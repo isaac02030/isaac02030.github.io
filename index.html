@@ -1,181 +1,1166 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contato - Bar Zukka</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
-    /* reset básico */
-    * { box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bar Zukka - O melhor restaurante e bar de Portalegre. Sabores únicos da gastronomia portuguesa em ambiente acolhedor. Venha descobrir nossa cozinha tradicional com francesinhas, bifanas e muito mais.">
+    <meta name="keywords" content="bar, restaurante, Portalegre, gastronomia portuguesa, francesinha, bifana, cerveja artesanal, comida tradicional, Alentejo, petiscos, gin tónico">
+    <meta name="author" content="Bar Zukka">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://barzukka.pt">
+    <meta property="og:title" content="Bar Zukka - Restaurante em Portalegre | Gastronomia Portuguesa Tradicional">
+    <meta property="og:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor, francesinhas especiais, bifanas do chefe e muito mais.">
+    <meta property="og:image" content="https://barzukka.pt/images/bar-zukka-og.jpg">
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #8B0000;
-      color: #fff;
-    }
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://barzukka.pt">
+    <meta property="twitter:title" content="Bar Zukka - Restaurante em Portalegre">
+    <meta property="twitter:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
+    <meta property="twitter:image" content="https://barzukka.pt/images/bar-zukka-og.jpg">
 
-    /* seção centralizada via flexbox */
-    section#contato {
-      padding: 80px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;       /* centraliza horizontalmente */
-      justify-content: flex-start;
-      text-align: center;
-      min-height: 60vh;
-    }
+    <title>Bar Zukka - Restaurante e Bar em Portalegre | Gastronomia Portuguesa Tradicional</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="Abril+Fatface" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-red: #c41e3a;
+            --primary-gold: #f4d03f;
+            --dark-bg: #1a1a1a;
+            --dark-card: #2a2a2a;
+            --darker-card: #1f1f1f;
+            --text-white: #ffffff;
+            --text-light: #e8e8e8;
+            --text-muted: #b0b0b0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 4px 15px rgba(244, 208, 63, 0.2);
+            --border-radius: 15px;
+            --border-radius-lg: 25px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    h2 {
-      color: #FFD700;
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* texto introdutório separado (evita regras genéricas em p) */
-    .intro {
-      max-width: 700px;
-      margin: 0 auto 40px;
-      font-size: 1.15rem;
-      line-height: 1.6;
-      text-align: center;
-    }
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
 
-    /* redes sociais */
-    .social-icons {
-      margin-bottom: 20px;
-    }
-    .social-icons a {
-      display: inline-block;
-      margin: 0 12px;
-      color: #FFD700;
-      font-size: 2rem;
-      transition: 0.25s;
-      text-decoration: none;
-    }
-    .social-icons a:hover { color: #fff; }
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-white);
+            background: var(--dark-bg);
+            overflow-x: hidden;
+            font-weight: 400;
+        }
 
-    /* informações de contato - usando flex coluna e centralização */
-    .contact-info {
-      margin-bottom: 30px;
-      font-size: 1.05rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      max-width: 680px;
-      padding: 0 10px;
-    }
+        /* Skip to content for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--primary-red);
+            color: var(--text-white);
+            padding: 12px 16px;
+            text-decoration: none;
+            z-index: 10000;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
 
-    .contact-info p {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center; /* garante que ícone + texto fiquem centralizados */
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        .skip-link:focus {
+            top: 6px;
+        }
 
-    .contact-info a {
-      color: #FFD700;
-      text-decoration: underline;
-      transition: 0.25s;
-    }
-    .contact-info a:hover { color: #fff; }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-red), #8b1538);
+            color: var(--primary-gold);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
 
-    .contact-info i { min-width: 22px; text-align: center; }
+        .header.scrolled {
+            background: rgba(196, 30, 58, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 0;
+        }
 
-    /* formulário centralizado com largura controlada */
-    .form-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
 
-    form {
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      margin-top: 8px;
-    }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-    input, textarea {
-      width: 100%;
-      max-width: 420px;
-      padding: 12px;
-      border: none;
-      border-radius: 25px;
-    }
+        .logo:hover {
+            transform: scale(1.05);
+        }
 
-    textarea { min-height: 120px; resize: vertical; }
+        .logo::before {
+            content: "🍺";
+            font-size: 1.8rem;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            animation: float 3s ease-in-out infinite;
+        }
 
-    button {
-      background-color: #FFD700;
-      color: #8B0000;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.25s;
-      min-width: 140px;
-    }
-    button:hover { background-color: #fff; color: #8B0000; }
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
 
-    /* responsividade simples */
-    @media (max-width: 420px) {
-      h2 { font-size: 2rem; }
-      .social-icons a { font-size: 1.8rem; margin: 0 8px; }
-      .intro { font-size: 1rem; padding: 0 10px; }
-    }
-  </style>
+        .nav-menu li a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius-lg);
+            position: relative;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-menu li a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 8px;
+            left: 50%;
+            background: linear-gradient(90deg, var(--primary-gold), #f1c40f);
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        .nav-menu li a:hover::before,
+        .nav-menu li a:focus::before {
+            width: calc(100% - 3rem);
+            left: 1.5rem;
+        }
+
+        .nav-menu li a:hover,
+        .nav-menu li a:focus {
+            background: var(--primary-gold);
+            color: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary-gold);
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: var(--transition);
+            border-radius: 8px;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(244, 208, 63, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.8), rgba(139, 21, 56, 0.9)), 
+                        radial-gradient(circle at 20% 80%, rgba(244, 208, 63, 0.1) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(244, 208, 63, 0.1) 0%, transparent 60%),
+                        var(--dark-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--primary-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><circle fill="%23f4d03f" cx="200" cy="150" r="4" opacity="0.4"/><circle fill="%23f4d03f" cx="800" cy="400" r="3" opacity="0.3"/><circle fill="%23f4d03f" cx="1000" cy="200" r="5" opacity="0.2"/><circle fill="%23f4d03f" cx="300" cy="500" r="2" opacity="0.5"/><circle fill="%23c41e3a" cx="600" cy="100" r="3" opacity="0.2"/></svg>');
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            z-index: 2;
+            position: relative;
+            animation: fadeInUp 1.2s ease-out;
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(3.5rem, 10vw, 6rem);
+            margin-bottom: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 0.9;
+        }
+
+        .hero-content .subtitle {
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--primary-gold), #f1c40f);
+            color: var(--primary-red);
+            padding: 1.5rem 3rem;
+            text-decoration: none;
+            border-radius: var(--border-radius-lg);
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-gold);
+            border: 2px solid transparent;
+            text-shadow: none;
+            letter-spacing: 0.5px;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(244, 208, 63, 0.4);
+            border-color: var(--primary-gold);
+            background: linear-gradient(135deg, #f1c40f, var(--primary-gold));
+        }
+
+        .cta-button i {
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .cta-button:hover i {
+            transform: scale(1.2);
+        }
+
+        /* Sections */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            color: var(--primary-gold);
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            margin-bottom: 4rem;
+            text-align: center;
+            font-weight: 700;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold));
+            border-radius: 3px;
+        }
+
+        /* Menu Section */
+        .menu-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .menu-category {
+            background: linear-gradient(145deg, var(--dark-card), var(--darker-card));
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold));
+        }
+
+        .menu-category:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-red);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .category-title {
+            color: var(--primary-gold);
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .category-title i {
+            font-size: 1.5rem;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .menu-item:hover {
+            transform: translateX(8px);
+            background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
+            border-radius: 12px 0 0 12px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--text-white);
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .item-description {
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .item-price {
+            color: var(--primary-gold);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-left: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        /* About Section */
+        .about-content {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .about-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        .about-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .contact-card {
+            background: linear-gradient(145deg, var(--dark-card), var(--darker-card));
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--primary-red));
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-red);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .contact-card .icon {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+            display: block;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .contact-card h3 {
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .contact-card p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .contact-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-link {
+            color: var(--primary-gold);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .contact-link:hover {
+            color: var(--text-white);
+            text-decoration: underline;
+        }
+
+        /* Social Media */
+        .social-media {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 4rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .social-media h3 {
+            color: var(--primary-gold);
+            margin-bottom: 2.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(145deg, var(--dark-card), var(--darker-card));
+            color: var(--text-white);
+            padding: 1.2rem 2rem;
+            text-decoration: none;
+            border-radius: var(--border-radius-lg);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .social-link:hover,
+        .social-link:focus {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            color: var(--text-white);
+            border-color: currentColor;
+        }
+
+        .social-link.whatsapp:hover { 
+            background: linear-gradient(145deg, #25d366, #128c7e); 
+            border-color: #25d366;
+        }
+        .social-link.instagram:hover { 
+            background: linear-gradient(145deg, #e1306c, #833ab4); 
+            border-color: #e1306c;
+        }
+        .social-link.facebook:hover { 
+            background: linear-gradient(145deg, #1877f2, #4267b2); 
+            border-color: #1877f2;
+        }
+
+        .social-link i {
+            font-size: 1.3rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--primary-red), #8b1538);
+            color: var(--primary-gold);
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-top: 5rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--primary-red));
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .footer .slogan {
+            font-size: 1.4rem;
+            font-weight: 600;
+            font-style: italic;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--primary-red), #8b1538);
+            color: var(--primary-gold);
+            border: none;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover,
+        .back-to-top:focus {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: var(--shadow-hover);
+            background: linear-gradient(135deg, #8b1538, var(--primary-red));
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(196, 30, 58, 0.98);
+                backdrop-filter: blur(15px);
+                flex-direction: column;
+                padding: 1.5rem;
+                box-shadow: var(--shadow);
+                border-radius: 0 0 20px 20px;
+                gap: 1rem;
+            }
+
+            .nav-menu.active {
+                display: flex;
+                animation: fadeInUp 0.3s ease-out;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-content {
+                padding: 0 1rem;
+            }
+
+            .section {
+                padding: 4rem 1rem;
+            }
+
+            .menu-categories {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .social-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .social-link {
+                width: 250px;
+                justify-content: center;
+            }
+
+            .back-to-top {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+
+            .menu-item {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .item-price {
+                margin-left: 0;
+                align-self: flex-end;
+                font-size: 1.3rem;
+            }
+
+            .menu-categories {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .menu-category {
+                padding: 2rem;
+            }
+        }
+
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --text-light: #ffffff;
+                --text-muted: #dddddd;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .hero::before {
+                animation: none;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        *:focus {
+            outline: 2px solid var(--primary-gold);
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <header class="header" role="banner">
+        <nav class="nav-container" role="navigation" aria-label="Menu principal">
+            <a href="#home" class="logo" aria-label="Bar Zukka - Página inicial">Bar Zukka</a>
+            <ul class="nav-menu">
+                <li><a href="#home" aria-label="Ir para início">Início</a></li>
+                <li><a href="#menu" aria-label="Ver cardápio">Cardápio</a></li>
+                <li><a href="#about" aria-label="Conhecer sobre nós">Sobre Nós</a></li>
+                <li><a href="#contact" aria-label="Entrar em contato">Contato</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="Abrir menu mobile" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
 
-  <section id="contato">
-    <h2>Contato</h2>
+    <main id="main-content">
+        <section id="home" class="hero" role="banner">
+            <div class="hero-content">
+                <h1>Bar Zukka</h1>
+                <p class="subtitle">Sabores únicos no coração de Portalegre</p>
+                <a href="#menu" class="cta-button" aria-label="Ver nosso cardápio">
+                    <i class="fas fa-utensils" aria-hidden="true"></i>
+                    Ver Cardápio
+                </a>
+            </div>
+        </section>
 
-    <div class="social-icons">
-      <a href="https://chat.whatsapp.com/J7DfK2fXmor1BsMnmJCfci" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-      <a href="https://www.facebook.com/share/1CaumdfATz/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://www.instagram.com/_barzukka?igsh=MXkxbnU3NXRmc3cwZg==" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-    </div>
+        <section id="menu" class="section" role="region" aria-labelledby="menu-title">
+            <h2 id="menu-title" class="section-title">Nosso Cardápio</h2>
+            <div class="menu-categories">
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-beer" aria-hidden="true"></i>
+                        Bebidas
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Cerveja Artesanal</div>
+                            <div class="item-description">Seleção especial da casa, refrescante e saborosa</div>
+                        </div>
+                        <span class="item-price">€4,50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Vinho da Casa</div>
+                            <div class="item-description">Tintos e brancos regionais de qualidade superior</div>
+                        </div>
+                        <span class="item-price">€3,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Sangria Zukka</div>
+                            <div class="item-description">Receita especial da casa com frutas frescas</div>
+                        </div>
+                        <span class="item-price">€5,20</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Gin Tónico Premium</div>
+                            <div class="item-description">Com especiarias e frutas vermelhas</div>
+                        </div>
+                        <span class="item-price">€6,50</span>
+                    </div>
+                </div>
 
-    <p class="intro">
-      Entre em contato conosco! Estamos prontos para atender você com a melhor
-      experiência no Bar Zukka. Ligue, envie mensagem ou venha nos visitar pessoalmente!
-    </p>
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-drumstick-bite" aria-hidden="true"></i>
+                        Pratos Principais
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Francesinha Zukka</div>
+                            <div class="item-description">Com molho especial da casa e batata frita caseira</div>
+                        </div>
+                        <span class="item-price">€8,90</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bifana do Chefe</div>
+                            <div class="item-description">Pão artesanal com carne marinada em temperos especiais</div>
+                        </div>
+                        <span class="item-price">€6,50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bitoque Tradicional</div>
+                            <div class="item-description">Com ovo estrelado, batata frita e salada fresca</div>
+                        </div>
+                        <span class="item-price">€7,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Secretos de Porco Ibérico</div>
+                            <div class="item-description">Com batata assada e legumes da época</div>
+                        </div>
+                        <span class="item-price">€12,50</span>
+                    </div>
+                </div>
 
-    <div class="contact-info">
-      <p><i class="fas fa-map-marker-alt"></i>
-        <a href="https://www.google.com/maps" target="_blank">Rua Luís de Camões 11, Portalegre</a>
-      </p>
-      <p><i class="fab fa-whatsapp"></i>
-        <a href="https://wa.me/351912345678" target="_blank">+351 245 038 389</a>
-      </p>
-      <p><i class="fas fa-envelope"></i>
-        <a href="mailto:contato@barzukka.com">contato@barzukka.com</a>
-      </p>
-      <p><i class="far fa-clock"></i>
-        Horário de funcionamento: Ter-Qua 06h - 23h | Qui-Dom 06h - 05h | Seg Fechado
-      </p>
-    </div>
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-cheese" aria-hidden="true"></i>
+                        Petiscos
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Tábua de Queijos Regionais</div>
+                            <div class="item-description">Seleção de queijos do Alentejo com mel e nozes</div>
+                        </div>
+                        <span class="item-price">€12,00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Chouriço Assado</div>
+                            <div class="item-description">Com broa alentejana e azeitonas marinadas</div>
+                        </div>
+                        <span class="item-price">€5,50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Pataniscas de Bacalhau</div>
+                            <div class="item-description">4 unidades crocantes com molho tártaro caseiro</div>
+                        </div>
+                        <span class="item-price">€6,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Azeitonas Temperadas</div>
+                            <div class="item-description">Com ervas aromáticas e azeite virgem extra</div>
+                        </div>
+                        <span class="item-price">€3,20</span>
+                    </div>
+                </div>
 
-    <div class="form-container">
-      <form action="#" method="post" aria-label="Formulário de contato">
-        <input type="text" name="nome" placeholder="Seu nome" required>
-        <input type="email" name="email" placeholder="Seu e-mail" required>
-        <textarea name="mensagem" placeholder="Sua mensagem" required></textarea>
-        <button type="submit">Enviar Mensagem</button>
-      </form>
-    </div>
-  </section>
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-coffee" aria-hidden="true"></i>
+                        Cafés & Sobremesas
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Café Expresso</div>
+                            <div class="item-description">Blend especial da casa, intenso e aromático</div>
+                        </div>
+                        <span class="item-price">€1,20</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Galão</div>
+                            <div class="item-description">Com leite cremoso e espuma perfeita</div>
+                        </div>
+                        <span class="item-price">€1,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Pastel de Nata</div>
+                            <div class="item-description">Receita tradicional portuguesa, crocante e cremoso</div>
+                        </div>
+                        <span class="item-price">€1,50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Serradura</div>
+                            <div class="item-description">Sobremesa tradicional com biscoito e natas</div>
+                        </div>
+                        <span class="item-price">€4,50</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <section id="about" class="section" role="region" aria-labelledby="about-title">
+            <h2 id="about-title" class="section-title">Sobre Nós</h2>
+            <div class="about-content">
+                <p>No coração de Portalegre, o <strong>Bar Zukka</strong> é um encontro com os sabores autênticos da gastronomia brasileira. Desde a nossa abertura, temos o compromisso de proporcionar uma experiência única aos nossos clientes.Nossa cozinha celebra a riqueza e diversidade do Brasil, com pratos preparados com ingredientes frescos e de qualidade, trazendo receitas tradicionais e sabores que conquistam todos os paladares, sempre com um toque moderno e criativo.O ambiente acolhedor e descontraído do Bar Zukka convida a momentos especiais, seja para um almoço entre amigos, um jantar em família ou simplesmente para apreciar uma boa caipirinha e petiscos saborosos. Venha descobrir por que somos a escolha certa para quem busca sabor, hospitalidade e alegria em Portalegre.</p>
+            </div>
+        </section>
+
+        <section id="contact" class="section" role="region" aria-labelledby="contact-title">
+            <h2 id="contact-title" class="section-title">Contato</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt icon" aria-hidden="true"></i>
+                    <h3>Localização</h3>
+                    <p>Rua Luís de Camões, 11</p>
+                    <p>7300-194 Portalegre</p>
+                    <p>Portugal</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-phone icon" aria-hidden="true"></i>
+                    <h3>Telefone</h3>
+                    <p><a href="tel:+351245038389" class="contact-link">+351 245 038 389</a></p>
+                    <p>Chamada para rede fixa nacional</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-envelope icon" aria-hidden="true"></i>
+                    <h3>Email</h3>
+                    <p><a href="mailto:info@barzukka.pt" class="contact-link">info@barzukka.pt</a></p>
+                    <p>Resposta em 24 horas</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-clock icon" aria-hidden="true"></i>
+                    <h3>Horários</h3>
+                    <p><strong>Terça - Quarta:</strong> 06h00 - 23h00</p>
+                    <p><strong>Quinta - Domingo:</strong> 06h00 - 05h00</p>
+                    <p><strong>Segunda</strong> fechado</p>
+                </div>
+            </div>
+
+            <div class="social-media">
+                <h3>Siga-nos nas Redes Sociais</h3>
+                <div class="social-links">
+                    <a href="https://chat.whatsapp.com/J7DfK2fXmor1BsMnmJCfci" class="social-link whatsapp" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Bar Zukka">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        WhatsApp
+                    </a>
+                    <a href="https://www.instagram.com/_barzukka?igsh=MXkxbnU3NXRmc3cwZg==" class="social-link instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram do Bar Zukka">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                        Instagram
+                    </a>
+                    <a href="https://www.facebook.com/share/1CaumdfATz/" class="social-link facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook do Bar Zukka">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        Facebook
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <p>&copy; 2024 Bar Zukka. Todos os direitos reservados.</p>
+            <p class="slogan">"No Bar Zukka, cada prato é uma experiência, cada visita é um momento de sabor e amizade. 🍹✨"</p>
+        </div>
+    </footer>
+
+    <button class="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navMenu = document.querySelector('.nav-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const isExpanded = navMenu.classList.contains('active');
+            mobileMenuBtn.setAttribute('aria-expanded', isExpanded);
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-bars');
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+            });
+        });
+
+        // Header scroll effect
+        const header = document.querySelector('.header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Back to top button
+        const backToTopBtn = document.querySelector('.back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerHeight = document.querySelector('.header').offsetHeight;
+                    const targetPosition = target.offsetTop - headerHeight - 20;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Enhanced accessibility - keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close mobile menu with Escape key
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                    mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+                    mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+                    mobileMenuBtn.focus();
+                }
+            }
+        });
+
+        // Performance optimization - Lazy loading for animations
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        
+        if (!prefersReducedMotion) {
+            // Add entrance animations only if user hasn't specified reduced motion preference
+            document.querySelectorAll('.menu-item, .contact-card, .social-link').forEach((element, index) => {
+                element.style.animationDelay = `${index * 0.1}s`;
+            });
+        }
+
+        // Loading performance
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+    </script>
 </body>
 </html>
-
