@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contato - Bar Zukka</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* reset básico */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #8B0000;
+      color: #fff;
+    }
+
+    /* seção centralizada via flexbox */
+    section#contato {
+      padding: 80px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;       /* centraliza horizontalmente */
+      justify-content: flex-start;
+      text-align: center;
+      min-height: 60vh;
+    }
+
+    h2 {
+      color: #FFD700;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    /* texto introdutório separado (evita regras genéricas em p) */
+    .intro {
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    /* redes sociais */
+    .social-icons {
+      margin-bottom: 20px;
+    }
+    .social-icons a {
+      display: inline-block;
+      margin: 0 12px;
+      color: #FFD700;
+      font-size: 2rem;
+      transition: 0.25s;
+      text-decoration: none;
+    }
+    .social-icons a:hover { color: #fff; }
+
+    /* informações de contato - usando flex coluna e centralização */
+    .contact-info {
+      margin-bottom: 30px;
+      font-size: 1.05rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 680px;
+      padding: 0 10px;
+    }
+
+    .contact-info p {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center; /* garante que ícone + texto fiquem centralizados */
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .contact-info a {
+      color: #FFD700;
+      text-decoration: underline;
+      transition: 0.25s;
+    }
+    .contact-info a:hover { color: #fff; }
+
+    .contact-info i { min-width: 22px; text-align: center; }
+
+    /* formulário centralizado com largura controlada */
+    .form-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    form {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    input, textarea {
+      width: 100%;
+      max-width: 420px;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+    }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    button {
+      background-color: #FFD700;
+      color: #8B0000;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.25s;
+      min-width: 140px;
+    }
+    button:hover { background-color: #fff; color: #8B0000; }
+
+    /* responsividade simples */
+    @media (max-width: 420px) {
+      h2 { font-size: 2rem; }
+      .social-icons a { font-size: 1.8rem; margin: 0 8px; }
+      .intro { font-size: 1rem; padding: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <section id="contato">
+    <h2>Contato</h2>
+
+    <div class="social-icons">
+      <a href="https://chat.whatsapp.com/J7DfK2fXmor1BsMnmJCfci" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://www.facebook.com/share/1CaumdfATz/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+      <a href="https://www.instagram.com/_barzukka?igsh=MXkxbnU3NXRmc3cwZg==" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+    </div>
+
+    <p class="intro">
+      Entre em contato conosco! Estamos prontos para atender você com a melhor
+      experiência no Bar Zukka. Ligue, envie mensagem ou venha nos visitar pessoalmente!
+    </p>
+
+    <div class="contact-info">
+      <p><i class="fas fa-map-marker-alt"></i>
+        <a href="https://www.google.com/maps" target="_blank">Rua Luís de Camões 11, Portalegre</a>
+      </p>
+      <p><i class="fab fa-whatsapp"></i>
+        <a href="https://wa.me/351912345678" target="_blank">+351 245 038 389</a>
+      </p>
+      <p><i class="fas fa-envelope"></i>
+        <a href="mailto:contato@barzukka.com">contato@barzukka.com</a>
+      </p>
+      <p><i class="far fa-clock"></i>
+        Horário de funcionamento: Ter-Qua 06h - 23h | Qui-Dom 06h - 05h | Seg Fechado
+      </p>
+    </div>
+
+    <div class="form-container">
+      <form action="#" method="post" aria-label="Formulário de contato">
+        <input type="text" name="nome" placeholder="Seu nome" required>
+        <input type="email" name="email" placeholder="Seu e-mail" required>
+        <textarea name="mensagem" placeholder="Sua mensagem" required></textarea>
+        <button type="submit">Enviar Mensagem</button>
+      </form>
+    </div>
+  </section>
+
+</body>
+</html>
