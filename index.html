@@ -113,27 +113,28 @@
         }
 
         .logo {
-            font-size: 2rem;
-            font-weight: 800;
-            text-decoration: none;
-            color: var(--primary-gold);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: var(--transition);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+    font-size: 2rem;
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--primary-gold);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
 
-        .logo:hover {
-            transform: scale(1.05);
-        }
+.logo:hover {
+    transform: scale(1.05);
+}
 
-        .logo::before {
-            content: "🍺";
-            font-size: 1.8rem;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-            animation: float 3s ease-in-out infinite;
-        }
+.logo-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    animation: float 3s ease-in-out infinite; /* opcional */
+}
 
         .nav-menu {
             display: flex;
@@ -799,7 +800,11 @@
     
     <header class="header" role="banner">
         <nav class="nav-container" role="navigation" aria-label="Menu principal">
-            <a href="#home" class="logo" aria-label="Bar Zukka - Página inicial">Bar Zukka</a>
+           <a href="index.html" class="logo" aria-label="Bar Zukka - Página inicial">
+    <img src="logos.png" alt="Bar Zukka" class="logo-img">
+    Bar Zukka
+</a>
+
             <ul class="nav-menu">
                 <li><a href="#home" aria-label="Ir para início">Início</a></li>
                 <li><a href="#menu" aria-label="Ver cardápio">Cardápio</a></li>
@@ -1160,6 +1165,7 @@
     </script>
 </body>
 </html>
+
 
 
 
