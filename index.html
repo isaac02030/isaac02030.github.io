@@ -13,7 +13,8 @@
     <meta property="og:url" content="https://barzukka.pt">
     <meta property="og:title" content="Bar Zukka - Restaurante em Portalegre | Gastronomia Portuguesa Tradicional">
     <meta property="og:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor, francesinhas especiais, bifanas do chefe e muito mais.">
-    <meta property="og:image" https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw">
+    <meta property="og:image" content="https://barzukka.pt/images/bar-zukka-og.jpg">
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://barzukka.pt">
@@ -21,19 +22,17 @@
     <meta property="twitter:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
     <meta property="twitter:image" content="https://barzukka.pt/images/bar-zukka-og.jpg">
 
-<!-- Adicione as linhas do favicon aqui -->
-<link rel="icon" type="image/png" sizes="32x32" href="logos.png">
-<link rel="icon" type="image/png" sizes="16x16" href="logos.png">
-<link rel="apple-touch-icon" sizes="180x180" href="logos.png">
-<link rel="shortcut icon" href="logos.png">
-
-<title>Bar Zukka - Restaurante e Bar em Portalegre...
+    <!-- Adicione as linhas do favicon aqui -->
+    <link rel="icon" type="image/png" sizes="32x32" href="logos.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="logos.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="logos.png">
+    <link rel="shortcut icon" href="logos.png">
 
     <title>Bar Zukka - Restaurante e Bar em Portalegre | Gastronomia Portuguesa Tradicional</title>
     
     <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
-
     
     <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com">
@@ -149,8 +148,6 @@
     animation: float 3s ease-in-out infinite; /* opcional */
 }
 
-
-
         .nav-menu {
             display: flex;
             list-style: none;
@@ -214,7 +211,7 @@
         }
 
         /* Hero Section */
-/* Versão Desktop */
+        /* Versão Desktop */
         .hero {
             background: linear-gradient(135deg, rgba(196, 30, 58, 0.6), rgba(139, 21, 56, 0.7)),
                         url('https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw') center/cover no-repeat;
@@ -282,6 +279,14 @@
             letter-spacing: 0.5px;
         }
 
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
         .cta-button {
             display: inline-flex;
             align-items: center;
@@ -306,6 +311,19 @@
             box-shadow: 0 12px 35px rgba(244, 208, 63, 0.4);
             border-color: var(--primary-gold);
             background: linear-gradient(135deg, #f1c40f, var(--primary-gold));
+        }
+
+        .cta-button.secondary {
+            background: linear-gradient(135deg, var(--primary-red), #8b1538);
+            color: var(--primary-gold);
+            border-color: var(--primary-red);
+        }
+
+        .cta-button.secondary:hover,
+        .cta-button.secondary:focus {
+            background: linear-gradient(135deg, #8b1538, var(--primary-red));
+            box-shadow: 0 12px 35px rgba(196, 30, 58, 0.4);
+            border-color: var(--primary-red);
         }
 
         .cta-button i {
@@ -766,6 +784,17 @@
             .menu-item {
                 padding: 1rem;
             }
+
+            .cta-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .cta-button {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -826,8 +855,6 @@
     </style>
 </head>
 <body>
-
-
     <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
     
     <header class="header" role="banner">
@@ -854,10 +881,16 @@
             <div class="hero-content">
                 <h1>Bar Zukka</h1>
                 <p class="subtitle">Sabores únicos no coração de Portalegre</p>
-                <a href="#menu" class="cta-button" aria-label="Ver nosso cardápio">
-                    <i class="fas fa-utensils" aria-hidden="true"></i>
-                    Ver Cardápio
-                </a>
+                <div class="cta-buttons">
+                    <a href="#menu" class="cta-button" aria-label="Ver nosso cardápio">
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                        Ver Cardápio
+                    </a>
+                    <a href="pedidos.html" class="cta-button secondary" aria-label="Fazer pedido online">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                        Pedido Online
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -1071,7 +1104,7 @@
 
     <footer class="footer" role="contentinfo">
         <div class="footer-content">
-            <p>&copy; 2025 Bar Zukka. Todos os direitos reservados.</p>
+            <p>&copy; 2024 Bar Zukka. Todos os direitos reservados.</p>
             <p class="slogan">"No Bar Zukka, cada prato é uma experiência, cada visita é um momento de sabor e amizade. 🍹✨"</p>
         </div>
     </footer>
@@ -1198,8 +1231,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
