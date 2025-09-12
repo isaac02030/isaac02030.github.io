@@ -40,6 +40,32 @@
             margin-bottom: 10px;
         }
 
+        /* Status de conexão */
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-connected {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-disconnected {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .status-connecting {
+            background: #f39c12;
+            color: white;
+        }
+
         /* Menu Hamburger */
         .menu-btn {
             position: absolute;
@@ -317,10 +343,17 @@
             font-weight: bold;
             cursor: pointer;
             flex: 1;
+            transition: all 0.3s ease;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .clear-cart-btn {
@@ -434,6 +467,18 @@
             padding: 20px;
             margin-bottom: 20px;
             border-left: 4px solid #f4d03f;
+            animation: slideIn 0.3s ease;
+        }
+
+        .order-card.new-order {
+            animation: pulse 1s ease;
+            border-left-color: #27ae60;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
         .order-header {
@@ -487,6 +532,10 @@
             margin-right: 10px;
         }
 
+        .status-btn:hover {
+            background: #2980b9;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -497,6 +546,7 @@
             border-radius: 8px;
             display: none;
             z-index: 3000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .notification.show {
@@ -504,9 +554,39 @@
             animation: slideIn 0.3s ease;
         }
 
+        .notification.success {
+            background: #27ae60;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
         @keyframes slideIn {
             from { transform: translateX(100%); }
             to { transform: translateX(0); }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #f4d03f;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(244, 208, 63, 0.3);
+            border-radius: 50%;
+            border-top-color: #f4d03f;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -534,12 +614,20 @@
                 min-width: auto;
                 padding: 12px;
             }
+
+            .staff-header {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="connection-status" id="connectionStatus">
+                <span class="spinner"></span> Conectando...
+            </div>
             <h1>Bar Zukka - Pedidos Online</h1>
             
             <button class="menu-btn" onclick="toggleMenu()">
@@ -683,7 +771,7 @@
                 
                 <!-- Botões de ação -->
                 <div class="form-buttons">
-                    <button class="submit-btn" onclick="submitOrder()">Confirmar Pedido</button>
+                    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Confirmar Pedido</button>
                     <button class="clear-cart-btn" onclick="clearCartInForm()" title="Limpar todo o carrinho">
                         🗑️
                     </button>
@@ -695,10 +783,15 @@
         <div id="staffPage" class="page">
             <div class="staff-header">
                 <h2 style="color: #f4d03f;">Pedidos em Tempo Real</h2>
-                <button class="logout-btn" onclick="logout()">Sair</button>
+                <div>
+                    <button class="status-btn" onclick="loadOrders()" style="margin-right: 10px;">🔄 Atualizar</button>
+                    <button class="logout-btn" onclick="logout()">Sair</button>
+                </div>
             </div>
             <div id="ordersContainer">
-                <p style="text-align: center; color: #ccc; padding: 40px;">Nenhum pedido no momento</p>
+                <div class="loading">
+                    <span class="spinner"></span> Carregando pedidos...
+                </div>
             </div>
         </div>
     </div>
@@ -724,11 +817,105 @@
     <!-- Notificação -->
     <div class="notification" id="notification"></div>
 
+    <!-- Firebase Scripts -->
+    <script type="module">
+        // CONFIGURAÇÃO FIREBASE - Suas configurações já integradas
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnbH88eFiiVCZXkF4MTLVDvTM_0HaOkGk",
+            authDomain: "bar-zukka-pedidos.firebaseapp.com",
+            projectId: "bar-zukka-pedidos",
+            storageBucket: "bar-zukka-pedidos.firebasestorage.app",
+            messagingSenderId: "879169407064",
+            appId: "1:879169407064:web:d241fc5a303c2ad35f222d",
+            measurementId: "G-4WX7KZN2LY"
+        };
+
+        try {
+            updateConnectionStatus('connecting', 'Conectando ao Firebase...');
+
+            // Importar Firebase
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+            const { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+
+            // Inicializar Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            updateConnectionStatus('connected', 'Conectado ao Firebase');
+
+            // Fazer funções globais
+            window.firebaseDb = db;
+            window.firebaseFunctions = { collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp };
+            window.isUsingFirebase = true;
+            
+            console.log('✅ Firebase conectado com sucesso');
+            
+            // Escutar mudanças em tempo real
+            const ordersRef = collection(db, 'orders');
+            const ordersQuery = query(ordersRef, orderBy('timestamp', 'desc'));
+            
+            onSnapshot(ordersQuery, (snapshot) => {
+                const orders = [];
+                snapshot.forEach((doc) => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                
+                window.currentOrders = orders;
+                
+                // Se estiver na área staff, atualizar
+                if (document.getElementById('staffPage').classList.contains('active')) {
+                    displayOrders(orders);
+                }
+                
+                console.log(`📦 ${orders.length} pedidos carregados do Firebase`);
+            });
+            
+        } catch (error) {
+            console.error('Erro ao conectar Firebase:', error);
+            updateConnectionStatus('disconnected', 'Erro de conexão');
+            // Fallback para localStorage
+            window.isUsingFirebase = false;
+            loadLocalStorageSystem();
+        }
+
+        function loadLocalStorageSystem() {
+            console.log('📱 Usando sistema localStorage como fallback');
+            try {
+                const savedOrders = localStorage.getItem('zukka_orders');
+                window.currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
+                window.orderCounter = parseInt(localStorage.getItem('zukka_order_counter')) || 1;
+            } catch (error) {
+                console.error('Erro ao carregar localStorage:', error);
+                window.currentOrders = [];
+                window.orderCounter = 1;
+            }
+        }
+
+        function updateConnectionStatus(status, message) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.className = `connection-status status-${status}`;
+            
+            const icons = {
+                connected: '🟢',
+                disconnected: '🔴',
+                connecting: '🟡'
+            };
+            
+            statusEl.innerHTML = `${icons[status]} ${message}`;
+        }
+
+        // Fazer funções disponíveis globalmente
+        window.updateConnectionStatus = updateConnectionStatus;
+        window.loadLocalStorageSystem = loadLocalStorageSystem;
+    </script>
+
     <script>
+        // Variáveis globais
         let cart = [];
-        let orders = [];
-        let orderCounter = 1;
         let selectedDeliveryType = '';
+        let currentOrders = [];
+        let orderCounter = 1;
+        let isUsingFirebase = false;
 
         // Credenciais
         const credentials = {
@@ -756,13 +943,13 @@
         function clearCart() {
             cart = [];
             updateCart();
-            showNotification('Pedido limpo');
+            showNotification('Pedido limpo', 'success');
             toggleMenu();
         }
 
         function clearCartInForm() {
             if (cart.length === 0) {
-                showNotification('Carrinho já está vazio');
+                showNotification('Carrinho já está vazio', 'error');
                 return;
             }
             
@@ -783,7 +970,7 @@
                     radio.checked = false;
                 });
                 
-                showNotification('Carrinho limpo com sucesso!');
+                showNotification('Carrinho limpo com sucesso!', 'success');
             }
         }
 
@@ -810,8 +997,10 @@
             if (credentials[username] && credentials[username] === password) {
                 hideLogin();
                 showPage('staffPage');
-                loadOrders();
-                showNotification('Login realizado com sucesso!');
+                setTimeout(() => {
+                    loadOrders();
+                }, 100);
+                showNotification('Login realizado com sucesso!', 'success');
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
                 document.getElementById('password').value = '';
@@ -820,7 +1009,7 @@
 
         function logout() {
             showPage('customerPage');
-            showNotification('Logout realizado');
+            showNotification('Logout realizado', 'success');
         }
 
         function showPage(pageId) {
@@ -855,7 +1044,7 @@
                 cart.push({ name, price, quantity: 1 });
             }
             updateCart();
-            showNotification(name + ' adicionado!');
+            showNotification(name + ' adicionado!', 'success');
         }
 
         function updateQuantity(name, change) {
@@ -910,71 +1099,126 @@
             orderForm.style.display = 'block';
         }
 
-        function submitOrder() {
+        async function submitOrder() {
             const name = document.getElementById('customerName').value;
             const phone = document.getElementById('customerPhone').value;
             const table = document.getElementById('tableNumber').value;
             const obs = document.getElementById('observations').value;
 
             if (!name || !phone || !table) {
-                showNotification('Preencha todos os campos obrigatórios');
+                showNotification('Preencha todos os campos obrigatórios', 'error');
                 return;
             }
 
             if (!selectedDeliveryType) {
-                showNotification('Selecione como prefere receber seu pedido');
+                showNotification('Selecione como prefere receber seu pedido', 'error');
                 return;
             }
 
             if (cart.length === 0) {
-                showNotification('Adicione itens ao pedido');
+                showNotification('Adicione itens ao pedido', 'error');
                 return;
             }
 
-            const order = {
-                id: orderCounter++,
-                name,
-                phone,
-                table,
-                observations: obs,
-                deliveryType: selectedDeliveryType,
-                items: [...cart],
-                total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                status: 'pending',
-                time: new Date().toLocaleString()
-            };
+            // Desabilitar botão durante envio
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-            orders.push(order);
+            try {
+                const order = {
+                    orderNumber: orderCounter++,
+                    name,
+                    phone,
+                    table: parseInt(table),
+                    observations: obs,
+                    deliveryType: selectedDeliveryType,
+                    items: [...cart],
+                    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                    status: 'pending',
+                    timestamp: isUsingFirebase ? window.firebaseFunctions.serverTimestamp() : Date.now(),
+                    createdAt: new Date().toLocaleString()
+                };
 
-            // Limpar
-            cart = [];
-            selectedDeliveryType = '';
-            updateCart();
-            document.getElementById('customerName').value = '';
-            document.getElementById('customerPhone').value = '';
-            document.getElementById('tableNumber').value = '';
-            document.getElementById('observations').value = '';
-            document.querySelectorAll('.radio-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
-                radio.checked = false;
-            });
+                if (isUsingFirebase) {
+                    // Salvar no Firebase
+                    const { collection, addDoc } = window.firebaseFunctions;
+                    const docRef = await addDoc(collection(window.firebaseDb, 'orders'), order);
+                    console.log('✅ Pedido salvo no Firebase:', docRef.id);
+                } else {
+                    // Salvar no localStorage
+                    order.id = Date.now().toString();
+                    currentOrders.unshift(order);
+                    localStorage.setItem('zukka_orders', JSON.stringify(currentOrders));
+                    localStorage.setItem('zukka_order_counter', orderCounter.toString());
+                    console.log('📱 Pedido salvo no localStorage');
+                }
 
-            showNotification('Pedido enviado com sucesso!');
+                // Limpar formulário
+                cart = [];
+                selectedDeliveryType = '';
+                updateCart();
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('tableNumber').value = '';
+                document.getElementById('observations').value = '';
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                    radio.checked = false;
+                });
+
+                showNotification(`Pedido #${order.orderNumber} enviado com sucesso!`, 'success');
+
+            } catch (error) {
+                console.error('Erro ao enviar pedido:', error);
+                showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
+            } finally {
+                // Reabilitar botão
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Confirmar Pedido';
+            }
         }
 
-        // Staff
+        // Staff - Carregar pedidos
         function loadOrders() {
-            const container = document.getElementById('ordersContainer');
+            if (isUsingFirebase) {
+                // Firebase já carrega automaticamente via onSnapshot
+                displayOrders(currentOrders);
+            } else {
+                // Carregar do localStorage
+                try {
+                    const savedOrders = localStorage.getItem('zukka_orders');
+                    currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
+                    displayOrders(currentOrders);
+                } catch (error) {
+                    console.error('Erro ao carregar pedidos:', error);
+                    displayOrders([]);
+                }
+            }
+        }
 
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+            
             if (orders.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #ccc; padding: 40px;">Nenhum pedido no momento</p>';
                 return;
             }
 
+            // Filtrar pedidos não entregues ou entregues recentemente
+            const activeOrders = orders.filter(order => {
+                if (order.status !== 'delivered') return true;
+                
+                // Manter pedidos entregues por 2 horas
+                const orderTime = order.timestamp?.seconds ? order.timestamp.seconds * 1000 : (order.timestamp || Date.now());
+                const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+                return orderTime > twoHoursAgo;
+            });
+
             let html = '';
-            orders.forEach(order => {
+            activeOrders.forEach(order => {
                 const statusText = {
                     'pending': 'Pendente',
                     'preparing': 'Preparando',
@@ -988,7 +1232,7 @@
                 html += `
                     <div class="order-card">
                         <div class="order-header">
-                            <span class="order-id">Pedido #${order.id}</span>
+                            <span class="order-id">Pedido #${order.orderNumber}</span>
                             <div>
                                 <span class="order-status status-${order.status}">${statusText}</span>
                                 <span class="delivery-type ${deliveryClass}">${deliveryText}</span>
@@ -998,7 +1242,7 @@
                             <strong>Cliente:</strong> ${order.name}<br>
                             <strong>Telefone:</strong> ${order.phone}<br>
                             <strong>Mesa:</strong> ${order.table}<br>
-                            <strong>Horário:</strong> ${order.time}
+                            <strong>Horário:</strong> ${order.createdAt}
                             ${order.observations ? '<br><strong>Obs:</strong> ' + order.observations : ''}
                         </div>
                         <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -1014,9 +1258,9 @@
                         </div>
                         ${order.status !== 'delivered' ? `
                             <div class="status-buttons">
-                                ${order.status === 'pending' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'preparing')">Iniciar Preparo</button>` : ''}
-                                ${order.status === 'preparing' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'ready')">Marcar Pronto</button>` : ''}
-                                ${order.status === 'ready' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'delivered')">Entregar</button>` : ''}
+                                ${order.status === 'pending' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">Iniciar Preparo</button>` : ''}
+                                ${order.status === 'preparing' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'ready')">Marcar Pronto</button>` : ''}
+                                ${order.status === 'ready' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'delivered')">Entregar</button>` : ''}
                             </div>
                         ` : ''}
                     </div>
@@ -1024,54 +1268,82 @@
             });
 
             container.innerHTML = html;
+            console.log(`📋 Exibindo ${activeOrders.length} pedidos ativos`);
         }
 
-        function updateStatus(orderId, newStatus) {
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                order.status = newStatus;
-                loadOrders();
-                showNotification(`Pedido #${orderId} atualizado!`);
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                if (isUsingFirebase) {
+                    // Atualizar no Firebase
+                    const { doc, updateDoc } = window.firebaseFunctions;
+                    const orderRef = doc(window.firebaseDb, 'orders', orderId);
+                    await updateDoc(orderRef, {
+                        status: newStatus,
+                        lastUpdated: window.firebaseFunctions.serverTimestamp()
+                    });
+                    console.log(`✅ Status atualizado no Firebase: ${orderId} -> ${newStatus}`);
+                } else {
+                    // Atualizar no localStorage
+                    const orderIndex = currentOrders.findIndex(o => o.id === orderId);
+                    if (orderIndex !== -1) {
+                        currentOrders[orderIndex].status = newStatus;
+                        localStorage.setItem('zukka_orders', JSON.stringify(currentOrders));
+                        displayOrders(currentOrders);
+                        console.log(`📱 Status atualizado no localStorage: ${orderId} -> ${newStatus}`);
+                    }
+                }
+
+                showNotification(`Status do pedido atualizado!`, 'success');
+
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                showNotification('Erro ao atualizar status', 'error');
             }
         }
 
-        function showNotification(message) {
+        function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
+            notification.className = `notification ${type} show`;
             notification.textContent = message;
-            notification.classList.add('show');
+            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
 
-        // Auto-atualizar pedidos na área staff
-        setInterval(() => {
-            if (document.getElementById('staffPage').classList.contains('active')) {
-                console.log('Auto-atualizando pedidos...');
-                loadOrders();
-            }
-        }, 3000); // Reduzido para 3 segundos para teste
-
-        // Função para testar se os pedidos estão sendo salvos
-        function debugOrders() {
-            console.log('=== DEBUG PEDIDOS ===');
-            console.log('Total de pedidos na memória:', orders.length);
-            console.log('Lista completa:', orders);
-            console.log('Contador atual:', orderCounter);
-            console.log('Página ativa:', document.querySelector('.page.active').id);
+        // Inicialização quando a página carrega
+        window.addEventListener('load', function() {
+            console.log('🚀 Bar Zukka - Sistema de Pedidos iniciado');
             
-            // Verificar localStorage
-            const savedOrders = localStorage.getItem('zukka_orders');
-            const savedCounter = localStorage.getItem('zukka_order_counter');
-            console.log('Dados no localStorage:');
-            console.log('- Pedidos salvos:', savedOrders ? JSON.parse(savedOrders).length : 'Nenhum');
-            console.log('- Contador salvo:', savedCounter || 'Não definido');
-            console.log('==================');
-        }
+            // Carregar dados do localStorage se não estiver usando Firebase
+            setTimeout(() => {
+                if (!window.isUsingFirebase) {
+                    try {
+                        const savedOrders = localStorage.getItem('zukka_orders');
+                        const savedCounter = localStorage.getItem('zukka_order_counter');
+                        
+                        currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
+                        orderCounter = savedCounter ? parseInt(savedCounter) : 1;
+                        
+                        console.log(`📱 Carregados ${currentOrders.length} pedidos do localStorage`);
+                    } catch (error) {
+                        console.error('Erro ao carregar localStorage:', error);
+                        currentOrders = [];
+                        orderCounter = 1;
+                    }
+                }
+            }, 500);
+        });
 
-        // Adicionar função debug ao console para teste
-        window.debugOrders = debugOrders;
-        window.clearAllData = clearAllData;
+        // Debug functions
+        window.debugSystem = function() {
+            console.log('=== DEBUG SISTEMA BAR ZUKKA ===');
+            console.log('Firebase ativo:', isUsingFirebase);
+            console.log('Pedidos atuais:', currentOrders.length);
+            console.log('Contador:', orderCounter);
+            console.log('Carrinho atual:', cart);
+            console.log('================================');
+        };
     </script>
 </body>
 </html>
