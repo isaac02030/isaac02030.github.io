@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos - Bar Zukka</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c41e3a, #8b1538);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            color: #f4d03f;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Menu Hamburger */
+        .menu-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .menu-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #f4d03f;
+            margin: 5px 0;
+            border-radius: 2px;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            color: white;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .menu-item:hover {
+            background: #c41e3a;
+            color: #f4d03f;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Páginas */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Menu */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-category {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .category-title {
+            color: #f4d03f;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .menu-item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .item-info h4 {
+            color: #f4d03f;
+            margin-bottom: 5px;
+        }
+
+        .item-info p {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            color: #f4d03f;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .add-btn {
+            background: #c41e3a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .add-btn:hover {
+            background: #a01729;
+        }
+
+        /* Carrinho */
+        .cart {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .cart h3 {
+            color: #f4d03f;
+            margin-bottom: 15px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            background: #c41e3a;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .cart-total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #f4d03f;
+            text-align: right;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #c41e3a;
+        }
+
+        /* Formulário */
+        .order-form {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #f4d03f;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #c41e3a;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #f4d03f, #f1c40f);
+            color: #c41e3a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Login Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid #c41e3a;
+        }
+
+        .modal h3 {
+            color: #f4d03f;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-btn {
+            background: #f4d03f;
+            color: #c41e3a;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid #c41e3a;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .error-msg {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Área Staff */
+        .staff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .logout-btn {
+            background: #c41e3a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .order-card {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f4d03f;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .order-id {
+            color: #f4d03f;
+            font-weight: bold;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-pending { background: #e67e22; }
+        .status-preparing { background: #3498db; }
+        .status-ready { background: #27ae60; }
+        .status-delivered { background: #95a5a6; }
+
+        .status-buttons {
+            margin-top: 15px;
+        }
+
+        .status-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #c41e3a;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 3000;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bar Zukka - Pedidos Online</h1>
+            
+            <button class="menu-btn" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div class="menu-dropdown" id="menuDropdown">
+                <div class="menu-item" onclick="goHome()">🏠 Início</div>
+                <div class="menu-item" onclick="clearCart()">🗑️ Limpar Pedido</div>
+                <div class="menu-item" onclick="refreshPage()">🔄 Atualizar</div>
+                <div class="menu-item" onclick="showLogin()">👤 Funcionários</div>
+            </div>
+        </div>
+
+        <!-- Página de Pedidos -->
+        <div id="customerPage" class="page active">
+            <div class="menu-grid">
+                <div class="menu-category">
+                    <h3 class="category-title">Bebidas</h3>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Cerveja Artesanal</h4>
+                            <p>Seleção especial da casa</p>
+                        </div>
+                        <span class="item-price">€4,50</span>
+                        <button class="add-btn" onclick="addToCart('Cerveja Artesanal', 4.50)">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Vinho da Casa</h4>
+                            <p>Tintos e brancos regionais</p>
+                        </div>
+                        <span class="item-price">€3,80</span>
+                        <button class="add-btn" onclick="addToCart('Vinho da Casa', 3.80)">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Sangria Zukka</h4>
+                            <p>Receita especial com frutas</p>
+                        </div>
+                        <span class="item-price">€5,20</span>
+                        <button class="add-btn" onclick="addToCart('Sangria Zukka', 5.20)">+</button>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3 class="category-title">Pratos Principais</h3>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Francesinha Zukka</h4>
+                            <p>Com molho especial da casa</p>
+                        </div>
+                        <span class="item-price">€8,90</span>
+                        <button class="add-btn" onclick="addToCart('Francesinha Zukka', 8.90)">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Bifana do Chefe</h4>
+                            <p>Pão artesanal com carne marinada</p>
+                        </div>
+                        <span class="item-price">€6,50</span>
+                        <button class="add-btn" onclick="addToCart('Bifana do Chefe', 6.50)">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Bitoque Tradicional</h4>
+                            <p>Com ovo, batata e salada</p>
+                        </div>
+                        <span class="item-price">€7,80</span>
+                        <button class="add-btn" onclick="addToCart('Bitoque Tradicional', 7.80)">+</button>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3 class="category-title">Petiscos</h3>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Tábua de Queijos</h4>
+                            <p>Queijos regionais com mel</p>
+                        </div>
+                        <span class="item-price">€12,00</span>
+                        <button class="add-btn" onclick="addToCart('Tábua de Queijos', 12.00)">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Chouriço Assado</h4>
+                            <p>Com broa alentejana</p>
+                        </div>
+                        <span class="item-price">€5,50</span>
+                        <button class="add-btn" onclick="addToCart('Chouriço Assado', 5.50)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart">
+                <h3>Seu Pedido</h3>
+                <div id="cartItems">
+                    <p style="text-align: center; color: #ccc; padding: 20px;">Carrinho vazio</p>
+                </div>
+                <div id="cartTotal" style="display: none;" class="cart-total">Total: €0,00</div>
+            </div>
+
+            <div class="order-form" id="orderForm" style="display: none;">
+                <h3 style="color: #f4d03f; margin-bottom: 15px;">Finalizar Pedido</h3>
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" id="customerPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Mesa</label>
+                    <input type="number" id="tableNumber" min="1" max="50" required>
+                </div>
+                <div class="form-group">
+                    <label>Observações (opcional)</label>
+                    <textarea id="observations" rows="3"></textarea>
+                </div>
+                <button class="submit-btn" onclick="submitOrder()">Confirmar Pedido</button>
+            </div>
+        </div>
+
+        <!-- Página de Funcionários -->
+        <div id="staffPage" class="page">
+            <div class="staff-header">
+                <h2 style="color: #f4d03f;">Pedidos em Tempo Real</h2>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+            <div id="ordersContainer">
+                <p style="text-align: center; color: #ccc; padding: 40px;">Nenhum pedido no momento</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h3>Login Funcionários</h3>
+            <div class="error-msg" id="errorMsg">Usuário ou senha incorretos!</div>
+            <div class="form-group">
+                <label>Usuário</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="password">
+            </div>
+            <button class="login-btn" onclick="login()">Entrar</button>
+            <button class="cancel-btn" onclick="hideLogin()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let cart = [];
+        let orders = [];
+        let orderCounter = 1;
+
+        // Credenciais
+        const credentials = {
+            'admin': 'zukka123',
+            'funcionario': 'bar2024'
+        };
+
+        // Menu hamburger
+        function toggleMenu() {
+            document.getElementById('menuDropdown').classList.toggle('show');
+        }
+
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.menu-btn') && !e.target.closest('.menu-dropdown')) {
+                document.getElementById('menuDropdown').classList.remove('show');
+            }
+        });
+
+        function goHome() {
+            window.location.href = 'cardapiobz.html';
+            toggleMenu();
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCart();
+            showNotification('Pedido limpo');
+            toggleMenu();
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function showLogin() {
+            document.getElementById('loginModal').classList.add('show');
+            toggleMenu();
+        }
+
+        function hideLogin() {
+            document.getElementById('loginModal').classList.remove('show');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (credentials[username] && credentials[username] === password) {
+                hideLogin();
+                showPage('staffPage');
+                loadOrders();
+                showNotification('Login realizado com sucesso!');
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('password').value = '';
+            }
+        }
+
+        function logout() {
+            showPage('customerPage');
+            showNotification('Logout realizado');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Carrinho
+        function addToCart(name, price) {
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            updateCart();
+            showNotification(name + ' adicionado!');
+        }
+
+        function updateQuantity(name, change) {
+            const item = cart.find(item => item.name === name);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(item => item.name !== name);
+                }
+                updateCart();
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const orderForm = document.getElementById('orderForm');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #ccc; padding: 20px;">Carrinho vazio</p>';
+                cartTotal.style.display = 'none';
+                orderForm.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small>€${item.price.toFixed(2)} cada</small>
+                        </div>
+                        <div class="cart-controls">
+                            <button class="qty-btn" onclick="updateQuantity('${item.name}', -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
+                            <strong>€${itemTotal.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItems.innerHTML = html;
+            cartTotal.innerHTML = `Total: €${total.toFixed(2)}`;
+            cartTotal.style.display = 'block';
+            orderForm.style.display = 'block';
+        }
+
+        function submitOrder() {
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const table = document.getElementById('tableNumber').value;
+            const obs = document.getElementById('observations').value;
+
+            if (!name || !phone || !table) {
+                showNotification('Preencha todos os campos obrigatórios');
+                return;
+            }
+
+            if (cart.length === 0) {
+                showNotification('Adicione itens ao pedido');
+                return;
+            }
+
+            const order = {
+                id: orderCounter++,
+                name,
+                phone,
+                table,
+                observations: obs,
+                items: [...cart],
+                total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                status: 'pending',
+                time: new Date().toLocaleString()
+            };
+
+            orders.push(order);
+
+            // Limpar
+            cart = [];
+            updateCart();
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('tableNumber').value = '';
+            document.getElementById('observations').value = '';
+
+            showNotification('Pedido enviado com sucesso!');
+        }
+
+        // Staff
+        function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #ccc; padding: 40px;">Nenhum pedido no momento</p>';
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                const statusText = {
+                    'pending': 'Pendente',
+                    'preparing': 'Preparando',
+                    'ready': 'Pronto',
+                    'delivered': 'Entregue'
+                }[order.status];
+
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">Pedido #${order.id}</span>
+                            <span class="order-status status-${order.status}">${statusText}</span>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Cliente:</strong> ${order.name}<br>
+                            <strong>Telefone:</strong> ${order.phone}<br>
+                            <strong>Mesa:</strong> ${order.table}<br>
+                            <strong>Horário:</strong> ${order.time}
+                            ${order.observations ? '<br><strong>Obs:</strong> ' + order.observations : ''}
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            ${order.items.map(item => `
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>${item.quantity}x ${item.name}</span>
+                                    <span>€${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                            <div style="border-top: 1px solid #ccc; padding-top: 5px; margin-top: 5px; font-weight: bold; text-align: right;">
+                                Total: €${order.total.toFixed(2)}
+                            </div>
+                        </div>
+                        ${order.status !== 'delivered' ? `
+                            <div class="status-buttons">
+                                ${order.status === 'pending' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'preparing')">Iniciar Preparo</button>` : ''}
+                                ${order.status === 'preparing' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'ready')">Marcar Pronto</button>` : ''}
+                                ${order.status === 'ready' ? `<button class="status-btn" onclick="updateStatus(${order.id}, 'delivered')">Entregar</button>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                loadOrders();
+                showNotification(`Pedido #${orderId} atualizado!`);
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Auto-atualizar pedidos na área staff
+        setInterval(() => {
+            if (document.getElementById('staffPage').classList.contains('active')) {
+                loadOrders();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
