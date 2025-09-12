@@ -241,6 +241,72 @@
             color: white;
         }
 
+        /* Opções de entrega */
+        .delivery-options {
+            background: rgba(244, 208, 63, 0.1);
+            border: 2px solid #f4d03f;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .delivery-options h4 {
+            color: #f4d03f;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            background: rgba(196, 30, 58, 0.2);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .radio-option.selected {
+            border-color: #f4d03f;
+            background: rgba(244, 208, 63, 0.1);
+        }
+
+        .radio-option label {
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .radio-option .icon {
+            font-size: 1.2rem;
+        }
+
+        /* Botões do formulário */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            align-items: stretch;
+        }
+
         .submit-btn {
             background: linear-gradient(135deg, #f4d03f, #f1c40f);
             color: #c41e3a;
@@ -250,10 +316,30 @@
             font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
+            flex: 1;
         }
 
         .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .clear-cart-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .clear-cart-btn:hover {
+            background: #c0392b;
             transform: translateY(-2px);
         }
 
@@ -369,6 +455,19 @@
             font-weight: bold;
         }
 
+        .delivery-type {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .delivery-type.takeaway {
+            background: #e67e22;
+        }
+
         .status-pending { background: #e67e22; }
         .status-preparing { background: #3498db; }
         .status-ready { background: #27ae60; }
@@ -419,6 +518,21 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .clear-cart-btn {
+                min-width: auto;
+                padding: 12px;
             }
         }
     </style>
@@ -532,6 +646,24 @@
 
             <div class="order-form" id="orderForm" style="display: none;">
                 <h3 style="color: #f4d03f; margin-bottom: 15px;">Finalizar Pedido</h3>
+                
+                <!-- Opções de Entrega -->
+                <div class="delivery-options">
+                    <h4>🍽️ Como prefere receber seu pedido?</h4>
+                    <div class="radio-group">
+                        <div class="radio-option" onclick="selectDeliveryType('dine-in')">
+                            <input type="radio" name="deliveryType" value="dine-in" id="dineIn">
+                            <span class="icon">🍽️</span>
+                            <label for="dineIn">Comer no Restaurante</label>
+                        </div>
+                        <div class="radio-option" onclick="selectDeliveryType('takeaway')">
+                            <input type="radio" name="deliveryType" value="takeaway" id="takeaway">
+                            <span class="icon">📦</span>
+                            <label for="takeaway">Para Levar</label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Nome</label>
                     <input type="text" id="customerName" required>
@@ -548,7 +680,14 @@
                     <label>Observações (opcional)</label>
                     <textarea id="observations" rows="3"></textarea>
                 </div>
-                <button class="submit-btn" onclick="submitOrder()">Confirmar Pedido</button>
+                
+                <!-- Botões de ação -->
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="submitOrder()">Confirmar Pedido</button>
+                    <button class="clear-cart-btn" onclick="clearCartInForm()" title="Limpar todo o carrinho">
+                        🗑️
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -589,6 +728,7 @@
         let cart = [];
         let orders = [];
         let orderCounter = 1;
+        let selectedDeliveryType = '';
 
         // Credenciais
         const credentials = {
@@ -618,6 +758,33 @@
             updateCart();
             showNotification('Pedido limpo');
             toggleMenu();
+        }
+
+        function clearCartInForm() {
+            if (cart.length === 0) {
+                showNotification('Carrinho já está vazio');
+                return;
+            }
+            
+            if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                cart = [];
+                selectedDeliveryType = '';
+                updateCart();
+                
+                // Limpar também os campos do formulário
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('tableNumber').value = '';
+                document.getElementById('observations').value = '';
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                
+                showNotification('Carrinho limpo com sucesso!');
+            }
         }
 
         function refreshPage() {
@@ -661,6 +828,22 @@
                 page.classList.remove('active');
             });
             document.getElementById(pageId).classList.add('active');
+        }
+
+        // Função para selecionar tipo de entrega
+        function selectDeliveryType(type) {
+            selectedDeliveryType = type;
+            
+            // Remove a classe selected de todas as opções
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Adiciona a classe selected à opção clicada
+            event.currentTarget.classList.add('selected');
+            
+            // Marca o radio button
+            document.getElementById(type === 'dine-in' ? 'dineIn' : 'takeaway').checked = true;
         }
 
         // Carrinho
@@ -738,6 +921,11 @@
                 return;
             }
 
+            if (!selectedDeliveryType) {
+                showNotification('Selecione como prefere receber seu pedido');
+                return;
+            }
+
             if (cart.length === 0) {
                 showNotification('Adicione itens ao pedido');
                 return;
@@ -749,6 +937,7 @@
                 phone,
                 table,
                 observations: obs,
+                deliveryType: selectedDeliveryType,
                 items: [...cart],
                 total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
                 status: 'pending',
@@ -759,11 +948,18 @@
 
             // Limpar
             cart = [];
+            selectedDeliveryType = '';
             updateCart();
             document.getElementById('customerName').value = '';
             document.getElementById('customerPhone').value = '';
             document.getElementById('tableNumber').value = '';
             document.getElementById('observations').value = '';
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                radio.checked = false;
+            });
 
             showNotification('Pedido enviado com sucesso!');
         }
@@ -786,11 +982,17 @@
                     'delivered': 'Entregue'
                 }[order.status];
 
+                const deliveryText = order.deliveryType === 'dine-in' ? 'Comer no Restaurante' : 'Para Levar';
+                const deliveryClass = order.deliveryType === 'takeaway' ? 'takeaway' : '';
+
                 html += `
                     <div class="order-card">
                         <div class="order-header">
                             <span class="order-id">Pedido #${order.id}</span>
-                            <span class="order-status status-${order.status}">${statusText}</span>
+                            <div>
+                                <span class="order-status status-${order.status}">${statusText}</span>
+                                <span class="delivery-type ${deliveryClass}">${deliveryText}</span>
+                            </div>
                         </div>
                         <div style="margin: 10px 0;">
                             <strong>Cliente:</strong> ${order.name}<br>
@@ -850,6 +1052,4 @@
         }, 5000);
     </script>
 </body>
-
 </html>
-
