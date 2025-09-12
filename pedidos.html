@@ -1047,9 +1047,22 @@
         // Auto-atualizar pedidos na área staff
         setInterval(() => {
             if (document.getElementById('staffPage').classList.contains('active')) {
+                console.log('Auto-atualizando pedidos...');
                 loadOrders();
             }
-        }, 5000);
+        }, 3000); // Reduzido para 3 segundos para teste
+
+        // Função para testar se os pedidos estão sendo salvos
+        function debugOrders() {
+            console.log('=== DEBUG PEDIDOS ===');
+            console.log('Total de pedidos:', orders.length);
+            console.log('Lista completa:', orders);
+            console.log('Página ativa:', document.querySelector('.page.active').id);
+            console.log('==================');
+        }
+
+        // Adicionar função debug ao console para teste
+        window.debugOrders = debugOrders;
     </script>
 </body>
 </html>
