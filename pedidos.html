@@ -1055,14 +1055,23 @@
         // Função para testar se os pedidos estão sendo salvos
         function debugOrders() {
             console.log('=== DEBUG PEDIDOS ===');
-            console.log('Total de pedidos:', orders.length);
+            console.log('Total de pedidos na memória:', orders.length);
             console.log('Lista completa:', orders);
+            console.log('Contador atual:', orderCounter);
             console.log('Página ativa:', document.querySelector('.page.active').id);
+            
+            // Verificar localStorage
+            const savedOrders = localStorage.getItem('zukka_orders');
+            const savedCounter = localStorage.getItem('zukka_order_counter');
+            console.log('Dados no localStorage:');
+            console.log('- Pedidos salvos:', savedOrders ? JSON.parse(savedOrders).length : 'Nenhum');
+            console.log('- Contador salvo:', savedCounter || 'Não definido');
             console.log('==================');
         }
 
         // Adicionar função debug ao console para teste
         window.debugOrders = debugOrders;
+        window.clearAllData = clearAllData;
     </script>
 </body>
 </html>
