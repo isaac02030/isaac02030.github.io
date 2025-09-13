@@ -773,12 +773,12 @@
                 <div class="delivery-options">
                     <h4>🍽️ Como prefere receber seu pedido?</h4>
                     <div class="radio-group">
-                        <div class="radio-option" onclick="selectDeliveryType('dine-in')">
+                        <div class="radio-option" onclick="selectDeliveryType('dine-in', this)">
                             <input type="radio" name="deliveryType" value="dine-in" id="dineIn">
                             <span class="icon">🍽️</span>
                             <label for="dineIn">Comer no Restaurante</label>
                         </div>
-                        <div class="radio-option" onclick="selectDeliveryType('takeaway')">
+                        <div class="radio-option" onclick="selectDeliveryType('takeaway', this)">
                             <input type="radio" name="deliveryType" value="takeaway" id="takeaway">
                             <span class="icon">📦</span>
                             <label for="takeaway">Para Levar</label>
@@ -931,7 +931,7 @@
         }
 
         // Funções globais
-        window.firebaseReady = firebaseReady;
+        window.firebaseReady = () => firebaseReady;
         window.db = db;
         
         window.saveOrderToFirebase = async function(orderData) {
@@ -1024,16 +1024,20 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // Seleção tipo de entrega
-        function selectDeliveryType(type) {
+        // CORREÇÃO: Seleção tipo de entrega
+        function selectDeliveryType(type, element) {
             selectedDeliveryType = type;
             
+            // Remover seleção anterior
             document.querySelectorAll('.radio-option').forEach(option => {
                 option.classList.remove('selected');
             });
             
-            event.currentTarget.classList.add('selected');
+            // Adicionar seleção ao elemento clicado
+            element.classList.add('selected');
             document.getElementById(type === 'dine-in' ? 'dineIn' : 'takeaway').checked = true;
+            
+            console.log('Tipo de entrega selecionado:', type);
         }
 
         // Carrinho
@@ -1152,31 +1156,57 @@
             }
         }
 
-        // Enviar pedido - versão simplificada
+        // CORREÇÃO: Função submitOrder melhorada
         async function submitOrder() {
+            console.log('Iniciando envio do pedido...');
+            
+            // Pegar valores dos campos
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
-            const table = parseInt(document.getElementById('tableNumber').value);
+            const tableValue = document.getElementById('tableNumber').value.trim();
             const obs = document.getElementById('observations').value.trim();
 
-            // Validações básicas
-            if (!name || !phone || !table) {
-                showNotification('Preencha nome, telefone e mesa', 'error');
+            console.log('Dados do formulário:', { name, phone, tableValue, selectedDeliveryType, cartLength: cart.length });
+
+            // Validações melhoradas
+            if (!name) {
+                showNotification('Por favor, preencha seu nome', 'error');
+                document.getElementById('customerName').focus();
+                return;
+            }
+
+            if (!phone) {
+                showNotification('Por favor, preencha seu telefone', 'error');
+                document.getElementById('customerPhone').focus();
+                return;
+            }
+
+            if (!tableValue) {
+                showNotification('Por favor, informe o número da mesa', 'error');
+                document.getElementById('tableNumber').focus();
+                return;
+            }
+
+            const table = parseInt(tableValue);
+            if (isNaN(table) || table < 1 || table > 50) {
+                showNotification('Número da mesa deve ser entre 1 e 50', 'error');
+                document.getElementById('tableNumber').focus();
                 return;
             }
 
             if (!selectedDeliveryType) {
-                showNotification('Selecione o tipo de entrega', 'error');
+                showNotification('Por favor, selecione o tipo de entrega', 'error');
                 return;
             }
 
             if (cart.length === 0) {
-                showNotification('Adicione itens ao pedido', 'error');
+                showNotification('Adicione pelo menos um item ao pedido', 'error');
                 return;
             }
 
             // Preparar pedido
             const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
@@ -1194,14 +1224,16 @@
                     createdAt: new Date().toLocaleString()
                 };
 
-                console.log('Enviando pedido:', orderData);
+                console.log('Dados do pedido preparados:', orderData);
 
-                if (window.firebaseReady && window.db) {
-                    // Tentar Firebase
+                // Tentar salvar no Firebase
+                if (window.firebaseReady && window.firebaseReady() && window.db) {
+                    console.log('Salvando no Firebase...');
                     await window.saveOrderToFirebase(orderData);
                     console.log('✅ Pedido salvo no Firebase');
                 } else {
                     // Fallback localStorage
+                    console.log('Firebase não disponível, salvando offline...');
                     orderData.id = Date.now().toString();
                     const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
                     savedOrders.unshift(orderData);
@@ -1209,19 +1241,19 @@
                     console.log('📱 Pedido salvo offline');
                 }
 
-                showNotification(`Pedido #${orderData.orderNumber} enviado!`, 'success');
+                showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
                 
-                // Limpar
+                // Limpar formulário e carrinho
                 cart = [];
                 updateCart();
                 clearForm();
 
             } catch (error) {
-                console.error('Erro ao enviar:', error);
-                showNotification('Erro ao enviar pedido', 'error');
+                console.error('Erro ao enviar pedido:', error);
+                showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Confirmar Pedido';
+                submitBtn.innerHTML = originalText;
             }
         }
 
@@ -1299,7 +1331,7 @@
 
         async function changeOrderStatus(orderId, newStatus) {
             try {
-                if (window.firebaseReady && window.db) {
+                if (window.firebaseReady && window.firebaseReady() && window.db) {
                     await window.updateOrderStatusFirebase(orderId, newStatus);
                 } else {
                     // Atualizar localStorage
