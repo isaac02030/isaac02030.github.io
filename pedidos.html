@@ -2350,3 +2350,145 @@
                 const refreshMenuItem = document.getElementById('refreshMenuItem');
                 if (refreshMenuItem) {
                     refreshMenuItem.addEventListener('click', () => window.location.reload());
+                }
+                
+                const staffMenuItem = document.getElementById('staffMenuItem');
+                if (staffMenuItem) {
+                    staffMenuItem.addEventListener('click', showLogin);
+                }
+                
+                // Login form
+                const loginBtn = document.getElementById('loginBtn');
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', login);
+                }
+                
+                const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+                if (cancelLoginBtn) {
+                    cancelLoginBtn.addEventListener('click', hideLogin);
+                }
+                
+                // Order form
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', submitOrder);
+                }
+                
+                const clearCartBtn = document.getElementById('clearCartBtn');
+                if (clearCartBtn) {
+                    clearCartBtn.addEventListener('click', clearCartInForm);
+                }
+                
+                // Staff area
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', logout);
+                }
+                
+                const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+                if (refreshOrdersBtn) {
+                    refreshOrdersBtn.addEventListener('click', loadOrders);
+                }
+                
+                // Selection modal
+                const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
+                if (cancelSelectionBtn) {
+                    cancelSelectionBtn.addEventListener('click', hideSelectionModal);
+                }
+                
+                // Close modals when clicking outside
+                document.addEventListener('click', function(e) {
+                    // Close menu dropdown
+                    if (!e.target.closest('#menuBtn') && !e.target.closest('#menuDropdown')) {
+                        const dropdown = document.getElementById('menuDropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('show');
+                        }
+                    }
+                    
+                    // Close modals when clicking on backdrop
+                    if (e.target.classList.contains('modal')) {
+                        if (e.target.id === 'selectionModal') {
+                            hideSelectionModal();
+                        } else if (e.target.id === 'loginModal') {
+                            hideLogin();
+                        }
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        const loginModal = document.getElementById('loginModal');
+                        const selectionModal = document.getElementById('selectionModal');
+                        const menuDropdown = document.getElementById('menuDropdown');
+                        
+                        if (loginModal && loginModal.classList.contains('show')) {
+                            hideLogin();
+                        } else if (selectionModal && selectionModal.classList.contains('show')) {
+                            hideSelectionModal();
+                        } else if (menuDropdown && menuDropdown.classList.contains('show')) {
+                            toggleMenu();
+                        }
+                    }
+                });
+                
+                // Enter key for login
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) {
+                    loginModal.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            login();
+                        }
+                    });
+                }
+                
+                console.log('✅ Sistema Bar Zukka iniciado com sucesso!');
+            }
+
+            // API pública
+            return {
+                init: init,
+                loadDailyDishes: loadDailyDishes,
+                showSelectionModal: showSelectionModal,
+                hideSelectionModal: hideSelectionModal,
+                addToCart: addToCart,
+                updateQuantity: updateQuantity,
+                updateCart: updateCart,
+                clearCart: clearCart,
+                clearForm: clearForm,
+                submitOrder: submitOrder,
+                showNotification: showNotification,
+                toggleMenu: toggleMenu,
+                showPage: showPage,
+                showLogin: showLogin,
+                hideLogin: hideLogin,
+                login: login,
+                logout: logout,
+                loadOrders: loadOrders,
+                displayOrders: displayOrders,
+                changeOrderStatus: changeOrderStatus,
+                selectDeliveryType: selectDeliveryType
+            };
+
+        })();
+
+        // Inicializar quando DOM estiver carregado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(window.BarZukka.init, 100);
+            });
+        } else {
+            setTimeout(window.BarZukka.init, 100);
+        }
+
+        // Backup - se por algum motivo não inicializou em 2 segundos, tentar novamente
+        setTimeout(function() {
+            if (!document.getElementById('dailyDishes').innerHTML.trim()) {
+                console.log('⚠️ Reinicializando sistema...');
+                window.BarZukka.init();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
