@@ -834,77 +834,189 @@
         };
 
         let app, db, isFirebaseReady = false;
+        let connectionTimeout;
+        let isOfflineMode = false;
+
+        // Timeout de 10 segundos para conexão
+        updateConnectionStatus('connecting', 'Conectando ao Firebase...');
+        
+        connectionTimeout = setTimeout(() => {
+            if (!isFirebaseReady) {
+                console.warn('⚠️ Timeout na conexão Firebase - entrando em modo offline');
+                isOfflineMode = true;
+                updateConnectionStatus('disconnected', 'Modo Offline');
+                loadOfflineOrders();
+            }
+        }, 10000);
 
         try {
             // Inicializar Firebase
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            isFirebaseReady = true;
             
-            updateConnectionStatus('connected', 'Conectado ao Firebase');
-            console.log('✅ Firebase iniciado com sucesso');
-
-            // Escutar pedidos em tempo real
-            const ordersRef = collection(db, 'orders');
-            const ordersQuery = query(ordersRef, orderBy('timestamp', 'desc'));
+            // Teste de conectividade real - tentar ler uma coleção
+            const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
             
-            onSnapshot(ordersQuery, (snapshot) => {
-                const orders = [];
+            // Se conseguir criar o listener sem erro, Firebase está funcionando
+            const unsubscribe = onSnapshot(testQuery, (snapshot) => {
+                // Primeira execução confirma que Firebase está funcionando
+                if (!isFirebaseReady) {
+                    clearTimeout(connectionTimeout);
+                    isFirebaseReady = true;
+                    isOfflineMode = false;
+                    
+                    updateConnectionStatus('connected', 'Conectado ao Firebase');
+                    console.log('✅ Firebase conectado e testado');
+                }
                 
+                // Processar pedidos
+                const orders = [];
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const order = {
                         id: doc.id,
                         ...data,
-                        // Converter timestamp do Firebase para Date
                         timestamp: data.timestamp?.seconds ? data.timestamp.seconds * 1000 : Date.now()
                     };
                     orders.push(order);
                 });
                 
                 window.allOrders = orders;
-                console.log(`📦 ${orders.length} pedidos sincronizados do Firebase`);
+                console.log(`📦 ${orders.length} pedidos sincronizados (Firebase)`);
                 
-                // Atualizar interface se estiver na área staff
+                // Salvar no localStorage como backup
+                localStorage.setItem('zukka_orders_backup', JSON.stringify(orders));
+                
+                // Atualizar interface se necessário
                 if (document.getElementById('staffPage').classList.contains('active')) {
                     displayOrders(orders);
+                }
+            }, (error) => {
+                console.error('❌ Erro na sincronização Firebase:', error);
+                // Se der erro depois de conectado, manter funcionando offline
+                if (isFirebaseReady) {
+                    updateConnectionStatus('disconnected', 'Conexão perdida - Modo Offline');
+                    isOfflineMode = true;
+                    loadOfflineOrders();
                 }
             });
 
         } catch (error) {
-            console.error('❌ Erro Firebase:', error);
-            updateConnectionStatus('disconnected', 'Erro de conexão');
-            isFirebaseReady = false;
+            console.error('❌ Erro ao inicializar Firebase:', error);
+            clearTimeout(connectionTimeout);
+            isOfflineMode = true;
+            updateConnectionStatus('disconnected', 'Modo Offline');
+            loadOfflineOrders();
+        }
+
+        // Função para carregar pedidos offline
+        function loadOfflineOrders() {
+            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+            const backupOrders = JSON.parse(localStorage.getItem('zukka_orders_backup') || '[]');
+            
+            // Usar backup do Firebase se disponível, senão pedidos offline
+            window.allOrders = backupOrders.length > 0 ? backupOrders : offlineOrders;
+            
+            console.log(`📱 ${window.allOrders.length} pedidos carregados (modo offline)`);
+            
+            if (document.getElementById('staffPage').classList.contains('active')) {
+                displayOrders(window.allOrders);
+            }
         }
 
         // Função para salvar pedido
         async function saveOrder(orderData) {
-            if (!isFirebaseReady) {
-                throw new Error('Firebase não está disponível');
+            if (isFirebaseReady && !isOfflineMode) {
+                try {
+                    const docRef = await addDoc(collection(db, 'orders'), {
+                        ...orderData,
+                        timestamp: serverTimestamp()
+                    });
+                    
+                    console.log('✅ Pedido salvo no Firebase:', docRef.id);
+                    return docRef.id;
+                } catch (error) {
+                    console.error('❌ Erro ao salvar no Firebase, usando localStorage:', error);
+                    isOfflineMode = true;
+                    updateConnectionStatus('disconnected', 'Conexão perdida - Modo Offline');
+                    return saveOrderOffline(orderData);
+                }
+            } else {
+                return saveOrderOffline(orderData);
+            }
+        }
+
+        // Salvar pedido offline
+        function saveOrderOffline(orderData) {
+            orderData.id = Date.now().toString();
+            orderData.timestamp = Date.now();
+            orderData.isOffline = true; // Marcar como offline para sincronizar depois
+            
+            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+            offlineOrders.unshift(orderData);
+            localStorage.setItem('zukka_orders', JSON.stringify(offlineOrders));
+            
+            // Atualizar lista global
+            if (!window.allOrders) window.allOrders = [];
+            window.allOrders.unshift(orderData);
+            
+            console.log('📱 Pedido salvo offline:', orderData.id);
+            
+            // Atualizar interface se staff estiver ativo
+            if (document.getElementById('staffPage').classList.contains('active')) {
+                displayOrders(window.allOrders);
             }
             
-            const docRef = await addDoc(collection(db, 'orders'), {
-                ...orderData,
-                timestamp: serverTimestamp()
-            });
-            
-            console.log('✅ Pedido salvo no Firebase:', docRef.id);
-            return docRef.id;
+            return orderData.id;
         }
 
         // Função para atualizar status
         async function updateOrderStatus(orderId, newStatus) {
-            if (!isFirebaseReady) {
-                throw new Error('Firebase não está disponível');
+            if (isFirebaseReady && !isOfflineMode) {
+                try {
+                    const orderRef = doc(db, 'orders', orderId);
+                    await updateDoc(orderRef, {
+                        status: newStatus,
+                        lastUpdated: serverTimestamp()
+                    });
+                    
+                    console.log(`✅ Status atualizado no Firebase: ${orderId} -> ${newStatus}`);
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar no Firebase, usando localStorage:', error);
+                    updateOrderStatusOffline(orderId, newStatus);
+                }
+            } else {
+                updateOrderStatusOffline(orderId, newStatus);
+            }
+        }
+
+        // Atualizar status offline
+        function updateOrderStatusOffline(orderId, newStatus) {
+            // Atualizar na lista global
+            if (window.allOrders) {
+                const order = window.allOrders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = newStatus;
+                    order.lastUpdated = Date.now();
+                }
             }
             
-            const orderRef = doc(db, 'orders', orderId);
-            await updateDoc(orderRef, {
-                status: newStatus,
-                lastUpdated: serverTimestamp()
-            });
+            // Atualizar no localStorage
+            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+            const orderIndex = offlineOrders.findIndex(o => o.id === orderId);
             
-            console.log(`✅ Status atualizado: ${orderId} -> ${newStatus}`);
+            if (orderIndex !== -1) {
+                offlineOrders[orderIndex].status = newStatus;
+                offlineOrders[orderIndex].lastUpdated = Date.now();
+                localStorage.setItem('zukka_orders', JSON.stringify(offlineOrders));
+            }
+            
+            console.log(`📱 Status atualizado offline: ${orderId} -> ${newStatus}`);
+            
+            // Atualizar interface
+            if (document.getElementById('staffPage').classList.contains('active')) {
+                displayOrders(window.allOrders);
+            }
         }
 
         // Função para atualizar status de conexão
@@ -921,10 +1033,66 @@
             statusEl.innerHTML = `${icons[status]} ${message}`;
         }
 
+        // Tentar reconectar a cada 30 segundos se offline
+        setInterval(() => {
+            if (isOfflineMode && !isFirebaseReady) {
+                console.log('🔄 Tentando reconectar ao Firebase...');
+                updateConnectionStatus('connecting', 'Tentando reconectar...');
+                
+                // Recriar conexão
+                try {
+                    const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
+                    const unsubscribe = onSnapshot(testQuery, (snapshot) => {
+                        isFirebaseReady = true;
+                        isOfflineMode = false;
+                        updateConnectionStatus('connected', 'Reconectado ao Firebase');
+                        console.log('✅ Reconectado ao Firebase');
+                        
+                        // Sincronizar pedidos offline se houver
+                        syncOfflineOrders();
+                    });
+                } catch (error) {
+                    updateConnectionStatus('disconnected', 'Modo Offline');
+                }
+            }
+        }, 30000);
+
+        // Sincronizar pedidos offline quando reconectar
+        async function syncOfflineOrders() {
+            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+            const ordersToSync = offlineOrders.filter(order => order.isOffline);
+            
+            if (ordersToSync.length > 0) {
+                console.log(`🔄 Sincronizando ${ordersToSync.length} pedidos offline...`);
+                
+                for (const order of ordersToSync) {
+                    try {
+                        delete order.isOffline;
+                        delete order.id; // Deixar Firebase gerar novo ID
+                        
+                        await addDoc(collection(db, 'orders'), {
+                            ...order,
+                            timestamp: serverTimestamp(),
+                            syncedAt: new Date().toISOString()
+                        });
+                        
+                        console.log('✅ Pedido sincronizado:', order.orderNumber);
+                    } catch (error) {
+                        console.error('❌ Erro ao sincronizar pedido:', error);
+                    }
+                }
+                
+                // Limpar pedidos offline já sincronizados
+                const remainingOrders = offlineOrders.filter(order => !order.isOffline);
+                localStorage.setItem('zukka_orders', JSON.stringify(remainingOrders));
+            }
+        }
+
         // Disponibilizar funções globalmente
         window.saveOrder = saveOrder;
         window.updateOrderStatus = updateOrderStatus;
-        window.isFirebaseReady = () => isFirebaseReady;
+        window.isFirebaseReady = () => isFirebaseReady && !isOfflineMode;
+        window.isOfflineMode = () => isOfflineMode;
         window.allOrders = [];
     </script>
 
