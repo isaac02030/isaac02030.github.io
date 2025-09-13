@@ -180,8 +180,8 @@
         }
 
         .menu-dropdown {
-            position: absolute;
-            top: 70px;
+            position: fixed;
+            top: 90px;
             right: 20px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -190,8 +190,8 @@
             box-shadow: var(--shadow-hover);
             min-width: 220px;
             display: none;
-            z-index: 1000;
-            overflow: hidden;
+            z-index: 9999;
+            overflow: visible;
         }
 
         .menu-dropdown.show {
