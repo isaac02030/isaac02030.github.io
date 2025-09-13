@@ -191,35 +191,38 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 1.1rem;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             padding: 1rem 1.8rem;
             border-radius: var(--border-radius-lg);
             position: relative;
             letter-spacing: 0.5px;
-            overflow: hidden;
+            display: block;
+            z-index: 10;
         }
 
         .nav-menu li a::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
+            left: 0;
+            width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
-            transition: var(--transition);
+            background: rgba(212, 175, 55, 0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+            border-radius: var(--border-radius-lg);
         }
 
-        .nav-menu li a:hover::before {
-            left: 100%;
+        .nav-menu li a:hover::before,
+        .nav-menu li a:focus::before {
+            width: 100%;
         }
 
         .nav-menu li a:hover,
         .nav-menu li a:focus {
             color: var(--primary-gold);
-            background: rgba(212, 175, 55, 0.1);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
         }
 
         /* Hero Section with parallax effect */
