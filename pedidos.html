@@ -1625,26 +1625,60 @@
                 document.getElementById('menuBackdrop').addEventListener('click', closeMenu);
                 
                 // Menu items
-                document.getElementById('homeMenuItem').addEventListener('click', () => {
-                    window.location.href = 'index.html';
-                });
+                const homeMenuItem = document.getElementById('homeMenuItem');
+                const clearCartMenuItem = document.getElementById('clearCartMenuItem');
+                const refreshMenuItem = document.getElementById('refreshMenuItem');
+                const staffMenuItem = document.getElementById('staffMenuItem');
                 
-                document.getElementById('clearCartMenuItem').addEventListener('click', clearCart);
-                document.getElementById('refreshMenuItem').addEventListener('click', () => window.location.reload());
-                document.getElementById('staffMenuItem').addEventListener('click', showLogin);
+                if (homeMenuItem) {
+                    homeMenuItem.addEventListener('click', () => {
+                        window.location.href = 'index.html';
+                    });
+                }
+                
+                if (clearCartMenuItem) {
+                    clearCartMenuItem.addEventListener('click', clearCart);
+                }
+                
+                if (refreshMenuItem) {
+                    refreshMenuItem.addEventListener('click', () => window.location.reload());
+                }
+                
+                if (staffMenuItem) {
+                    staffMenuItem.addEventListener('click', showLogin);
+                }
                 
                 // Login e Staff
-                document.getElementById('loginBtn').addEventListener('click', login);
-                document.getElementById('cancelLoginBtn').addEventListener('click', hideLogin);
-                document.getElementById('logoutBtn').addEventListener('click', logout);
-                document.getElementById('refreshOrdersBtn').addEventListener('click', loadOrders);
+                const loginBtn = document.getElementById('loginBtn');
+                const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+                const loginModal = document.getElementById('loginModal');
+                
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', login);
+                }
+                
+                if (cancelLoginBtn) {
+                    cancelLoginBtn.addEventListener('click', hideLogin);
+                }
+                
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', logout);
+                }
+                
+                if (refreshOrdersBtn) {
+                    refreshOrdersBtn.addEventListener('click', loadOrders);
+                }
                 
                 // Enter key para login
-                document.getElementById('loginModal').addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        login();
-                    }
-                });
+                if (loginModal) {
+                    loginModal.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            login();
+                        }
+                    });
+                }
                 
                 // Fechar modal clicando fora
                 document.addEventListener('click', function(e) {
