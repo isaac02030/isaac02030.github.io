@@ -1280,26 +1280,29 @@
 
         // Enviar pedido
         async function submitOrder() {
-            const name = document.getElementById('customerName').value;
-            const phone = document.getElementById('customerPhone').value;
+            // Validar formulário primeiro
+            const validation = validateForm();
+            
+            if (!validation.isValid) {
+                // Mostrar primeiro erro na lista
+                showNotification(validation.errors[0], 'error');
+                
+                // Focar no primeiro campo com erro
+                const firstErrorField = document.querySelector('.form-group.error input, .form-group.error textarea');
+                if (firstErrorField) {
+                    firstErrorField.focus();
+                } else if (!selectedDeliveryType) {
+                    // Se erro for no tipo de entrega, rolar até a seção
+                    document.getElementById('deliveryOptions').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                return;
+            }
+
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
             const table = document.getElementById('tableNumber').value;
-            const obs = document.getElementById('observations').value;
-
-            // Validações
-            if (!name || !phone || !table) {
-                showNotification('Preencha todos os campos obrigatórios', 'error');
-                return;
-            }
-
-            if (!selectedDeliveryType) {
-                showNotification('Selecione como prefere receber seu pedido', 'error');
-                return;
-            }
-
-            if (cart.length === 0) {
-                showNotification('Adicione itens ao pedido', 'error');
-                return;
-            }
+            const obs = document.getElementById('observations').value.trim();
 
             // Preparar pedido
             const submitBtn = document.getElementById('submitBtn');
@@ -1312,7 +1315,7 @@
                     name,
                     phone,
                     table: parseInt(table),
-                    observations: obs,
+                    observations: obs || '', // Garantir string vazia se vazio
                     deliveryType: selectedDeliveryType,
                     items: [...cart],
                     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -1320,14 +1323,14 @@
                     createdAt: new Date().toLocaleString()
                 };
 
-                console.log('📤 Enviando pedido:', orderData);
+                console.log('📤 Enviando pedido validado:', orderData);
 
                 // Tentar salvar no Firebase
                 if (window.isFirebaseReady()) {
                     await window.saveOrder(orderData);
                     showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
                 } else {
-                    // Fallback localStorage
+                    // Fallback localStorage com aviso
                     orderData.id = Date.now().toString();
                     orderData.timestamp = Date.now();
                     
@@ -1336,18 +1339,30 @@
                     localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
                     
                     console.log('📱 Pedido salvo no localStorage (modo offline)');
-                    showNotification(`Pedido #${orderData.orderNumber} enviado (modo offline)!`, 'success');
+                    showNotification(`Pedido #${orderData.orderNumber} enviado (modo offline)! Os dados serão sincronizados quando a conexão voltar.`, 'success');
                 }
 
-                // Limpar formulário
+                // Limpar formulário e carrinho
                 cart = [];
                 selectedDeliveryType = '';
                 updateCart();
+                updateCartCounter();
                 clearForm();
 
             } catch (error) {
                 console.error('❌ Erro ao enviar pedido:', error);
-                showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
+                
+                // Erro específico baseado no tipo
+                let errorMessage = 'Erro ao enviar pedido. ';
+                if (error.message.includes('offline') || error.message.includes('network')) {
+                    errorMessage += 'Verifique sua conexão com a internet.';
+                } else if (error.message.includes('Firebase')) {
+                    errorMessage += 'Problema no servidor. Tente novamente.';
+                } else {
+                    errorMessage += 'Tente novamente em alguns instantes.';
+                }
+                
+                showNotification(errorMessage, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Confirmar Pedido';
