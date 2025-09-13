@@ -3,40 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Bar Zukka - Venha nos Conhecer! O restaurante Bar Zukka fica em Portalegre. Sabores únicos da gastronomia brasileira em ambiente acolhedor. Venha descobrir nossa cozinha tradicional com francesinhas, bifanas e muito mais.">
-    <meta name="keywords" content="bar, restaurante, Portalegre, gastronomia brasileira, francesinha, bifana, cerveja artesanal, comida tradicional, Alentejo, petiscos, gin tónico">
-    <meta name="author" content="Bar Zukka">
-    <meta name="robots" content="index, follow">
-    
-    <!-- Open Graph / Facebook / WhatsApp / Instagram -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://barzukka.pt">
-    <meta property="og:title" content="Bar Zukka - Restaurante em Portalegre">
-    <meta property="og:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
-    <meta property="og:image" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1200-c">
-    <meta property="og:image:secure_url" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1200-c">
-    <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Bar Zukka - Restaurante em Portalegre">
-    <meta property="og:site_name" content="Bar Zukka">
-    <meta property="og:locale" content="pt_PT">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://barzukka.pt">
-    <meta property="twitter:title" content="Bar Zukka - Restaurante em Portalegre">
-    <meta property="twitter:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
-    <meta property="twitter:image" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw">
-    <meta property="twitter:image:alt" content="Bar Zukka - Restaurante em Portalegre">
-
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="logos.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="logos.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="logos.png">
-    <link rel="shortcut icon" href="logos.png">
-
-    <title>Bar Zukka - Restaurante e Bar em Portalegre | Gastronomia Portuguesa Tradicional</title>
+    <title>Pedidos Online - Bar Zukka</title>
     
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,11 +52,11 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            line-height: 1.7;
-            color: var(--text-white);
             background: var(--dark-bg);
+            color: var(--text-white);
+            line-height: 1.6;
             overflow-x: hidden;
-            font-weight: 400;
+            min-height: 100vh;
         }
 
         /* Custom scrollbar */
@@ -106,181 +73,136 @@
             border-radius: 4px;
         }
 
-        /* Glassmorphism utility class */
-        .glass {
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Enhanced Header */
+        .header {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-        }
-
-        /* Skip to content for accessibility */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            background: var(--primary-red);
-            color: var(--text-white);
-            padding: 12px 16px;
-            text-decoration: none;
-            z-index: 10000;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .skip-link:focus {
-            top: 6px;
-        }
-
-        /* Header with glassmorphism */
-        .header {
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(20px);
-            color: var(--primary-gold);
-            padding: 1.2rem 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-            transition: var(--transition);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header.scrolled {
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(25px);
-            padding: 1rem 0;
-            box-shadow: 0 8px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 800;
-            text-decoration: none;
-            color: var(--primary-gold);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: var(--transition);
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-            color: var(--accent-gold);
-        }
-
-        .logo-img {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-            filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.5));
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2.5rem;
-        }
-
-        .nav-menu li a {
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            padding: 1rem 1.8rem;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
             border-radius: var(--border-radius-lg);
+            text-align: center;
             position: relative;
-            letter-spacing: 0.5px;
-            display: block;
-            z-index: 10;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
-        .nav-menu li a::before {
+        .header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 0%;
-            height: 100%;
-            background: rgba(212, 175, 55, 0.1);
-            transition: width 0.3s ease;
-            z-index: -1;
-            border-radius: var(--border-radius-lg);
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
         }
 
-        .nav-menu li a:hover::before,
-        .nav-menu li a:focus::before {
-            width: 100%;
-        }
-
-        .nav-menu li a:hover,
-        .nav-menu li a:focus {
+        .header h1 {
+            font-family: 'Playfair Display', serif;
             color: var(--primary-gold);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
         }
 
-        /* Hero Section with parallax effect */
-        .hero {
-            position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--text-white);
+        .header .subtitle {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-connected {
+            background: rgba(39, 174, 96, 0.2);
+            color: #2ecc71;
+            border-color: rgba(39, 174, 96, 0.3);
+        }
+
+        .status-disconnected {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+
+        .status-connecting {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border-color: rgba(243, 156, 18, 0.3);
+        }
+
+        /* Enhanced Menu Button */
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-gold);
+            border-color: var(--primary-gold);
+        }
+
+        .menu-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: var(--primary-gold);
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-hover);
+            min-width: 220px;
+            display: none;
+            z-index: 1000;
             overflow: hidden;
         }
 
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 120%;
-            background: linear-gradient(135deg, rgba(196, 30, 58, 0.7), rgba(10, 10, 10, 0.4)),
-                        url('https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw') center/cover no-repeat;
-            z-index: 1;
+        .menu-dropdown.show {
+            display: block;
+            animation: slideDown 0.3s ease;
         }
 
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(196, 30, 58, 0.1) 0%, transparent 50%),
-                linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-            z-index: 2;
-        }
-
-        .hero-content {
-            z-index: 3;
-            position: relative;
-            animation: heroFadeIn 1.5s ease-out;
-            max-width: 1000px;
-            padding: 0 2rem;
-        }
-
-        @keyframes heroFadeIn {
+        @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(60px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -288,155 +210,70 @@
             }
         }
 
-        .hero-content h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(4rem, 12vw, 8rem);
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            text-shadow: 4px 4px 20px rgba(0,0,0,0.7);
-            letter-spacing: -3px;
-            line-height: 0.9;
-            background: linear-gradient(135deg, var(--text-white), var(--primary-gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-content .subtitle {
-            font-size: clamp(1.4rem, 4vw, 2.2rem);
-            margin-bottom: 3rem;
-            opacity: 0.95;
-            font-weight: 300;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
-            letter-spacing: 1px;
+        .menu-item {
+            padding: 15px 20px;
             color: var(--text-light);
-        }
-
-        .cta-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
-            color: var(--dark-bg);
-            padding: 1.8rem 3.5rem;
-            text-decoration: none;
-            border-radius: var(--border-radius-lg);
-            font-weight: 700;
-            font-size: 1.3rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow-gold);
-            border: 2px solid transparent;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             position: relative;
-            overflow: hidden;
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .cta-button:hover::before {
-            left: 100%;
+        .menu-item:hover {
+            background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
+            color: var(--primary-gold);
+            transform: translateX(5px);
         }
 
-        .cta-button:hover,
-        .cta-button:focus {
-            transform: translateY(-6px) scale(1.05);
-            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.5);
-            border-color: var(--accent-gold);
+        .menu-item:last-child {
+            border-bottom: none;
         }
 
-        .cta-button.secondary {
+        /* Enhanced Cart Badge */
+        .cart-badge {
             background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
             color: var(--text-white);
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            display: none;
+            animation: bounce 0.4s ease;
             box-shadow: var(--shadow-red);
         }
 
-        .cta-button.secondary:hover {
-            box-shadow: 0 15px 50px rgba(196, 30, 58, 0.5);
-            border-color: var(--primary-red);
+        @keyframes bounce {
+            0% { transform: scale(0.3); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
-        .cta-button i {
-            font-size: 1.2rem;
-            transition: var(--transition);
+        /* Page System */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
         }
 
-        .cta-button:hover i {
-            transform: scale(1.3) rotate(5deg);
+        .page.active {
+            display: block;
         }
 
-        /* Sections - Mobile First Approach */
-        .section {
-            padding: 8rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            /* Remove opacity animations for mobile-first approach */
-            opacity: 1;
-            transform: translateY(0);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Only apply entrance animations on larger screens */
-        @media (min-width: 1024px) {
-            .section {
-                opacity: 0;
-                transform: translateY(80px);
-                transition: opacity 1s ease, transform 1s ease;
-            }
-            
-            .section.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            font-size: clamp(3rem, 8vw, 4.5rem);
-            margin-bottom: 5rem;
-            text-align: center;
-            font-weight: 800;
-            position: relative;
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
-            border-radius: 3px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        /* Enhanced Menu Section */
-        .menu-categories {
+        /* Enhanced Menu Grid */
+        .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 3rem;
-            margin-top: 5rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
 
         .menu-category {
@@ -444,9 +281,9 @@
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius-lg);
-            padding: 3rem;
-            transition: var(--transition-slow);
+            padding: 2rem;
             box-shadow: var(--shadow);
+            transition: var(--transition-slow);
             position: relative;
             overflow: hidden;
         }
@@ -457,54 +294,50 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold));
         }
 
         .menu-category:hover {
-            transform: translateY(-15px) scale(1.02);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
             border-color: var(--primary-gold);
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
         }
 
         .category-title {
             font-family: 'Playfair Display', serif;
             color: var(--primary-gold);
-            font-size: 2.2rem;
-            margin-bottom: 2.5rem;
-            text-align: center;
+            font-size: 1.8rem;
             font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            gap: 10px;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
         }
 
         .category-title i {
-            font-size: 1.8rem;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            font-size: 1.5rem;
         }
 
-        /* Menu Items - Always visible for mobile reliability */
-        .menu-item {
+        /* Enhanced Menu Item Cards */
+        .menu-item-card {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2.5rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: var(--transition);
+            align-items: center;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
             background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
             position: relative;
             overflow: hidden;
-            /* Ensure visibility on mobile */
-            opacity: 1;
-            transform: translateX(0);
         }
 
-        .menu-item::before {
+        .menu-item-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -515,38 +348,28 @@
             transition: var(--transition);
         }
 
-        .menu-item:hover::before {
+        .menu-item-card:hover::before {
             left: 100%;
         }
 
-        .menu-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .menu-item:hover {
-            transform: translateX(10px);
-            background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
+        .menu-item-card:hover {
+            transform: translateX(8px) scale(1.02);
+            background: linear-gradient(90deg, rgba(196, 30, 58, 0.08), transparent);
             border-color: var(--primary-gold);
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
         }
 
-        .item-info {
-            flex: 1;
-        }
-
-        .item-name {
+        .item-info h4 {
             font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            font-size: 1.4rem;
             color: var(--text-white);
-            margin-bottom: 0.8rem;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
         }
 
-        .item-description {
-            font-size: 1.1rem;
+        .item-info p {
             color: var(--text-light);
-            line-height: 1.6;
+            font-size: 0.95rem;
             opacity: 0.9;
         }
 
@@ -554,61 +377,49 @@
             color: var(--primary-gold);
             font-family: 'Playfair Display', serif;
             font-weight: 800;
-            font-size: 1.6rem;
-            margin-left: 2rem;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+            font-size: 1.3rem;
+            margin-right: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             flex-shrink: 0;
         }
 
-        /* Enhanced About Section */
-        .about-content {
-            text-align: center;
-            max-width: 1000px;
-            margin: 0 auto;
+        .add-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
+            color: var(--text-white);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: var(--transition);
+            box-shadow: var(--shadow-red);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.5);
+        }
+
+        /* Enhanced Cart */
+        .cart {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius-lg);
-            padding: 4rem;
-            box-shadow: var(--shadow);
-        }
-
-        .about-content p {
-            font-size: 1.3rem;
-            margin-bottom: 2.5rem;
-            color: var(--text-light);
-            line-height: 1.9;
-        }
-
-        .about-content p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Enhanced Contact Section */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 3rem;
-            margin-top: 5rem;
-        }
-
-        .contact-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius-lg);
-            padding: 3rem;
-            text-align: center;
-            transition: var(--transition-slow);
-            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-top: 2rem;
             position: relative;
-            overflow: hidden;
-            /* Ensure visibility on mobile */
-            opacity: 1;
-            transform: translateY(0);
+            box-shadow: var(--shadow);
+            transition: var(--transition-slow);
         }
 
-        .contact-card::before {
+        .cart::before {
             content: '';
             position: absolute;
             top: 0;
@@ -619,356 +430,521 @@
             border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
-        .contact-card:hover {
-            transform: translateY(-12px) scale(1.03);
-            border-color: var(--primary-gold);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
-        }
-
-        .contact-card .icon {
-            font-size: 3.5rem;
-            color: var(--primary-gold);
-            margin-bottom: 2rem;
-            display: block;
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
-        }
-
-        .contact-card h3 {
+        .cart h3 {
             font-family: 'Playfair Display', serif;
             color: var(--primary-gold);
-            margin-bottom: 2rem;
             font-size: 1.8rem;
             font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .contact-card p {
-            margin-bottom: 1.2rem;
-            color: var(--text-light);
-            line-height: 1.7;
-            font-size: 1.2rem;
-        }
-
-        .contact-card p:last-child {
-            margin-bottom: 0;
-        }
-
-        .contact-link {
-            color: var(--primary-gold);
-            text-decoration: none;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .contact-link:hover {
-            color: var(--accent-gold);
-            text-decoration: underline;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
-
-        /* Enhanced Social Media */
-        .social-media {
-            text-align: center;
-            margin-top: 5rem;
-            padding-top: 5rem;
-            border-top: 2px solid rgba(212, 175, 55, 0.2);
-        }
-
-        .social-media h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            margin-bottom: 3rem;
-            font-size: 2.2rem;
-            font-weight: 700;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-            flex-wrap: wrap;
-        }
-
-        .social-link {
-            display: inline-flex;
+        .cart-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
+            color: var(--text-white);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: none;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            animation: pulse 0.4s ease;
+            box-shadow: var(--shadow-red);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .cart-item:hover {
+            background: rgba(212, 175, 55, 0.05);
+            transform: translateX(5px);
+        }
+
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
+            color: var(--text-white);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-red);
+        }
+
+        .cart-total {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            text-align: right;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--primary-red);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Enhanced Order Form */
+        .order-form {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            color: var(--text-white);
-            padding: 1.5rem 2.5rem;
-            text-decoration: none;
             border-radius: var(--border-radius-lg);
-            transition: var(--transition);
+            padding: 2rem;
+            margin-top: 2rem;
             box-shadow: var(--shadow);
-            font-weight: 600;
-            font-size: 1.2rem;
             position: relative;
             overflow: hidden;
         }
 
-        .social-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: var(--transition);
-        }
-
-        .social-link:hover::before {
-            left: 100%;
-        }
-
-        .social-link:hover,
-        .social-link:focus {
-            transform: translateY(-6px) scale(1.05);
-            box-shadow: var(--shadow-hover);
-            color: var(--text-white);
-        }
-
-        .social-link.whatsapp:hover { 
-            background: linear-gradient(145deg, #25d366, #128c7e); 
-            border-color: #25d366;
-            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.4);
-        }
-        .social-link.instagram:hover { 
-            background: linear-gradient(145deg, #e1306c, #833ab4); 
-            border-color: #e1306c;
-            box-shadow: 0 15px 40px rgba(225, 48, 108, 0.4);
-        }
-        .social-link.facebook:hover { 
-            background: linear-gradient(145deg, #1877f2, #4267b2); 
-            border-color: #1877f2;
-            box-shadow: 0 15px 40px rgba(24, 119, 242, 0.4);
-        }
-
-        .social-link i {
-            font-size: 1.5rem;
-        }
-
-        /* Enhanced Footer */
-        .footer {
-            background: linear-gradient(135deg, var(--dark-bg), var(--darker-card));
-            border-top: 3px solid var(--primary-gold);
-            color: var(--text-light);
-            text-align: center;
-            padding: 5rem 2rem;
-            margin-top: 6rem;
-            position: relative;
-        }
-
-        .footer::before {
+        .order-form::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 200px;
-            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
-            pointer-events: none;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--primary-red));
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
-        .footer-content {
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-
-        .footer p {
-            margin-bottom: 2rem;
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .footer .slogan {
+        .order-form h3 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            font-weight: 600;
-            font-style: italic;
             color: var(--primary-gold);
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Enhanced Back to top button */
-        .back-to-top {
-            position: fixed;
-            bottom: 2.5rem;
-            right: 2.5rem;
-            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
             color: var(--primary-gold);
-            border: none;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            font-size: 2rem;
-            cursor: pointer;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-white);
+            font-family: inherit;
+            font-size: 1rem;
             transition: var(--transition);
-            box-shadow: var(--shadow);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Enhanced Delivery Options */
+        .delivery-options {
+            background: rgba(212, 175, 55, 0.08);
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .delivery-options h4 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-gold);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
             display: flex;
             align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 1.2rem 2rem;
+            border-radius: var(--border-radius-lg);
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.05);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            min-width: 180px;
             justify-content: center;
         }
 
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
+        .radio-option:hover {
+            background: rgba(196, 30, 58, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-red);
         }
 
-        .back-to-top:hover,
-        .back-to-top:focus {
-            transform: translateY(-8px) scale(1.1);
-            box-shadow: 0 20px 60px rgba(196, 30, 58, 0.6);
-            background: linear-gradient(135deg, var(--deep-red), var(--primary-red));
+        .radio-option.selected {
+            border-color: var(--primary-gold);
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: var(--shadow-gold);
         }
 
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--primary-gold);
-            font-size: 2rem;
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            accent-color: var(--primary-gold);
+        }
+
+        .radio-option label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-white);
             cursor: pointer;
-            padding: 0.8rem;
-            transition: var(--transition);
-            border-radius: 12px;
+            margin: 0;
         }
 
-        .mobile-menu-btn:hover {
+        .radio-option .icon {
+            font-size: 1.4rem;
+        }
+
+        /* Enhanced Form Buttons */
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            align-items: stretch;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
+            color: var(--dark-bg);
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: var(--border-radius-lg);
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+            transition: var(--transition);
+            box-shadow: var(--shadow-gold);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-cart-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: var(--text-white);
+            border: none;
+            padding: 1.2rem;
+            border-radius: var(--border-radius-lg);
+            font-size: 1.3rem;
+            cursor: pointer;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .clear-cart-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+        }
+
+        /* Enhanced Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .modal h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-gold);
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        /* Selection Modal */
+        .selection-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .option-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-white);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .option-btn:hover {
             background: rgba(212, 175, 55, 0.1);
-            transform: scale(1.1);
+            border-color: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            margin-bottom: 0.8rem;
+            background: transparent;
+            color: var(--text-white);
+            border: 2px solid var(--primary-red);
+        }
+
+        .cancel-btn:hover {
+            background: rgba(196, 30, 58, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            display: none;
+            z-index: 3000;
+            box-shadow: var(--shadow);
+            font-weight: 600;
+            min-width: 250px;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideInRight 0.4s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .notification.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background: rgba(10, 10, 10, 0.98);
-                backdrop-filter: blur(25px);
-                flex-direction: column;
-                padding: 2rem;
-                box-shadow: var(--shadow);
-                border-radius: 0 0 25px 25px;
+            .container {
+                padding: 15px;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
                 gap: 1.5rem;
-                border: 1px solid var(--glass-border);
-                border-top: none;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
 
-            .nav-menu.active {
-                display: flex;
-                animation: slideDown 0.4s ease-out;
+            .cart-controls {
+                align-self: flex-end;
             }
 
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .hero-content {
-                padding: 0 1rem;
-            }
-
-            .section {
-                padding: 5rem 1rem;
-            }
-
-            .menu-categories {
-                grid-template-columns: 1fr;
-                gap: 2.5rem;
-            }
-
-            .contact-grid {
-                grid-template-columns: 1fr;
-                gap: 2.5rem;
-            }
-
-            .social-links {
+            .radio-group {
                 flex-direction: column;
                 align-items: center;
-                gap: 2rem;
+                gap: 1rem;
             }
 
-            .social-link {
-                width: 280px;
-                justify-content: center;
+            .radio-option {
+                min-width: 250px;
             }
 
-            .back-to-top {
-                bottom: 2rem;
-                right: 2rem;
-                width: 60px;
-                height: 60px;
-                font-size: 1.8rem;
+            .form-buttons {
+                flex-direction: column;
+                gap: 1rem;
             }
 
-            .menu-item {
+            .clear-cart-btn {
+                min-width: auto;
+                padding: 12px;
+            }
+
+            .connection-status {
+                position: static;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+
+            .menu-btn {
+                position: static;
+                margin-bottom: 1rem;
+            }
+
+            .menu-dropdown {
+                position: static;
+                display: block;
+                margin-bottom: 1rem;
+            }
+
+            .header {
                 padding: 1.5rem;
             }
 
-            .cta-buttons {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .cta-button {
-                width: 100%;
-                max-width: 320px;
-                justify-content: center;
-            }
-
-            .about-content {
-                padding: 2.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .nav-container {
-                padding: 0 1rem;
-            }
-
-            .menu-item {
+            .menu-item-card {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
             }
 
-            .item-price {
-                margin-left: 0;
+            .menu-item-card .item-price {
+                margin-right: 0;
                 align-self: flex-end;
-                font-size: 1.5rem;
             }
 
-            .menu-category {
-                padding: 2rem;
+            .selection-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
             }
 
-            .contact-card {
-                padding: 2rem;
+            .menu-category, .cart, .order-form {
+                padding: 1.5rem;
             }
 
-            .about-content {
+            .modal-content {
                 padding: 2rem;
             }
         }
@@ -981,7 +957,7 @@
             }
         }
 
-        /* Reduced motion - Disable all animations */
+        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -990,579 +966,866 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
-            
-            .section {
-                opacity: 1 !important;
-                transform: translateY(0) !important;
-            }
-            
-            .menu-item,
-            .contact-card {
-                opacity: 1 !important;
-                transform: translateX(0) translateY(0) !important;
-            }
         }
 
         /* Focus styles for accessibility */
         *:focus {
             outline: 3px solid var(--primary-gold);
-            outline-offset: 3px;
-        }
-
-        /* Loading animation */
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(212, 175, 55, 0.3);
-            border-top: 3px solid var(--primary-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading" id="loading">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
-    
-    <header class="header" role="banner">
-        <nav class="nav-container" role="navigation" aria-label="Menu principal">
-            <a href="index.html" class="logo" aria-label="Bar Zukka - Página inicial">
-                <img src="logos.png" alt="Bar Zukka" class="logo-img">
-                Bar Zukka
-            </a>
-
-            <ul class="nav-menu">
-                <li><a href="#home" aria-label="Ir para início">Início</a></li>
-                <li><a href="#menu" aria-label="Ver cardápio">Cardápio</a></li>
-                <li><a href="#about" aria-label="Conhecer sobre nós">Sobre Nós</a></li>
-                <li><a href="#contact" aria-label="Entrar em contato">Contato</a></li>
-            </ul>
-            <button class="mobile-menu-btn" aria-label="Abrir menu mobile" aria-expanded="false">
-                <i class="fas fa-bars"></i>
+    <div class="container">
+        <div class="header">
+            <div class="connection-status" id="connectionStatus">
+                <span class="spinner"></span> Conectando...
+            </div>
+            <h1>Pedidos Online</h1>
+            <p class="subtitle">Bar Zukka - Sabores únicos em Portalegre</p>
+            
+            <button class="menu-btn" id="menuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
-        </nav>
-    </header>
-
-    <main id="main-content">
-        <section id="home" class="hero" role="banner">
-            <div class="hero-bg"></div>
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1>Bar Zukka</h1>
-                <p class="subtitle">Sabores únicos no coração de Portalegre</p>
-                <div class="cta-buttons">
-                    <a href="#menu" class="cta-button" aria-label="Ver nosso cardápio">
-                        <i class="fas fa-utensils" aria-hidden="true"></i>
-                        Ver Cardápio
-                    </a>
-                    <a href="pedidos.html" class="cta-button secondary" aria-label="Fazer pedido online">
-                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                        Pedido Online
-                    </a>
+            
+            <div class="menu-dropdown" id="menuDropdown">
+                <div class="menu-item" id="homeMenuItem">
+                    <span><i class="fas fa-home"></i> Página Inicial</span>
+                </div>
+                <div class="menu-item" id="clearCartMenuItem">
+                    <span><i class="fas fa-trash"></i> Limpar Pedido</span>
+                    <span class="cart-badge" id="menuCartBadge"></span>
+                </div>
+                <div class="menu-item" id="refreshMenuItem">
+                    <span><i class="fas fa-sync"></i> Atualizar Página</span>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section id="menu" class="section" role="region" aria-labelledby="menu-title">
-            <h2 id="menu-title" class="section-title">Nosso Cardápio</h2>
-            <div class="menu-categories">
-                <div class="menu-category">
+        <!-- Página de Pedidos -->
+        <div id="customerPage" class="page active">
+            <div class="menu-grid" id="menuGrid">
+                <!-- Pratos do Dia -->
+                <div class="menu-category" id="dailyDishCategory">
                     <h3 class="category-title">
-                        <i class="fas fa-utensils" aria-hidden="true"></i>
-                        Pratos do Dia
+                        <i class="fas fa-utensils"></i>
+                        Prato do Dia
                     </h3>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Segunda a Sexta-feira</div>
-                            <div class="item-description">Prato do dia decidido diariamente com ingredientes frescos</div>
-                        </div>
-                        <span class="item-price">€10,00</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Sábado - Galinhada</div>
-                            <div class="item-description">Galinha cozinhada com arroz e temperos especiais</div>
-                        </div>
-                        <span class="item-price">€12,00</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Domingo - Churrasco</div>
-                            <div class="item-description">Churrasco tradicional com acompanhamentos</div>
-                        </div>
-                        <span class="item-price">€15,00</span>
+                    <div id="dailyDishes">
+                        <!-- Pratos serão inseridos via JavaScript baseado no dia -->
                     </div>
                 </div>
 
                 <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-glass-water" aria-hidden="true"></i>
+                        <i class="fas fa-glass-water"></i>
                         Bebidas
                     </h3>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Refrigerantes / Sumos</div>
-                            <div class="item-description">Coca-Cola, Sprite, Fanta, Guaraná, 7Up, Sumol, Ice Tea</div>
+                            <h4>Refrigerantes / Sumos</h4>
+                            <p>Coca-Cola, Sprite, Fanta, Guaraná, 7Up, Sumol, Ice Tea</p>
                         </div>
                         <span class="item-price">€1,60</span>
+                        <button class="add-btn" data-category="refrigerantes">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Sucos B!</div>
-                            <div class="item-description">B! Limão, Laranja, Maçã Verde, Frutos Vermelhos</div>
+                            <h4>Sucos B!</h4>
+                            <p>B! Limão, Laranja, Maçã Verde, Frutos Vermelhos</p>
                         </div>
                         <span class="item-price">€2,00</span>
+                        <button class="add-btn" data-category="sucosb">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Compal</div>
-                            <div class="item-description">Pêra, Pêssego, Frutos Vermelhos, Manga-Laranja</div>
+                            <h4>Compal</h4>
+                            <p>Pêra, Pêssego, Frutos Vermelhos, Manga-Laranja</p>
                         </div>
                         <span class="item-price">€1,30</span>
+                        <button class="add-btn" data-category="compal">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Água</div>
-                            <div class="item-description">33cl / 50cl — €1,00 | 1.5L — €2,00</div>
+                            <h4>Água 50cl</h4>
+                            <p>Água natural em garrafa de 50cl</p>
                         </div>
-                        <span class="item-price">€1,00+</span>
+                        <span class="item-price">€1,00</span>
+                        <button class="add-btn" data-item="Água 50cl" data-price="1.00">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Pedras</div>
-                            <div class="item-description">Normal, Limão, Morango, Mexerica</div>
+                            <h4>Água 1.5L</h4>
+                            <p>Água natural em garrafa grande</p>
+                        </div>
+                        <span class="item-price">€2,00</span>
+                        <button class="add-btn" data-item="Água 1.5L" data-price="2.00">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Pedras</h4>
+                            <p>Natural, Limão, Morango, Mexerica</p>
                         </div>
                         <span class="item-price">€1,30</span>
+                        <button class="add-btn" data-category="pedras">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Energéticos</div>
-                            <div class="item-description">Red Bull, Monster</div>
+                            <h4>Energéticos</h4>
+                            <p>Red Bull, Monster</p>
                         </div>
                         <span class="item-price">€3,60</span>
+                        <button class="add-btn" data-category="energeticos">+</button>
                     </div>
                 </div>
 
                 <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-leaf" aria-hidden="true"></i>
-                        Chás & Infusões
-                    </h3>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Chás Tetley</div>
-                            <div class="item-description">Maçã & Canela, English Breakfast, Immune, Dormir</div>
-                        </div>
-                        <span class="item-price">€0,90</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Chás Especiais</div>
-                            <div class="item-description">Mirtilo & Açaí, Chá Verde, Camomila, Cidreira, Tomilho</div>
-                        </div>
-                        <span class="item-price">€0,90</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Lipton & Outros</div>
-                            <div class="item-description">Vanilla Caramel Black Tea, Queima Gorduras</div>
-                        </div>
-                        <span class="item-price">€0,90</span>
-                    </div>
-                </div>
-
-                <div class="menu-category">
-                    <h3 class="category-title">
-                        <i class="fas fa-hamburger" aria-hidden="true"></i>
+                        <i class="fas fa-hamburger"></i>
                         Salgados
                     </h3>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Hambúrguer</div>
-                            <div class="item-description">Pão, hambúrguer, alface, tomate</div>
+                            <h4>Hambúrguer</h4>
+                            <p>Pão, hambúrguer, alface, tomate</p>
                         </div>
                         <span class="item-price">€2,60</span>
+                        <button class="add-btn" data-item="Hambúrguer" data-price="2.60">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolas de Carne/Frango</div>
-                            <div class="item-description">Especialidades brasileiras fritas</div>
+                            <h4>Bolas de Carne/Frango</h4>
+                            <p>Especialidades brasileiras fritas</p>
                         </div>
                         <span class="item-price">€2,60</span>
+                        <button class="add-btn" data-category="bolas">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Salgados Variados</div>
-                            <div class="item-description">Atum, Coxinha, Mini pizza, Enrolados, Folhados</div>
+                            <h4>Salgados Variados</h4>
+                            <p>Atum, Coxinha, Mini pizza, Enrolados, Folhados</p>
                         </div>
                         <span class="item-price">€1,60</span>
+                        <button class="add-btn" data-category="salgados">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Massa Frita / Sonho</div>
-                            <div class="item-description">Doces fritos tradicionais</div>
+                            <h4>Massa Frita</h4>
+                            <p>Doce frito tradicional</p>
                         </div>
                         <span class="item-price">€1,30</span>
+                        <button class="add-btn" data-item="Massa Frita" data-price="1.30">+</button>
+                    </div>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Sonho / Bola de Berlim</h4>
+                            <p>Doce frito com recheio</p>
+                        </div>
+                        <span class="item-price">€1,30</span>
+                        <button class="add-btn" data-item="Sonho/Bola de Berlim" data-price="1.30">+</button>
                     </div>
                 </div>
 
                 <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-birthday-cake" aria-hidden="true"></i>
+                        <i class="fas fa-birthday-cake"></i>
                         Doces & Bolos
                     </h3>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolo de Prestígio</div>
-                            <div class="item-description">Bolo de chocolate com coco e leite condensado</div>
+                            <h4>Bolo de Prestígio</h4>
+                            <p>Bolo de chocolate com coco e leite condensado</p>
                         </div>
                         <span class="item-price">€2,60</span>
+                        <button class="add-btn" data-item="Bolo de Prestígio" data-price="2.60">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Cuca Frutos Vermelhos</div>
-                            <div class="item-description">Bolo alemão com frutas vermelhas</div>
+                            <h4>Cuca Frutos Vermelhos</h4>
+                            <p>Bolo alemão com frutas vermelhas</p>
                         </div>
                         <span class="item-price">€2,50</span>
+                        <button class="add-btn" data-item="Cuca Frutos Vermelhos" data-price="2.50">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolo de Mandioca</div>
-                            <div class="item-description">Tradicional bolo brasileiro</div>
+                            <h4>Bolo de Mandioca</h4>
+                            <p>Tradicional bolo brasileiro</p>
                         </div>
                         <span class="item-price">€2,00</span>
+                        <button class="add-btn" data-item="Bolo de Mandioca" data-price="2.00">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolo de Nozes</div>
-                            <div class="item-description">Bolo caseiro com nozes</div>
+                            <h4>Bolo de Nozes</h4>
+                            <p>Bolo caseiro com nozes</p>
                         </div>
                         <span class="item-price">€1,80</span>
+                        <button class="add-btn" data-item="Bolo de Nozes" data-price="1.80">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolo de Queijo e Goiabada</div>
-                            <div class="item-description">Combinação doce brasileira clássica</div>
+                            <h4>Bolo de Queijo e Goiabada</h4>
+                            <p>Combinação doce brasileira clássica</p>
                         </div>
                         <span class="item-price">€1,80</span>
+                        <button class="add-btn" data-item="Bolo de Queijo e Goiabada" data-price="1.80">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Rosca de Coco</div>
-                            <div class="item-description">Rosca tradicional com coco</div>
+                            <h4>Rosca de Coco</h4>
+                            <p>Rosca tradicional com coco</p>
                         </div>
                         <span class="item-price">€1,80</span>
+                        <button class="add-btn" data-item="Rosca de Coco" data-price="1.80">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Bolo de Coco</div>
-                            <div class="item-description">Bolo húmido com coco ralado</div>
+                            <h4>Bolo de Coco</h4>
+                            <p>Bolo húmido com coco ralado</p>
                         </div>
                         <span class="item-price">€1,60</span>
+                        <button class="add-btn" data-item="Bolo de Coco" data-price="1.60">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Massa Frita</div>
-                            <div class="item-description">Doce frito tradicional</div>
-                        </div>
-                        <span class="item-price">€1,30</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Sonho / Bola de Berlim</div>
-                            <div class="item-description">Doce frito com recheio</div>
-                        </div>
-                        <span class="item-price">€1,30</span>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-info">
-                            <div class="item-name">Brigadeiro</div>
-                            <div class="item-description">Doce brasileiro de chocolate</div>
+                            <h4>Brigadeiro</h4>
+                            <p>Doce brasileiro de chocolate</p>
                         </div>
                         <span class="item-price">€1,20</span>
+                        <button class="add-btn" data-item="Brigadeiro" data-price="1.20">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Beijinho</div>
-                            <div class="item-description">Doce brasileiro de coco</div>
+                            <h4>Beijinho</h4>
+                            <p>Doce brasileiro de coco</p>
                         </div>
                         <span class="item-price">€1,20</span>
+                        <button class="add-btn" data-item="Beijinho" data-price="1.20">+</button>
                     </div>
-                    <div class="menu-item">
+                    <div class="menu-item-card">
                         <div class="item-info">
-                            <div class="item-name">Suspiro</div>
-                            <div class="item-description">Doce leve de clara de ovo</div>
+                            <h4>Suspiro</h4>
+                            <p>Doce leve de clara de ovo</p>
                         </div>
                         <span class="item-price">€0,40</span>
+                        <button class="add-btn" data-item="Suspiro" data-price="0.40">+</button>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-leaf"></i>
+                        Chás & Infusões
+                    </h3>
+                    <div class="menu-item-card">
+                        <div class="item-info">
+                            <h4>Chás Variados</h4>
+                            <p>Tetley, Lipton, Camomila, Chá Verde, e outros</p>
+                        </div>
+                        <span class="item-price">€0,90</span>
+                        <button class="add-btn" data-category="chas">+</button>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <section id="about" class="section" role="region" aria-labelledby="about-title">
-            <h2 id="about-title" class="section-title">Sobre Nós</h2>
-            <div class="about-content">
-                <p>No coração histórico de Portalegre, o <strong>Bar Zukka</strong> representa um encontro único entre a autenticidade portuguesa e a hospitalidade calorosa. Desde a nossa abertura, cultivamos o compromisso inabalável de proporcionar experiências gastronômicas memoráveis aos nossos estimados clientes.</p>
-                <p>Nossa cozinha celebra a rica tradição culinária portuguesa, utilizando exclusivamente ingredientes frescos e de qualidade superior, cuidadosamente selecionados de produtores locais. Cada prato é uma homenagem às receitas tradicionais, reinventadas com toques modernos e criativos que conquistam todos os paladares.</p>
-                <p>O ambiente acolhedor e sofisticado do Bar Zukka convida a momentos especiais, seja para um almoço descontraído entre amigos, um jantar romântico em família, ou simplesmente para apreciar nossos cocktails especiais acompanhados de petiscos gourmet. Venha descobrir por que somos a escolha preferida de quem busca excelência, sabor e alegria genuína em Portalegre.</p>
-            </div>
-        </section>
-
-        <section id="contact" class="section" role="region" aria-labelledby="contact-title">
-            <h2 id="contact-title" class="section-title">Contacto</h2>
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <i class="fas fa-map-marker-alt icon" aria-hidden="true"></i>
-                    <h3>Localização</h3>
-                    <p><a href="https://maps.google.com/maps?q=Rua+Luís+de+Camões,+11+Portalegre" target="_blank" class="contact-link">Rua Luís de Camões, 11</a></p>
-                    <p>7300-194 Portalegre</p>
-                    <p>Portugal</p>
+            <div class="cart">
+                <h3>Seu Pedido</h3>
+                <div class="cart-counter" id="cartCounter">0</div>
+                <div id="cartItems">
+                    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
+                        Carrinho vazio
+                    </p>
                 </div>
-
-                <div class="contact-card">
-                    <i class="fas fa-phone-alt icon" aria-hidden="true"></i>
-                    <h3>Telefone</h3>
-                    <p><a href="tel:+351245038389" class="contact-link">+351 245 038 389</a></p>
-                    <p>Chamada para rede fixa nacional</p>
-                    <p>Atendimento das 8h às 23h</p>
-                </div>
-
-                <div class="contact-card">
-                    <i class="fas fa-envelope icon" aria-hidden="true"></i>
-                    <h3>E-mail</h3>
-                    <p><a href="mailto:info@barzukka.pt" class="contact-link">info@barzukka.pt</a></p>
-                    <p>Resposta garantida em 24 horas</p>
-                    <p>Para reservas e informações</p>
-                </div>
-
-                <div class="contact-card">
-                    <i class="fas fa-clock icon" aria-hidden="true"></i>
-                    <h3>Horários de Funcionamento</h3>
-                    <p><strong>Terça - Quarta:</strong> 06h00 - 23h00</p>
-                    <p><strong>Quinta - Domingo:</strong> 06h00 - 05h00</p>
-                    <p><strong>Segunda-feira:</strong> Encerrado</p>
-                </div>
+                <div id="cartTotal" style="display: none;" class="cart-total">Total: €0,00</div>
             </div>
 
-            <div class="social-media">
-                <h3>Conecte-se Connosco</h3>
-                <div class="social-links">
-                    <a href="https://chat.whatsapp.com/J7DfK2fXmor1BsMnmJCfci" class="social-link whatsapp" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Bar Zukka">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                        WhatsApp
-                    </a>
-                    <a href="https://www.instagram.com/_barzukka?igsh=MXkxbnU3NXRmc3cwZg==" class="social-link instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram do Bar Zukka">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                        Instagram
-                    </a>
-                    <a href="https://www.facebook.com/share/1CaumdfATz/" class="social-link facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook do Bar Zukka">
-                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
-                        Facebook
-                    </a>
+            <div class="order-form" id="orderForm" style="display: none;">
+                <h3>Finalizar Pedido</h3>
+                
+                <!-- Opções de Entrega -->
+                <div class="delivery-options">
+                    <h4><i class="fas fa-utensils"></i> Como prefere receber seu pedido?</h4>
+                    <div class="radio-group">
+                        <div class="radio-option" data-delivery="dine-in">
+                            <input type="radio" name="deliveryType" value="dine-in" id="dineIn">
+                            <span class="icon">🍽️</span>
+                            <label for="dineIn">Comer no Restaurante</label>
+                        </div>
+                        <div class="radio-option" data-delivery="takeaway">
+                            <input type="radio" name="deliveryType" value="takeaway" id="takeaway">
+                            <span class="icon">📦</span>
+                            <label for="takeaway">Para Levar</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nome</label>
+                    <input type="text" id="customerName" required placeholder="Seu nome completo">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Telefone</label>
+                    <input type="tel" id="customerPhone" required placeholder="Seu telefone">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-table"></i> Mesa</label>
+                    <input type="number" id="tableNumber" min="1" max="50" required placeholder="Número da mesa">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-comment"></i> Observações (opcional)</label>
+                    <textarea id="observations" rows="3" placeholder="Alguma observação especial..."></textarea>
+                </div>
+                
+                <!-- Botões de ação -->
+                <div class="form-buttons">
+                    <button class="submit-btn" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> Confirmar Pedido
+                    </button>
+                    <button class="clear-cart-btn" id="clearCartBtn" title="Limpar todo o carrinho">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
-        </section>
-    </main>
-
-    <footer class="footer" role="contentinfo">
-        <div class="footer-content">
-            <p>&copy; 2024 Bar Zukka. Todos os direitos reservados.</p>
-            <p class="slogan">"No Bar Zukka, cada prato é uma experiência, cada visita é um momento de sabor e amizade."</p>
         </div>
-    </footer>
+    </div>
 
-    <button class="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo">
-        <i class="fas fa-arrow-up" aria-hidden="true"></i>
-    </button>
+    <!-- Modal de Seleção -->
+    <div class="modal" id="selectionModal">
+        <div class="modal-content">
+            <h3 id="selectionTitle">Escolha uma opção</h3>
+            <div id="selectionOptions" class="selection-options">
+                <!-- Opções serão inseridas via JavaScript -->
+            </div>
+            <button class="cancel-btn" id="cancelSelectionBtn">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div class="notification" id="notification"></div>
 
     <script>
-        // Loading screen
-        window.addEventListener('load', () => {
-            const loading = document.getElementById('loading');
-            loading.classList.add('fade-out');
-            setTimeout(() => {
-                loading.style.display = 'none';
-            }, 500);
-        });
+        // Sistema Bar Zukka - Versão Limpa
+        (function() {
+            'use strict';
 
-        // Mobile menu toggle
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navMenu = document.querySelector('.nav-menu');
+            // Estado da aplicação
+            let cart = [];
+            let selectedDeliveryType = '';
+            let orderCounter = 1;
 
-        mobileMenuBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-            const isExpanded = navMenu.classList.contains('active');
-            mobileMenuBtn.setAttribute('aria-expanded', isExpanded);
-            
-            const icon = mobileMenuBtn.querySelector('i');
-            if (isExpanded) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
-                mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                const icon = mobileMenuBtn.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            });
-        });
-
-        // Header scroll effect
-        const header = document.querySelector('.header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Back to top button
-        const backToTopBtn = document.querySelector('.back-to-top');
-        
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('visible');
-            } else {
-                backToTopBtn.classList.remove('visible');
-            }
-        });
-
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
-        // Enhanced scroll reveal animation - Only for desktop (1024px+)
-        if (window.innerWidth >= 1024) {
-            const observerOptions = {
-                threshold: 0.05,
-                rootMargin: '0px 0px -30px 0px'
+            // Opções de seleção para cada categoria
+            const selectionOptions = {
+                refrigerantes: {
+                    title: 'Escolha seu Refrigerante/Sumo',
+                    price: 1.60,
+                    options: [
+                        'Coca-Cola', 'Coca-Cola Zero', 'Sprite', 'Sprite Raspberry', 
+                        'Sprite Watermelon', 'Fanta', 'Guaraná', '7 Up', 
+                        'Sumol Laranja', 'Sumol Ananás', 'Schweppes', 
+                        'Ice Tea Limão', 'Ice Tea Manga', 'Ice Tea Pêssego'
+                    ]
+                },
+                sucosb: {
+                    title: 'Escolha seu Suco B!',
+                    price: 2.00,
+                    options: ['B! Limão', 'B! Laranja', 'B! Maçã Verde', 'B! Frutos Vermelhos']
+                },
+                compal: {
+                    title: 'Escolha seu Compal',
+                    price: 1.30,
+                    options: ['Compal Pêra', 'Compal Pêssego', 'Compal Frutos Vermelhos', 'Compal Manga-Laranja']
+                },
+                pedras: {
+                    title: 'Escolha seu Pedras',
+                    price: 1.30,
+                    options: ['Pedras Natural', 'Pedras Limão', 'Pedras Morango', 'Pedras Mexerica']
+                },
+                energeticos: {
+                    title: 'Escolha seu Energético',
+                    price: 3.60,
+                    options: ['Red Bull', 'Monster']
+                },
+                bolas: {
+                    title: 'Escolha sua Bola',
+                    price: 2.60,
+                    options: ['Bola de Carne', 'Bola de Frango']
+                },
+                salgados: {
+                    title: 'Escolha seu Salgado',
+                    price: 1.60,
+                    options: [
+                        'Salgado de Atum', 'Coxinha', 'Mini Pizza de Carne', 
+                        'Enrolado Bacon Queijo', 'Enrolado Chouriço', 
+                        'Folhado Misto', 'Salgado Frito Misto', 
+                        'Salgado Assado de Frango', 'Salgado Misto com Tomate'
+                    ]
+                },
+                chas: {
+                    title: 'Escolha seu Chá',
+                    price: 0.90,
+                    options: [
+                        'Lipton Vanilla Caramel', 'Tetley Maçã & Canela', 
+                        'Tetley Chá Preto', 'Tetley Immune', 'Tetley Dormir',
+                        'Tetley Mirtilo & Açaí', 'Camomila Dona Matilde', 
+                        'Tetley Camomila', 'Tetley Cidreira', 'Tetley Chá Verde',
+                        'Tetley Tomilho', 'Chá Queima Gorduras'
+                    ]
+                }
             };
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, observerOptions);
-
-            // Only observe sections on desktop
-            document.querySelectorAll('.section').forEach(section => {
-                observer.observe(section);
-            });
-        }
-
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const headerHeight = document.querySelector('.header').offsetHeight;
-                    const targetPosition = target.offsetTop - headerHeight - 20;
-                    
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
+            // Função para carregar pratos do dia
+            function loadDailyDishes() {
+                const dailyDishesContainer = document.getElementById('dailyDishes');
+                if (!dailyDishesContainer) return;
+                
+                const today = new Date().getDay(); // 0 = Domingo, 1 = Segunda, etc.
+                let dishHTML = '';
+                
+                if (today === 0) { // Domingo
+                    dishHTML = `
+                        <div class="menu-item-card">
+                            <div class="item-info">
+                                <h4>Churrasco</h4>
+                                <p>Churrasco tradicional com acompanhamentos</p>
+                            </div>
+                            <span class="item-price">€15,00</span>
+                            <button class="add-btn" data-item="Churrasco (Domingo)" data-price="15.00">+</button>
+                        </div>
+                    `;
+                } else if (today === 6) { // Sábado
+                    dishHTML = `
+                        <div class="menu-item-card">
+                            <div class="item-info">
+                                <h4>Galinhada</h4>
+                                <p>Galinha cozinhada com arroz e temperos especiais</p>
+                            </div>
+                            <span class="item-price">€12,00</span>
+                            <button class="add-btn" data-item="Galinhada (Sábado)" data-price="12.00">+</button>
+                        </div>
+                    `;
+                } else { // Segunda a Sexta
+                    dishHTML = `
+                        <div class="menu-item-card">
+                            <div class="item-info">
+                                <h4>Prato do Dia</h4>
+                                <p>Prato especial decidido diariamente com ingredientes frescos</p>
+                            </div>
+                            <span class="item-price">€10,00</span>
+                            <button class="add-btn" data-item="Prato do Dia" data-price="10.00">+</button>
+                        </div>
+                    `;
                 }
-            });
-        });
-
-        // Enhanced accessibility - keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                // Close mobile menu with Escape key
-                if (navMenu.classList.contains('active')) {
-                    navMenu.classList.remove('active');
-                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                    const icon = mobileMenuBtn.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                    mobileMenuBtn.focus();
-                }
+                
+                dailyDishesContainer.innerHTML = dishHTML;
+                console.log('Pratos do dia carregados');
             }
-        });
 
-        // Interactive hover effects for menu items (desktop only)
-        if (window.innerWidth > 768) {
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(15px) scale(1.02)';
+            // Função para mostrar modal de seleção
+            function showSelectionModal(category) {
+                const modal = document.getElementById('selectionModal');
+                const title = document.getElementById('selectionTitle');
+                const optionsContainer = document.getElementById('selectionOptions');
+                
+                const categoryData = selectionOptions[category];
+                if (!categoryData) return;
+                
+                title.textContent = categoryData.title;
+                
+                let optionsHTML = '';
+                categoryData.options.forEach(option => {
+                    optionsHTML += `
+                        <button class="option-btn" data-option="${option}" data-price="${categoryData.price}">
+                            ${option}
+                        </button>
+                    `;
                 });
                 
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0) scale(1)';
-                });
-            });
-        }
-
-        // Add dynamic year to footer
-        const currentYear = new Date().getFullYear();
-        document.querySelector('.footer p').innerHTML = `&copy; ${currentYear} Bar Zukka. Todos os direitos reservados.`;
-
-        // Mobile visibility check and fallback
-        function ensureMobileVisibility() {
-            if (window.innerWidth <= 768) {
-                // Force all content to be visible on mobile
-                document.querySelectorAll('.section, .menu-item, .contact-card').forEach(element => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateX(0) translateY(0)';
-                    element.style.visibility = 'visible';
-                });
-                console.log('Mobile visibility ensured');
+                optionsContainer.innerHTML = optionsHTML;
+                modal.classList.add('show');
             }
-        }
 
-        // Run mobile visibility check
-        ensureMobileVisibility();
-        
-        // Re-run on resize
-        window.addEventListener('resize', () => {
-            setTimeout(ensureMobileVisibility, 100);
-        });
+            // Função para esconder modal de seleção
+            function hideSelectionModal() {
+                const modal = document.getElementById('selectionModal');
+                modal.classList.remove('show');
+            }
 
-        console.log('Bar Zukka - Website loaded successfully! Mobile-optimized version.');
+            // Função para adicionar ao carrinho
+            function addToCart(name, price) {
+                console.log('Adicionando ao carrinho:', name, price);
+                
+                const existing = cart.find(item => item.name === name);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    cart.push({ name, price, quantity: 1 });
+                }
+                
+                updateCart();
+                showNotification(name + ' adicionado!', 'success');
+            }
+
+            // Função para atualizar quantidade
+            function updateQuantity(name, change) {
+                const item = cart.find(item => item.name === name);
+                if (item) {
+                    item.quantity += change;
+                    if (item.quantity <= 0) {
+                        cart = cart.filter(item => item.name !== name);
+                    }
+                    updateCart();
+                }
+            }
+
+            // Função para atualizar carrinho
+            function updateCart() {
+                const cartItems = document.getElementById('cartItems');
+                const cartTotal = document.getElementById('cartTotal');
+                const orderForm = document.getElementById('orderForm');
+                const cartCounter = document.getElementById('cartCounter');
+                const menuBadge = document.getElementById('menuCartBadge');
+
+                // Calcular total de itens
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                
+                // Atualizar counter
+                if (totalItems > 0) {
+                    cartCounter.style.display = 'flex';
+                    cartCounter.textContent = totalItems;
+                    menuBadge.style.display = 'inline-block';
+                    menuBadge.textContent = totalItems;
+                } else {
+                    cartCounter.style.display = 'none';
+                    menuBadge.style.display = 'none';
+                }
+
+                if (cart.length === 0) {
+                    cartItems.innerHTML = `
+                        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                            <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
+                            Carrinho vazio
+                        </p>`;
+                    cartTotal.style.display = 'none';
+                    orderForm.style.display = 'none';
+                    return;
+                }
+
+                let html = '';
+                let total = 0;
+
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+
+                    html += `
+                        <div class="cart-item">
+                            <div>
+                                <strong>${item.name}</strong><br>
+                                <small style="color: var(--text-muted);">€${item.price.toFixed(2)} cada</small>
+                            </div>
+                            <div class="cart-controls">
+                                <button class="qty-btn" data-action="decrease" data-item="${item.name}">-</button>
+                                <span style="font-weight: 600; margin: 0 8px;">${item.quantity}</span>
+                                <button class="qty-btn" data-action="increase" data-item="${item.name}">+</button>
+                                <strong style="margin-left: 15px; color: var(--primary-gold);">€${itemTotal.toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                cartItems.innerHTML = html;
+                cartTotal.innerHTML = `Total: €${total.toFixed(2)}`;
+                cartTotal.style.display = 'block';
+                orderForm.style.display = 'block';
+            }
+
+            // Função para limpar formulário
+            function clearForm() {
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('tableNumber').value = '';
+                document.getElementById('observations').value = '';
+                
+                selectedDeliveryType = '';
+                
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                    radio.checked = false;
+                });
+            }
+
+            // Função para limpar carrinho
+            function clearCart() {
+                if (cart.length === 0) {
+                    showNotification('Carrinho já está vazio', 'error');
+                    return;
+                }
+                
+                if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                    cart = [];
+                    updateCart();
+                    clearForm();
+                    showNotification('Carrinho limpo com sucesso!', 'success');
+                }
+                
+                // Fechar menu dropdown
+                document.getElementById('menuDropdown').classList.remove('show');
+            }
+
+            // Função para submeter pedido
+            function submitOrder() {
+                console.log('Iniciando envio do pedido...');
+                
+                const name = document.getElementById('customerName').value.trim();
+                const phone = document.getElementById('customerPhone').value.trim();
+                const tableValue = document.getElementById('tableNumber').value.trim();
+                const obs = document.getElementById('observations').value.trim();
+
+                // Validações
+                if (!name) {
+                    showNotification('Por favor, preencha seu nome', 'error');
+                    document.getElementById('customerName').focus();
+                    return;
+                }
+
+                if (!phone) {
+                    showNotification('Por favor, preencha seu telefone', 'error');
+                    document.getElementById('customerPhone').focus();
+                    return;
+                }
+
+                if (!tableValue) {
+                    showNotification('Por favor, informe o número da mesa', 'error');
+                    document.getElementById('tableNumber').focus();
+                    return;
+                }
+
+                const table = parseInt(tableValue);
+                if (isNaN(table) || table < 1 || table > 50) {
+                    showNotification('Número da mesa deve ser entre 1 e 50', 'error');
+                    document.getElementById('tableNumber').focus();
+                    return;
+                }
+
+                if (!selectedDeliveryType) {
+                    showNotification('Por favor, selecione o tipo de entrega', 'error');
+                    return;
+                }
+
+                if (cart.length === 0) {
+                    showNotification('Adicione pelo menos um item ao pedido', 'error');
+                    return;
+                }
+
+                // Submeter pedido
+                const submitBtn = document.getElementById('submitBtn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+                try {
+                    const orderData = {
+                        orderNumber: orderCounter++,
+                        name,
+                        phone,
+                        table,
+                        observations: obs,
+                        deliveryType: selectedDeliveryType,
+                        items: [...cart],
+                        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                        status: 'pending',
+                        createdAt: new Date().toLocaleString()
+                    };
+
+                    console.log('Pedido criado:', orderData);
+
+                    // Simular salvamento (aqui você adicionaria a integração com Firebase)
+                    setTimeout(() => {
+                        showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
+                        
+                        // Limpar formulário e carrinho
+                        cart = [];
+                        updateCart();
+                        clearForm();
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Erro ao enviar pedido:', error);
+                    showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+
+            // Função para mostrar notificação
+            function showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.className = `notification ${type} show`;
+                notification.textContent = message;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            // Função para alternar menu
+            function toggleMenu() {
+                const dropdown = document.getElementById('menuDropdown');
+                dropdown.classList.toggle('show');
+            }
+
+            // Função para selecionar tipo de entrega
+            function selectDeliveryType(type, element) {
+                selectedDeliveryType = type;
+                
+                // Remover seleção anterior
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Adicionar seleção ao elemento clicado
+                element.classList.add('selected');
+                const radioInput = element.querySelector('input[type="radio"]');
+                if (radioInput) {
+                    radioInput.checked = true;
+                }
+                
+                console.log('Tipo de entrega selecionado:', type);
+            }
+
+            // Inicialização usando Event Delegation
+            function init() {
+                console.log('Sistema Bar Zukka iniciando...');
+                
+                // Carregar pratos do dia
+                loadDailyDishes();
+                
+                // Status de conexão
+                document.getElementById('connectionStatus').className = 'connection-status status-connected';
+                document.getElementById('connectionStatus').innerHTML = '🟢 Conectado';
+                
+                // Event Delegation - Um único listener para todos os botões de adicionar
+                document.getElementById('menuGrid').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('add-btn')) {
+                        e.preventDefault();
+                        
+                        const category = e.target.dataset.category;
+                        const item = e.target.dataset.item;
+                        const price = parseFloat(e.target.dataset.price);
+                        
+                        if (category) {
+                            showSelectionModal(category);
+                        } else if (item && !isNaN(price)) {
+                            addToCart(item, price);
+                        }
+                    }
+                });
+                
+                // Event Delegation para botões de quantidade no carrinho
+                document.getElementById('cartItems').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('qty-btn')) {
+                        e.preventDefault();
+                        
+                        const action = e.target.dataset.action;
+                        const itemName = e.target.dataset.item;
+                        
+                        if (action === 'increase') {
+                            updateQuantity(itemName, 1);
+                        } else if (action === 'decrease') {
+                            updateQuantity(itemName, -1);
+                        }
+                    }
+                });
+                
+                // Event Delegation para opções de seleção
+                document.getElementById('selectionOptions').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('option-btn')) {
+                        const optionName = e.target.dataset.option;
+                        const price = parseFloat(e.target.dataset.price);
+                        addToCart(optionName, price);
+                        hideSelectionModal();
+                    }
+                });
+                
+                // Event Delegation para opções de entrega
+                document.querySelector('.radio-group').addEventListener('click', function(e) {
+                    const radioOption = e.target.closest('.radio-option');
+                    if (radioOption) {
+                        const deliveryType = radioOption.dataset.delivery;
+                        if (deliveryType) {
+                            selectDeliveryType(deliveryType, radioOption);
+                        }
+                    }
+                });
+                
+                // Event listeners diretos para elementos únicos
+                document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+                
+                document.getElementById('homeMenuItem').addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+                
+                document.getElementById('clearCartMenuItem').addEventListener('click', clearCart);
+                
+                document.getElementById('refreshMenuItem').addEventListener('click', () => {
+                    window.location.reload();
+                });
+                
+                document.getElementById('submitBtn').addEventListener('click', submitOrder);
+                document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+                
+                document.getElementById('cancelSelectionBtn').addEventListener('click', hideSelectionModal);
+                
+                // Close modals when clicking outside
+                document.addEventListener('click', function(e) {
+                    // Close menu dropdown
+                    if (!e.target.closest('#menuBtn') && !e.target.closest('#menuDropdown')) {
+                        document.getElementById('menuDropdown').classList.remove('show');
+                    }
+                    
+                    // Close modal when clicking on backdrop
+                    if (e.target.classList.contains('modal')) {
+                        hideSelectionModal();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        const selectionModal = document.getElementById('selectionModal');
+                        const menuDropdown = document.getElementById('menuDropdown');
+                        
+                        if (selectionModal.classList.contains('show')) {
+                            hideSelectionModal();
+                        } else if (menuDropdown.classList.contains('show')) {
+                            toggleMenu();
+                        }
+                    }
+                });
+                
+                console.log('Sistema Bar Zukka iniciado com sucesso!');
+            }
+
+            // Inicializar quando DOM estiver carregado
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
     </script>
 </body>
 </html>
