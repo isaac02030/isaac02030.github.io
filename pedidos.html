@@ -1646,6 +1646,13 @@
                     }
                 });
                 
+                // Fechar modal clicando fora
+                document.addEventListener('click', function(e) {
+                    if (e.target.id === 'loginModal') {
+                        hideLogin();
+                    }
+                });
+                
                 // Event Delegation
                 document.getElementById('menuGrid').addEventListener('click', function(e) {
                     if (e.target.classList.contains('add-btn')) {
