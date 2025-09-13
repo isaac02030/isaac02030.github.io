@@ -817,9 +817,12 @@
     <!-- Notificação -->
     <div class="notification" id="notification"></div>
 
-    <!-- Firebase Scripts -->
+    <!-- Firebase -->
     <script type="module">
-        // CONFIGURAÇÃO FIREBASE - Suas configurações já integradas
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Configuração Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBnbH88eFiiVCZXkF4MTLVDvTM_0HaOkGk",
             authDomain: "bar-zukka-pedidos.firebaseapp.com",
@@ -830,73 +833,81 @@
             measurementId: "G-4WX7KZN2LY"
         };
 
+        let app, db, isFirebaseReady = false;
+
         try {
-            updateConnectionStatus('connecting', 'Conectando ao Firebase...');
-
-            // Importar Firebase
-            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
-            const { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-
             // Inicializar Firebase
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            isFirebaseReady = true;
+            
             updateConnectionStatus('connected', 'Conectado ao Firebase');
+            console.log('✅ Firebase iniciado com sucesso');
 
-            // Fazer funções globais
-            window.firebaseDb = db;
-            window.firebaseFunctions = { collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp };
-            window.isUsingFirebase = true;
-            
-            console.log('✅ Firebase conectado com sucesso');
-            
-            // Escutar mudanças em tempo real
+            // Escutar pedidos em tempo real
             const ordersRef = collection(db, 'orders');
             const ordersQuery = query(ordersRef, orderBy('timestamp', 'desc'));
             
             onSnapshot(ordersQuery, (snapshot) => {
                 const orders = [];
+                
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    orders.push({ id: doc.id, ...data });
-                    console.log('Pedido recebido do Firebase:', { id: doc.id, ...data });
+                    const order = {
+                        id: doc.id,
+                        ...data,
+                        // Converter timestamp do Firebase para Date
+                        timestamp: data.timestamp?.seconds ? data.timestamp.seconds * 1000 : Date.now()
+                    };
+                    orders.push(order);
                 });
                 
-                window.currentOrders = orders;
+                window.allOrders = orders;
+                console.log(`📦 ${orders.length} pedidos sincronizados do Firebase`);
                 
-                // Atualizar sempre que houver mudança
+                // Atualizar interface se estiver na área staff
                 if (document.getElementById('staffPage').classList.contains('active')) {
                     displayOrders(orders);
                 }
-                
-                console.log(`📦 ${orders.length} pedidos carregados do Firebase - Tempo: ${new Date().toLocaleTimeString()}`);
-            }, (error) => {
-                console.error('❌ Erro ao escutar Firebase:', error);
-                window.isUsingFirebase = false;
-                loadLocalStorageSystem();
+            });
+
+        } catch (error) {
+            console.error('❌ Erro Firebase:', error);
+            updateConnectionStatus('disconnected', 'Erro de conexão');
+            isFirebaseReady = false;
+        }
+
+        // Função para salvar pedido
+        async function saveOrder(orderData) {
+            if (!isFirebaseReady) {
+                throw new Error('Firebase não está disponível');
+            }
+            
+            const docRef = await addDoc(collection(db, 'orders'), {
+                ...orderData,
+                timestamp: serverTimestamp()
             });
             
-        } catch (error) {
-            console.error('Erro ao conectar Firebase:', error);
-            updateConnectionStatus('disconnected', 'Erro de conexão');
-            // Fallback para localStorage
-            window.isUsingFirebase = false;
-            loadLocalStorageSystem();
+            console.log('✅ Pedido salvo no Firebase:', docRef.id);
+            return docRef.id;
         }
 
-        function loadLocalStorageSystem() {
-            console.log('📱 Usando sistema localStorage como fallback');
-            try {
-                const savedOrders = localStorage.getItem('zukka_orders');
-                window.currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
-                window.orderCounter = parseInt(localStorage.getItem('zukka_order_counter')) || 1;
-            } catch (error) {
-                console.error('Erro ao carregar localStorage:', error);
-                window.currentOrders = [];
-                window.orderCounter = 1;
+        // Função para atualizar status
+        async function updateOrderStatus(orderId, newStatus) {
+            if (!isFirebaseReady) {
+                throw new Error('Firebase não está disponível');
             }
+            
+            const orderRef = doc(db, 'orders', orderId);
+            await updateDoc(orderRef, {
+                status: newStatus,
+                lastUpdated: serverTimestamp()
+            });
+            
+            console.log(`✅ Status atualizado: ${orderId} -> ${newStatus}`);
         }
 
+        // Função para atualizar status de conexão
         function updateConnectionStatus(status, message) {
             const statusEl = document.getElementById('connectionStatus');
             statusEl.className = `connection-status status-${status}`;
@@ -910,20 +921,20 @@
             statusEl.innerHTML = `${icons[status]} ${message}`;
         }
 
-        // Fazer funções disponíveis globalmente
-        window.updateConnectionStatus = updateConnectionStatus;
-        window.loadLocalStorageSystem = loadLocalStorageSystem;
+        // Disponibilizar funções globalmente
+        window.saveOrder = saveOrder;
+        window.updateOrderStatus = updateOrderStatus;
+        window.isFirebaseReady = () => isFirebaseReady;
+        window.allOrders = [];
     </script>
 
     <script>
         // Variáveis globais
         let cart = [];
         let selectedDeliveryType = '';
-        let currentOrders = [];
         let orderCounter = 1;
-        let isUsingFirebase = false;
 
-        // Credenciais
+        // Credenciais funcionários
         const credentials = {
             'admin': 'zukka123',
             'funcionario': 'bar2024'
@@ -934,7 +945,6 @@
             document.getElementById('menuDropdown').classList.toggle('show');
         }
 
-        // Fechar menu ao clicar fora
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.menu-btn') && !e.target.closest('.menu-dropdown')) {
                 document.getElementById('menuDropdown').classList.remove('show');
@@ -963,19 +973,7 @@
                 cart = [];
                 selectedDeliveryType = '';
                 updateCart();
-                
-                // Limpar também os campos do formulário
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerPhone').value = '';
-                document.getElementById('tableNumber').value = '';
-                document.getElementById('observations').value = '';
-                document.querySelectorAll('.radio-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
-                    radio.checked = false;
-                });
-                
+                clearForm();
                 showNotification('Carrinho limpo com sucesso!', 'success');
             }
         }
@@ -1003,9 +1001,7 @@
             if (credentials[username] && credentials[username] === password) {
                 hideLogin();
                 showPage('staffPage');
-                setTimeout(() => {
-                    loadOrders();
-                }, 100);
+                loadOrders();
                 showNotification('Login realizado com sucesso!', 'success');
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
@@ -1025,19 +1021,15 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // Função para selecionar tipo de entrega
+        // Seleção tipo de entrega
         function selectDeliveryType(type) {
             selectedDeliveryType = type;
             
-            // Remove a classe selected de todas as opções
             document.querySelectorAll('.radio-option').forEach(option => {
                 option.classList.remove('selected');
             });
             
-            // Adiciona a classe selected à opção clicada
             event.currentTarget.classList.add('selected');
-            
-            // Marca o radio button
             document.getElementById(type === 'dine-in' ? 'dineIn' : 'takeaway').checked = true;
         }
 
@@ -1105,12 +1097,27 @@
             orderForm.style.display = 'block';
         }
 
+        function clearForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('tableNumber').value = '';
+            document.getElementById('observations').value = '';
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                radio.checked = false;
+            });
+        }
+
+        // Enviar pedido
         async function submitOrder() {
             const name = document.getElementById('customerName').value;
             const phone = document.getElementById('customerPhone').value;
             const table = document.getElementById('tableNumber').value;
             const obs = document.getElementById('observations').value;
 
+            // Validações
             if (!name || !phone || !table) {
                 showNotification('Preencha todos os campos obrigatórios', 'error');
                 return;
@@ -1126,18 +1133,13 @@
                 return;
             }
 
-            // Desabilitar botão durante envio
+            // Preparar pedido
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-            console.log('🔄 Iniciando envio do pedido...');
-            console.log('Firebase ativo:', window.isUsingFirebase);
-            console.log('Firebase DB:', window.firebaseDb);
-            console.log('Firebase Functions:', window.firebaseFunctions);
-
             try {
-                const order = {
+                const orderData = {
                     orderNumber: orderCounter++,
                     name,
                     phone,
@@ -1147,100 +1149,67 @@
                     items: [...cart],
                     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
                     status: 'pending',
-                    timestamp: window.isUsingFirebase && window.firebaseFunctions ? window.firebaseFunctions.serverTimestamp() : Date.now(),
                     createdAt: new Date().toLocaleString()
                 };
 
-                console.log('📦 Pedido preparado:', order);
+                console.log('📤 Enviando pedido:', orderData);
 
-                if (window.isUsingFirebase && window.firebaseDb && window.firebaseFunctions) {
-                    console.log('💾 Tentando salvar no Firebase...');
-                    
-                    // Salvar no Firebase
-                    const { collection, addDoc } = window.firebaseFunctions;
-                    const docRef = await addDoc(collection(window.firebaseDb, 'orders'), order);
-                    
-                    console.log('✅ Pedido salvo no Firebase com ID:', docRef.id);
-                    showNotification(`Pedido #${order.orderNumber} enviado com sucesso!`, 'success');
+                // Tentar salvar no Firebase
+                if (window.isFirebaseReady()) {
+                    await window.saveOrder(orderData);
+                    showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
                 } else {
-                    console.warn('⚠️ Firebase não disponível, usando localStorage');
+                    // Fallback localStorage
+                    orderData.id = Date.now().toString();
+                    orderData.timestamp = Date.now();
                     
-                    // Salvar no localStorage
-                    order.id = Date.now().toString();
-                    order.timestamp = Date.now();
+                    const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+                    savedOrders.unshift(orderData);
+                    localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
                     
-                    if (!currentOrders) currentOrders = [];
-                    currentOrders.unshift(order);
-                    
-                    localStorage.setItem('zukka_orders', JSON.stringify(currentOrders));
-                    localStorage.setItem('zukka_order_counter', orderCounter.toString());
-                    
-                    console.log('📱 Pedido salvo no localStorage');
-                    showNotification(`Pedido #${order.orderNumber} enviado (modo offline)!`, 'success');
+                    console.log('📱 Pedido salvo no localStorage (modo offline)');
+                    showNotification(`Pedido #${orderData.orderNumber} enviado (modo offline)!`, 'success');
                 }
 
                 // Limpar formulário
                 cart = [];
                 selectedDeliveryType = '';
                 updateCart();
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerPhone').value = '';
-                document.getElementById('tableNumber').value = '';
-                document.getElementById('observations').value = '';
-                document.querySelectorAll('.radio-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
-                    radio.checked = false;
-                });
+                clearForm();
 
             } catch (error) {
                 console.error('❌ Erro ao enviar pedido:', error);
-                console.error('Detalhes do erro:', {
-                    message: error.message,
-                    code: error.code,
-                    stack: error.stack
-                });
                 showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
             } finally {
-                // Reabilitar botão
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Confirmar Pedido';
             }
         }
 
-        // Staff - Carregar pedidos
+        // Área funcionários
         function loadOrders() {
-            if (isUsingFirebase) {
-                // Firebase já carrega automaticamente via onSnapshot
-                displayOrders(currentOrders);
+            if (window.isFirebaseReady() && window.allOrders) {
+                displayOrders(window.allOrders);
             } else {
-                // Carregar do localStorage
-                try {
-                    const savedOrders = localStorage.getItem('zukka_orders');
-                    currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
-                    displayOrders(currentOrders);
-                } catch (error) {
-                    console.error('Erro ao carregar pedidos:', error);
-                    displayOrders([]);
-                }
+                // Fallback localStorage
+                const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+                displayOrders(savedOrders);
             }
         }
 
         function displayOrders(orders) {
             const container = document.getElementById('ordersContainer');
             
-            if (orders.length === 0) {
+            if (!orders || orders.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #ccc; padding: 40px;">Nenhum pedido no momento</p>';
                 return;
             }
 
-            // Filtrar pedidos não entregues ou entregues recentemente
+            // Filtrar pedidos ativos (não entregues ou entregues recentemente)
             const activeOrders = orders.filter(order => {
                 if (order.status !== 'delivered') return true;
                 
-                // Manter pedidos entregues por 2 horas
-                const orderTime = order.timestamp?.seconds ? order.timestamp.seconds * 1000 : (order.timestamp || Date.now());
+                const orderTime = order.timestamp || Date.now();
                 const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
                 return orderTime > twoHoursAgo;
             });
@@ -1286,9 +1255,9 @@
                         </div>
                         ${order.status !== 'delivered' ? `
                             <div class="status-buttons">
-                                ${order.status === 'pending' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">Iniciar Preparo</button>` : ''}
-                                ${order.status === 'preparing' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'ready')">Marcar Pronto</button>` : ''}
-                                ${order.status === 'ready' ? `<button class="status-btn" onclick="updateOrderStatus('${order.id}', 'delivered')">Entregar</button>` : ''}
+                                ${order.status === 'pending' ? `<button class="status-btn" onclick="changeOrderStatus('${order.id}', 'preparing')">Iniciar Preparo</button>` : ''}
+                                ${order.status === 'preparing' ? `<button class="status-btn" onclick="changeOrderStatus('${order.id}', 'ready')">Marcar Pronto</button>` : ''}
+                                ${order.status === 'ready' ? `<button class="status-btn" onclick="changeOrderStatus('${order.id}', 'delivered')">Entregar</button>` : ''}
                             </div>
                         ` : ''}
                     </div>
@@ -1299,32 +1268,25 @@
             console.log(`📋 Exibindo ${activeOrders.length} pedidos ativos`);
         }
 
-        async function updateOrderStatus(orderId, newStatus) {
+        async function changeOrderStatus(orderId, newStatus) {
             try {
-                if (isUsingFirebase) {
-                    // Atualizar no Firebase
-                    const { doc, updateDoc } = window.firebaseFunctions;
-                    const orderRef = doc(window.firebaseDb, 'orders', orderId);
-                    await updateDoc(orderRef, {
-                        status: newStatus,
-                        lastUpdated: window.firebaseFunctions.serverTimestamp()
-                    });
-                    console.log(`✅ Status atualizado no Firebase: ${orderId} -> ${newStatus}`);
+                if (window.isFirebaseReady()) {
+                    await window.updateOrderStatus(orderId, newStatus);
+                    showNotification('Status atualizado!', 'success');
                 } else {
-                    // Atualizar no localStorage
-                    const orderIndex = currentOrders.findIndex(o => o.id === orderId);
+                    // Fallback localStorage
+                    const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+                    const orderIndex = savedOrders.findIndex(o => o.id === orderId);
+                    
                     if (orderIndex !== -1) {
-                        currentOrders[orderIndex].status = newStatus;
-                        localStorage.setItem('zukka_orders', JSON.stringify(currentOrders));
-                        displayOrders(currentOrders);
-                        console.log(`📱 Status atualizado no localStorage: ${orderId} -> ${newStatus}`);
+                        savedOrders[orderIndex].status = newStatus;
+                        localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
+                        displayOrders(savedOrders);
+                        showNotification('Status atualizado (modo offline)!', 'success');
                     }
                 }
-
-                showNotification(`Status do pedido atualizado!`, 'success');
-
             } catch (error) {
-                console.error('Erro ao atualizar status:', error);
+                console.error('❌ Erro ao atualizar status:', error);
                 showNotification('Erro ao atualizar status', 'error');
             }
         }
@@ -1339,38 +1301,27 @@
             }, 3000);
         }
 
-        // Inicialização quando a página carrega
+        // Inicialização
         window.addEventListener('load', function() {
-            console.log('🚀 Bar Zukka - Sistema de Pedidos iniciado');
+            console.log('🚀 Bar Zukka - Sistema iniciado');
             
-            // Carregar dados do localStorage se não estiver usando Firebase
+            // Aguardar Firebase estar pronto
             setTimeout(() => {
-                if (!window.isUsingFirebase) {
-                    try {
-                        const savedOrders = localStorage.getItem('zukka_orders');
-                        const savedCounter = localStorage.getItem('zukka_order_counter');
-                        
-                        currentOrders = savedOrders ? JSON.parse(savedOrders) : [];
-                        orderCounter = savedCounter ? parseInt(savedCounter) : 1;
-                        
-                        console.log(`📱 Carregados ${currentOrders.length} pedidos do localStorage`);
-                    } catch (error) {
-                        console.error('Erro ao carregar localStorage:', error);
-                        currentOrders = [];
-                        orderCounter = 1;
-                    }
+                if (window.isFirebaseReady()) {
+                    console.log('✅ Sistema Firebase ativo');
+                } else {
+                    console.log('📱 Sistema em modo offline (localStorage)');
                 }
-            }, 500);
+            }, 1000);
         });
 
-        // Debug functions
+        // Debug
         window.debugSystem = function() {
-            console.log('=== DEBUG SISTEMA BAR ZUKKA ===');
-            console.log('Firebase ativo:', isUsingFirebase);
-            console.log('Pedidos atuais:', currentOrders.length);
-            console.log('Contador:', orderCounter);
-            console.log('Carrinho atual:', cart);
-            console.log('================================');
+            console.log('=== DEBUG SISTEMA ===');
+            console.log('Firebase pronto:', window.isFirebaseReady());
+            console.log('Pedidos:', window.allOrders?.length || 0);
+            console.log('Carrinho:', cart.length);
+            console.log('====================');
         };
     </script>
 </body>
