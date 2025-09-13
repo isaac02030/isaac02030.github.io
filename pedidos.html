@@ -1131,6 +1131,11 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
+            console.log('🔄 Iniciando envio do pedido...');
+            console.log('Firebase ativo:', window.isUsingFirebase);
+            console.log('Firebase DB:', window.firebaseDb);
+            console.log('Firebase Functions:', window.firebaseFunctions);
+
             try {
                 const order = {
                     orderNumber: orderCounter++,
@@ -1142,22 +1147,36 @@
                     items: [...cart],
                     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
                     status: 'pending',
-                    timestamp: isUsingFirebase ? window.firebaseFunctions.serverTimestamp() : Date.now(),
+                    timestamp: window.isUsingFirebase && window.firebaseFunctions ? window.firebaseFunctions.serverTimestamp() : Date.now(),
                     createdAt: new Date().toLocaleString()
                 };
 
-                if (isUsingFirebase) {
+                console.log('📦 Pedido preparado:', order);
+
+                if (window.isUsingFirebase && window.firebaseDb && window.firebaseFunctions) {
+                    console.log('💾 Tentando salvar no Firebase...');
+                    
                     // Salvar no Firebase
                     const { collection, addDoc } = window.firebaseFunctions;
                     const docRef = await addDoc(collection(window.firebaseDb, 'orders'), order);
-                    console.log('✅ Pedido salvo no Firebase:', docRef.id);
+                    
+                    console.log('✅ Pedido salvo no Firebase com ID:', docRef.id);
+                    showNotification(`Pedido #${order.orderNumber} enviado com sucesso!`, 'success');
                 } else {
+                    console.warn('⚠️ Firebase não disponível, usando localStorage');
+                    
                     // Salvar no localStorage
                     order.id = Date.now().toString();
+                    order.timestamp = Date.now();
+                    
+                    if (!currentOrders) currentOrders = [];
                     currentOrders.unshift(order);
+                    
                     localStorage.setItem('zukka_orders', JSON.stringify(currentOrders));
                     localStorage.setItem('zukka_order_counter', orderCounter.toString());
+                    
                     console.log('📱 Pedido salvo no localStorage');
+                    showNotification(`Pedido #${order.orderNumber} enviado (modo offline)!`, 'success');
                 }
 
                 // Limpar formulário
@@ -1175,10 +1194,13 @@
                     radio.checked = false;
                 });
 
-                showNotification(`Pedido #${order.orderNumber} enviado com sucesso!`, 'success');
-
             } catch (error) {
-                console.error('Erro ao enviar pedido:', error);
+                console.error('❌ Erro ao enviar pedido:', error);
+                console.error('Detalhes do erro:', {
+                    message: error.message,
+                    code: error.code,
+                    stack: error.stack
+                });
                 showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
             } finally {
                 // Reabilitar botão
