@@ -108,6 +108,7 @@
             color: white;
             cursor: pointer;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
         .menu-item:hover {
@@ -117,6 +118,27 @@
 
         .menu-item:last-child {
             border-bottom: none;
+        }
+
+        /* Badge do carrinho */
+        .cart-badge {
+            background: #c41e3a;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+            min-width: 18px;
+            text-align: center;
+            display: none;
+            animation: bounce 0.3s ease;
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(0.3); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         /* Páginas */
@@ -197,11 +219,29 @@
             border-radius: 15px;
             padding: 20px;
             margin-top: 30px;
+            position: relative;
         }
 
         .cart h3 {
             color: #f4d03f;
             margin-bottom: 15px;
+        }
+
+        .cart-counter {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #c41e3a;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            animation: pulse 0.3s ease;
         }
 
         .cart-item {
@@ -265,6 +305,13 @@
             border-radius: 5px;
             background: rgba(255,255,255,0.05);
             color: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f4d03f;
+            background: rgba(244, 208, 63, 0.1);
         }
 
         /* Opções de entrega */
@@ -470,17 +517,6 @@
             animation: slideIn 0.3s ease;
         }
 
-        .order-card.new-order {
-            animation: pulse 1s ease;
-            border-left-color: #27ae60;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -540,7 +576,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #c41e3a;
+            background: #c41e3c;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -568,12 +604,6 @@
         }
 
         /* Loading */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #f4d03f;
-        }
-
         .spinner {
             display: inline-block;
             width: 20px;
@@ -638,7 +668,10 @@
             
             <div class="menu-dropdown" id="menuDropdown">
                 <div class="menu-item" onclick="goHome()">🏠 Início</div>
-                <div class="menu-item" onclick="clearCart()">🗑️ Limpar Pedido</div>
+                <div class="menu-item" onclick="clearCart()">
+                    🗑️ Limpar Pedido
+                    <span class="cart-badge" id="menuCartBadge"></span>
+                </div>
                 <div class="menu-item" onclick="refreshPage()">🔄 Atualizar</div>
                 <div class="menu-item" onclick="showLogin()">👤 Funcionários</div>
             </div>
@@ -726,6 +759,7 @@
 
             <div class="cart">
                 <h3>Seu Pedido</h3>
+                <div class="cart-counter" id="cartCounter">0</div>
                 <div id="cartItems">
                     <p style="text-align: center; color: #ccc; padding: 20px;">Carrinho vazio</p>
                 </div>
@@ -754,19 +788,19 @@
 
                 <div class="form-group">
                     <label>Nome</label>
-                    <input type="text" id="customerName" required>
+                    <input type="text" id="customerName" required placeholder="Seu nome completo">
                 </div>
                 <div class="form-group">
                     <label>Telefone</label>
-                    <input type="tel" id="customerPhone" required>
+                    <input type="tel" id="customerPhone" required placeholder="Seu telefone">
                 </div>
                 <div class="form-group">
                     <label>Mesa</label>
-                    <input type="number" id="tableNumber" min="1" max="50" required>
+                    <input type="number" id="tableNumber" min="1" max="50" required placeholder="Número da mesa">
                 </div>
                 <div class="form-group">
                     <label>Observações (opcional)</label>
-                    <textarea id="observations" rows="3"></textarea>
+                    <textarea id="observations" rows="3" placeholder="Alguma observação especial..."></textarea>
                 </div>
                 
                 <!-- Botões de ação -->
@@ -789,7 +823,7 @@
                 </div>
             </div>
             <div id="ordersContainer">
-                <div class="loading">
+                <div style="text-align: center; padding: 20px; color: #ccc;">
                     <span class="spinner"></span> Carregando pedidos...
                 </div>
             </div>
@@ -817,7 +851,7 @@
     <!-- Notificação -->
     <div class="notification" id="notification"></div>
 
-    <!-- Firebase -->
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -833,193 +867,9 @@
             measurementId: "G-4WX7KZN2LY"
         };
 
-        let app, db, isFirebaseReady = false;
-        let connectionTimeout;
-        let isOfflineMode = false;
+        let db;
+        let firebaseReady = false;
 
-        // Timeout de 10 segundos para conexão
-        updateConnectionStatus('connecting', 'Conectando ao Firebase...');
-        
-        connectionTimeout = setTimeout(() => {
-            if (!isFirebaseReady) {
-                console.warn('⚠️ Timeout na conexão Firebase - entrando em modo offline');
-                isOfflineMode = true;
-                updateConnectionStatus('disconnected', 'Modo Offline');
-                loadOfflineOrders();
-            }
-        }, 10000);
-
-        try {
-            // Inicializar Firebase
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            
-            // Teste de conectividade real - tentar ler uma coleção
-            const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
-            
-            // Se conseguir criar o listener sem erro, Firebase está funcionando
-            const unsubscribe = onSnapshot(testQuery, (snapshot) => {
-                // Primeira execução confirma que Firebase está funcionando
-                if (!isFirebaseReady) {
-                    clearTimeout(connectionTimeout);
-                    isFirebaseReady = true;
-                    isOfflineMode = false;
-                    
-                    updateConnectionStatus('connected', 'Conectado ao Firebase');
-                    console.log('✅ Firebase conectado e testado');
-                }
-                
-                // Processar pedidos
-                const orders = [];
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const order = {
-                        id: doc.id,
-                        ...data,
-                        timestamp: data.timestamp?.seconds ? data.timestamp.seconds * 1000 : Date.now()
-                    };
-                    orders.push(order);
-                });
-                
-                window.allOrders = orders;
-                console.log(`📦 ${orders.length} pedidos sincronizados (Firebase)`);
-                
-                // Salvar no localStorage como backup
-                localStorage.setItem('zukka_orders_backup', JSON.stringify(orders));
-                
-                // Atualizar interface se necessário
-                if (document.getElementById('staffPage').classList.contains('active')) {
-                    displayOrders(orders);
-                }
-            }, (error) => {
-                console.error('❌ Erro na sincronização Firebase:', error);
-                // Se der erro depois de conectado, manter funcionando offline
-                if (isFirebaseReady) {
-                    updateConnectionStatus('disconnected', 'Conexão perdida - Modo Offline');
-                    isOfflineMode = true;
-                    loadOfflineOrders();
-                }
-            });
-
-        } catch (error) {
-            console.error('❌ Erro ao inicializar Firebase:', error);
-            clearTimeout(connectionTimeout);
-            isOfflineMode = true;
-            updateConnectionStatus('disconnected', 'Modo Offline');
-            loadOfflineOrders();
-        }
-
-        // Função para carregar pedidos offline
-        function loadOfflineOrders() {
-            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-            const backupOrders = JSON.parse(localStorage.getItem('zukka_orders_backup') || '[]');
-            
-            // Usar backup do Firebase se disponível, senão pedidos offline
-            window.allOrders = backupOrders.length > 0 ? backupOrders : offlineOrders;
-            
-            console.log(`📱 ${window.allOrders.length} pedidos carregados (modo offline)`);
-            
-            if (document.getElementById('staffPage').classList.contains('active')) {
-                displayOrders(window.allOrders);
-            }
-        }
-
-        // Função para salvar pedido
-        async function saveOrder(orderData) {
-            if (isFirebaseReady && !isOfflineMode) {
-                try {
-                    const docRef = await addDoc(collection(db, 'orders'), {
-                        ...orderData,
-                        timestamp: serverTimestamp()
-                    });
-                    
-                    console.log('✅ Pedido salvo no Firebase:', docRef.id);
-                    return docRef.id;
-                } catch (error) {
-                    console.error('❌ Erro ao salvar no Firebase, usando localStorage:', error);
-                    isOfflineMode = true;
-                    updateConnectionStatus('disconnected', 'Conexão perdida - Modo Offline');
-                    return saveOrderOffline(orderData);
-                }
-            } else {
-                return saveOrderOffline(orderData);
-            }
-        }
-
-        // Salvar pedido offline
-        function saveOrderOffline(orderData) {
-            orderData.id = Date.now().toString();
-            orderData.timestamp = Date.now();
-            orderData.isOffline = true; // Marcar como offline para sincronizar depois
-            
-            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-            offlineOrders.unshift(orderData);
-            localStorage.setItem('zukka_orders', JSON.stringify(offlineOrders));
-            
-            // Atualizar lista global
-            if (!window.allOrders) window.allOrders = [];
-            window.allOrders.unshift(orderData);
-            
-            console.log('📱 Pedido salvo offline:', orderData.id);
-            
-            // Atualizar interface se staff estiver ativo
-            if (document.getElementById('staffPage').classList.contains('active')) {
-                displayOrders(window.allOrders);
-            }
-            
-            return orderData.id;
-        }
-
-        // Função para atualizar status
-        async function updateOrderStatus(orderId, newStatus) {
-            if (isFirebaseReady && !isOfflineMode) {
-                try {
-                    const orderRef = doc(db, 'orders', orderId);
-                    await updateDoc(orderRef, {
-                        status: newStatus,
-                        lastUpdated: serverTimestamp()
-                    });
-                    
-                    console.log(`✅ Status atualizado no Firebase: ${orderId} -> ${newStatus}`);
-                } catch (error) {
-                    console.error('❌ Erro ao atualizar no Firebase, usando localStorage:', error);
-                    updateOrderStatusOffline(orderId, newStatus);
-                }
-            } else {
-                updateOrderStatusOffline(orderId, newStatus);
-            }
-        }
-
-        // Atualizar status offline
-        function updateOrderStatusOffline(orderId, newStatus) {
-            // Atualizar na lista global
-            if (window.allOrders) {
-                const order = window.allOrders.find(o => o.id === orderId);
-                if (order) {
-                    order.status = newStatus;
-                    order.lastUpdated = Date.now();
-                }
-            }
-            
-            // Atualizar no localStorage
-            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-            const orderIndex = offlineOrders.findIndex(o => o.id === orderId);
-            
-            if (orderIndex !== -1) {
-                offlineOrders[orderIndex].status = newStatus;
-                offlineOrders[orderIndex].lastUpdated = Date.now();
-                localStorage.setItem('zukka_orders', JSON.stringify(offlineOrders));
-            }
-            
-            console.log(`📱 Status atualizado offline: ${orderId} -> ${newStatus}`);
-            
-            // Atualizar interface
-            if (document.getElementById('staffPage').classList.contains('active')) {
-                displayOrders(window.allOrders);
-            }
-        }
-
-        // Função para atualizar status de conexão
         function updateConnectionStatus(status, message) {
             const statusEl = document.getElementById('connectionStatus');
             statusEl.className = `connection-status status-${status}`;
@@ -1033,66 +883,73 @@
             statusEl.innerHTML = `${icons[status]} ${message}`;
         }
 
-        // Tentar reconectar a cada 30 segundos se offline
-        setInterval(() => {
-            if (isOfflineMode && !isFirebaseReady) {
-                console.log('🔄 Tentando reconectar ao Firebase...');
-                updateConnectionStatus('connecting', 'Tentando reconectar...');
-                
-                // Recriar conexão
-                try {
-                    const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
-                    const unsubscribe = onSnapshot(testQuery, (snapshot) => {
-                        isFirebaseReady = true;
-                        isOfflineMode = false;
-                        updateConnectionStatus('connected', 'Reconectado ao Firebase');
-                        console.log('✅ Reconectado ao Firebase');
-                        
-                        // Sincronizar pedidos offline se houver
-                        syncOfflineOrders();
-                    });
-                } catch (error) {
-                    updateConnectionStatus('disconnected', 'Modo Offline');
-                }
+        // Timeout para conexão Firebase
+        const connectionTimeout = setTimeout(() => {
+            if (!firebaseReady) {
+                updateConnectionStatus('disconnected', 'Modo Offline');
+                console.log('⚠️ Firebase timeout - modo offline');
             }
-        }, 30000);
+        }, 8000);
 
-        // Sincronizar pedidos offline quando reconectar
-        async function syncOfflineOrders() {
-            const offlineOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-            const ordersToSync = offlineOrders.filter(order => order.isOffline);
+        try {
+            // Inicializar Firebase
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
             
-            if (ordersToSync.length > 0) {
-                console.log(`🔄 Sincronizando ${ordersToSync.length} pedidos offline...`);
-                
-                for (const order of ordersToSync) {
-                    try {
-                        delete order.isOffline;
-                        delete order.id; // Deixar Firebase gerar novo ID
-                        
-                        await addDoc(collection(db, 'orders'), {
-                            ...order,
-                            timestamp: serverTimestamp(),
-                            syncedAt: new Date().toISOString()
-                        });
-                        
-                        console.log('✅ Pedido sincronizado:', order.orderNumber);
-                    } catch (error) {
-                        console.error('❌ Erro ao sincronizar pedido:', error);
-                    }
+            // Testar conexão
+            const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
+            
+            onSnapshot(testQuery, (snapshot) => {
+                if (!firebaseReady) {
+                    clearTimeout(connectionTimeout);
+                    firebaseReady = true;
+                    updateConnectionStatus('connected', 'Conectado ao Firebase');
+                    console.log('✅ Firebase conectado');
                 }
                 
-                // Limpar pedidos offline já sincronizados
-                const remainingOrders = offlineOrders.filter(order => !order.isOffline);
-                localStorage.setItem('zukka_orders', JSON.stringify(remainingOrders));
-            }
+                const orders = [];
+                snapshot.forEach((doc) => {
+                    orders.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                window.allOrders = orders;
+                console.log(`📦 ${orders.length} pedidos carregados`);
+                
+                // Atualizar staff se estiver ativo
+                if (document.getElementById('staffPage').classList.contains('active')) {
+                    displayOrders(orders);
+                }
+            });
+            
+        } catch (error) {
+            clearTimeout(connectionTimeout);
+            console.error('❌ Erro Firebase:', error);
+            updateConnectionStatus('disconnected', 'Modo Offline');
         }
 
-        // Disponibilizar funções globalmente
-        window.saveOrder = saveOrder;
-        window.updateOrderStatus = updateOrderStatus;
-        window.isFirebaseReady = () => isFirebaseReady && !isOfflineMode;
-        window.isOfflineMode = () => isOfflineMode;
+        // Funções globais
+        window.firebaseReady = firebaseReady;
+        window.db = db;
+        
+        window.saveOrderToFirebase = async function(orderData) {
+            const docRef = await addDoc(collection(db, 'orders'), {
+                ...orderData,
+                timestamp: serverTimestamp()
+            });
+            return docRef.id;
+        };
+        
+        window.updateOrderStatusFirebase = async function(orderId, newStatus) {
+            const orderRef = doc(db, 'orders', orderId);
+            await updateDoc(orderRef, {
+                status: newStatus,
+                lastUpdated: serverTimestamp()
+            });
+        };
+        
         window.allOrders = [];
     </script>
 
@@ -1102,7 +959,7 @@
         let selectedDeliveryType = '';
         let orderCounter = 1;
 
-        // Credenciais funcionários
+        // Credenciais
         const credentials = {
             'admin': 'zukka123',
             'funcionario': 'bar2024'
@@ -1122,28 +979,6 @@
         function goHome() {
             window.location.href = 'index.html';
             toggleMenu();
-        }
-
-        function clearCart() {
-            cart = [];
-            updateCart();
-            showNotification('Pedido limpo', 'success');
-            toggleMenu();
-        }
-
-        function clearCartInForm() {
-            if (cart.length === 0) {
-                showNotification('Carrinho já está vazio', 'error');
-                return;
-            }
-            
-            if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
-                cart = [];
-                selectedDeliveryType = '';
-                updateCart();
-                clearForm();
-                showNotification('Carrinho limpo com sucesso!', 'success');
-            }
         }
 
         function refreshPage() {
@@ -1228,6 +1063,22 @@
             const cartItems = document.getElementById('cartItems');
             const cartTotal = document.getElementById('cartTotal');
             const orderForm = document.getElementById('orderForm');
+            const cartCounter = document.getElementById('cartCounter');
+            const menuBadge = document.getElementById('menuCartBadge');
+
+            // Calcular total de itens
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Atualizar counter
+            if (totalItems > 0) {
+                cartCounter.style.display = 'flex';
+                cartCounter.textContent = totalItems;
+                menuBadge.style.display = 'inline-block';
+                menuBadge.textContent = totalItems;
+            } else {
+                cartCounter.style.display = 'none';
+                menuBadge.style.display = 'none';
+            }
 
             if (cart.length === 0) {
                 cartItems.innerHTML = '<p style="text-align: center; color: #ccc; padding: 20px;">Carrinho vazio</p>';
@@ -1270,6 +1121,8 @@
             document.getElementById('customerPhone').value = '';
             document.getElementById('tableNumber').value = '';
             document.getElementById('observations').value = '';
+            selectedDeliveryType = '';
+            
             document.querySelectorAll('.radio-option').forEach(option => {
                 option.classList.remove('selected');
             });
@@ -1278,31 +1131,49 @@
             });
         }
 
-        // Enviar pedido
-        async function submitOrder() {
-            // Validar formulário primeiro
-            const validation = validateForm();
+        function clearCart() {
+            cart = [];
+            updateCart();
+            showNotification('Pedido limpo', 'success');
+            toggleMenu();
+        }
+
+        function clearCartInForm() {
+            if (cart.length === 0) {
+                showNotification('Carrinho já está vazio', 'error');
+                return;
+            }
             
-            if (!validation.isValid) {
-                // Mostrar primeiro erro na lista
-                showNotification(validation.errors[0], 'error');
-                
-                // Focar no primeiro campo com erro
-                const firstErrorField = document.querySelector('.form-group.error input, .form-group.error textarea');
-                if (firstErrorField) {
-                    firstErrorField.focus();
-                } else if (!selectedDeliveryType) {
-                    // Se erro for no tipo de entrega, rolar até a seção
-                    document.getElementById('deliveryOptions').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                
+            if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                cart = [];
+                updateCart();
+                clearForm();
+                showNotification('Carrinho limpo com sucesso!', 'success');
+            }
+        }
+
+        // Enviar pedido - versão simplificada
+        async function submitOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const table = parseInt(document.getElementById('tableNumber').value);
+            const obs = document.getElementById('observations').value.trim();
+
+            // Validações básicas
+            if (!name || !phone || !table) {
+                showNotification('Preencha nome, telefone e mesa', 'error');
                 return;
             }
 
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const table = document.getElementById('tableNumber').value;
-            const obs = document.getElementById('observations').value.trim();
+            if (!selectedDeliveryType) {
+                showNotification('Selecione o tipo de entrega', 'error');
+                return;
+            }
+
+            if (cart.length === 0) {
+                showNotification('Adicione itens ao pedido', 'error');
+                return;
+            }
 
             // Preparar pedido
             const submitBtn = document.getElementById('submitBtn');
@@ -1314,8 +1185,8 @@
                     orderNumber: orderCounter++,
                     name,
                     phone,
-                    table: parseInt(table),
-                    observations: obs || '', // Garantir string vazia se vazio
+                    table,
+                    observations: obs,
                     deliveryType: selectedDeliveryType,
                     items: [...cart],
                     total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -1323,46 +1194,31 @@
                     createdAt: new Date().toLocaleString()
                 };
 
-                console.log('📤 Enviando pedido validado:', orderData);
+                console.log('Enviando pedido:', orderData);
 
-                // Tentar salvar no Firebase
-                if (window.isFirebaseReady()) {
-                    await window.saveOrder(orderData);
-                    showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
+                if (window.firebaseReady && window.db) {
+                    // Tentar Firebase
+                    await window.saveOrderToFirebase(orderData);
+                    console.log('✅ Pedido salvo no Firebase');
                 } else {
-                    // Fallback localStorage com aviso
+                    // Fallback localStorage
                     orderData.id = Date.now().toString();
-                    orderData.timestamp = Date.now();
-                    
                     const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
                     savedOrders.unshift(orderData);
                     localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
-                    
-                    console.log('📱 Pedido salvo no localStorage (modo offline)');
-                    showNotification(`Pedido #${orderData.orderNumber} enviado (modo offline)! Os dados serão sincronizados quando a conexão voltar.`, 'success');
+                    console.log('📱 Pedido salvo offline');
                 }
 
-                // Limpar formulário e carrinho
+                showNotification(`Pedido #${orderData.orderNumber} enviado!`, 'success');
+                
+                // Limpar
                 cart = [];
-                selectedDeliveryType = '';
                 updateCart();
-                updateCartCounter();
                 clearForm();
 
             } catch (error) {
-                console.error('❌ Erro ao enviar pedido:', error);
-                
-                // Erro específico baseado no tipo
-                let errorMessage = 'Erro ao enviar pedido. ';
-                if (error.message.includes('offline') || error.message.includes('network')) {
-                    errorMessage += 'Verifique sua conexão com a internet.';
-                } else if (error.message.includes('Firebase')) {
-                    errorMessage += 'Problema no servidor. Tente novamente.';
-                } else {
-                    errorMessage += 'Tente novamente em alguns instantes.';
-                }
-                
-                showNotification(errorMessage, 'error');
+                console.error('Erro ao enviar:', error);
+                showNotification('Erro ao enviar pedido', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Confirmar Pedido';
@@ -1371,7 +1227,7 @@
 
         // Área funcionários
         function loadOrders() {
-            if (window.isFirebaseReady() && window.allOrders) {
+            if (window.allOrders && window.allOrders.length > 0) {
                 displayOrders(window.allOrders);
             } else {
                 // Fallback localStorage
@@ -1388,17 +1244,8 @@
                 return;
             }
 
-            // Filtrar pedidos ativos (não entregues ou entregues recentemente)
-            const activeOrders = orders.filter(order => {
-                if (order.status !== 'delivered') return true;
-                
-                const orderTime = order.timestamp || Date.now();
-                const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
-                return orderTime > twoHoursAgo;
-            });
-
             let html = '';
-            activeOrders.forEach(order => {
+            orders.forEach(order => {
                 const statusText = {
                     'pending': 'Pendente',
                     'preparing': 'Preparando',
@@ -1448,28 +1295,25 @@
             });
 
             container.innerHTML = html;
-            console.log(`📋 Exibindo ${activeOrders.length} pedidos ativos`);
         }
 
         async function changeOrderStatus(orderId, newStatus) {
             try {
-                if (window.isFirebaseReady()) {
-                    await window.updateOrderStatus(orderId, newStatus);
-                    showNotification('Status atualizado!', 'success');
+                if (window.firebaseReady && window.db) {
+                    await window.updateOrderStatusFirebase(orderId, newStatus);
                 } else {
-                    // Fallback localStorage
+                    // Atualizar localStorage
                     const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
                     const orderIndex = savedOrders.findIndex(o => o.id === orderId);
-                    
                     if (orderIndex !== -1) {
                         savedOrders[orderIndex].status = newStatus;
                         localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
                         displayOrders(savedOrders);
-                        showNotification('Status atualizado (modo offline)!', 'success');
                     }
                 }
+                showNotification('Status atualizado!', 'success');
             } catch (error) {
-                console.error('❌ Erro ao atualizar status:', error);
+                console.error('Erro ao atualizar status:', error);
                 showNotification('Erro ao atualizar status', 'error');
             }
         }
@@ -1485,27 +1329,7 @@
         }
 
         // Inicialização
-        window.addEventListener('load', function() {
-            console.log('🚀 Bar Zukka - Sistema iniciado');
-            
-            // Aguardar Firebase estar pronto
-            setTimeout(() => {
-                if (window.isFirebaseReady()) {
-                    console.log('✅ Sistema Firebase ativo');
-                } else {
-                    console.log('📱 Sistema em modo offline (localStorage)');
-                }
-            }, 1000);
-        });
-
-        // Debug
-        window.debugSystem = function() {
-            console.log('=== DEBUG SISTEMA ===');
-            console.log('Firebase pronto:', window.isFirebaseReady());
-            console.log('Pedidos:', window.allOrders?.length || 0);
-            console.log('Carrinho:', cart.length);
-            console.log('====================');
-        };
+        console.log('🚀 Sistema Bar Zukka iniciado');
     </script>
 </body>
 </html>
