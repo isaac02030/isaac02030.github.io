@@ -857,17 +857,23 @@
             onSnapshot(ordersQuery, (snapshot) => {
                 const orders = [];
                 snapshot.forEach((doc) => {
-                    orders.push({ id: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    orders.push({ id: doc.id, ...data });
+                    console.log('Pedido recebido do Firebase:', { id: doc.id, ...data });
                 });
                 
                 window.currentOrders = orders;
                 
-                // Se estiver na área staff, atualizar
+                // Atualizar sempre que houver mudança
                 if (document.getElementById('staffPage').classList.contains('active')) {
                     displayOrders(orders);
                 }
                 
-                console.log(`📦 ${orders.length} pedidos carregados do Firebase`);
+                console.log(`📦 ${orders.length} pedidos carregados do Firebase - Tempo: ${new Date().toLocaleTimeString()}`);
+            }, (error) => {
+                console.error('❌ Erro ao escutar Firebase:', error);
+                window.isUsingFirebase = false;
+                loadLocalStorageSystem();
             });
             
         } catch (error) {
