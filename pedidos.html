@@ -55,7 +55,6 @@
             background: var(--dark-bg);
             color: var(--text-white);
             line-height: 1.6;
-            overflow-x: hidden;
             min-height: 100vh;
         }
 
@@ -79,17 +78,16 @@
             padding: 20px;
         }
 
-        /* Enhanced Header */
+        /* Header */
         .header {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            padding: 2rem 0;
+            padding: 2rem;
             margin-bottom: 2rem;
             border-radius: var(--border-radius-lg);
             text-align: center;
             position: relative;
-            overflow: hidden;
             box-shadow: var(--shadow);
         }
 
@@ -101,6 +99,7 @@
             right: 0;
             height: 6px;
             background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
         .header h1 {
@@ -129,28 +128,13 @@
             font-weight: 600;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .status-connected {
             background: rgba(39, 174, 96, 0.2);
             color: #2ecc71;
             border-color: rgba(39, 174, 96, 0.3);
         }
 
-        .status-disconnected {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border-color: rgba(231, 76, 60, 0.3);
-        }
-
-        .status-connecting {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
-            border-color: rgba(243, 156, 18, 0.3);
-        }
-
-        /* Enhanced Menu Button */
-        .menu-btn {
+        /* Menu Hambúrguer - Solução Robusta */
+        .menu-toggle {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -161,15 +145,16 @@
             padding: 12px;
             cursor: pointer;
             transition: var(--transition);
+            z-index: 1001;
         }
 
-        .menu-btn:hover {
+        .menu-toggle:hover {
             transform: scale(1.05);
             box-shadow: var(--shadow-gold);
             border-color: var(--primary-gold);
         }
 
-        .menu-btn span {
+        .menu-toggle span {
             display: block;
             width: 25px;
             height: 3px;
@@ -179,60 +164,75 @@
             transition: var(--transition);
         }
 
+        /* Backdrop para fechar o menu */
+        .menu-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Menu Dropdown */
         .menu-dropdown {
             position: fixed;
-            top: 90px;
+            top: 20px;
             right: 20px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-hover);
-            min-width: 220px;
-            display: none;
-            z-index: 9999;
-            overflow: visible;
+            width: 280px;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
         }
 
-        .menu-dropdown.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .menu-dropdown.active {
+            transform: translateX(0);
         }
 
         .menu-item {
-            padding: 15px 20px;
+            padding: 18px 25px;
             color: var(--text-light);
             cursor: pointer;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            position: relative;
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            font-size: 1.1rem;
         }
 
         .menu-item:hover {
             background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
             color: var(--primary-gold);
-            transform: translateX(5px);
+            transform: translateX(8px);
         }
 
         .menu-item:last-child {
             border-bottom: none;
         }
 
-        /* Enhanced Cart Badge */
+        .menu-item i {
+            margin-right: 12px;
+            width: 18px;
+            text-align: center;
+        }
+
+        /* Cart Badge */
         .cart-badge {
             background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
             color: var(--text-white);
@@ -253,22 +253,7 @@
             100% { transform: scale(1); }
         }
 
-        /* Page System */
-        .page {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Enhanced Menu Grid */
+        /* Menu Grid */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -285,7 +270,6 @@
             box-shadow: var(--shadow);
             transition: var(--transition-slow);
             position: relative;
-            overflow: hidden;
         }
 
         .menu-category::before {
@@ -296,6 +280,7 @@
             right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--primary-red), var(--primary-gold));
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
         .menu-category:hover {
@@ -322,7 +307,7 @@
             font-size: 1.5rem;
         }
 
-        /* Enhanced Menu Item Cards */
+        /* Menu Item Cards */
         .menu-item-card {
             display: flex;
             justify-content: space-between;
@@ -334,22 +319,6 @@
             border-radius: var(--border-radius);
             transition: var(--transition);
             position: relative;
-            overflow: hidden;
-        }
-
-        .menu-item-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
-            transition: var(--transition);
-        }
-
-        .menu-item-card:hover::before {
-            left: 100%;
         }
 
         .menu-item-card:hover {
@@ -406,7 +375,7 @@
             box-shadow: 0 8px 25px rgba(196, 30, 58, 0.5);
         }
 
-        /* Enhanced Cart */
+        /* Cart */
         .cart {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -416,7 +385,6 @@
             margin-top: 2rem;
             position: relative;
             box-shadow: var(--shadow);
-            transition: var(--transition-slow);
         }
 
         .cart::before {
@@ -518,7 +486,7 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Enhanced Order Form */
+        /* Order Form */
         .order-form {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -528,7 +496,6 @@
             margin-top: 2rem;
             box-shadow: var(--shadow);
             position: relative;
-            overflow: hidden;
         }
 
         .order-form::before {
@@ -585,7 +552,7 @@
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
         }
 
-        /* Enhanced Delivery Options */
+        /* Delivery Options */
         .delivery-options {
             background: rgba(212, 175, 55, 0.08);
             border: 2px solid rgba(212, 175, 55, 0.2);
@@ -657,7 +624,7 @@
             font-size: 1.4rem;
         }
 
-        /* Enhanced Form Buttons */
+        /* Form Buttons */
         .form-buttons {
             display: flex;
             gap: 1rem;
@@ -715,7 +682,7 @@
             box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
         }
 
-        /* Enhanced Modal */
+        /* Modal */
         .modal {
             position: fixed;
             top: 0;
@@ -794,7 +761,6 @@
             font-weight: 600;
             font-size: 1.1rem;
             transition: var(--transition);
-            margin-bottom: 0.8rem;
             background: transparent;
             color: var(--text-white);
             border: 2px solid var(--primary-red);
@@ -805,7 +771,7 @@
             transform: translateY(-2px);
         }
 
-        /* Enhanced Notification */
+        /* Notification */
         .notification {
             position: fixed;
             top: 20px;
@@ -863,6 +829,13 @@
                 padding: 15px;
             }
 
+            .menu-dropdown {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+            }
+
             .menu-grid {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
@@ -893,35 +866,8 @@
                 gap: 1rem;
             }
 
-            .clear-cart-btn {
-                min-width: auto;
-                padding: 12px;
-            }
-
-            .connection-status {
-                position: static;
-                display: inline-block;
-                margin-bottom: 1rem;
-            }
-
-            .menu-container {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-            }
-
-            .menu-dropdown {
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: auto;
-                width: 280px;
-                margin-top: 10px;
-            }
-
             .header {
                 padding: 1.5rem;
-                position: relative;
             }
 
             .menu-item-card {
@@ -940,39 +886,6 @@
             }
         }
 
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .menu-category, .cart, .order-form {
-                padding: 1.5rem;
-            }
-
-            .modal-content {
-                padding: 2rem;
-            }
-        }
-
-        /* High contrast mode */
-        @media (prefers-contrast: high) {
-            :root {
-                --text-light: #ffffff;
-                --text-muted: #dddddd;
-            }
-        }
-
-        /* Reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
         /* Focus styles for accessibility */
         *:focus {
             outline: 3px solid var(--primary-gold);
@@ -981,32 +894,37 @@
     </style>
 </head>
 <body>
+    <!-- Backdrop para fechar menu -->
+    <div class="menu-backdrop" id="menuBackdrop"></div>
+    
+    <!-- Menu Dropdown -->
+    <div class="menu-dropdown" id="menuDropdown">
+        <div class="menu-item" id="homeMenuItem">
+            <span><i class="fas fa-home"></i> Página Inicial</span>
+        </div>
+        <div class="menu-item" id="clearCartMenuItem">
+            <span><i class="fas fa-trash"></i> Limpar Pedido</span>
+            <span class="cart-badge" id="menuCartBadge"></span>
+        </div>
+        <div class="menu-item" id="refreshMenuItem">
+            <span><i class="fas fa-sync"></i> Atualizar Página</span>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="connection-status" id="connectionStatus">
-                <span class="spinner"></span> Conectando...
+                🟢 Conectado
             </div>
-            <h1>Pedidos Online</h1>
-            <p class="subtitle">Bar Zukka - Sabores únicos em Portalegre</p>
             
-            <button class="menu-btn" id="menuBtn">
+            <button class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
             
-            <div class="menu-dropdown" id="menuDropdown">
-                <div class="menu-item" id="homeMenuItem">
-                    <span><i class="fas fa-home"></i> Página Inicial</span>
-                </div>
-                <div class="menu-item" id="clearCartMenuItem">
-                    <span><i class="fas fa-trash"></i> Limpar Pedido</span>
-                    <span class="cart-badge" id="menuCartBadge"></span>
-                </div>
-                <div class="menu-item" id="refreshMenuItem">
-                    <span><i class="fas fa-sync"></i> Atualizar Página</span>
-                </div>
-            </div>
+            <h1>Pedidos Online</h1>
+            <p class="subtitle">Bar Zukka - Sabores únicos em Portalegre</p>
         </div>
 
         <!-- Página de Pedidos -->
@@ -1315,7 +1233,7 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // Sistema Bar Zukka - Versão Limpa
+        // Sistema Bar Zukka - Versão Completamente Nova
         (function() {
             'use strict';
 
@@ -1389,10 +1307,10 @@
                 const dailyDishesContainer = document.getElementById('dailyDishes');
                 if (!dailyDishesContainer) return;
                 
-                const today = new Date().getDay(); // 0 = Domingo, 1 = Segunda, etc.
+                const today = new Date().getDay();
                 let dishHTML = '';
                 
-                if (today === 0) { // Domingo
+                if (today === 0) {
                     dishHTML = `
                         <div class="menu-item-card">
                             <div class="item-info">
@@ -1403,7 +1321,7 @@
                             <button class="add-btn" data-item="Churrasco (Domingo)" data-price="15.00">+</button>
                         </div>
                     `;
-                } else if (today === 6) { // Sábado
+                } else if (today === 6) {
                     dishHTML = `
                         <div class="menu-item-card">
                             <div class="item-info">
@@ -1414,7 +1332,7 @@
                             <button class="add-btn" data-item="Galinhada (Sábado)" data-price="12.00">+</button>
                         </div>
                     `;
-                } else { // Segunda a Sexta
+                } else {
                     dishHTML = `
                         <div class="menu-item-card">
                             <div class="item-info">
@@ -1428,7 +1346,26 @@
                 }
                 
                 dailyDishesContainer.innerHTML = dishHTML;
-                console.log('Pratos do dia carregados');
+            }
+
+            // Funções de Menu
+            function toggleMenu() {
+                const dropdown = document.getElementById('menuDropdown');
+                const backdrop = document.getElementById('menuBackdrop');
+                const isActive = dropdown.classList.contains('active');
+                
+                if (isActive) {
+                    dropdown.classList.remove('active');
+                    backdrop.classList.remove('active');
+                } else {
+                    dropdown.classList.add('active');
+                    backdrop.classList.add('active');
+                }
+            }
+
+            function closeMenu() {
+                document.getElementById('menuDropdown').classList.remove('active');
+                document.getElementById('menuBackdrop').classList.remove('active');
             }
 
             // Função para mostrar modal de seleção
@@ -1455,16 +1392,12 @@
                 modal.classList.add('show');
             }
 
-            // Função para esconder modal de seleção
             function hideSelectionModal() {
-                const modal = document.getElementById('selectionModal');
-                modal.classList.remove('show');
+                document.getElementById('selectionModal').classList.remove('show');
             }
 
             // Função para adicionar ao carrinho
             function addToCart(name, price) {
-                console.log('Adicionando ao carrinho:', name, price);
-                
                 const existing = cart.find(item => item.name === name);
                 if (existing) {
                     existing.quantity += 1;
@@ -1496,10 +1429,8 @@
                 const cartCounter = document.getElementById('cartCounter');
                 const menuBadge = document.getElementById('menuCartBadge');
 
-                // Calcular total de itens
                 const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
                 
-                // Atualizar counter
                 if (totalItems > 0) {
                     cartCounter.style.display = 'flex';
                     cartCounter.textContent = totalItems;
@@ -1550,6 +1481,23 @@
                 orderForm.style.display = 'block';
             }
 
+            // Função para limpar carrinho
+            function clearCart() {
+                if (cart.length === 0) {
+                    showNotification('Carrinho já está vazio', 'error');
+                    return;
+                }
+                
+                if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                    cart = [];
+                    updateCart();
+                    clearForm();
+                    showNotification('Carrinho limpo com sucesso!', 'success');
+                }
+                
+                closeMenu();
+            }
+
             // Função para limpar formulário
             function clearForm() {
                 document.getElementById('customerName').value = '';
@@ -1567,28 +1515,8 @@
                 });
             }
 
-            // Função para limpar carrinho
-            function clearCart() {
-                if (cart.length === 0) {
-                    showNotification('Carrinho já está vazio', 'error');
-                    return;
-                }
-                
-                if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
-                    cart = [];
-                    updateCart();
-                    clearForm();
-                    showNotification('Carrinho limpo com sucesso!', 'success');
-                }
-                
-                // Fechar menu dropdown
-                document.getElementById('menuDropdown').classList.remove('show');
-            }
-
             // Função para submeter pedido
             function submitOrder() {
-                console.log('Iniciando envio do pedido...');
-                
                 const name = document.getElementById('customerName').value.trim();
                 const phone = document.getElementById('customerPhone').value.trim();
                 const tableValue = document.getElementById('tableNumber').value.trim();
@@ -1630,13 +1558,12 @@
                     return;
                 }
 
-                // Submeter pedido
                 const submitBtn = document.getElementById('submitBtn');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-                try {
+                setTimeout(() => {
                     const orderData = {
                         orderNumber: orderCounter++,
                         name,
@@ -1650,28 +1577,15 @@
                         createdAt: new Date().toLocaleString()
                     };
 
-                    console.log('Pedido criado:', orderData);
-
-                    // Simular salvamento (aqui você adicionaria a integração com Firebase)
-                    setTimeout(() => {
-                        showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
-                        
-                        // Limpar formulário e carrinho
-                        cart = [];
-                        updateCart();
-                        clearForm();
-                        
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    }, 1500);
-
-                } catch (error) {
-                    console.error('Erro ao enviar pedido:', error);
-                    showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
+                    showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
+                    
+                    cart = [];
+                    updateCart();
+                    clearForm();
                     
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
-                }
+                }, 1500);
             }
 
             // Função para mostrar notificação
@@ -1685,43 +1599,40 @@
                 }, 4000);
             }
 
-            // Função para alternar menu
-            function toggleMenu() {
-                const dropdown = document.getElementById('menuDropdown');
-                dropdown.classList.toggle('show');
-            }
-
             // Função para selecionar tipo de entrega
             function selectDeliveryType(type, element) {
                 selectedDeliveryType = type;
                 
-                // Remover seleção anterior
                 document.querySelectorAll('.radio-option').forEach(option => {
                     option.classList.remove('selected');
                 });
                 
-                // Adicionar seleção ao elemento clicado
                 element.classList.add('selected');
                 const radioInput = element.querySelector('input[type="radio"]');
                 if (radioInput) {
                     radioInput.checked = true;
                 }
-                
-                console.log('Tipo de entrega selecionado:', type);
             }
 
-            // Inicialização usando Event Delegation
+            // Inicialização
             function init() {
                 console.log('Sistema Bar Zukka iniciando...');
                 
-                // Carregar pratos do dia
                 loadDailyDishes();
                 
-                // Status de conexão
-                document.getElementById('connectionStatus').className = 'connection-status status-connected';
-                document.getElementById('connectionStatus').innerHTML = '🟢 Conectado';
+                // Menu toggle
+                document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+                document.getElementById('menuBackdrop').addEventListener('click', closeMenu);
                 
-                // Event Delegation - Um único listener para todos os botões de adicionar
+                // Menu items
+                document.getElementById('homeMenuItem').addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+                
+                document.getElementById('clearCartMenuItem').addEventListener('click', clearCart);
+                document.getElementById('refreshMenuItem').addEventListener('click', () => window.location.reload());
+                
+                // Event Delegation
                 document.getElementById('menuGrid').addEventListener('click', function(e) {
                     if (e.target.classList.contains('add-btn')) {
                         e.preventDefault();
@@ -1738,7 +1649,6 @@
                     }
                 });
                 
-                // Event Delegation para botões de quantidade no carrinho
                 document.getElementById('cartItems').addEventListener('click', function(e) {
                     if (e.target.classList.contains('qty-btn')) {
                         e.preventDefault();
@@ -1754,7 +1664,6 @@
                     }
                 });
                 
-                // Event Delegation para opções de seleção
                 document.getElementById('selectionOptions').addEventListener('click', function(e) {
                     if (e.target.classList.contains('option-btn')) {
                         const optionName = e.target.dataset.option;
@@ -1764,7 +1673,6 @@
                     }
                 });
                 
-                // Event Delegation para opções de entrega
                 document.querySelector('.radio-group').addEventListener('click', function(e) {
                     const radioOption = e.target.closest('.radio-option');
                     if (radioOption) {
@@ -1775,55 +1683,31 @@
                     }
                 });
                 
-                // Event listeners diretos para elementos únicos
-                document.getElementById('menuBtn').addEventListener('click', toggleMenu);
-                
-                document.getElementById('homeMenuItem').addEventListener('click', () => {
-                    window.location.href = 'index.html';
-                });
-                
-                document.getElementById('clearCartMenuItem').addEventListener('click', clearCart);
-                
-                document.getElementById('refreshMenuItem').addEventListener('click', () => {
-                    window.location.reload();
-                });
-                
                 document.getElementById('submitBtn').addEventListener('click', submitOrder);
                 document.getElementById('clearCartBtn').addEventListener('click', clearCart);
-                
                 document.getElementById('cancelSelectionBtn').addEventListener('click', hideSelectionModal);
                 
-                // Close modals when clicking outside
+                // Close modals
                 document.addEventListener('click', function(e) {
-                    // Close menu dropdown
-                    if (!e.target.closest('#menuBtn') && !e.target.closest('#menuDropdown')) {
-                        document.getElementById('menuDropdown').classList.remove('show');
-                    }
-                    
-                    // Close modal when clicking on backdrop
                     if (e.target.classList.contains('modal')) {
                         hideSelectionModal();
                     }
                 });
                 
-                // Keyboard shortcuts
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape') {
-                        const selectionModal = document.getElementById('selectionModal');
-                        const menuDropdown = document.getElementById('menuDropdown');
-                        
-                        if (selectionModal.classList.contains('show')) {
+                        if (document.getElementById('selectionModal').classList.contains('show')) {
                             hideSelectionModal();
-                        } else if (menuDropdown.classList.contains('show')) {
-                            toggleMenu();
+                        } else if (document.getElementById('menuDropdown').classList.contains('active')) {
+                            closeMenu();
                         }
                     }
                 });
                 
-                console.log('Sistema Bar Zukka iniciado com sucesso!');
+                console.log('Sistema iniciado com sucesso!');
             }
 
-            // Inicializar quando DOM estiver carregado
+            // Inicializar
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', init);
             } else {
