@@ -861,6 +861,7 @@
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
+                overflow: visible;
             }
 
             .menu-grid {
@@ -905,18 +906,26 @@
             }
 
             .menu-btn {
-                position: static;
-                margin-bottom: 1rem;
+                position: absolute;
+                top: 20px;
+                right: 20px;
             }
 
             .menu-dropdown {
-                position: static;
-                display: block;
-                margin-bottom: 1rem;
+                position: fixed;
+                top: 80px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                min-width: auto;
+                max-width: none;
+                margin: 0;
+                z-index: 99999;
             }
 
             .header {
                 padding: 1.5rem;
+                overflow: visible;
             }
 
             .menu-item-card {
