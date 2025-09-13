@@ -3,7 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedidos Online - Bar Zukka</title>
+    <meta name="description" content="Bar Zukka - Venha nos Conhecer! O restaurante Bar Zukka fica em Portalegre. Sabores únicos da gastronomia brasileira em ambiente acolhedor. Venha descobrir nossa cozinha tradicional com francesinhas, bifanas e muito mais.">
+    <meta name="keywords" content="bar, restaurante, Portalegre, gastronomia brasileira, francesinha, bifana, cerveja artesanal, comida tradicional, Alentejo, petiscos, gin tónico">
+    <meta name="author" content="Bar Zukka">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook / WhatsApp / Instagram -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://barzukka.pt">
+    <meta property="og:title" content="Bar Zukka - Restaurante em Portalegre">
+    <meta property="og:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
+    <meta property="og:image" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1200-c">
+    <meta property="og:image:secure_url" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1200-c">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Bar Zukka - Restaurante em Portalegre">
+    <meta property="og:site_name" content="Bar Zukka">
+    <meta property="og:locale" content="pt_PT">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://barzukka.pt">
+    <meta property="twitter:title" content="Bar Zukka - Restaurante em Portalegre">
+    <meta property="twitter:description" content="Sabores únicos da gastronomia portuguesa no coração de Portalegre. Ambiente acolhedor e pratos tradicionais.">
+    <meta property="twitter:image" content="https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw">
+    <meta property="twitter:image:alt" content="Bar Zukka - Restaurante em Portalegre">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="logos.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="logos.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="logos.png">
+    <link rel="shortcut icon" href="logos.png">
+
+    <title>Bar Zukka - Restaurante e Bar em Portalegre | Gastronomia Portuguesa Tradicional</title>
     
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,11 +85,11 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: var(--dark-bg);
+            line-height: 1.7;
             color: var(--text-white);
-            line-height: 1.6;
+            background: var(--dark-bg);
             overflow-x: hidden;
-            min-height: 100vh;
+            font-weight: 400;
         }
 
         /* Custom scrollbar */
@@ -73,136 +106,181 @@
             border-radius: 4px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Enhanced Header */
-        .header {
+        /* Glassmorphism utility class */
+        .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            border-radius: var(--border-radius-lg);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow);
         }
 
-        .header::before {
+        /* Skip to content for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--primary-red);
+            color: var(--text-white);
+            padding: 12px 16px;
+            text-decoration: none;
+            z-index: 10000;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Header with glassmorphism */
+        .header {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            color: var(--primary-gold);
+            padding: 1.2rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(25px);
+            padding: 1rem 0;
+            box-shadow: 0 8px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--transition);
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            color: var(--accent-gold);
+        }
+
+        .logo-img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.5));
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+
+        .nav-menu li a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 1rem 1.8rem;
+            border-radius: var(--border-radius-lg);
+            position: relative;
+            letter-spacing: 0.5px;
+            display: block;
+            z-index: 10;
+        }
+
+        .nav-menu li a::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
+            width: 0%;
+            height: 100%;
+            background: rgba(212, 175, 55, 0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+            border-radius: var(--border-radius-lg);
         }
 
-        .header h1 {
-            font-family: 'Playfair Display', serif;
+        .nav-menu li a:hover::before,
+        .nav-menu li a:focus::before {
+            width: 100%;
+        }
+
+        .nav-menu li a:hover,
+        .nav-menu li a:focus {
             color: var(--primary-gold);
-            font-size: clamp(2.5rem, 6vw, 3.5rem);
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
         }
 
-        .header .subtitle {
-            color: var(--text-light);
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        /* Connection Status */
-        .connection-status {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .status-connected {
-            background: rgba(39, 174, 96, 0.2);
-            color: #2ecc71;
-            border-color: rgba(39, 174, 96, 0.3);
-        }
-
-        .status-disconnected {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-            border-color: rgba(231, 76, 60, 0.3);
-        }
-
-        .status-connecting {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
-            border-color: rgba(243, 156, 18, 0.3);
-        }
-
-        /* Enhanced Menu Button */
-        .menu-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .menu-btn:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-gold);
-            border-color: var(--primary-gold);
-        }
-
-        .menu-btn span {
-            display: block;
-            width: 25px;
-            height: 3px;
-            background: var(--primary-gold);
-            margin: 5px 0;
-            border-radius: 2px;
-            transition: var(--transition);
-        }
-
-        .menu-dropdown {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-hover);
-            min-width: 220px;
-            display: none;
-            z-index: 1000;
+        /* Hero Section with parallax effect */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-white);
             overflow: hidden;
         }
 
-        .menu-dropdown.show {
-            display: block;
-            animation: slideDown 0.3s ease;
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.7), rgba(10, 10, 10, 0.4)),
+                        url('https://lh3.googleusercontent.com/p/AF1QipP-Bh4aw2NwwF4d5HN1W7rHsQVkrVzmFkACzMgf=s1360-w1360-h1020-rw') center/cover no-repeat;
+            z-index: 1;
         }
 
-        @keyframes slideDown {
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(196, 30, 58, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+            z-index: 2;
+        }
+
+        .hero-content {
+            z-index: 3;
+            position: relative;
+            animation: heroFadeIn 1.5s ease-out;
+            max-width: 1000px;
+            padding: 0 2rem;
+        }
+
+        @keyframes heroFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(60px);
             }
             to {
                 opacity: 1;
@@ -210,70 +288,155 @@
             }
         }
 
-        .menu-item {
-            padding: 15px 20px;
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-shadow: 4px 4px 20px rgba(0,0,0,0.7);
+            letter-spacing: -3px;
+            line-height: 0.9;
+            background: linear-gradient(135deg, var(--text-white), var(--primary-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .subtitle {
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+            letter-spacing: 1px;
             color: var(--text-light);
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            position: relative;
-            transition: var(--transition);
+        }
+
+        .cta-buttons {
             display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
+            gap: 2rem;
+            margin-top: 3rem;
         }
 
-        .menu-item:hover {
-            background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
-            color: var(--primary-gold);
-            transform: translateX(5px);
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
+            color: var(--dark-bg);
+            padding: 1.8rem 3.5rem;
+            text-decoration: none;
+            border-radius: var(--border-radius-lg);
+            font-weight: 700;
+            font-size: 1.3rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-gold);
+            border: 2px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .menu-item:last-child {
-            border-bottom: none;
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: var(--transition);
         }
 
-        /* Enhanced Cart Badge */
-        .cart-badge {
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus {
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.5);
+            border-color: var(--accent-gold);
+        }
+
+        .cta-button.secondary {
             background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
             color: var(--text-white);
-            border-radius: 50%;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            min-width: 20px;
-            text-align: center;
-            display: none;
-            animation: bounce 0.4s ease;
             box-shadow: var(--shadow-red);
         }
 
-        @keyframes bounce {
-            0% { transform: scale(0.3); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        .cta-button.secondary:hover {
+            box-shadow: 0 15px 50px rgba(196, 30, 58, 0.5);
+            border-color: var(--primary-red);
         }
 
-        /* Page System */
-        .page {
-            display: none;
-            animation: fadeIn 0.5s ease;
+        .cta-button i {
+            font-size: 1.2rem;
+            transition: var(--transition);
         }
 
-        .page.active {
-            display: block;
+        .cta-button:hover i {
+            transform: scale(1.3) rotate(5deg);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Sections - Mobile First Approach */
+        .section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            /* Remove opacity animations for mobile-first approach */
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Enhanced Menu Grid */
-        .menu-grid {
+        /* Only apply entrance animations on larger screens */
+        @media (min-width: 1024px) {
+            .section {
+                opacity: 0;
+                transform: translateY(80px);
+                transition: opacity 1s ease, transform 1s ease;
+            }
+            
+            .section.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-gold);
+            font-size: clamp(3rem, 8vw, 4.5rem);
+            margin-bottom: 5rem;
+            text-align: center;
+            font-weight: 800;
+            position: relative;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
+            border-radius: 3px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Enhanced Menu Section */
+        .menu-categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 3rem;
+            margin-top: 5rem;
         }
 
         .menu-category {
@@ -281,9 +444,9 @@
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            box-shadow: var(--shadow);
+            padding: 3rem;
             transition: var(--transition-slow);
+            box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
         }
@@ -294,50 +457,54 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold));
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-gold), var(--primary-red));
         }
 
         .menu-category:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-hover);
+            transform: translateY(-15px) scale(1.02);
             border-color: var(--primary-gold);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
         }
 
         .category-title {
             font-family: 'Playfair Display', serif;
             color: var(--primary-gold);
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            margin-bottom: 2.5rem;
             text-align: center;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            gap: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
         }
 
         .category-title i {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
         }
 
-        /* Enhanced Menu Item Cards */
-        .menu-item-card {
+        /* Menu Items - Always visible for mobile reliability */
+        .menu-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            background: rgba(255,255,255,0.03);
+            align-items: flex-start;
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            border-radius: 15px;
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: var(--border-radius);
             transition: var(--transition);
+            background: rgba(255,255,255,0.03);
             position: relative;
             overflow: hidden;
+            /* Ensure visibility on mobile */
+            opacity: 1;
+            transform: translateX(0);
         }
 
-        .menu-item-card::before {
+        .menu-item::before {
             content: '';
             position: absolute;
             top: 0;
@@ -348,28 +515,38 @@
             transition: var(--transition);
         }
 
-        .menu-item-card:hover::before {
+        .menu-item:hover::before {
             left: 100%;
         }
 
-        .menu-item-card:hover {
-            transform: translateX(8px) scale(1.02);
-            background: linear-gradient(90deg, rgba(196, 30, 58, 0.08), transparent);
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .menu-item:hover {
+            transform: translateX(10px);
+            background: linear-gradient(90deg, rgba(196, 30, 58, 0.1), transparent);
             border-color: var(--primary-gold);
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
         }
 
-        .item-info h4 {
-            font-family: 'Playfair Display', serif;
-            color: var(--text-white);
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+        .item-info {
+            flex: 1;
         }
 
-        .item-info p {
+        .item-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--text-white);
+            margin-bottom: 0.8rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .item-description {
+            font-size: 1.1rem;
             color: var(--text-light);
-            font-size: 0.95rem;
+            line-height: 1.6;
             opacity: 0.9;
         }
 
@@ -377,49 +554,61 @@
             color: var(--primary-gold);
             font-family: 'Playfair Display', serif;
             font-weight: 800;
-            font-size: 1.3rem;
-            margin-right: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.6rem;
+            margin-left: 2rem;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
             flex-shrink: 0;
         }
 
-        .add-btn {
-            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
-            color: var(--text-white);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: 700;
-            transition: var(--transition);
-            box-shadow: var(--shadow-red);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .add-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.5);
-        }
-
-        /* Enhanced Cart */
-        .cart {
+        /* Enhanced About Section */
+        .about-content {
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin-top: 2rem;
-            position: relative;
+            padding: 4rem;
             box-shadow: var(--shadow);
-            transition: var(--transition-slow);
         }
 
-        .cart::before {
+        .about-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            color: var(--text-light);
+            line-height: 1.9;
+        }
+
+        .about-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Enhanced Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            margin-top: 5rem;
+        }
+
+        .contact-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem;
+            text-align: center;
+            transition: var(--transition-slow);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            /* Ensure visibility on mobile */
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -430,693 +619,356 @@
             border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
         }
 
-        .cart h3 {
+        .contact-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            border-color: var(--primary-gold);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+        }
+
+        .contact-card .icon {
+            font-size: 3.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 2rem;
+            display: block;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+        }
+
+        .contact-card h3 {
             font-family: 'Playfair Display', serif;
             color: var(--primary-gold);
+            margin-bottom: 2rem;
             font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .cart-counter {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
-            color: var(--text-white);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            animation: pulse 0.4s ease;
-            box-shadow: var(--shadow-red);
+        .contact-card p {
+            margin-bottom: 1.2rem;
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 1.2rem;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .contact-card p:last-child {
+            margin-bottom: 0;
         }
 
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.02);
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            transition: var(--transition);
-        }
-
-        .cart-item:hover {
-            background: rgba(212, 175, 55, 0.05);
-            transform: translateX(5px);
-        }
-
-        .cart-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .qty-btn {
-            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
-            color: var(--text-white);
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: 700;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .qty-btn:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-red);
-        }
-
-        .cart-total {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 800;
+        .contact-link {
             color: var(--primary-gold);
-            text-align: right;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 2px solid var(--primary-red);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
         }
 
-        /* Enhanced Order Form */
-        .order-form {
+        .contact-link:hover {
+            color: var(--accent-gold);
+            text-decoration: underline;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Enhanced Social Media */
+        .social-media {
+            text-align: center;
+            margin-top: 5rem;
+            padding-top: 5rem;
+            border-top: 2px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .social-media h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-gold);
+            margin-bottom: 3rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 1.5rem 2.5rem;
+            text-decoration: none;
             border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            margin-top: 2rem;
+            transition: var(--transition);
             box-shadow: var(--shadow);
+            font-weight: 600;
+            font-size: 1.2rem;
             position: relative;
             overflow: hidden;
         }
 
-        .order-form::before {
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: var(--transition);
+        }
+
+        .social-link:hover::before {
+            left: 100%;
+        }
+
+        .social-link:hover,
+        .social-link:focus {
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: var(--shadow-hover);
+            color: var(--text-white);
+        }
+
+        .social-link.whatsapp:hover { 
+            background: linear-gradient(145deg, #25d366, #128c7e); 
+            border-color: #25d366;
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.4);
+        }
+        .social-link.instagram:hover { 
+            background: linear-gradient(145deg, #e1306c, #833ab4); 
+            border-color: #e1306c;
+            box-shadow: 0 15px 40px rgba(225, 48, 108, 0.4);
+        }
+        .social-link.facebook:hover { 
+            background: linear-gradient(145deg, #1877f2, #4267b2); 
+            border-color: #1877f2;
+            box-shadow: 0 15px 40px rgba(24, 119, 242, 0.4);
+        }
+
+        .social-link i {
+            font-size: 1.5rem;
+        }
+
+        /* Enhanced Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-bg), var(--darker-card));
+            border-top: 3px solid var(--primary-gold);
+            color: var(--text-light);
+            text-align: center;
+            padding: 5rem 2rem;
+            margin-top: 6rem;
+            position: relative;
+        }
+
+        .footer::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-gold), var(--primary-red));
-            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            height: 200px;
+            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            pointer-events: none;
         }
 
-        .order-form h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            color: var(--primary-gold);
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-white);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: var(--transition);
-            backdrop-filter: blur(10px);
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-gold);
-            background: rgba(212, 175, 55, 0.1);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-        }
-
-        /* Enhanced Delivery Options */
-        .delivery-options {
-            background: rgba(212, 175, 55, 0.08);
-            border: 2px solid rgba(212, 175, 55, 0.2);
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
+        .footer p {
             margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .delivery-options h4 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 1.2rem 2rem;
-            border-radius: var(--border-radius-lg);
-            border: 2px solid transparent;
-            background: rgba(255,255,255,0.05);
-            transition: var(--transition);
-            backdrop-filter: blur(10px);
-            min-width: 180px;
-            justify-content: center;
-        }
-
-        .radio-option:hover {
-            background: rgba(196, 30, 58, 0.1);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-red);
-        }
-
-        .radio-option.selected {
-            border-color: var(--primary-gold);
-            background: rgba(212, 175, 55, 0.15);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .radio-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            margin: 0;
-            accent-color: var(--primary-gold);
-        }
-
-        .radio-option label {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-white);
-            cursor: pointer;
-            margin: 0;
-        }
-
-        .radio-option .icon {
-            font-size: 1.4rem;
-        }
-
-        /* Enhanced Form Buttons */
-        .form-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            align-items: stretch;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
-            color: var(--dark-bg);
-            border: none;
-            padding: 1.2rem 2.5rem;
-            border-radius: var(--border-radius-lg);
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            flex: 1;
-            transition: var(--transition);
-            box-shadow: var(--shadow-gold);
-            font-family: 'Inter', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .clear-cart-btn {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: var(--text-white);
-            border: none;
-            padding: 1.2rem;
-            border-radius: var(--border-radius-lg);
-            font-size: 1.3rem;
-            cursor: pointer;
-            min-width: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        .clear-cart-btn:hover {
-            background: linear-gradient(135deg, #c0392b, #a93226);
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
-        }
-
-        /* Enhanced Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius-lg);
-            padding: 2.5rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-hover);
-        }
-
-        .modal h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-        }
-
-        /* Selection Modal */
-        .selection-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .option-btn {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            padding: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--text-white);
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .option-btn:hover {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: var(--primary-gold);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .login-btn, .cancel-btn {
-            width: 100%;
-            padding: 12px 25px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: var(--transition);
-            margin-bottom: 0.8rem;
-        }
-
-        .login-btn {
-            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
-            color: var(--dark-bg);
-            border: none;
-            box-shadow: var(--shadow-gold);
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-        }
-
-        .cancel-btn {
-            background: transparent;
-            color: var(--text-white);
-            border: 2px solid var(--primary-red);
-        }
-
-        .cancel-btn:hover {
-            background: rgba(196, 30, 58, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .error-msg {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: var(--text-white);
-            padding: 12px;
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
-            text-align: center;
-            display: none;
-            font-weight: 600;
-        }
-
-        /* Enhanced Staff Area */
-        .staff-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .staff-header h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
-            color: var(--text-white);
-            border: none;
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-red);
-        }
-
-        .order-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--primary-gold);
-            animation: slideIn 0.4s ease;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .order-id {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-gold);
-            font-weight: 700;
             font-size: 1.2rem;
+            opacity: 0.9;
         }
 
-        .order-status {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .delivery-type {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-            border: 1px solid rgba(52, 152, 219, 0.3);
-        }
-
-        .delivery-type.takeaway {
-            background: rgba(230, 126, 34, 0.2);
-            color: #e67e22;
-            border-color: rgba(230, 126, 34, 0.3);
-        }
-
-        .status-pending { 
-            background: rgba(230, 126, 34, 0.2); 
-            color: #e67e22;
-            border: 1px solid rgba(230, 126, 34, 0.3);
-        }
-        .status-preparing { 
-            background: rgba(52, 152, 219, 0.2); 
-            color: #3498db;
-            border: 1px solid rgba(52, 152, 219, 0.3);
-        }
-        .status-ready { 
-            background: rgba(39, 174, 96, 0.2); 
-            color: #27ae60;
-            border: 1px solid rgba(39, 174, 96, 0.3);
-        }
-        .status-delivered { 
-            background: rgba(149, 165, 166, 0.2); 
-            color: #95a5a6;
-            border: 1px solid rgba(149, 165, 166, 0.3);
-        }
-
-        .status-buttons {
-            margin-top: 1rem;
-        }
-
-        .status-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: var(--text-white);
-            border: none;
-            padding: 8px 15px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            margin-right: 10px;
+        .footer .slogan {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
             font-weight: 600;
-            transition: var(--transition);
+            font-style: italic;
+            color: var(--primary-gold);
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
         }
 
-        .status-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-        }
-
-        /* Enhanced Notification */
-        .notification {
+        /* Enhanced Back to top button */
+        .back-to-top {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            color: var(--text-white);
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            display: none;
-            z-index: 3000;
-            box-shadow: var(--shadow);
-            font-weight: 600;
-            min-width: 250px;
-        }
-
-        .notification.show {
-            display: block;
-            animation: slideInRight 0.4s ease;
-        }
-
-        .notification.success {
-            border-left: 4px solid #27ae60;
-        }
-
-        .notification.error {
-            border-left: 4px solid #e74c3c;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(212, 175, 55, 0.3);
+            bottom: 2.5rem;
+            right: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-red), var(--deep-red));
+            color: var(--primary-gold);
+            border: none;
             border-radius: 50%;
-            border-top-color: var(--primary-gold);
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover,
+        .back-to-top:focus {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 20px 60px rgba(196, 30, 58, 0.6);
+            background: linear-gradient(135deg, var(--deep-red), var(--primary-red));
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary-gold);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.8rem;
+            transition: var(--transition);
+            border-radius: 12px;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: scale(1.1);
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .menu-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .cart-item {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 10, 10, 0.98);
+                backdrop-filter: blur(25px);
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
+                padding: 2rem;
+                box-shadow: var(--shadow);
+                border-radius: 0 0 25px 25px;
+                gap: 1.5rem;
+                border: 1px solid var(--glass-border);
+                border-top: none;
             }
 
-            .cart-controls {
-                align-self: flex-end;
+            .nav-menu.active {
+                display: flex;
+                animation: slideDown 0.4s ease-out;
             }
 
-            .radio-group {
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-content {
+                padding: 0 1rem;
+            }
+
+            .section {
+                padding: 5rem 1rem;
+            }
+
+            .menu-categories {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .social-links {
                 flex-direction: column;
                 align-items: center;
-                gap: 1rem;
+                gap: 2rem;
             }
 
-            .radio-option {
-                min-width: 250px;
+            .social-link {
+                width: 280px;
+                justify-content: center;
             }
 
-            .form-buttons {
-                flex-direction: column;
-                gap: 1rem;
+            .back-to-top {
+                bottom: 2rem;
+                right: 2rem;
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
             }
 
-            .clear-cart-btn {
-                min-width: auto;
-                padding: 12px;
-            }
-
-            .staff-header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .connection-status {
-                position: static;
-                display: inline-block;
-                margin-bottom: 1rem;
-            }
-
-            .menu-btn {
-                position: static;
-                margin-bottom: 1rem;
-            }
-
-            .menu-dropdown {
-                position: static;
-                display: block;
-                margin-bottom: 1rem;
-            }
-
-            .header {
+            .menu-item {
                 padding: 1.5rem;
             }
 
-            .menu-item-card {
+            .cta-buttons {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+                gap: 1.5rem;
             }
 
-            .menu-item-card .item-price {
-                margin-right: 0;
-                align-self: flex-end;
+            .cta-button {
+                width: 100%;
+                max-width: 320px;
+                justify-content: center;
             }
 
-            .selection-options {
-                grid-template-columns: 1fr;
+            .about-content {
+                padding: 2.5rem;
             }
         }
 
         @media (max-width: 480px) {
-            .header h1 {
-                font-size: 2rem;
+            .nav-container {
+                padding: 0 1rem;
             }
 
-            .menu-category, .cart, .order-form {
-                padding: 1.5rem;
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
             }
 
-            .modal-content {
+            .item-price {
+                margin-left: 0;
+                align-self: flex-end;
+                font-size: 1.5rem;
+            }
+
+            .menu-category {
+                padding: 2rem;
+            }
+
+            .contact-card {
+                padding: 2rem;
+            }
+
+            .about-content {
                 padding: 2rem;
             }
         }
@@ -1129,7 +981,7 @@
             }
         }
 
-        /* Reduced motion */
+        /* Reduced motion - Disable all animations */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -1138,1357 +990,579 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
+            
+            .section {
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+            }
+            
+            .menu-item,
+            .contact-card {
+                opacity: 1 !important;
+                transform: translateX(0) translateY(0) !important;
+            }
         }
 
         /* Focus styles for accessibility */
         *:focus {
             outline: 3px solid var(--primary-gold);
-            outline-offset: 2px;
+            outline-offset: 3px;
+        }
+
+        /* Loading animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="connection-status" id="connectionStatus">
-                <span class="spinner"></span> Conectando...
-            </div>
-            <h1>Pedidos Online</h1>
-            <p class="subtitle">Bar Zukka - Sabores únicos em Portalegre</p>
-            
-            <button class="menu-btn" id="menuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            
-            <div class="menu-dropdown" id="menuDropdown">
-                <div class="menu-item" id="homeMenuItem">
-                    <span><i class="fas fa-home"></i> Página Inicial</span>
-                </div>
-                <div class="menu-item" id="clearCartMenuItem">
-                    <span><i class="fas fa-trash"></i> Limpar Pedido</span>
-                    <span class="cart-badge" id="menuCartBadge"></span>
-                </div>
-                <div class="menu-item" id="refreshMenuItem">
-                    <span><i class="fas fa-sync"></i> Atualizar Página</span>
-                </div>
-                <div class="menu-item" id="staffMenuItem">
-                    <span><i class="fas fa-user-shield"></i> Área Staff</span>
-                </div>
-            </div>
-        </div>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
 
-        <!-- Página de Pedidos -->
-        <div id="customerPage" class="page active">
-            <div class="menu-grid">
-                <!-- Pratos do Dia - Inserido via JavaScript -->
-                <div class="menu-category" id="dailyDishCategory">
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <header class="header" role="banner">
+        <nav class="nav-container" role="navigation" aria-label="Menu principal">
+            <a href="index.html" class="logo" aria-label="Bar Zukka - Página inicial">
+                <img src="logos.png" alt="Bar Zukka" class="logo-img">
+                Bar Zukka
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="#home" aria-label="Ir para início">Início</a></li>
+                <li><a href="#menu" aria-label="Ver cardápio">Cardápio</a></li>
+                <li><a href="#about" aria-label="Conhecer sobre nós">Sobre Nós</a></li>
+                <li><a href="#contact" aria-label="Entrar em contato">Contato</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="Abrir menu mobile" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <section id="home" class="hero" role="banner">
+            <div class="hero-bg"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Bar Zukka</h1>
+                <p class="subtitle">Sabores únicos no coração de Portalegre</p>
+                <div class="cta-buttons">
+                    <a href="#menu" class="cta-button" aria-label="Ver nosso cardápio">
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                        Ver Cardápio
+                    </a>
+                    <a href="pedidos.html" class="cta-button secondary" aria-label="Fazer pedido online">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                        Pedido Online
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="section" role="region" aria-labelledby="menu-title">
+            <h2 id="menu-title" class="section-title">Nosso Cardápio</h2>
+            <div class="menu-categories">
+                <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-utensils"></i>
-                        Prato do Dia
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
+                        Pratos do Dia
                     </h3>
-                    <div id="dailyDishes">
-                        <!-- Pratos serão inseridos via JavaScript baseado no dia -->
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Segunda a Sexta-feira</div>
+                            <div class="item-description">Prato do dia decidido diariamente com ingredientes frescos</div>
+                        </div>
+                        <span class="item-price">€10,00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Sábado - Galinhada</div>
+                            <div class="item-description">Galinha cozinhada com arroz e temperos especiais</div>
+                        </div>
+                        <span class="item-price">€12,00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Domingo - Churrasco</div>
+                            <div class="item-description">Churrasco tradicional com acompanhamentos</div>
+                        </div>
+                        <span class="item-price">€15,00</span>
                     </div>
                 </div>
 
                 <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-glass-water"></i>
+                        <i class="fas fa-glass-water" aria-hidden="true"></i>
                         Bebidas
                     </h3>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Refrigerantes / Sumos</h4>
-                            <p>Coca-Cola, Sprite, Fanta, Guaraná, 7Up, Sumol, Ice Tea</p>
+                            <div class="item-name">Refrigerantes / Sumos</div>
+                            <div class="item-description">Coca-Cola, Sprite, Fanta, Guaraná, 7Up, Sumol, Ice Tea</div>
                         </div>
                         <span class="item-price">€1,60</span>
-                        <button class="add-btn" data-category="refrigerantes">+</button>
                     </div>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Sucos B!</h4>
-                            <p>B! Limão, Laranja, Maçã Verde, Frutos Vermelhos</p>
+                            <div class="item-name">Sucos B!</div>
+                            <div class="item-description">B! Limão, Laranja, Maçã Verde, Frutos Vermelhos</div>
                         </div>
                         <span class="item-price">€2,00</span>
-                        <button class="add-btn" data-category="sucosb">+</button>
                     </div>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Compal</h4>
-                            <p>Pêra, Pêssego, Frutos Vermelhos, Manga-Laranja</p>
+                            <div class="item-name">Compal</div>
+                            <div class="item-description">Pêra, Pêssego, Frutos Vermelhos, Manga-Laranja</div>
                         </div>
                         <span class="item-price">€1,30</span>
-                        <button class="add-btn" data-category="compal">+</button>
                     </div>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Água 50cl</h4>
-                            <p>Água natural em garrafa de 50cl</p>
+                            <div class="item-name">Água</div>
+                            <div class="item-description">33cl / 50cl — €1,00 | 1.5L — €2,00</div>
                         </div>
-                        <span class="item-price">€1,00</span>
-                        <button class="add-btn" data-item="Água 50cl" data-price="1.00">+</button>
+                        <span class="item-price">€1,00+</span>
                     </div>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Água 1.5L</h4>
-                            <p>Água natural em garrafa grande</p>
-                        </div>
-                        <span class="item-price">€2,00</span>
-                        <button class="add-btn" data-item="Água 1.5L" data-price="2.00">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Pedras</h4>
-                            <p>Natural, Limão, Morango, Mexerica</p>
+                            <div class="item-name">Pedras</div>
+                            <div class="item-description">Normal, Limão, Morango, Mexerica</div>
                         </div>
                         <span class="item-price">€1,30</span>
-                        <button class="add-btn" data-category="pedras">+</button>
                     </div>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Energéticos</h4>
-                            <p>Red Bull, Monster</p>
+                            <div class="item-name">Energéticos</div>
+                            <div class="item-description">Red Bull, Monster</div>
                         </div>
                         <span class="item-price">€3,60</span>
-                        <button class="add-btn" data-category="energeticos">+</button>
                     </div>
                 </div>
 
                 <div class="menu-category">
                     <h3 class="category-title">
-                        <i class="fas fa-hamburger"></i>
-                        Salgados
-                    </h3>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Hambúrguer</h4>
-                            <p>Pão, hambúrguer, alface, tomate</p>
-                        </div>
-                        <span class="item-price">€2,60</span>
-                        <button class="add-btn" data-item="Hambúrguer" data-price="2.60">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolas de Carne/Frango</h4>
-                            <p>Especialidades brasileiras fritas</p>
-                        </div>
-                        <span class="item-price">€2,60</span>
-                        <button class="add-btn" data-category="bolas">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Salgados Variados</h4>
-                            <p>Atum, Coxinha, Mini pizza, Enrolados, Folhados</p>
-                        </div>
-                        <span class="item-price">€1,60</span>
-                        <button class="add-btn" data-category="salgados">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Massa Frita</h4>
-                            <p>Doce frito tradicional</p>
-                        </div>
-                        <span class="item-price">€1,30</span>
-                        <button class="add-btn" data-item="Massa Frita" data-price="1.30">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Sonho / Bola de Berlim</h4>
-                            <p>Doce frito com recheio</p>
-                        </div>
-                        <span class="item-price">€1,30</span>
-                        <button class="add-btn" data-item="Sonho/Bola de Berlim" data-price="1.30">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Batata Snack</h4>
-                            <p>Batata frita crocante</p>
-                        </div>
-                        <span class="item-price">€1,30</span>
-                        <button class="add-btn" data-item="Batata Snack" data-price="1.30">+</button>
-                    </div>
-                </div>
-
-                <div class="menu-category">
-                    <h3 class="category-title">
-                        <i class="fas fa-birthday-cake"></i>
-                        Doces & Bolos
-                    </h3>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolo de Prestígio</h4>
-                            <p>Bolo de chocolate com coco e leite condensado</p>
-                        </div>
-                        <span class="item-price">€2,60</span>
-                        <button class="add-btn" data-item="Bolo de Prestígio" data-price="2.60">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Cuca Frutos Vermelhos</h4>
-                            <p>Bolo alemão com frutas vermelhas</p>
-                        </div>
-                        <span class="item-price">€2,50</span>
-                        <button class="add-btn" data-item="Cuca Frutos Vermelhos" data-price="2.50">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolo de Mandioca</h4>
-                            <p>Tradicional bolo brasileiro</p>
-                        </div>
-                        <span class="item-price">€2,00</span>
-                        <button class="add-btn" data-item="Bolo de Mandioca" data-price="2.00">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolo de Nozes</h4>
-                            <p>Bolo caseiro com nozes</p>
-                        </div>
-                        <span class="item-price">€1,80</span>
-                        <button class="add-btn" data-item="Bolo de Nozes" data-price="1.80">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolo de Queijo e Goiabada</h4>
-                            <p>Combinação doce brasileira clássica</p>
-                        </div>
-                        <span class="item-price">€1,80</span>
-                        <button class="add-btn" data-item="Bolo de Queijo e Goiabada" data-price="1.80">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Rosca de Coco</h4>
-                            <p>Rosca tradicional com coco</p>
-                        </div>
-                        <span class="item-price">€1,80</span>
-                        <button class="add-btn" data-item="Rosca de Coco" data-price="1.80">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Bolo de Coco</h4>
-                            <p>Bolo húmido com coco ralado</p>
-                        </div>
-                        <span class="item-price">€1,60</span>
-                        <button class="add-btn" data-item="Bolo de Coco" data-price="1.60">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Brigadeiro</h4>
-                            <p>Doce brasileiro de chocolate</p>
-                        </div>
-                        <span class="item-price">€1,20</span>
-                        <button class="add-btn" data-item="Brigadeiro" data-price="1.20">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Beijinho</h4>
-                            <p>Doce brasileiro de coco</p>
-                        </div>
-                        <span class="item-price">€1,20</span>
-                        <button class="add-btn" data-item="Beijinho" data-price="1.20">+</button>
-                    </div>
-                    <div class="menu-item-card">
-                        <div class="item-info">
-                            <h4>Suspiro</h4>
-                            <p>Doce leve de clara de ovo</p>
-                        </div>
-                        <span class="item-price">€0,40</span>
-                        <button class="add-btn" data-item="Suspiro" data-price="0.40">+</button>
-                    </div>
-                </div>
-
-                <div class="menu-category">
-                    <h3 class="category-title">
-                        <i class="fas fa-leaf"></i>
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
                         Chás & Infusões
                     </h3>
-                    <div class="menu-item-card">
+                    <div class="menu-item">
                         <div class="item-info">
-                            <h4>Chás Variados</h4>
-                            <p>Tetley, Lipton, Camomila, Chá Verde, e outros</p>
+                            <div class="item-name">Chás Tetley</div>
+                            <div class="item-description">Maçã & Canela, English Breakfast, Immune, Dormir</div>
                         </div>
                         <span class="item-price">€0,90</span>
-                        <button class="add-btn" data-category="chas">+</button>
                     </div>
-                </div>
-            </div>
-
-            <div class="cart">
-                <h3>Seu Pedido</h3>
-                <div class="cart-counter" id="cartCounter">0</div>
-                <div id="cartItems">
-                    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                        <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
-                        Carrinho vazio
-                    </p>
-                </div>
-                <div id="cartTotal" style="display: none;" class="cart-total">Total: €0,00</div>
-            </div>
-
-            <div class="order-form" id="orderForm" style="display: none;">
-                <h3>Finalizar Pedido</h3>
-                
-                <!-- Opções de Entrega -->
-                <div class="delivery-options">
-                    <h4><i class="fas fa-utensils"></i> Como prefere receber seu pedido?</h4>
-                    <div class="radio-group">
-                        <div class="radio-option" data-delivery="dine-in">
-                            <input type="radio" name="deliveryType" value="dine-in" id="dineIn">
-                            <span class="icon">🍽️</span>
-                            <label for="dineIn">Comer no Restaurante</label>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Chás Especiais</div>
+                            <div class="item-description">Mirtilo & Açaí, Chá Verde, Camomila, Cidreira, Tomilho</div>
                         </div>
-                        <div class="radio-option" data-delivery="takeaway">
-                            <input type="radio" name="deliveryType" value="takeaway" id="takeaway">
-                            <span class="icon">📦</span>
-                            <label for="takeaway">Para Levar</label>
+                        <span class="item-price">€0,90</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Lipton & Outros</div>
+                            <div class="item-description">Vanilla Caramel Black Tea, Queima Gorduras</div>
                         </div>
+                        <span class="item-price">€0,90</span>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Nome</label>
-                    <input type="text" id="customerName" required placeholder="Seu nome completo">
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-hamburger" aria-hidden="true"></i>
+                        Salgados
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Hambúrguer</div>
+                            <div class="item-description">Pão, hambúrguer, alface, tomate</div>
+                        </div>
+                        <span class="item-price">€2,60</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolas de Carne/Frango</div>
+                            <div class="item-description">Especialidades brasileiras fritas</div>
+                        </div>
+                        <span class="item-price">€2,60</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Salgados Variados</div>
+                            <div class="item-description">Atum, Coxinha, Mini pizza, Enrolados, Folhados</div>
+                        </div>
+                        <span class="item-price">€1,60</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Massa Frita / Sonho</div>
+                            <div class="item-description">Doces fritos tradicionais</div>
+                        </div>
+                        <span class="item-price">€1,30</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label><i class="fas fa-phone"></i> Telefone</label>
-                    <input type="tel" id="customerPhone" required placeholder="Seu telefone">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-table"></i> Mesa</label>
-                    <input type="number" id="tableNumber" min="1" max="50" required placeholder="Número da mesa">
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-comment"></i> Observações (opcional)</label>
-                    <textarea id="observations" rows="3" placeholder="Alguma observação especial..."></textarea>
-                </div>
-                
-                <!-- Botões de ação -->
-                <div class="form-buttons">
-                    <button class="submit-btn" id="submitBtn">
-                        <i class="fas fa-paper-plane"></i> Confirmar Pedido
-                    </button>
-                    <button class="clear-cart-btn" id="clearCartBtn" title="Limpar todo o carrinho">
-                        <i class="fas fa-trash"></i>
-                    </button>
+
+                <div class="menu-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-birthday-cake" aria-hidden="true"></i>
+                        Doces & Bolos
+                    </h3>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolo de Prestígio</div>
+                            <div class="item-description">Bolo de chocolate com coco e leite condensado</div>
+                        </div>
+                        <span class="item-price">€2,60</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Cuca Frutos Vermelhos</div>
+                            <div class="item-description">Bolo alemão com frutas vermelhas</div>
+                        </div>
+                        <span class="item-price">€2,50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolo de Mandioca</div>
+                            <div class="item-description">Tradicional bolo brasileiro</div>
+                        </div>
+                        <span class="item-price">€2,00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolo de Nozes</div>
+                            <div class="item-description">Bolo caseiro com nozes</div>
+                        </div>
+                        <span class="item-price">€1,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolo de Queijo e Goiabada</div>
+                            <div class="item-description">Combinação doce brasileira clássica</div>
+                        </div>
+                        <span class="item-price">€1,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Rosca de Coco</div>
+                            <div class="item-description">Rosca tradicional com coco</div>
+                        </div>
+                        <span class="item-price">€1,80</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Bolo de Coco</div>
+                            <div class="item-description">Bolo húmido com coco ralado</div>
+                        </div>
+                        <span class="item-price">€1,60</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Massa Frita</div>
+                            <div class="item-description">Doce frito tradicional</div>
+                        </div>
+                        <span class="item-price">€1,30</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Sonho / Bola de Berlim</div>
+                            <div class="item-description">Doce frito com recheio</div>
+                        </div>
+                        <span class="item-price">€1,30</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Brigadeiro</div>
+                            <div class="item-description">Doce brasileiro de chocolate</div>
+                        </div>
+                        <span class="item-price">€1,20</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Beijinho</div>
+                            <div class="item-description">Doce brasileiro de coco</div>
+                        </div>
+                        <span class="item-price">€1,20</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name">Suspiro</div>
+                            <div class="item-description">Doce leve de clara de ovo</div>
+                        </div>
+                        <span class="item-price">€0,40</span>
+                    </div>
                 </div>
             </div>
+        </section>
+
+        <section id="about" class="section" role="region" aria-labelledby="about-title">
+            <h2 id="about-title" class="section-title">Sobre Nós</h2>
+            <div class="about-content">
+                <p>No coração histórico de Portalegre, o <strong>Bar Zukka</strong> representa um encontro único entre a autenticidade portuguesa e a hospitalidade calorosa. Desde a nossa abertura, cultivamos o compromisso inabalável de proporcionar experiências gastronômicas memoráveis aos nossos estimados clientes.</p>
+                <p>Nossa cozinha celebra a rica tradição culinária portuguesa, utilizando exclusivamente ingredientes frescos e de qualidade superior, cuidadosamente selecionados de produtores locais. Cada prato é uma homenagem às receitas tradicionais, reinventadas com toques modernos e criativos que conquistam todos os paladares.</p>
+                <p>O ambiente acolhedor e sofisticado do Bar Zukka convida a momentos especiais, seja para um almoço descontraído entre amigos, um jantar romântico em família, ou simplesmente para apreciar nossos cocktails especiais acompanhados de petiscos gourmet. Venha descobrir por que somos a escolha preferida de quem busca excelência, sabor e alegria genuína em Portalegre.</p>
+            </div>
+        </section>
+
+        <section id="contact" class="section" role="region" aria-labelledby="contact-title">
+            <h2 id="contact-title" class="section-title">Contacto</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fas fa-map-marker-alt icon" aria-hidden="true"></i>
+                    <h3>Localização</h3>
+                    <p><a href="https://maps.google.com/maps?q=Rua+Luís+de+Camões,+11+Portalegre" target="_blank" class="contact-link">Rua Luís de Camões, 11</a></p>
+                    <p>7300-194 Portalegre</p>
+                    <p>Portugal</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-phone-alt icon" aria-hidden="true"></i>
+                    <h3>Telefone</h3>
+                    <p><a href="tel:+351245038389" class="contact-link">+351 245 038 389</a></p>
+                    <p>Chamada para rede fixa nacional</p>
+                    <p>Atendimento das 8h às 23h</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-envelope icon" aria-hidden="true"></i>
+                    <h3>E-mail</h3>
+                    <p><a href="mailto:info@barzukka.pt" class="contact-link">info@barzukka.pt</a></p>
+                    <p>Resposta garantida em 24 horas</p>
+                    <p>Para reservas e informações</p>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-clock icon" aria-hidden="true"></i>
+                    <h3>Horários de Funcionamento</h3>
+                    <p><strong>Terça - Quarta:</strong> 06h00 - 23h00</p>
+                    <p><strong>Quinta - Domingo:</strong> 06h00 - 05h00</p>
+                    <p><strong>Segunda-feira:</strong> Encerrado</p>
+                </div>
+            </div>
+
+            <div class="social-media">
+                <h3>Conecte-se Connosco</h3>
+                <div class="social-links">
+                    <a href="https://chat.whatsapp.com/J7DfK2fXmor1BsMnmJCfci" class="social-link whatsapp" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Bar Zukka">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        WhatsApp
+                    </a>
+                    <a href="https://www.instagram.com/_barzukka?igsh=MXkxbnU3NXRmc3cwZg==" class="social-link instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram do Bar Zukka">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                        Instagram
+                    </a>
+                    <a href="https://www.facebook.com/share/1CaumdfATz/" class="social-link facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook do Bar Zukka">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        Facebook
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <p>&copy; 2024 Bar Zukka. Todos os direitos reservados.</p>
+            <p class="slogan">"No Bar Zukka, cada prato é uma experiência, cada visita é um momento de sabor e amizade."</p>
         </div>
+    </footer>
 
-        <!-- Página de Funcionários -->
-        <div id="staffPage" class="page">
-            <div class="staff-header">
-                <h2><i class="fas fa-chart-line"></i> Pedidos em Tempo Real</h2>
-                <div>
-                    <button class="status-btn" id="refreshOrdersBtn" style="margin-right: 10px;">
-                        <i class="fas fa-sync"></i> Atualizar
-                    </button>
-                    <button class="logout-btn" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </button>
-                </div>
-            </div>
-            <div id="ordersContainer">
-                <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                    <span class="spinner"></span> Carregando pedidos...
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <h3><i class="fas fa-shield-alt"></i> Login Staff</h3>
-            <div class="error-msg" id="errorMsg">Usuário ou senha incorretos!</div>
-            <div class="form-group">
-                <label><i class="fas fa-user"></i> Usuário</label>
-                <input type="text" id="username">
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-lock"></i> Senha</label>
-                <input type="password" id="password">
-            </div>
-            <button class="login-btn" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Entrar
-            </button>
-            <button class="cancel-btn" id="cancelLoginBtn">
-                <i class="fas fa-times"></i> Cancelar
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal de Seleção -->
-    <div class="modal" id="selectionModal">
-        <div class="modal-content">
-            <h3 id="selectionTitle">Escolha uma opção</h3>
-            <div id="selectionOptions" class="selection-options">
-                <!-- Opções serão inseridas via JavaScript -->
-            </div>
-            <button class="cancel-btn" id="cancelSelectionBtn">
-                <i class="fas fa-times"></i> Cancelar
-            </button>
-        </div>
-    </div>
-
-    <!-- Notificação -->
-    <div class="notification" id="notification"></div>
-
-    <!-- Firebase Script -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        // Configuração Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnbH88eFiiVCZXkF4MTLVDvTM_0HaOkGk",
-            authDomain: "bar-zukka-pedidos.firebaseapp.com",
-            projectId: "bar-zukka-pedidos",
-            storageBucket: "bar-zukka-pedidos.firebasestorage.app",
-            messagingSenderId: "879169407064",
-            appId: "1:879169407064:web:d241fc5a303c2ad35f222d",
-            measurementId: "G-4WX7KZN2LY"
-        };
-
-        let db;
-        let firebaseReady = false;
-
-        function updateConnectionStatus(status, message) {
-            const statusEl = document.getElementById('connectionStatus');
-            if (statusEl) {
-                statusEl.className = `connection-status status-${status}`;
-                
-                const icons = {
-                    connected: '🟢',
-                    disconnected: '🔴',
-                    connecting: '🟡'
-                };
-                
-                statusEl.innerHTML = `${icons[status]} ${message}`;
-            }
-        }
-
-        // Timeout para conexão Firebase
-        const connectionTimeout = setTimeout(() => {
-            if (!firebaseReady) {
-                updateConnectionStatus('disconnected', 'Modo Offline');
-                console.log('⚠️ Firebase timeout - modo offline');
-            }
-        }, 8000);
-
-        try {
-            // Inicializar Firebase
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            
-            // Testar conexão
-            const testQuery = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
-            
-            onSnapshot(testQuery, (snapshot) => {
-                if (!firebaseReady) {
-                    clearTimeout(connectionTimeout);
-                    firebaseReady = true;
-                    updateConnectionStatus('connected', 'Conectado');
-                    console.log('✅ Firebase conectado');
-                }
-                
-                const orders = [];
-                snapshot.forEach((doc) => {
-                    orders.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                window.allOrders = orders;
-                console.log(`📦 ${orders.length} pedidos carregados`);
-                
-                // Atualizar staff se estiver ativo
-                if (document.getElementById('staffPage').classList.contains('active')) {
-                    window.BarZukka.displayOrders(orders);
-                }
-            });
-            
-        } catch (error) {
-            clearTimeout(connectionTimeout);
-            console.error('❌ Erro Firebase:', error);
-            updateConnectionStatus('disconnected', 'Modo Offline');
-        }
-
-        // Funções globais
-        window.firebaseReady = () => firebaseReady;
-        window.db = db;
-        
-        window.saveOrderToFirebase = async function(orderData) {
-            const docRef = await addDoc(collection(db, 'orders'), {
-                ...orderData,
-                timestamp: serverTimestamp()
-            });
-            return docRef.id;
-        };
-        
-        window.updateOrderStatusFirebase = async function(orderId, newStatus) {
-            const orderRef = doc(db, 'orders', orderId);
-            await updateDoc(orderRef, {
-                status: newStatus,
-                lastUpdated: serverTimestamp()
-            });
-        };
-        
-        window.allOrders = [];
-    </script>
+    <button class="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
 
     <script>
-        // Sistema completo Bar Zukka
-        window.BarZukka = (function() {
-            'use strict';
+        // Loading screen
+        window.addEventListener('load', () => {
+            const loading = document.getElementById('loading');
+            loading.classList.add('fade-out');
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 500);
+        });
 
-            // Variáveis privadas
-            let cart = [];
-            let selectedDeliveryType = '';
-            let orderCounter = 1;
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navMenu = document.querySelector('.nav-menu');
 
-            // Credenciais
-            const credentials = {
-                'admin': 'zukka123',
-                'funcionario': 'bar2024'
-            };
-
-            // Opções de seleção para cada categoria
-            const selectionOptions = {
-                refrigerantes: {
-                    title: 'Escolha seu Refrigerante/Sumo',
-                    price: 1.60,
-                    options: [
-                        'Coca-Cola', 'Coca-Cola Zero', 'Sprite', 'Sprite Raspberry', 
-                        'Sprite Watermelon', 'Fanta', 'Guaraná', '7 Up', 
-                        'Sumol Laranja', 'Sumol Ananás', 'Schweppes', 
-                        'Ice Tea Limão', 'Ice Tea Manga', 'Ice Tea Pêssego'
-                    ]
-                },
-                sucosb: {
-                    title: 'Escolha seu Suco B!',
-                    price: 2.00,
-                    options: ['B! Limão', 'B! Laranja', 'B! Maçã Verde', 'B! Frutos Vermelhos']
-                },
-                compal: {
-                    title: 'Escolha seu Compal',
-                    price: 1.30,
-                    options: ['Compal Pêra', 'Compal Pêssego', 'Compal Frutos Vermelhos', 'Compal Manga-Laranja']
-                },
-                pedras: {
-                    title: 'Escolha seu Pedras',
-                    price: 1.30,
-                    options: ['Pedras Natural', 'Pedras Limão', 'Pedras Morango', 'Pedras Mexerica']
-                },
-                energeticos: {
-                    title: 'Escolha seu Energético',
-                    price: 3.60,
-                    options: ['Red Bull', 'Monster']
-                },
-                bolas: {
-                    title: 'Escolha sua Bola',
-                    price: 2.60,
-                    options: ['Bola de Carne', 'Bola de Frango']
-                },
-                salgados: {
-                    title: 'Escolha seu Salgado',
-                    price: 1.60,
-                    options: [
-                        'Salgado de Atum', 'Coxinha', 'Mini Pizza de Carne', 
-                        'Enrolado Bacon Queijo', 'Enrolado Chouriço', 
-                        'Folhado Misto', 'Salgado Frito Misto', 
-                        'Salgado Assado de Frango', 'Salgado Misto com Tomate'
-                    ]
-                },
-                chas: {
-                    title: 'Escolha seu Chá',
-                    price: 0.90,
-                    options: [
-                        'Lipton Vanilla Caramel', 'Tetley Maçã & Canela', 
-                        'Tetley Chá Preto', 'Tetley Immune', 'Tetley Dormir',
-                        'Tetley Mirtilo & Açaí', 'Camomila Dona Matilde', 
-                        'Tetley Camomila', 'Tetley Cidreira', 'Tetley Chá Verde',
-                        'Tetley Tomilho', 'Chá Queima Gorduras'
-                    ]
-                }
-            };
-
-            // Função para carregar pratos do dia baseado no dia da semana
-            function loadDailyDishes() {
-                const dailyDishesContainer = document.getElementById('dailyDishes');
-                if (!dailyDishesContainer) {
-                    return;
-                }
-                
-                const today = new Date().getDay(); // 0 = Domingo, 1 = Segunda, etc.
-                let dishHTML = '';
-                
-                if (today === 0) { // Domingo
-                    dishHTML = `
-                        <div class="menu-item-card">
-                            <div class="item-info">
-                                <h4>Churrasco</h4>
-                                <p>Churrasco tradicional com acompanhamentos</p>
-                            </div>
-                            <span class="item-price">€15,00</span>
-                            <button class="add-btn" data-item="Churrasco (Domingo)" data-price="15.00">+</button>
-                        </div>
-                    `;
-                } else if (today === 6) { // Sábado
-                    dishHTML = `
-                        <div class="menu-item-card">
-                            <div class="item-info">
-                                <h4>Galinhada</h4>
-                                <p>Galinha cozinhada com arroz e temperos especiais</p>
-                            </div>
-                            <span class="item-price">€12,00</span>
-                            <button class="add-btn" data-item="Galinhada (Sábado)" data-price="12.00">+</button>
-                        </div>
-                    `;
-                } else { // Segunda a Sexta
-                    dishHTML = `
-                        <div class="menu-item-card">
-                            <div class="item-info">
-                                <h4>Prato do Dia</h4>
-                                <p>Prato especial decidido diariamente com ingredientes frescos</p>
-                            </div>
-                            <span class="item-price">€10,00</span>
-                            <button class="add-btn" data-item="Prato do Dia" data-price="10.00">+</button>
-                        </div>
-                    `;
-                }
-                
-                dailyDishesContainer.innerHTML = dishHTML;
-                console.log('✅ Pratos do dia carregados');
-                
-                // Re-bind events
-                bindAddButtonEvents();
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const isExpanded = navMenu.classList.contains('active');
+            mobileMenuBtn.setAttribute('aria-expanded', isExpanded);
+            
+            const icon = mobileMenuBtn.querySelector('i');
+            if (isExpanded) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
             }
+        });
 
-            // Função para mostrar modal de seleção
-            function showSelectionModal(category) {
-                const modal = document.getElementById('selectionModal');
-                const title = document.getElementById('selectionTitle');
-                const optionsContainer = document.getElementById('selectionOptions');
-                
-                const categoryData = selectionOptions[category];
-                if (!categoryData || !modal || !title || !optionsContainer) return;
-                
-                title.textContent = categoryData.title;
-                
-                let optionsHTML = '';
-                categoryData.options.forEach(option => {
-                    optionsHTML += `
-                        <button class="option-btn" data-option="${option}" data-price="${categoryData.price}">
-                            ${option}
-                        </button>
-                    `;
-                });
-                
-                optionsContainer.innerHTML = optionsHTML;
-                
-                // Bind option button events
-                optionsContainer.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('option-btn')) {
-                        const optionName = e.target.dataset.option;
-                        const price = parseFloat(e.target.dataset.price);
-                        addToCart(optionName, price);
-                        hideSelectionModal();
-                    }
-                });
-                
-                modal.classList.add('show');
-            }
-
-            // Função para esconder modal de seleção
-            function hideSelectionModal() {
-                const modal = document.getElementById('selectionModal');
-                if (modal) {
-                    modal.classList.remove('show');
-                }
-            }
-
-            // Função para adicionar ao carrinho
-            function addToCart(name, price) {
-                const existing = cart.find(item => item.name === name);
-                if (existing) {
-                    existing.quantity += 1;
-                } else {
-                    cart.push({ name, price, quantity: 1 });
-                }
-                updateCart();
-                showNotification(name + ' adicionado!', 'success');
-            }
-
-            // Função para atualizar quantidade
-            function updateQuantity(name, change) {
-                const item = cart.find(item => item.name === name);
-                if (item) {
-                    item.quantity += change;
-                    if (item.quantity <= 0) {
-                        cart = cart.filter(item => item.name !== name);
-                    }
-                    updateCart();
-                }
-            }
-
-            // Função para atualizar carrinho
-            function updateCart() {
-                const cartItems = document.getElementById('cartItems');
-                const cartTotal = document.getElementById('cartTotal');
-                const orderForm = document.getElementById('orderForm');
-                const cartCounter = document.getElementById('cartCounter');
-                const menuBadge = document.getElementById('menuCartBadge');
-
-                if (!cartItems || !cartTotal || !orderForm || !cartCounter || !menuBadge) return;
-
-                // Calcular total de itens
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                
-                // Atualizar counter
-                if (totalItems > 0) {
-                    cartCounter.style.display = 'flex';
-                    cartCounter.textContent = totalItems;
-                    menuBadge.style.display = 'inline-block';
-                    menuBadge.textContent = totalItems;
-                } else {
-                    cartCounter.style.display = 'none';
-                    menuBadge.style.display = 'none';
-                }
-
-                if (cart.length === 0) {
-                    cartItems.innerHTML = `
-                        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                            <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
-                            Carrinho vazio
-                        </p>`;
-                    cartTotal.style.display = 'none';
-                    orderForm.style.display = 'none';
-                    return;
-                }
-
-                let html = '';
-                let total = 0;
-
-                cart.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-
-                    html += `
-                        <div class="cart-item">
-                            <div>
-                                <strong>${item.name}</strong><br>
-                                <small style="color: var(--text-muted);">€${item.price.toFixed(2)} cada</small>
-                            </div>
-                            <div class="cart-controls">
-                                <button class="qty-btn" data-action="decrease" data-item="${item.name}">-</button>
-                                <span style="font-weight: 600; margin: 0 8px;">${item.quantity}</span>
-                                <button class="qty-btn" data-action="increase" data-item="${item.name}">+</button>
-                                <strong style="margin-left: 15px; color: var(--primary-gold);">€${itemTotal.toFixed(2)}</strong>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                cartItems.innerHTML = html;
-                cartTotal.innerHTML = `Total: €${total.toFixed(2)}`;
-                cartTotal.style.display = 'block';
-                orderForm.style.display = 'block';
-                
-                // Bind quantity button events
-                bindQuantityButtonEvents();
-            }
-
-            // Função para limpar formulário
-            function clearForm() {
-                const customerName = document.getElementById('customerName');
-                const customerPhone = document.getElementById('customerPhone');
-                const tableNumber = document.getElementById('tableNumber');
-                const observations = document.getElementById('observations');
-                
-                if (customerName) customerName.value = '';
-                if (customerPhone) customerPhone.value = '';
-                if (tableNumber) tableNumber.value = '';
-                if (observations) observations.value = '';
-                
-                selectedDeliveryType = '';
-                
-                document.querySelectorAll('.radio-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
-                    radio.checked = false;
-                });
-            }
-
-            // Função para limpar carrinho
-            function clearCart() {
-                cart = [];
-                updateCart();
-                showNotification('Pedido limpo', 'success');
-                toggleMenu();
-            }
-
-            // Função para limpar carrinho no formulário
-            function clearCartInForm() {
-                if (cart.length === 0) {
-                    showNotification('Carrinho já está vazio', 'error');
-                    return;
-                }
-                
-                if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
-                    cart = [];
-                    updateCart();
-                    clearForm();
-                    showNotification('Carrinho limpo com sucesso!', 'success');
-                }
-            }
-
-            // Função para submeter pedido
-            async function submitOrder() {
-                console.log('Iniciando envio do pedido...');
-                
-                // Pegar valores dos campos
-                const name = document.getElementById('customerName')?.value.trim() || '';
-                const phone = document.getElementById('customerPhone')?.value.trim() || '';
-                const tableValue = document.getElementById('tableNumber')?.value.trim() || '';
-                const obs = document.getElementById('observations')?.value.trim() || '';
-
-                console.log('Dados do formulário:', { name, phone, tableValue, selectedDeliveryType, cartLength: cart.length });
-
-                // Validações
-                if (!name) {
-                    showNotification('Por favor, preencha seu nome', 'error');
-                    document.getElementById('customerName')?.focus();
-                    return;
-                }
-
-                if (!phone) {
-                    showNotification('Por favor, preencha seu telefone', 'error');
-                    document.getElementById('customerPhone')?.focus();
-                    return;
-                }
-
-                if (!tableValue) {
-                    showNotification('Por favor, informe o número da mesa', 'error');
-                    document.getElementById('tableNumber')?.focus();
-                    return;
-                }
-
-                const table = parseInt(tableValue);
-                if (isNaN(table) || table < 1 || table > 50) {
-                    showNotification('Número da mesa deve ser entre 1 e 50', 'error');
-                    document.getElementById('tableNumber')?.focus();
-                    return;
-                }
-
-                if (!selectedDeliveryType) {
-                    showNotification('Por favor, selecione o tipo de entrega', 'error');
-                    return;
-                }
-
-                if (cart.length === 0) {
-                    showNotification('Adicione pelo menos um item ao pedido', 'error');
-                    return;
-                }
-
-                // Preparar pedido
-                const submitBtn = document.getElementById('submitBtn');
-                const originalText = submitBtn?.innerHTML || '';
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
-                }
-
-                try {
-                    const orderData = {
-                        orderNumber: orderCounter++,
-                        name,
-                        phone,
-                        table,
-                        observations: obs,
-                        deliveryType: selectedDeliveryType,
-                        items: [...cart],
-                        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                        status: 'pending',
-                        createdAt: new Date().toLocaleString()
-                    };
-
-                    console.log('Dados do pedido preparados:', orderData);
-
-                    // Tentar salvar no Firebase
-                    if (window.firebaseReady && window.firebaseReady() && window.db) {
-                        console.log('Salvando no Firebase...');
-                        await window.saveOrderToFirebase(orderData);
-                        console.log('✅ Pedido salvo no Firebase');
-                    } else {
-                        // Fallback localStorage
-                        console.log('Firebase não disponível, salvando offline...');
-                        orderData.id = Date.now().toString();
-                        const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-                        savedOrders.unshift(orderData);
-                        localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
-                        console.log('📱 Pedido salvo offline');
-                    }
-
-                    showNotification(`Pedido #${orderData.orderNumber} enviado com sucesso!`, 'success');
-                    
-                    // Limpar formulário e carrinho
-                    cart = [];
-                    updateCart();
-                    clearForm();
-
-                } catch (error) {
-                    console.error('Erro ao enviar pedido:', error);
-                    showNotification('Erro ao enviar pedido. Tente novamente.', 'error');
-                } finally {
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    }
-                }
-            }
-
-            // Função para mostrar notificação
-            function showNotification(message, type = 'success') {
-                const notification = document.getElementById('notification');
-                if (notification) {
-                    notification.className = `notification ${type} show`;
-                    notification.textContent = message;
-                    
-                    setTimeout(() => {
-                        notification.classList.remove('show');
-                    }, 4000);
-                }
-            }
-
-            // Função para alternar menu
-            function toggleMenu() {
-                const dropdown = document.getElementById('menuDropdown');
-                if (dropdown) {
-                    dropdown.classList.toggle('show');
-                }
-            }
-
-            // Função para mostrar página
-            function showPage(pageId) {
-                document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                const targetPage = document.getElementById(pageId);
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                }
-            }
-
-            // Função para mostrar login
-            function showLogin() {
-                const modal = document.getElementById('loginModal');
-                if (modal) {
-                    modal.classList.add('show');
-                }
-                toggleMenu();
-            }
-
-            // Função para esconder login
-            function hideLogin() {
-                const modal = document.getElementById('loginModal');
-                const username = document.getElementById('username');
-                const password = document.getElementById('password');
-                const errorMsg = document.getElementById('errorMsg');
-                
-                if (modal) modal.classList.remove('show');
-                if (username) username.value = '';
-                if (password) password.value = '';
-                if (errorMsg) errorMsg.style.display = 'none';
-            }
-
-            // Função para fazer login
-            function login() {
-                const username = document.getElementById('username')?.value || '';
-                const password = document.getElementById('password')?.value || '';
-
-                if (credentials[username] && credentials[username] === password) {
-                    hideLogin();
-                    showPage('staffPage');
-                    loadOrders();
-                    showNotification('Login realizado com sucesso!', 'success');
-                } else {
-                    const errorMsg = document.getElementById('errorMsg');
-                    const passwordField = document.getElementById('password');
-                    if (errorMsg) errorMsg.style.display = 'block';
-                    if (passwordField) passwordField.value = '';
-                }
-            }
-
-            // Função para logout
-            function logout() {
-                showPage('customerPage');
-                showNotification('Logout realizado', 'success');
-            }
-
-            // Função para carregar pedidos
-            function loadOrders() {
-                if (window.allOrders && window.allOrders.length > 0) {
-                    displayOrders(window.allOrders);
-                } else {
-                    // Fallback localStorage
-                    const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-                    displayOrders(savedOrders);
-                }
-            }
-
-            // Função para exibir pedidos
-            function displayOrders(orders) {
-                const container = document.getElementById('ordersContainer');
-                if (!container) return;
-                
-                if (!orders || orders.length === 0) {
-                    container.innerHTML = `
-                        <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                            <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
-                            <p>Nenhum pedido no momento</p>
-                        </div>`;
-                    return;
-                }
-
-                let html = '';
-                orders.forEach(order => {
-                    const statusText = {
-                        'pending': 'Pendente',
-                        'preparing': 'Preparando',
-                        'ready': 'Pronto',
-                        'delivered': 'Entregue'
-                    }[order.status];
-
-                    const deliveryText = order.deliveryType === 'dine-in' ? 'Comer no Restaurante' : 'Para Levar';
-                    const deliveryClass = order.deliveryType === 'takeaway' ? 'takeaway' : '';
-
-                    html += `
-                        <div class="order-card">
-                            <div class="order-header">
-                                <span class="order-id">Pedido #${order.orderNumber}</span>
-                                <div>
-                                    <span class="order-status status-${order.status}">${statusText}</span>
-                                    <span class="delivery-type ${deliveryClass}">${deliveryText}</span>
-                                </div>
-                            </div>
-                            <div style="margin: 10px 0; line-height: 1.8;">
-                                <strong><i class="fas fa-user"></i> Cliente:</strong> ${order.name}<br>
-                                <strong><i class="fas fa-phone"></i> Telefone:</strong> ${order.phone}<br>
-                                <strong><i class="fas fa-table"></i> Mesa:</strong> ${order.table}<br>
-                                <strong><i class="fas fa-clock"></i> Horário:</strong> ${order.createdAt}
-                                ${order.observations ? '<br><strong><i class="fas fa-comment"></i> Obs:</strong> ' + order.observations : ''}
-                            </div>
-                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: var(--border-radius); margin: 15px 0; border: 1px solid rgba(255,255,255,0.08);">
-                                ${order.items.map(item => `
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                        <span>${item.quantity}x ${item.name}</span>
-                                        <span style="color: var(--primary-gold); font-weight: 600;">€${(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                `).join('')}
-                                <div style="border-top: 2px solid var(--primary-gold); padding-top: 10px; margin-top: 15px; font-weight: 700; text-align: right; color: var(--primary-gold); font-size: 1.1rem;">
-                                    Total: €${order.total.toFixed(2)}
-                                </div>
-                            </div>
-                            ${order.status !== 'delivered' ? `
-                                <div class="status-buttons">
-                                    ${order.status === 'pending' ? `<button class="status-btn" data-order-id="${order.id}" data-status="preparing"><i class="fas fa-play"></i> Iniciar Preparo</button>` : ''}
-                                    ${order.status === 'preparing' ? `<button class="status-btn" data-order-id="${order.id}" data-status="ready"><i class="fas fa-check"></i> Marcar Pronto</button>` : ''}
-                                    ${order.status === 'ready' ? `<button class="status-btn" data-order-id="${order.id}" data-status="delivered"><i class="fas fa-handshake"></i> Entregar</button>` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-                
-                // Bind status button events
-                bindStatusButtonEvents();
-            }
-
-            // Função para mudar status do pedido
-            async function changeOrderStatus(orderId, newStatus) {
-                try {
-                    if (window.firebaseReady && window.firebaseReady() && window.db) {
-                        await window.updateOrderStatusFirebase(orderId, newStatus);
-                    } else {
-                        // Atualizar localStorage
-                        const savedOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
-                        const orderIndex = savedOrders.findIndex(o => o.id === orderId);
-                        if (orderIndex !== -1) {
-                            savedOrders[orderIndex].status = newStatus;
-                            localStorage.setItem('zukka_orders', JSON.stringify(savedOrders));
-                            displayOrders(savedOrders);
-                        }
-                    }
-                    showNotification('Status atualizado!', 'success');
-                } catch (error) {
-                    console.error('Erro ao atualizar status:', error);
-                    showNotification('Erro ao atualizar status', 'error');
-                }
-            }
-
-            // Função para selecionar tipo de entrega
-            function selectDeliveryType(type, element) {
-                selectedDeliveryType = type;
-                
-                // Remover seleção anterior
-                document.querySelectorAll('.radio-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                
-                // Adicionar seleção ao elemento clicado
-                if (element) {
-                    element.classList.add('selected');
-                    const radioInput = element.querySelector('input[type="radio"]');
-                    if (radioInput) {
-                        radioInput.checked = true;
-                    }
-                }
-                
-                console.log('Tipo de entrega selecionado:', type);
-            }
-
-            // Event binding functions
-            function bindAddButtonEvents() {
-                document.querySelectorAll('.add-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        const category = this.dataset.category;
-                        const item = this.dataset.item;
-                        const price = parseFloat(this.dataset.price);
-                        
-                        if (category) {
-                            showSelectionModal(category);
-                        } else if (item && !isNaN(price)) {
-                            addToCart(item, price);
-                        }
-                    });
-                });
-            }
-
-            function bindQuantityButtonEvents() {
-                document.querySelectorAll('.qty-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        const action = this.dataset.action;
-                        const itemName = this.dataset.item;
-                        
-                        if (action === 'increase') {
-                            updateQuantity(itemName, 1);
-                        } else if (action === 'decrease') {
-                            updateQuantity(itemName, -1);
-                        }
-                    });
-                });
-            }
-
-            function bindStatusButtonEvents() {
-                document.querySelectorAll('.status-btn').forEach(btn => {
-                    if (btn.dataset.orderId) {
-                        btn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            
-                            const orderId = this.dataset.orderId;
-                            const newStatus = this.dataset.status;
-                            
-                            if (orderId && newStatus) {
-                                changeOrderStatus(orderId, newStatus);
-                            }
-                        });
-                    }
-                });
-            }
-
-            function bindDeliveryOptionsEvents() {
-                document.querySelectorAll('.radio-option').forEach(option => {
-                    option.addEventListener('click', function(e) {
-                        const deliveryType = this.dataset.delivery;
-                        if (deliveryType) {
-                            selectDeliveryType(deliveryType, this);
-                        }
-                    });
-                });
-            }
-
-            // Inicialização
-            function init() {
-                console.log('🚀 Sistema Bar Zukka iniciando...');
-                
-                // Carregar pratos do dia
-                loadDailyDishes();
-                
-                // Bind initial events
-                bindAddButtonEvents();
-                bindDeliveryOptionsEvents();
-                
-                // Menu toggle
-                const menuBtn = document.getElementById('menuBtn');
-                if (menuBtn) {
-                    menuBtn.addEventListener('click', toggleMenu);
-                }
-                
-                // Menu items
-                const homeMenuItem = document.getElementById('homeMenuItem');
-                if (homeMenuItem) {
-                    homeMenuItem.addEventListener('click', () => {
-                        window.location.href = 'index.html';
-                        toggleMenu();
-                    });
-                }
-                
-                const clearCartMenuItem = document.getElementById('clearCartMenuItem');
-                if (clearCartMenuItem) {
-                    clearCartMenuItem.addEventListener('click', clearCart);
-                }
-                
-                const refreshMenuItem = document.getElementById('refreshMenuItem');
-                if (refreshMenuItem) {
-                    refreshMenuItem.addEventListener('click', () => window.location.reload());
-                }
-                
-                const staffMenuItem = document.getElementById('staffMenuItem');
-                if (staffMenuItem) {
-                    staffMenuItem.addEventListener('click', showLogin);
-                }
-                
-                // Login form
-                const loginBtn = document.getElementById('loginBtn');
-                if (loginBtn) {
-                    loginBtn.addEventListener('click', login);
-                }
-                
-                const cancelLoginBtn = document.getElementById('cancelLoginBtn');
-                if (cancelLoginBtn) {
-                    cancelLoginBtn.addEventListener('click', hideLogin);
-                }
-                
-                // Order form
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.addEventListener('click', submitOrder);
-                }
-                
-                const clearCartBtn = document.getElementById('clearCartBtn');
-                if (clearCartBtn) {
-                    clearCartBtn.addEventListener('click', clearCartInForm);
-                }
-                
-                // Staff area
-                const logoutBtn = document.getElementById('logoutBtn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', logout);
-                }
-                
-                const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
-                if (refreshOrdersBtn) {
-                    refreshOrdersBtn.addEventListener('click', loadOrders);
-                }
-                
-                // Selection modal
-                const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
-                if (cancelSelectionBtn) {
-                    cancelSelectionBtn.addEventListener('click', hideSelectionModal);
-                }
-                
-                // Close modals when clicking outside
-                document.addEventListener('click', function(e) {
-                    // Close menu dropdown
-                    if (!e.target.closest('#menuBtn') && !e.target.closest('#menuDropdown')) {
-                        const dropdown = document.getElementById('menuDropdown');
-                        if (dropdown) {
-                            dropdown.classList.remove('show');
-                        }
-                    }
-                    
-                    // Close modals when clicking on backdrop
-                    if (e.target.classList.contains('modal')) {
-                        if (e.target.id === 'selectionModal') {
-                            hideSelectionModal();
-                        } else if (e.target.id === 'loginModal') {
-                            hideLogin();
-                        }
-                    }
-                });
-                
-                // Keyboard shortcuts
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        const loginModal = document.getElementById('loginModal');
-                        const selectionModal = document.getElementById('selectionModal');
-                        const menuDropdown = document.getElementById('menuDropdown');
-                        
-                        if (loginModal && loginModal.classList.contains('show')) {
-                            hideLogin();
-                        } else if (selectionModal && selectionModal.classList.contains('show')) {
-                            hideSelectionModal();
-                        } else if (menuDropdown && menuDropdown.classList.contains('show')) {
-                            toggleMenu();
-                        }
-                    }
-                });
-                
-                // Enter key for login
-                const loginModal = document.getElementById('loginModal');
-                if (loginModal) {
-                    loginModal.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            login();
-                        }
-                    });
-                }
-                
-                console.log('✅ Sistema Bar Zukka iniciado com sucesso!');
-            }
-
-            // API pública
-            return {
-                init: init,
-                loadDailyDishes: loadDailyDishes,
-                showSelectionModal: showSelectionModal,
-                hideSelectionModal: hideSelectionModal,
-                addToCart: addToCart,
-                updateQuantity: updateQuantity,
-                updateCart: updateCart,
-                clearCart: clearCart,
-                clearForm: clearForm,
-                submitOrder: submitOrder,
-                showNotification: showNotification,
-                toggleMenu: toggleMenu,
-                showPage: showPage,
-                showLogin: showLogin,
-                hideLogin: hideLogin,
-                login: login,
-                logout: logout,
-                loadOrders: loadOrders,
-                displayOrders: displayOrders,
-                changeOrderStatus: changeOrderStatus,
-                selectDeliveryType: selectDeliveryType
-            };
-
-        })();
-
-        // Inicializar quando DOM estiver carregado
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(window.BarZukka.init, 100);
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
             });
-        } else {
-            setTimeout(window.BarZukka.init, 100);
+        });
+
+        // Header scroll effect
+        const header = document.querySelector('.header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Back to top button
+        const backToTopBtn = document.querySelector('.back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Enhanced scroll reveal animation - Only for desktop (1024px+)
+        if (window.innerWidth >= 1024) {
+            const observerOptions = {
+                threshold: 0.05,
+                rootMargin: '0px 0px -30px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Only observe sections on desktop
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
         }
 
-        // Backup - se por algum motivo não inicializou em 2 segundos, tentar novamente
-        setTimeout(function() {
-            if (!document.getElementById('dailyDishes').innerHTML.trim()) {
-                console.log('⚠️ Reinicializando sistema...');
-                window.BarZukka.init();
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerHeight = document.querySelector('.header').offsetHeight;
+                    const targetPosition = target.offsetTop - headerHeight - 20;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Enhanced accessibility - keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close mobile menu with Escape key
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    mobileMenuBtn.focus();
+                }
             }
-        }, 2000);
+        });
+
+        // Interactive hover effects for menu items (desktop only)
+        if (window.innerWidth > 768) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(15px) scale(1.02)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0) scale(1)';
+                });
+            });
+        }
+
+        // Add dynamic year to footer
+        const currentYear = new Date().getFullYear();
+        document.querySelector('.footer p').innerHTML = `&copy; ${currentYear} Bar Zukka. Todos os direitos reservados.`;
+
+        // Mobile visibility check and fallback
+        function ensureMobileVisibility() {
+            if (window.innerWidth <= 768) {
+                // Force all content to be visible on mobile
+                document.querySelectorAll('.section, .menu-item, .contact-card').forEach(element => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateX(0) translateY(0)';
+                    element.style.visibility = 'visible';
+                });
+                console.log('Mobile visibility ensured');
+            }
+        }
+
+        // Run mobile visibility check
+        ensureMobileVisibility();
+        
+        // Re-run on resize
+        window.addEventListener('resize', () => {
+            setTimeout(ensureMobileVisibility, 100);
+        });
+
+        console.log('Bar Zukka - Website loaded successfully! Mobile-optimized version.');
     </script>
 </body>
 </html>
