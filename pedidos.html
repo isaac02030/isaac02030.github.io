@@ -1631,6 +1631,20 @@
                 
                 document.getElementById('clearCartMenuItem').addEventListener('click', clearCart);
                 document.getElementById('refreshMenuItem').addEventListener('click', () => window.location.reload());
+                document.getElementById('staffMenuItem').addEventListener('click', showLogin);
+                
+                // Login e Staff
+                document.getElementById('loginBtn').addEventListener('click', login);
+                document.getElementById('cancelLoginBtn').addEventListener('click', hideLogin);
+                document.getElementById('logoutBtn').addEventListener('click', logout);
+                document.getElementById('refreshOrdersBtn').addEventListener('click', loadOrders);
+                
+                // Enter key para login
+                document.getElementById('loginModal').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
                 
                 // Event Delegation
                 document.getElementById('menuGrid').addEventListener('click', function(e) {
