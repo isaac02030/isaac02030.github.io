@@ -11,6 +11,31 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Configurações do Firebase - Bar Zukka
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnbH88eFiiVCZXkF4MTLVDvTM_0HaOkGk",
+            authDomain: "bar-zukka-pedidos.firebaseapp.com",
+            projectId: "bar-zukka-pedidos",
+            storageBucket: "bar-zukka-pedidos.firebasestorage.app",
+            messagingSenderId: "879169407064",
+            appId: "1:879169407064:web:d241fc5a303c2ad35f222d",
+            measurementId: "G-4WX7KZN2LY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expor para uso global
+        window.firebase = { db, collection, addDoc, onSnapshot, updateDoc, doc, orderBy, query, limit };
+    </script>
+    
     <style>
         :root {
             --primary-red: #c41e3a;
@@ -103,6 +128,12 @@
             background: rgba(39, 174, 96, 0.2);
             color: #2ecc71;
             border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .connection-status.offline {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
         }
 
         /* Menu Hambúrguer */
@@ -968,7 +999,7 @@
 
     <div class="container">
         <div class="header">
-            <div class="connection-status">🟢 Conectado</div>
+            <div class="connection-status" id="connectionStatus">🟢 Conectado ao Firebase</div>
             
             <button class="menu-toggle" id="menuToggle">
                 <span></span>
@@ -1142,7 +1173,7 @@
             <div id="ordersContainer">
                 <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
                     <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
-                    <p>Nenhum pedido no momento</p>
+                    <p>Carregando pedidos...</p>
                 </div>
             </div>
         </div>
@@ -1179,7 +1210,7 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // Sistema Bar Zukka - Versão Final Completa
+        // Sistema Bar Zukka - Integrado com Firebase
         (function() {
             'use strict';
 
@@ -1187,7 +1218,8 @@
             let cart = [];
             let selectedDeliveryType = '';
             let orderCounter = parseInt(localStorage.getItem('zukka_order_counter') || '1');
-            let allOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
+            let allOrders = [];
+            let firebaseConnected = false;
 
             // Credenciais
             const credentials = {
@@ -1209,6 +1241,29 @@
                     options: ['Red Bull', 'Monster']
                 }
             };
+
+            // Firebase functions - aguardar carregamento
+            function waitForFirebase(callback) {
+                if (window.firebase && window.firebase.db) {
+                    callback();
+                } else {
+                    setTimeout(() => waitForFirebase(callback), 100);
+                }
+            }
+
+            // Verificar conexão Firebase
+            function checkFirebaseConnection() {
+                const status = document.getElementById('connectionStatus');
+                if (window.firebase && window.firebase.db) {
+                    firebaseConnected = true;
+                    status.innerHTML = '🟢 Conectado ao Firebase';
+                    status.className = 'connection-status';
+                } else {
+                    firebaseConnected = false;
+                    status.innerHTML = '🔴 Firebase não configurado';
+                    status.className = 'connection-status offline';
+                }
+            }
 
             // Carregar pratos do dia
             function loadDailyDishes() {
@@ -1404,8 +1459,24 @@
                 });
             }
 
+            // Firebase - Enviar pedido
+            async function submitOrderToFirebase(orderData) {
+                if (!firebaseConnected || !window.firebase) {
+                    throw new Error('Firebase não conectado');
+                }
+
+                try {
+                    const { db, collection, addDoc } = window.firebase;
+                    const docRef = await addDoc(collection(db, 'orders'), orderData);
+                    return { success: true, id: docRef.id };
+                } catch (error) {
+                    console.error('Erro Firebase:', error);
+                    throw error;
+                }
+            }
+
             // Pedido
-            function submitOrder() {
+            async function submitOrder() {
                 const name = document.getElementById('customerName').value.trim();
                 const phone = document.getElementById('customerPhone').value.trim();
                 const tableValue = document.getElementById('tableNumber').value.trim();
@@ -1443,34 +1514,61 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-                setTimeout(() => {
-                    const orderData = {
-                        id: Date.now().toString(),
-                        orderNumber: orderCounter++,
-                        name,
-                        phone,
-                        table,
-                        observations: obs,
-                        deliveryType: selectedDeliveryType,
-                        items: [...cart],
-                        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                        status: 'pending',
-                        createdAt: new Date().toLocaleString()
-                    };
+                const orderData = {
+                    orderNumber: orderCounter++,
+                    name,
+                    phone,
+                    table,
+                    observations: obs,
+                    deliveryType: selectedDeliveryType,
+                    items: [...cart],
+                    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
 
+                try {
+                    if (firebaseConnected) {
+                        // Tentar enviar para Firebase
+                        const result = await submitOrderToFirebase(orderData);
+                        orderData.id = result.id;
+                        
+                        showNotification(`Pedido #${orderData.orderNumber} enviado para o Firebase!`, 'success');
+                    } else {
+                        // Fallback: salvar localmente
+                        orderData.id = Date.now().toString();
+                        showNotification(`Pedido #${orderData.orderNumber} salvo localmente (Firebase indisponível)`, 'error');
+                    }
+
+                    // Backup local sempre
                     allOrders.unshift(orderData);
                     localStorage.setItem('zukka_orders', JSON.stringify(allOrders));
                     localStorage.setItem('zukka_order_counter', orderCounter.toString());
 
-                    showNotification(`Pedido #${orderData.orderNumber} enviado!`, 'success');
-                    
+                    // Limpar formulário
                     cart = [];
                     updateCart();
                     clearForm();
                     
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }, 1500);
+                } catch (error) {
+                    console.error('Erro ao enviar pedido:', error);
+                    
+                    // Salvar localmente como fallback
+                    orderData.id = Date.now().toString();
+                    allOrders.unshift(orderData);
+                    localStorage.setItem('zukka_orders', JSON.stringify(allOrders));
+                    localStorage.setItem('zukka_order_counter', orderCounter.toString());
+                    
+                    showNotification(`Pedido #${orderData.orderNumber} salvo localmente (erro no Firebase)`, 'error');
+                    
+                    // Limpar formulário mesmo com erro
+                    cart = [];
+                    updateCart();
+                    clearForm();
+                }
+                
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             }
 
             function selectDeliveryType(type, element) {
@@ -1529,9 +1627,52 @@
                 document.getElementById(pageId).classList.add('active');
             }
 
-            function loadOrders() {
+            // Firebase - Carregar pedidos em tempo real
+            function setupFirebaseListener() {
+                if (!firebaseConnected || !window.firebase) return;
+
+                const { db, collection, onSnapshot, query, orderBy: fbOrderBy, limit: fbLimit } = window.firebase;
+                
+                try {
+                    const q = query(
+                        collection(db, 'orders'),
+                        fbOrderBy('createdAt', 'desc'),
+                        fbLimit(50)
+                    );
+                    
+                    onSnapshot(q, (snapshot) => {
+                        allOrders = [];
+                        snapshot.forEach((doc) => {
+                            allOrders.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        // Sincronizar com localStorage
+                        localStorage.setItem('zukka_orders', JSON.stringify(allOrders));
+                        
+                        if (document.getElementById('staffPage').classList.contains('active')) {
+                            displayOrders(allOrders);
+                        }
+                        
+                        showNotification('Pedidos atualizados em tempo real!', 'success');
+                    });
+                } catch (error) {
+                    console.error('Erro ao configurar listener:', error);
+                    loadOrdersFromLocal();
+                }
+            }
+
+            function loadOrdersFromLocal() {
                 allOrders = JSON.parse(localStorage.getItem('zukka_orders') || '[]');
                 displayOrders(allOrders);
+            }
+
+            function loadOrders() {
+                if (firebaseConnected) {
+                    setupFirebaseListener();
+                } else {
+                    loadOrdersFromLocal();
+                    showNotification('Carregando pedidos locais (Firebase indisponível)', 'error');
+                }
             }
 
             function displayOrders(orders) {
@@ -1551,6 +1692,8 @@
                         'delivered': 'Entregue'
                     }[order.status];
 
+                    const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Data não disponível';
+
                     html += `
                         <div class="order-card">
                             <div class="order-header">
@@ -1561,7 +1704,7 @@
                                 <strong>Cliente:</strong> ${order.name}<br>
                                 <strong>Telefone:</strong> ${order.phone}<br>
                                 <strong>Mesa:</strong> ${order.table}<br>
-                                <strong>Horário:</strong> ${order.createdAt}
+                                <strong>Horário:</strong> ${createdAt}
                                 ${order.observations ? '<br><strong>Obs:</strong> ' + order.observations : ''}
                             </div>
                             <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: var(--border-radius); margin: 15px 0;">
@@ -1589,13 +1732,42 @@
                 container.innerHTML = html;
             }
 
-            function changeOrderStatus(orderId, newStatus) {
-                const orderIndex = allOrders.findIndex(o => o.id === orderId);
-                if (orderIndex !== -1) {
-                    allOrders[orderIndex].status = newStatus;
-                    localStorage.setItem('zukka_orders', JSON.stringify(allOrders));
-                    displayOrders(allOrders);
-                    showNotification('Status atualizado!', 'success');
+            // Firebase - Atualizar status
+            async function updateOrderStatusFirebase(orderId, newStatus) {
+                if (!firebaseConnected || !window.firebase) {
+                    throw new Error('Firebase não conectado');
+                }
+
+                try {
+                    const { db, doc, updateDoc } = window.firebase;
+                    await updateDoc(doc(db, 'orders', orderId), {
+                        status: newStatus,
+                        updatedAt: new Date().toISOString()
+                    });
+                    return { success: true };
+                } catch (error) {
+                    console.error('Erro ao atualizar status:', error);
+                    throw error;
+                }
+            }
+
+            async function changeOrderStatus(orderId, newStatus) {
+                try {
+                    if (firebaseConnected) {
+                        await updateOrderStatusFirebase(orderId, newStatus);
+                        showNotification('Status atualizado no Firebase!', 'success');
+                    } else {
+                        throw new Error('Firebase indisponível');
+                    }
+                } catch (error) {
+                    // Fallback: atualizar localmente
+                    const orderIndex = allOrders.findIndex(o => o.id === orderId);
+                    if (orderIndex !== -1) {
+                        allOrders[orderIndex].status = newStatus;
+                        localStorage.setItem('zukka_orders', JSON.stringify(allOrders));
+                        displayOrders(allOrders);
+                        showNotification('Status atualizado localmente (Firebase indisponível)', 'error');
+                    }
                 }
             }
 
@@ -1613,6 +1785,14 @@
             // Inicialização
             function init() {
                 loadDailyDishes();
+                
+                // Verificar Firebase após carregamento
+                setTimeout(() => {
+                    checkFirebaseConnection();
+                    if (firebaseConnected) {
+                        setupFirebaseListener();
+                    }
+                }, 1000);
                 
                 // Menu
                 document.getElementById('menuToggle').addEventListener('click', toggleMenu);
