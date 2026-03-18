@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #FF5C00;
+    --fire-dim: rgba(255,92,0,0.1);
+    --bg: #0A0A08;
+    --bg2: #111110;
+    --bg3: #181816;
+    --text: #F0EDE6;
+    --muted: #6E6C65;
+    --muted2: #9A9890;
+    --border: rgba(240,237,230,0.07);
+    --border2: rgba(240,237,230,0.13);
+    --success: #44CC88;
+    --error: #FF4444;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;cursor:none;}
+  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{
+    background:var(--bg2);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    padding:32px 0;position:sticky;top:0;height:100vh;
+  }
+  .sidebar-logo{
+    font-family:'Bebas Neue',sans-serif;font-size:24px;
+    letter-spacing:.1em;padding:0 28px 32px;
+    border-bottom:1px solid var(--border);
+  }
+  .sidebar-logo em{color:var(--fire);font-style:normal;}
+
+  .sidebar-nav{padding:24px 0;flex:1;}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 28px;font-size:13px;font-weight:500;
+    color:var(--muted);cursor:none;transition:color .2s,background .2s;
+    border:none;background:transparent;width:100%;text-align:left;
+    font-family:'Bricolage Grotesque',sans-serif;
+    position:relative;
+  }
+  .nav-item:hover{color:var(--text);background:rgba(240,237,230,0.03);}
+  .nav-item.active{color:var(--fire);}
+  .nav-item.active::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;
+    width:2px;background:var(--fire);
+  }
+  .nav-icon{font-size:16px;width:20px;text-align:center;}
+
+  .sidebar-user{
+    padding:20px 28px;border-top:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;
+  }
+  .user-avatar{
+    width:36px;height:36px;background:var(--fire-dim);
+    border:1px solid rgba(255,92,0,0.3);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--fire);
+    flex-shrink:0;
+  }
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-role{font-size:11px;color:var(--muted);}
+  .btn-logout{
+    background:transparent;border:none;color:var(--muted);
+    cursor:none;font-size:16px;padding:4px;transition:color .2s;
+  }
+  .btn-logout:hover{color:var(--error);}
+
+  /* MAIN */
+  .main{padding:48px;overflow-y:auto;}
+
+  .main-header{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:48px;
+  }
+  .main-header h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:48px;line-height:.95;letter-spacing:.02em;
+  }
+  .main-header h1 span{color:var(--fire);}
+  .main-header p{font-size:14px;color:var(--muted2);margin-top:6px;}
+
+  .btn-new-mission{
+    background:var(--fire);color:#fff;border:none;
+    padding:12px 24px;
+    font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.06em;
+    cursor:none;transition:opacity .2s,transform .15s;white-space:nowrap;
+  }
+  .btn-new-mission:hover{opacity:.88;transform:translateY(-1px);}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
+  .stat-card{background:var(--bg);padding:28px 24px;}
+  .stat-card .stat-num{
+    font-family:'Bebas Neue',sans-serif;font-size:52px;
+    color:var(--fire);line-height:1;
+  }
+  .stat-card .stat-label{font-size:12px;color:var(--muted2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+
+  /* MISSÃO ATIVA */
+  .section-label{
+    font-size:11px;font-weight:600;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--fire);
+    margin-bottom:20px;
+  }
+
+  .mission-card{
+    background:var(--bg2);border:1px solid var(--border);
+    padding:32px;margin-bottom:32px;
+    animation:up .5s ease both;
+  }
+  .mission-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+  .mission-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.03em;}
+  .mission-mode{
+    padding:4px 12px;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+  }
+  .mission-mode.rival{background:rgba(255,92,0,0.1);color:var(--fire);}
+  .mission-mode.parceiro{background:rgba(68,204,136,0.1);color:var(--success);}
+  .mission-mode.solo{background:rgba(240,237,230,0.06);color:var(--muted2);}
+
+  /* Barra de progresso */
+  .progress-wrap{margin-bottom:24px;}
+  .progress-info{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted2);}
+  .progress-bar{height:4px;background:rgba(240,237,230,0.08);position:relative;}
+  .progress-fill{height:100%;background:var(--fire);transition:width .6s ease;}
+
+  /* Placar rival */
+  .score-section{
+    display:grid;grid-template-columns:1fr auto 1fr;
+    gap:16px;align-items:center;
+    padding:20px;background:var(--bg3);
+    margin-bottom:24px;
+  }
+  .score-side{text-align:center;}
+  .score-side .s-name{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+  .score-side .s-num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;}
+  .score-side .s-num.fire{color:var(--fire);}
+  .score-vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--border2);}
+
+  /* Check-in */
+  .checkin-section{display:flex;align-items:center;gap:16px;}
+  .btn-checkin{
+    flex:1;background:var(--fire);color:#fff;border:none;
+    padding:14px;font-family:'Bebas Neue',sans-serif;
+    font-size:18px;letter-spacing:.06em;cursor:none;
+    transition:opacity .2s;
+  }
+  .btn-checkin:hover{opacity:.88;}
+  .btn-checkin:disabled{background:rgba(68,204,136,0.2);color:var(--success);cursor:not-allowed;opacity:1;}
+  .checkin-note{font-size:12px;color:var(--muted2);}
+
+  /* GRID inferior */
+  .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+
+  /* Mini calendário */
+  .calendar-card{background:var(--bg2);border:1px solid var(--border);padding:28px;}
+  .calendar-card h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;margin-bottom:20px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-day{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:500;
+    border:1px solid var(--border);
+  }
+  .cal-day.done{background:rgba(255,92,0,0.15);border-color:rgba(255,92,0,0.3);color:var(--fire);}
+  .cal-day.missed{background:rgba(255,68,68,0.06);border-color:rgba(255,68,68,0.15);color:var(--error);}
+  .cal-day.today{border-color:var(--fire);color:var(--text);}
+  .cal-day.future{opacity:.25;}
+
+  /* Chat */
+  .chat-card{background:var(--bg2);border:1px solid var(--border);padding:28px;display:flex;flex-direction:column;}
+  .chat-card h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;margin-bottom:16px;}
+  .chat-messages{flex:1;overflow-y:auto;max-height:220px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  .chat-msg{padding:10px 14px;max-width:80%;font-size:13px;line-height:1.5;}
+  .chat-msg.mine{background:rgba(255,92,0,0.12);border-left:2px solid var(--fire);align-self:flex-end;}
+  .chat-msg.theirs{background:var(--bg3);border-left:2px solid var(--border2);align-self:flex-start;}
+  .chat-msg .msg-sender{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .chat-input-row{display:flex;gap:0;}
+  .chat-input{
+    flex:1;background:var(--bg3);border:1px solid var(--border2);
+    border-right:none;color:var(--text);padding:12px 14px;
+    font-family:'Bricolage Grotesque',sans-serif;font-size:14px;
+    outline:none;cursor:none;
+  }
+  .chat-input::placeholder{color:var(--muted);}
+  .chat-input:focus{border-color:var(--fire);}
+  .btn-send{
+    background:var(--fire);color:#fff;border:none;
+    padding:12px 18px;cursor:none;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;
+    transition:opacity .2s;
+  }
+  .btn-send:hover{opacity:.88;}
+
+  /* MODAL nova missão */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.8);
+    z-index:1000;display:none;align-items:center;justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--bg2);border:1px solid var(--border2);
+    padding:48px;width:100%;max-width:500px;
+    animation:up .3s ease both;
+  }
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.04em;margin-bottom:32px;}
+  .modal .field{margin-bottom:18px;}
+  .modal .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+  .modal .field input,
+  .modal .field select,
+  .modal .field textarea{
+    width:100%;background:var(--bg3);border:1px solid var(--border2);
+    color:var(--text);padding:12px 14px;
+    font-family:'Bricolage Grotesque',sans-serif;font-size:14px;
+    outline:none;cursor:none;transition:border-color .2s;
+    -webkit-appearance:none;
+  }
+  .modal .field input:focus,
+  .modal .field select:focus,
+  .modal .field textarea:focus{border-color:var(--fire);}
+  .modal .field select option{background:var(--bg2);}
+  .modal-actions{display:flex;gap:12px;margin-top:32px;}
+  .btn-cancel{
+    flex:1;background:transparent;border:1px solid var(--border2);
+    color:var(--muted2);padding:14px;cursor:none;
+    font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;
+    transition:border-color .2s,color .2s;
+  }
+  .btn-cancel:hover{border-color:var(--text);color:var(--text);}
+  .btn-confirm{
+    flex:2;background:var(--fire);color:#fff;border:none;
+    padding:14px;cursor:none;
+    font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;
+    transition:opacity .2s;
+  }
+  .btn-confirm:hover{opacity:.88;}
+
+  /* Estado vazio */
+  .empty-state{
+    text-align:center;padding:80px 40px;
+    border:1px dashed var(--border2);
+  }
+  .empty-state h3{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted);margin-bottom:12px;}
+  .empty-state p{font-size:14px;color:var(--muted);margin-bottom:24px;}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:32px;right:32px;
+    background:var(--bg2);border:1px solid var(--border2);
+    border-left:3px solid var(--success);
+    padding:14px 20px;font-size:13px;
+    z-index:2000;transform:translateY(20px);opacity:0;
+    transition:all .3s ease;pointer-events:none;
+  }
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.error{border-left-color:var(--error);}
+
+  @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .main{padding:24px;}
+    .bottom-grid{grid-template-columns:1fr;}
+    .stats-row{grid-template-columns:1fr 1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL NOVA MISSÃO -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <h2>NOVA MISSÃO</h2>
+    <div class="field">
+      <label>Objetivo</label>
+      <input type="text" id="m-title" placeholder="ex: Correr 5km todos os dias">
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="m-category">
+        <option value="fitness">Fitness / Desporto</option>
+        <option value="aprendizagem">Aprendizagem</option>
+        <option value="habito">Hábito diário</option>
+        <option value="criatividade">Criatividade</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Nível</label>
+      <select id="m-level">
+        <option value="iniciante">Iniciante</option>
+        <option value="intermedio">Intermédio</option>
+        <option value="avancado">Avançado</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Modo</label>
+      <select id="m-mode">
+        <option value="rival">Rival — competir com alguém</option>
+        <option value="parceiro">Parceiro — cooperar com alguém</option>
+        <option value="solo">Solo — IA como companheiro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Descrição (opcional)</label>
+      <textarea id="m-desc" rows="2" placeholder="mais detalhes sobre o teu objetivo..." style="resize:none"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">CANCELAR</button>
+      <button class="btn-confirm" onclick="createMission()">CRIAR MISSÃO →</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">NEX<em>U</em>S</div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('overview')">
+        <span class="nav-icon">◎</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showSection('missions')">
+        <span class="nav-icon">⬡</span> Missões
+      </button>
+      <button class="nav-item" onclick="showSection('chat')">
+        <span class="nav-icon">⇄</span> Chat
+      </button>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-username">Carregando...</div>
+        <div class="user-role">Membro Nexus</div>
+      </div>
+      <button class="btn-logout" onclick="logout()" title="Sair">✕</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-header">
+      <div>
+        <h1>OLÁ, <span id="header-name">—</span></h1>
+        <p id="header-date"></p>
+      </div>
+      <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ NOVA MISSÃO</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-missions">0</div>
+        <div class="stat-label">Missões ativas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-days">0</div>
+        <div class="stat-label">Dias completados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-streak">0</div>
+        <div class="stat-label">Sequência atual</div>
+      </div>
+    </div>
+
+    <!-- MISSÃO ATIVA -->
+    <p class="section-label">Missão ativa</p>
+    <div id="mission-area">
+      <div class="empty-state">
+        <h3>NENHUMA MISSÃO ATIVA</h3>
+        <p>Define o teu objetivo e começa hoje.</p>
+        <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSÃO</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid" id="bottom-grid" style="display:none">
+      <!-- Calendário -->
+      <div class="calendar-card">
+        <h3>PROGRESSO DO MÊS</h3>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <!-- Chat -->
+      <div class="chat-card">
+        <h3>CHAT</h3>
+        <div class="chat-messages" id="chat-messages">
+          <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
+          <button class="btn-send" onclick="sendMessage()">ENVIAR</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const API = 'https://nexus-backend-production-3f61.up.railway.app';
+
+  // Estado
+  let user = null;
+  let token = null;
+  let activeMission = null;
+  let chatInterval = null;
+
+  // Cursor
+  const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function loop(){
+    cur.style.left=mx+'px';cur.style.top=my+'px';
+    rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+    curR.style.left=rx+'px';curR.style.top=ry+'px';
+    requestAnimationFrame(loop);
+  })();
+
+  // Toast
+  function toast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type==='error' ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  // Auth
+  function logout() {
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user');
+    window.location.href = 'nexus-auth.html';
+  }
+
+  function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
+  }
+
+  // Init
+  async function init() {
+    token = localStorage.getItem('nexus_token');
+    const userData = localStorage.getItem('nexus_user');
+
+    if (!token || !userData) {
+      window.location.href = 'nexus-auth.html';
+      return;
+    }
+
+    user = JSON.parse(userData);
+
+    // Preencher UI com dados do utilizador
+    document.getElementById('header-name').textContent = user.username.toUpperCase();
+    document.getElementById('sidebar-username').textContent = user.username;
+    document.getElementById('sidebar-avatar').textContent = user.username[0].toUpperCase();
+
+    // Data de hoje
+    const now = new Date();
+    document.getElementById('header-date').textContent =
+      now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+
+    await loadMissions();
+  }
+
+  // Carregar missões
+  async function loadMissions() {
+    try {
+      const res = await fetch(`${API}/api/missions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const missions = await res.json();
+
+      const active = missions.filter(m => m.status === 'active');
+      document.getElementById('stat-missions').textContent = active.length;
+
+      if (active.length > 0) {
+        activeMission = active[0];
+        renderMission(activeMission);
+        document.getElementById('bottom-grid').style.display = 'grid';
+        buildCalendar();
+        loadMessages();
+        chatInterval = setInterval(loadMessages, 8000);
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  // Renderizar missão ativa
+  function renderMission(m) {
+    const started = new Date(m.started_at);
+    const today   = new Date();
+    const day     = Math.min(Math.floor((today - started) / 86400000) + 1, m.duration_days);
+    const pct     = Math.round((day / m.duration_days) * 100);
+
+    const isRival = m.mode === 'rival';
+    const myScore = m.user_score || 0;
+    const partnerScore = m.partner_score || 0;
+
+    document.getElementById('stat-days').textContent = day;
+    document.getElementById('stat-streak').textContent = myScore;
+
+    const scoreHtml = isRival ? `
+      <div class="score-section">
+        <div class="score-side">
+          <div class="s-name">Tu</div>
+          <div class="s-num fire">${myScore}</div>
+        </div>
+        <div class="score-vs">VS</div>
+        <div class="score-side">
+          <div class="s-name">${m.partner_name || 'Rival'}</div>
+          <div class="s-num">${partnerScore}</div>
+        </div>
+      </div>` : '';
+
+    document.getElementById('mission-area').innerHTML = `
+      <div class="mission-card">
+        <div class="mission-top">
+          <div class="mission-title">${m.title}</div>
+          <span class="mission-mode ${m.mode}">${m.mode.toUpperCase()}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-info">
+            <span>Dia ${day} de ${m.duration_days}</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+        ${scoreHtml}
+        <div class="checkin-section">
+          <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()">
+            ✓ CHECK-IN DE HOJE
+          </button>
+          <span class="checkin-note">Regista o teu progresso de hoje</span>
+        </div>
+      </div>`;
+  }
+
+  // Check-in
+  async function doCheckin() {
+    if (!activeMission) return;
+    const btn = document.getElementById('btn-checkin');
+    btn.disabled = true;
+    btn.textContent = 'A registar...';
+
+    try {
+      const res = await fetch(`${API}/api/checkins`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        btn.textContent = '✓ FEITO HOJE!';
+        toast(data.message || 'Check-in registado! 🔥');
+        await loadMissions();
+      } else {
+        btn.disabled = false;
+        btn.textContent = '✓ CHECK-IN DE HOJE';
+        toast(data.error || 'Erro ao registar.', 'error');
+      }
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = '✓ CHECK-IN DE HOJE';
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  // Calendário de progresso
+  function buildCalendar() {
+    if (!activeMission) return;
+    const started = new Date(activeMission.started_at);
+    const today   = new Date();
+    const grid    = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= activeMission.duration_days; i++) {
+      const d   = new Date(started);
+      d.setDate(d.getDate() + i - 1);
+      const div = document.createElement('div');
+      div.className = 'cal-day';
+
+      if (d > today) {
+        div.classList.add('future');
+      } else if (d.toDateString() === today.toDateString()) {
+        div.classList.add('today');
+      }
+
+      div.textContent = i;
+      grid.appendChild(div);
+    }
+  }
+
+  // Chat
+  async function loadMessages() {
+    if (!activeMission) return;
+    try {
+      const res = await fetch(`${API}/api/messages/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const msgs = data.messages || [];
+      const container = document.getElementById('chat-messages');
+
+      if (msgs.length === 0) return;
+
+      container.innerHTML = msgs.map(m => `
+        <div class="chat-msg ${m.sender_id === user.id ? 'mine' : 'theirs'}">
+          <div class="msg-sender">${m.sender_name}</div>
+          ${m.content}
+        </div>`).join('');
+
+      container.scrollTop = container.scrollHeight;
+    } catch(err) {}
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const content = input.value.trim();
+    if (!content || !activeMission) return;
+
+    input.value = '';
+    try {
+      await fetch(`${API}/api/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id, content })
+      });
+      await loadMessages();
+    } catch(err) {
+      toast('Erro ao enviar mensagem.', 'error');
+    }
+  }
+
+  // Criar missão
+  async function createMission() {
+    const title    = document.getElementById('m-title').value.trim();
+    const category = document.getElementById('m-category').value;
+    const level    = document.getElementById('m-level').value;
+    const mode     = document.getElementById('m-mode').value;
+    const desc     = document.getElementById('m-desc').value.trim();
+
+    if (!title) return toast('Escreve o objetivo da missão.', 'error');
+
+    try {
+      const res = await fetch(`${API}/api/missions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, category, level, mode, description: desc })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('modal').classList.remove('open');
+        toast(data.message || 'Missão criada!');
+        await loadMissions();
+      } else {
+        toast(data.error || 'Erro ao criar missão.', 'error');
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  function showSection(s) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.target.closest('.nav-item').classList.add('active');
+  }
+
+  init();
+</script>
+</body>
+</html>
