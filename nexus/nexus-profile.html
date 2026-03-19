@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus — Perfil</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF5C00">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #FF5C00;
+    --fire-dim: rgba(255,92,0,0.1);
+    --bg: #0A0A08;
+    --bg2: #111110;
+    --bg3: #181816;
+    --text: #F0EDE6;
+    --muted: #6E6C65;
+    --muted2: #9A9890;
+    --border: rgba(240,237,230,0.07);
+    --border2: rgba(240,237,230,0.13);
+    --success: #44CC88;
+    --error: #FF4444;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;cursor:none;}
+  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+
+  .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:32px 0;position:sticky;top:0;height:100vh;}
+  .sidebar-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.1em;padding:0 28px 32px;border-bottom:1px solid var(--border);}
+  .sidebar-logo em{color:var(--fire);font-style:normal;}
+  .sidebar-nav{padding:24px 0;flex:1;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 28px;font-size:13px;font-weight:500;color:var(--muted);cursor:none;transition:color .2s,background .2s;border:none;background:transparent;width:100%;text-align:left;font-family:'Bricolage Grotesque',sans-serif;position:relative;text-decoration:none;}
+  .nav-item:hover{color:var(--text);background:rgba(240,237,230,0.03);}
+  .nav-item.active{color:var(--fire);}
+  .nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--fire);}
+  .sidebar-user{padding:20px 28px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .user-avatar{width:36px;height:36px;background:var(--fire-dim);border:1px solid rgba(255,92,0,0.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--fire);flex-shrink:0;}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-role{font-size:11px;color:var(--muted);}
+  .btn-logout{background:transparent;border:none;color:var(--muted);cursor:none;font-size:16px;padding:4px;transition:color .2s;}
+  .btn-logout:hover{color:var(--error);}
+
+  /* MAIN */
+  .main{padding:48px;overflow-y:auto;}
+
+  /* HERO DO PERFIL */
+  .profile-hero{
+    display:grid;grid-template-columns:auto 1fr auto;
+    gap:32px;align-items:center;
+    padding:40px;background:var(--bg2);
+    border:1px solid var(--border);
+    margin-bottom:32px;
+    animation:up .5s ease both;
+  }
+  .profile-avatar-big{
+    width:80px;height:80px;
+    background:var(--fire-dim);border:2px solid rgba(255,92,0,0.4);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--fire);
+    flex-shrink:0;
+  }
+  .profile-info h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:42px;letter-spacing:.03em;line-height:1;
+    margin-bottom:6px;
+  }
+  .profile-info h1 span{color:var(--fire);}
+  .profile-info p{font-size:14px;color:var(--muted2);}
+  .profile-info .join-date{font-size:12px;color:var(--muted);margin-top:4px;}
+
+  .btn-edit{
+    background:transparent;border:1px solid var(--border2);
+    color:var(--muted2);padding:10px 20px;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.06em;
+    cursor:none;transition:border-color .2s,color .2s;white-space:nowrap;
+  }
+  .btn-edit:hover{border-color:var(--fire);color:var(--fire);}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
+  .stat-card{background:var(--bg);padding:28px 24px;text-align:center;}
+  .stat-card .num{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--fire);line-height:1;}
+  .stat-card .lbl{font-size:11px;color:var(--muted2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+
+  /* CLASSES / CONQUISTAS */
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fire);margin-bottom:16px;}
+
+  .class-card{
+    background:var(--bg2);border:1px solid var(--border);
+    padding:24px 28px;margin-bottom:32px;
+    display:flex;align-items:center;gap:24px;
+  }
+  .class-badge{
+    width:64px;height:64px;border:2px solid rgba(255,92,0,0.3);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    font-size:28px;
+  }
+  .class-info h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;margin-bottom:4px;}
+  .class-info p{font-size:13px;color:var(--muted2);line-height:1.6;}
+  .class-progress{flex:1;}
+  .class-bar-wrap{height:4px;background:rgba(240,237,230,0.08);margin-top:8px;}
+  .class-bar-fill{height:100%;background:var(--fire);transition:width .6s ease;}
+  .class-next{font-size:11px;color:var(--muted);margin-top:6px;text-align:right;}
+
+  /* HISTÓRICO */
+  .history-list{display:flex;flex-direction:column;gap:2px;background:var(--border);}
+  .history-item{
+    background:var(--bg);padding:20px 24px;
+    display:grid;grid-template-columns:1fr auto auto;
+    gap:16px;align-items:center;
+    transition:background .2s;
+  }
+  .history-item:hover{background:var(--bg3);}
+  .history-title{font-size:15px;font-weight:500;}
+  .history-meta{font-size:12px;color:var(--muted2);margin-top:3px;}
+  .history-score{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--fire);}
+  .history-badge{
+    padding:4px 10px;font-size:10px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .history-badge.completed{background:rgba(68,204,136,0.1);color:var(--success);}
+  .history-badge.active{background:rgba(255,92,0,0.1);color:var(--fire);}
+  .history-badge.waiting{background:rgba(240,237,230,0.06);color:var(--muted2);}
+  .history-badge.abandoned{background:rgba(255,68,68,0.08);color:var(--error);}
+
+  .empty-history{
+    text-align:center;padding:60px 40px;
+    border:1px dashed var(--border2);
+  }
+  .empty-history h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--muted);margin-bottom:8px;}
+  .empty-history p{font-size:13px;color:var(--muted);}
+
+  /* MODAL EDITAR */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);padding:48px;width:100%;max-width:440px;animation:up .3s ease both;}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.04em;margin-bottom:28px;}
+  .modal .field{margin-bottom:16px;}
+  .modal .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+  .modal .field input,.modal .field textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:12px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;outline:none;cursor:none;transition:border-color .2s;}
+  .modal .field input:focus,.modal .field textarea:focus{border-color:var(--fire);}
+  .modal-actions{display:flex;gap:12px;margin-top:24px;}
+  .btn-cancel{flex:1;background:transparent;border:1px solid var(--border2);color:var(--muted2);padding:13px;cursor:none;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;transition:border-color .2s,color .2s;}
+  .btn-cancel:hover{border-color:var(--text);color:var(--text);}
+  .btn-save{flex:2;background:var(--fire);color:#fff;border:none;padding:13px;cursor:none;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;transition:opacity .2s;}
+  .btn-save:hover{opacity:.88;}
+
+  .toast{position:fixed;bottom:32px;right:32px;background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--success);padding:14px 20px;font-size:13px;z-index:2000;transform:translateY(20px);opacity:0;transition:all .3s ease;pointer-events:none;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.error{border-left-color:var(--error);}
+
+  @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .main{padding:24px;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .profile-hero{grid-template-columns:auto 1fr;gap:20px;}
+    .btn-edit{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL EDITAR PERFIL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <h2>EDITAR PERFIL</h2>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="edit-username" placeholder="o_teu_nome">
+    </div>
+    <div class="field">
+      <label>Bio</label>
+      <textarea id="edit-bio" rows="3" placeholder="Conta algo sobre ti..." style="resize:none"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">CANCELAR</button>
+      <button class="btn-save" onclick="saveProfile()">GUARDAR →</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">NEX<em>U</em>S</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="nexus-dashboard.html">
+        <span>◎</span> Dashboard
+      </a>
+      <a class="nav-item" href="nexus-dashboard.html">
+        <span>⬡</span> Missões
+      </a>
+      <a class="nav-item active" href="nexus-profile.html">
+        <span>◈</span> Perfil
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-username">—</div>
+        <div class="user-role">Membro Nexus</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">✕</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="profile-avatar">?</div>
+      <div class="profile-info">
+        <h1 id="profile-name">—</h1>
+        <p id="profile-bio">Sem bio ainda.</p>
+        <p class="join-date" id="profile-join">—</p>
+      </div>
+      <button class="btn-edit" onclick="openEdit()">✎ EDITAR PERFIL</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num" id="s-total">0</div>
+        <div class="lbl">Missões totais</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="s-completed">0</div>
+        <div class="lbl">Completadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="s-days">0</div>
+        <div class="lbl">Dias de foco</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="s-wins">0</div>
+        <div class="lbl">Vitórias rival</div>
+      </div>
+    </div>
+
+    <!-- CLASSE -->
+    <p class="section-label">A tua classe</p>
+    <div class="class-card">
+      <div class="class-badge" id="class-badge">🎯</div>
+      <div class="class-info">
+        <h3 id="class-name">RECRUTA</h3>
+        <p id="class-desc">Acabaste de entrar no Nexus. Completa a tua primeira missão para subir de classe.</p>
+      </div>
+      <div class="class-progress" style="min-width:140px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-bottom:4px">
+          <span id="class-current-label">Recruta</span>
+          <span id="class-next-label">Veterano</span>
+        </div>
+        <div class="class-bar-wrap">
+          <div class="class-bar-fill" id="class-bar" style="width:0%"></div>
+        </div>
+        <div class="class-next" id="class-next-text">0 / 1 missões para subir</div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <p class="section-label">Histórico de missões</p>
+    <div id="history-area">
+      <div class="empty-history">
+        <h3>SEM HISTÓRICO</h3>
+        <p>As tuas missões vão aparecer aqui.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const API = 'https://nexus-backend-production-3f61.up.railway.app';
+  let user = null, token = null;
+
+  // Cursor
+  const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function loop(){
+    cur.style.left=mx+'px';cur.style.top=my+'px';
+    rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+    curR.style.left=rx+'px';curR.style.top=ry+'px';
+    requestAnimationFrame(loop);
+  })();
+
+  function toast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type==='error' ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  function logout() {
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user');
+    window.location.href = 'nexus-auth.html';
+  }
+
+  function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
+  }
+
+  function openEdit() {
+    document.getElementById('edit-username').value = user.username || '';
+    document.getElementById('edit-bio').value = user.bio || '';
+    document.getElementById('modal').classList.add('open');
+  }
+
+  // Sistema de classes
+  const CLASSES = [
+    { name: 'Recruta',  badge: '🎯', desc: 'Acabaste de entrar no Nexus.', min: 0  },
+    { name: 'Veterano', badge: '⚔️', desc: 'Completaste a tua primeira missão.', min: 1 },
+    { name: 'Elite',    badge: '🔥', desc: 'Três missões completadas. Estás a levar isto a sério.', min: 3 },
+    { name: 'Lenda',    badge: '👑', desc: 'Cinco missões. Poucos chegam aqui.', min: 5 },
+  ];
+
+  function getClass(completed) {
+    let cls = CLASSES[0];
+    for (const c of CLASSES) {
+      if (completed >= c.min) cls = c;
+    }
+    return cls;
+  }
+
+  function renderClass(completed) {
+    const current = getClass(completed);
+    const idx = CLASSES.indexOf(current);
+    const next = CLASSES[idx + 1];
+
+    document.getElementById('class-badge').textContent = current.badge;
+    document.getElementById('class-name').textContent = current.name.toUpperCase();
+    document.getElementById('class-desc').textContent = current.desc;
+
+    if (next) {
+      const progress = ((completed - current.min) / (next.min - current.min)) * 100;
+      document.getElementById('class-bar').style.width = Math.min(progress, 100) + '%';
+      document.getElementById('class-current-label').textContent = current.name;
+      document.getElementById('class-next-label').textContent = next.name;
+      document.getElementById('class-next-text').textContent =
+        `${completed - current.min} / ${next.min - current.min} missões para subir`;
+    } else {
+      document.getElementById('class-bar').style.width = '100%';
+      document.getElementById('class-next-text').textContent = 'Classe máxima atingida! 👑';
+    }
+  }
+
+  async function init() {
+    token = localStorage.getItem('nexus_token');
+    const userData = localStorage.getItem('nexus_user');
+    if (!token || !userData) { window.location.href = 'nexus-auth.html'; return; }
+
+    user = JSON.parse(userData);
+
+    // Preencher dados básicos
+    const initial = user.username[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent = initial;
+    document.getElementById('sidebar-avatar').textContent = initial;
+    document.getElementById('sidebar-username').textContent = user.username;
+    document.getElementById('profile-name').innerHTML =
+      user.username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
+    document.getElementById('profile-bio').textContent = user.bio || 'Sem bio ainda.';
+
+    const joined = new Date(user.created_at);
+    document.getElementById('profile-join').textContent =
+      'Membro desde ' + joined.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+
+    await loadMissions();
+  }
+
+  async function loadMissions() {
+    try {
+      const res = await fetch(`${API}/api/missions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const missions = await res.json();
+
+      const completed = missions.filter(m => m.status === 'completed');
+      const total     = missions.length;
+      const days      = missions.reduce((acc, m) => acc + (m.user_score || 0), 0);
+      const wins      = missions.filter(m =>
+        m.status === 'completed' && (m.user_score || 0) > (m.partner_score || 0)
+      ).length;
+
+      document.getElementById('s-total').textContent = total;
+      document.getElementById('s-completed').textContent = completed.length;
+      document.getElementById('s-days').textContent = days;
+      document.getElementById('s-wins').textContent = wins;
+
+      renderClass(completed.length);
+      renderHistory(missions);
+
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  function renderHistory(missions) {
+    if (missions.length === 0) return;
+
+    const statusLabel = {
+      active:    { label: 'Ativa',     cls: 'active' },
+      waiting:   { label: 'Em espera', cls: 'waiting' },
+      completed: { label: 'Completa',  cls: 'completed' },
+      abandoned: { label: 'Abandonada',cls: 'abandoned' }
+    };
+
+    document.getElementById('history-area').innerHTML = `
+      <div class="history-list">
+        ${missions.map(m => {
+          const s = statusLabel[m.status] || { label: m.status, cls: 'waiting' };
+          const started = m.started_at
+            ? new Date(m.started_at).toLocaleDateString('pt-PT', { day:'numeric', month:'short', year:'numeric' })
+            : 'Ainda não iniciada';
+          const rival = m.partner_name ? `vs ${m.partner_name}` : m.mode;
+          return `
+            <div class="history-item">
+              <div>
+                <div class="history-title">${m.title}</div>
+                <div class="history-meta">${started} · ${rival} · ${m.category}</div>
+              </div>
+              <div class="history-score">${m.user_score || 0}</div>
+              <span class="history-badge ${s.cls}">${s.label}</span>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  async function saveProfile() {
+    const username = document.getElementById('edit-username').value.trim();
+    const bio      = document.getElementById('edit-bio').value.trim();
+
+    if (!username) return toast('Username não pode estar vazio.', 'error');
+
+    // Por agora guardar localmente (backend de update de perfil vem a seguir)
+    user.username = username;
+    user.bio = bio;
+    localStorage.setItem('nexus_user', JSON.stringify(user));
+
+    document.getElementById('profile-name').innerHTML =
+      username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
+    document.getElementById('profile-bio').textContent = bio || 'Sem bio ainda.';
+    document.getElementById('sidebar-username').textContent = username;
+    document.getElementById('sidebar-avatar').textContent = username[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent = username[0].toUpperCase();
+
+    document.getElementById('modal').classList.remove('open');
+    toast('Perfil atualizado! ✓');
+  }
+
+  init();
+</script>
+</body>
+</html>
