@@ -271,6 +271,12 @@
   .toast.error{border-left-color:var(--error);}
 
   @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+  .notif-dot{
+    width:8px;height:8px;background:var(--fire);border-radius:50%;
+    margin-left:auto;flex-shrink:0;
+    animation:pulse 1.8s ease-in-out infinite;
+  }
 
   @media(max-width:900px){
     .layout{grid-template-columns:1fr;}
@@ -339,14 +345,16 @@
   <aside class="sidebar">
     <div class="sidebar-logo">NEX<em>U</em>S</div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" onclick="showSection('overview')">
+      <button class="nav-item active" id="nav-dashboard" onclick="showSection('overview')">
         <span class="nav-icon">◎</span> Dashboard
+        <span class="notif-dot" id="dot-rival" style="display:none"></span>
       </button>
       <button class="nav-item" onclick="showSection('missions')">
         <span class="nav-icon">⬡</span> Missões
       </button>
-      <button class="nav-item" onclick="showSection('chat')">
+      <button class="nav-item" id="nav-chat" onclick="showSection('chat');clearChatDot()">
         <span class="nav-icon">⇄</span> Chat
+        <span class="notif-dot" id="dot-chat" style="display:none"></span>
       </button>
       <a class="nav-item" href="nexus-profile.html" style="text-decoration:none">
         <span class="nav-icon">◈</span> Perfil
@@ -504,7 +512,10 @@
         document.getElementById('bottom-grid').style.display = 'grid';
         await buildCalendar();
         loadMessages();
-        if (!chatInterval) chatInterval = setInterval(loadMessages, 8000);
+        checkRivalActivity();
+        if (!chatInterval) {
+          chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
+        }
 
       } else if (waiting.length > 0) {
         // Está em fila de espera — mostrar estado de espera
@@ -725,6 +736,7 @@
           ${m.content}
         </div>`).join('');
 
+      checkUnreadMessages(msgs);
       container.scrollTop = container.scrollHeight;
     } catch(err) {}
   }
@@ -786,6 +798,59 @@
   function showSection(s) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.target.closest('.nav-item').classList.add('active');
+  }
+
+  // Verificar se o rival fez check-in hoje mas tu não
+  async function checkRivalActivity() {
+    if (!activeMission || !activeMission.partner_id) return;
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.progress) return;
+
+      const started   = new Date(activeMission.started_at);
+      const today     = new Date();
+      const todayDay  = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Check-ins do utilizador
+      const myCheckins = data.progress[user.id]?.checkins || [];
+      const idoneToday = myCheckins.some(c => c.day === todayDay && c.completed);
+
+      // Check-ins do rival
+      const partnerId = activeMission.user_id === user.id
+        ? activeMission.partner_id
+        : activeMission.user_id;
+      const rivalCheckins = data.progress[partnerId]?.checkins || [];
+      const rivalDoneToday = rivalCheckins.some(c => c.day === todayDay && c.completed);
+
+      // Mostrar dot se rival fez e eu não fiz
+      const dot = document.getElementById('dot-rival');
+      if (dot) dot.style.display = (rivalDoneToday && !idoneToday) ? 'block' : 'none';
+
+    } catch(err) {}
+  }
+
+  // Verificar mensagens não lidas
+  let lastMessageCount = 0;
+  function checkUnreadMessages(msgs) {
+    const dot = document.getElementById('dot-chat');
+    if (!dot) return;
+    if (msgs.length > lastMessageCount) {
+      // Só mostrar se não estiver na secção de chat
+      const chatNav = document.getElementById('nav-chat');
+      if (chatNav && !chatNav.classList.contains('active')) {
+        dot.style.display = 'block';
+      }
+    }
+    lastMessageCount = msgs.length;
+  }
+
+  function clearChatDot() {
+    const dot = document.getElementById('dot-chat');
+    if (dot) dot.style.display = 'none';
+    lastMessageCount = document.querySelectorAll('.chat-msg').length;
   }
 
   init();
