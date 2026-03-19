@@ -45,7 +45,7 @@
   html{scroll-behavior:smooth;}
   body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
   #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(255,92,0,0.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+  #cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(255,92,0,0.35);border-radius:50%;pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:opacity .2s;}
   body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:0;}
 
   nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:22px 52px;}
@@ -60,14 +60,14 @@
 
   .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px 52px 100px;position:relative;overflow:hidden;}
   .hero-glow{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(255,92,0,0.07) 0%,transparent 65%);pointer-events:none;}
-  .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fire);margin-bottom:36px;opacity:0;animation:up .7s .1s ease forwards;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fire);margin-bottom:36px;animation:up .7s .1s ease both;}
   .hero-tag::before{content:'';width:20px;height:1px;background:var(--fire);}
-  .hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,12vw,160px);line-height:.9;letter-spacing:.015em;opacity:0;animation:up .8s .2s ease forwards;}
+  .hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,12vw,160px);line-height:.9;letter-spacing:.015em;animation:up .8s .2s ease both;}
   .hero-h1 .out{-webkit-text-stroke:1px rgba(240,237,230,0.2);color:transparent;}
   .hero-h1 .fire{color:var(--fire);}
-  .hero-desc{max-width:480px;margin-top:36px;font-size:17px;font-weight:300;color:var(--muted2);line-height:1.7;opacity:0;animation:up .8s .35s ease forwards;}
+  .hero-desc{max-width:480px;margin-top:36px;font-size:17px;font-weight:300;color:var(--muted2);line-height:1.7;animation:up .8s .35s ease both;}
   .hero-desc strong{color:var(--text);font-weight:500;}
-  .hero-cta{display:flex;align-items:center;gap:20px;margin-top:52px;opacity:0;animation:up .8s .45s ease forwards;}
+  .hero-cta{display:flex;align-items:center;gap:20px;margin-top:52px;animation:up .8s .45s ease both;}
   .btn-fire{background:var(--fire);color:#fff;border:none;padding:15px 36px;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;letter-spacing:.02em;transition:opacity .2s,transform .15s;}
   .btn-fire:hover{opacity:.88;transform:translateY(-2px);}
   .link-ghost{color:var(--muted);font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;}
@@ -181,7 +181,7 @@
     Define um objetivo. Recebe um <strong>parceiro ou rival</strong> com a mesma missão. Trinta dias de esforço real — sem distrações, sem likes, sem feed.
   </p>
   <div class="hero-cta">
-    <a href="nexus-auth.html" class="btn-fire" style="display:inline-block;text-decoration:none;text-align:center">Começar agora</a>
+    <button class="btn-fire">Começar agora</button>
     <a href="#funciona" class="link-ghost">Como funciona <span>→</span></a>
   </div>
 </section>
