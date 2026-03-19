@@ -270,6 +270,56 @@
   .toast.show{transform:translateY(0);opacity:1;}
   .toast.error{border-left-color:var(--error);}
 
+  /* PORTA ABERTA */
+  .porta-card{
+    background:var(--bg2);border:1px solid rgba(255,92,0,0.3);
+    padding:40px;margin-top:24px;text-align:center;
+    animation:up .5s ease both;
+  }
+  .porta-icon{font-size:48px;margin-bottom:16px;}
+  .porta-card h3{
+    font-family:'Bebas Neue',sans-serif;font-size:36px;
+    letter-spacing:.04em;color:var(--fire);margin-bottom:12px;
+  }
+  .porta-card p{font-size:15px;color:var(--muted2);line-height:1.7;max-width:400px;margin:0 auto 28px;}
+  .porta-input{
+    width:100%;max-width:360px;
+    background:var(--bg3);border:1px solid var(--border2);
+    color:var(--text);padding:14px 16px;
+    font-family:'Bricolage Grotesque',sans-serif;font-size:15px;
+    outline:none;margin-bottom:16px;cursor:none;
+    transition:border-color .2s;
+  }
+  .porta-input:focus{border-color:var(--fire);}
+  .btn-porta{
+    background:var(--fire);color:#fff;border:none;
+    padding:14px 36px;
+    font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.06em;
+    cursor:none;transition:opacity .2s,transform .15s;
+  }
+  .btn-porta:hover{opacity:.88;transform:translateY(-1px);}
+  .porta-resultado{
+    margin-top:24px;padding:20px;
+    background:rgba(68,204,136,0.06);
+    border:1px solid rgba(68,204,136,0.2);
+  }
+  .porta-resultado .contact-name{
+    font-size:13px;color:var(--muted2);text-transform:uppercase;
+    letter-spacing:.06em;margin-bottom:8px;
+  }
+  .porta-resultado .contact-value{
+    font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--success);
+    letter-spacing:.04em;
+  }
+  .porta-waiting{
+    margin-top:16px;font-size:13px;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .porta-waiting::before{
+    content:'';width:6px;height:6px;background:var(--fire);
+    border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;
+  }
+
   @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
   .notif-dot{
@@ -513,6 +563,7 @@
         await buildCalendar();
         loadMessages();
         checkRivalActivity();
+        checkPortaAberta();
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
         }
@@ -851,6 +902,88 @@
     const dot = document.getElementById('dot-chat');
     if (dot) dot.style.display = 'none';
     lastMessageCount = document.querySelectorAll('.chat-msg').length;
+  }
+
+  // ============================================
+  // PORTA ABERTA
+  // ============================================
+  async function checkPortaAberta() {
+    if (!activeMission || activeMission.status !== 'completed') return;
+
+    try {
+      const res = await fetch(`${API}/api/porta-aberta/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      renderPortaAberta(data);
+    } catch(err) {}
+  }
+
+  function renderPortaAberta(data) {
+    const area = document.getElementById('mission-area');
+    if (!area) return;
+
+    if (data.both_open && data.partner_contact) {
+      // Ambos abriram — mostrar contacto
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">🔓</div>
+          <h3>PORTA ABERTA!</h3>
+          <p>Os 30 dias foram completados. Aqui está o contacto de <strong>${data.partner_name}</strong>:</p>
+          <div class="porta-resultado">
+            <div class="contact-name">Contacto de ${data.partner_name}</div>
+            <div class="contact-value">${data.partner_contact}</div>
+          </div>
+        </div>`);
+
+    } else if (data.i_opened) {
+      // Eu já abri, a aguardar o rival
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">⏳</div>
+          <h3>AGUARDANDO ${data.partner_name.toUpperCase()}</h3>
+          <p>Já partilhaste o teu contacto. Quando <strong>${data.partner_name}</strong> abrir a porta, os contactos ficam visíveis para os dois.</p>
+          <div class="porta-waiting">A aguardar que ${data.partner_name} abra a porta...</div>
+        </div>`);
+
+    } else {
+      // Missão completa mas ainda não abriu a porta
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">🚪</div>
+          <h3>PORTA ABERTA</h3>
+          <p>Completaste os 30 dias com <strong>${data.partner_name}</strong>! Se quiserem manter o contacto fora do Nexus, partilha o teu contacto. É mútuo — só vês o dele se ele também partilhar.</p>
+          <input class="porta-input" id="porta-contact" placeholder="email, instagram, número..." maxlength="100">
+          <br>
+          <button class="btn-porta" onclick="abrirPorta()">ABRIR A PORTA →</button>
+        </div>`);
+    }
+  }
+
+  async function abrirPorta() {
+    const contact = document.getElementById('porta-contact')?.value.trim();
+    if (!contact) return toast('Escreve um contacto primeiro.', 'error');
+
+    try {
+      const res = await fetch(`${API}/api/porta-aberta`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id, contact })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast(data.message);
+        await checkPortaAberta();
+      } else {
+        toast(data.error || 'Erro ao abrir porta.', 'error');
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
   }
 
   init();
