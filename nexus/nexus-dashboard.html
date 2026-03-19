@@ -499,7 +499,7 @@
         activeMission = active[0];
         renderMission(activeMission);
         document.getElementById('bottom-grid').style.display = 'grid';
-        buildCalendar();
+        await buildCalendar();
         loadMessages();
         if (!chatInterval) chatInterval = setInterval(loadMessages, 8000);
 
@@ -650,27 +650,51 @@
   }
 
   // Calendário de progresso
-  function buildCalendar() {
+  async function buildCalendar() {
     if (!activeMission) return;
-    const started = new Date(activeMission.started_at);
-    const today   = new Date();
-    const grid    = document.getElementById('cal-grid');
+
+    let doneDays = new Set();
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.progress && data.progress[user.id]) {
+        data.progress[user.id].checkins
+          .filter(c => c.completed)
+          .forEach(c => doneDays.add(c.day));
+      }
+    } catch(err) {}
+
+    const started  = new Date(activeMission.started_at);
+    const today    = new Date();
+    const todayDay = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+    const grid     = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
     for (let i = 1; i <= activeMission.duration_days; i++) {
-      const d   = new Date(started);
-      d.setDate(d.getDate() + i - 1);
       const div = document.createElement('div');
       div.className = 'cal-day';
-
-      if (d > today) {
+      if (i > todayDay) {
         div.classList.add('future');
-      } else if (d.toDateString() === today.toDateString()) {
-        div.classList.add('today');
+      } else if (i === todayDay) {
+        div.classList.add(doneDays.has(i) ? 'done' : 'today');
+      } else {
+        div.classList.add(doneDays.has(i) ? 'done' : 'missed');
       }
-
       div.textContent = i;
       grid.appendChild(div);
+    }
+
+    const btn = document.getElementById('btn-checkin');
+    if (btn) {
+      if (doneDays.has(todayDay)) {
+        btn.textContent = '\u2713 FEITO HOJE!';
+        btn.disabled = true;
+      } else {
+        btn.textContent = '\u2713 CHECK-IN DE HOJE';
+        btn.disabled = false;
+      }
     }
   }
 
