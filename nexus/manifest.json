@@ -1,0 +1,31 @@
+{
+  "name": "Nexus — O teu objetivo primeiro",
+  "short_name": "Nexus",
+  "description": "Define um objetivo. Encontra um rival. 30 dias de foco real.",
+  "start_url": "/nexus/",
+  "display": "standalone",
+  "background_color": "#0A0A08",
+  "theme_color": "#FF5C00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "390x844",
+      "type": "image/png"
+    }
+  ]
+}
