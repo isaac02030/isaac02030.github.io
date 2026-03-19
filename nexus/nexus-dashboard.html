@@ -368,6 +368,12 @@
     animation:pulse 1.8s ease-in-out infinite;
   }
 
+  /* Fix cursor em mobile */
+  @media(hover:none),(pointer:coarse){
+    body{cursor:auto!important;}
+    #cur,#cur-r{display:none!important;}
+    button,a{cursor:pointer!important;}
+  }
   @media(max-width:900px){
     .layout{grid-template-columns:1fr;}
     .sidebar{display:none;}
