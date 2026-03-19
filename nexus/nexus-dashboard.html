@@ -610,10 +610,10 @@
         </div>
         ${scoreHtml}
         <div class="checkin-section">
-          <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()">
-            ✓ CHECK-IN DE HOJE
+          <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
+            A verificar...
           </button>
-          <span class="checkin-note">Regista o teu progresso de hoje</span>
+          <span class="checkin-note" id="checkin-note">A carregar...</span>
         </div>
       </div>`;
   }
@@ -690,13 +690,18 @@
     }
 
     const btn = document.getElementById('btn-checkin');
+    const note = document.getElementById('checkin-note');
     if (btn) {
       if (doneDays.has(todayDay)) {
         btn.textContent = '\u2713 FEITO HOJE!';
         btn.disabled = true;
+        btn.style.opacity = '1';
+        if (note) note.textContent = 'Voltas amanhã para o dia ' + (todayDay + 1) + '.';
       } else {
         btn.textContent = '\u2713 CHECK-IN DE HOJE';
         btn.disabled = false;
+        btn.style.opacity = '1';
+        if (note) note.textContent = 'Regista o teu progresso de hoje.';
       }
     }
   }
