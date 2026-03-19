@@ -1,7 +1,41 @@
 // ============================================
 // NEXUS — Service Worker
-// Cache para funcionamento offline
+// Cache + Push Notifications
 // ============================================
+
+// Receber push notification
+self.addEventListener('push', e => {
+  if (!e.data) return;
+
+  const data = e.data.json();
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/nexus/icon-192.png',
+      badge: '/nexus/icon-192.png',
+      data: { url: data.url || '/nexus/nexus-dashboard.html' },
+      vibrate: [200, 100, 200],
+      requireInteraction: false
+    })
+  );
+});
+
+// Clique na notificação — abrir o dashboard
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || '/nexus/nexus-dashboard.html';
+  e.waitUntil(
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url.includes('nexus') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
 
 const CACHE = 'nexus-v1';
 const ASSETS = [
