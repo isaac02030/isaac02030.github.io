@@ -321,6 +321,46 @@
   }
 
   @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  /* SUGESTÃO DE COMUNIDADE */
+  .suggest-card{
+    background:var(--bg2);border:1px solid rgba(255,92,0,0.25);
+    padding:28px;margin-top:24px;
+    display:flex;align-items:center;gap:20px;
+    animation:up .5s ease both;
+    position:relative;overflow:hidden;
+  }
+  .suggest-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:var(--fire);
+  }
+  .suggest-icon{font-size:36px;flex-shrink:0;}
+  .suggest-body{flex:1;}
+  .suggest-body .suggest-label{
+    font-size:10px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--fire);margin-bottom:6px;
+  }
+  .suggest-body h4{
+    font-family:'Bebas Neue',sans-serif;font-size:20px;
+    letter-spacing:.03em;margin-bottom:4px;
+  }
+  .suggest-body p{font-size:13px;color:var(--muted2);line-height:1.5;}
+  .suggest-actions{display:flex;gap:8px;margin-top:14px;}
+  .btn-suggest-yes{
+    background:var(--fire);color:#fff;border:none;
+    padding:9px 20px;font-family:'Bebas Neue',sans-serif;
+    font-size:14px;letter-spacing:.06em;cursor:none;transition:opacity .2s;
+  }
+  .btn-suggest-yes:hover{opacity:.88;}
+  .btn-suggest-no{
+    background:transparent;border:1px solid var(--border2);
+    color:var(--muted2);padding:9px 16px;
+    font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.04em;
+    cursor:none;transition:border-color .2s,color .2s;
+  }
+  .btn-suggest-no:hover{border-color:var(--text);color:var(--text);}
+  .consist-bar{height:3px;background:rgba(240,237,230,0.08);margin-top:8px;width:100%;}
+  .consist-fill{height:100%;background:var(--fire);transition:width .6s ease;}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
   .notif-dot{
     width:8px;height:8px;background:var(--fire);border-radius:50%;
@@ -567,6 +607,7 @@
         loadMessages();
         checkRivalActivity();
         checkPortaAberta();
+        checkCommunitySuggestion();
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
         }
@@ -905,6 +946,69 @@
     const dot = document.getElementById('dot-chat');
     if (dot) dot.style.display = 'none';
     lastMessageCount = document.querySelectorAll('.chat-msg').length;
+  }
+
+  // ============================================
+  // SUGESTÃO DE COMUNIDADE
+  // ============================================
+  async function checkCommunitySuggestion() {
+    if (!activeMission || activeMission.status !== 'active') return;
+
+    // Só verificar se já passou o dia 15
+    const started  = new Date(activeMission.started_at);
+    const today    = new Date();
+    const dayNum   = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+    if (dayNum < 15) return;
+
+    // Verificar se já dispensou a sugestão
+    const dismissed = localStorage.getItem(`nexus_suggest_${activeMission.id}`);
+    if (dismissed) return;
+
+    try {
+      const res = await fetch(`${API}/api/communities/smart-suggest/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (data.suggest && data.community) {
+        renderCommunitySuggestion(data);
+      }
+    } catch(err) {}
+  }
+
+  function renderCommunitySuggestion(data) {
+    const area = document.getElementById('mission-area');
+    if (!area || document.getElementById('suggest-card')) return;
+
+    const c = data.community;
+    area.insertAdjacentHTML('beforeend', `
+      <div class="suggest-card" id="suggest-card">
+        <div class="suggest-icon">${c.icon}</div>
+        <div class="suggest-body">
+          <div class="suggest-label">✦ Sugestão do Nexus — Dia ${data.day}</div>
+          <h4>${c.name}</h4>
+          <p>${data.message} Há uma comunidade para o teu objetivo com ${c.member_count} membros.</p>
+          <div class="consist-bar">
+            <div class="consist-fill" style="width:${data.consistency}%"></div>
+          </div>
+          <div class="suggest-actions">
+            <button class="btn-suggest-yes" onclick="joinFromSuggestion('${c.slug}')">VER COMUNIDADE →</button>
+            <button class="btn-suggest-no" onclick="dismissSuggestion()">Agora não</button>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  async function joinFromSuggestion(slug) {
+    window.location.href = `nexus-communities.html`;
+  }
+
+  function dismissSuggestion() {
+    if (activeMission) {
+      localStorage.setItem(`nexus_suggest_${activeMission.id}`, 'dismissed');
+    }
+    const card = document.getElementById('suggest-card');
+    if (card) card.remove();
   }
 
   // ============================================
