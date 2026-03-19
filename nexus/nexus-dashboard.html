@@ -489,20 +489,78 @@
       });
       const missions = await res.json();
 
-      const active = missions.filter(m => m.status === 'active');
+      const active  = missions.filter(m => m.status === 'active');
+      const waiting = missions.filter(m => m.status === 'waiting');
+
       document.getElementById('stat-missions').textContent = active.length;
 
       if (active.length > 0) {
+        // Tem missão ativa — mostrar normalmente
         activeMission = active[0];
         renderMission(activeMission);
         document.getElementById('bottom-grid').style.display = 'grid';
         buildCalendar();
         loadMessages();
-        chatInterval = setInterval(loadMessages, 8000);
+        if (!chatInterval) chatInterval = setInterval(loadMessages, 8000);
+
+      } else if (waiting.length > 0) {
+        // Está em fila de espera — mostrar estado de espera
+        renderWaiting(waiting[0]);
+
+      } else {
+        // Sem missões — mostrar estado vazio
+        document.getElementById('mission-area').innerHTML = `
+          <div class="empty-state">
+            <h3>NENHUMA MISSÃO ATIVA</h3>
+            <p>Define o teu objetivo e começa hoje.</p>
+            <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSÃO</button>
+          </div>`;
       }
     } catch(err) {
       console.error(err);
     }
+  }
+
+  // Mostrar missão em espera de match
+  function renderWaiting(mission) {
+    document.getElementById('mission-area').innerHTML = `
+      <div class="mission-card" style="border-color:rgba(255,92,0,0.2)">
+        <div class="mission-top">
+          <div class="mission-title">${mission.title}</div>
+          <span class="mission-mode ${mission.mode}">${mission.mode.toUpperCase()}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;padding:24px;background:var(--bg3);margin-bottom:16px;">
+          <div style="width:12px;height:12px;background:var(--fire);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0"></div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.04em;margin-bottom:4px">À PROCURA DE ${mission.mode === 'rival' ? 'RIVAL' : 'PARCEIRO'}...</div>
+            <div style="font-size:13px;color:var(--muted2)">Serás notificado quando encontrarmos alguém com o mesmo objetivo.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border)">
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.category}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Categoria</div>
+          </div>
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.duration_days}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Dias</div>
+          </div>
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.level}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Nível</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--muted2);text-align:center;padding:12px">
+          Partilha o Nexus com um amigo para competir diretamente →
+          <button onclick="navigator.clipboard.writeText('isaac02030.github.io/nexus');toast('Link copiado! 🔥')" 
+            style="background:var(--fire-dim);border:1px solid rgba(255,92,0,0.3);color:var(--fire);padding:6px 14px;font-size:12px;font-weight:600;cursor:none;margin-left:8px;font-family:'Bricolage Grotesque',sans-serif">
+            COPIAR LINK
+          </button>
+        </div>
+      </div>`;
+
+    // Verificar match a cada 15 segundos automaticamente
+    setTimeout(loadMissions, 15000);
   }
 
   // Renderizar missão ativa
