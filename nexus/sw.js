@@ -37,7 +37,7 @@ self.addEventListener('notificationclick', e => {
   );
 });
 
-const CACHE = 'nexus-v1';
+const CACHE = 'nexus-v3';
 const ASSETS = [
   '/nexus/',
   '/nexus/index.html',
