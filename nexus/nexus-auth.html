@@ -27,7 +27,7 @@
   body{
     font-family:'Bricolage Grotesque',sans-serif;
     background:var(--bg);color:var(--text);
-    min-height:100vh;overflow-x:hidden;cursor:none;
+    min-height:100vh;overflow-x:hidden;
     display:grid;grid-template-columns:1fr 1fr;
   }
 
@@ -119,7 +119,7 @@
     margin-bottom:8px;
   }
   .form-header p{font-size:14px;color:var(--muted2);}
-  .form-header p a{color:var(--fire);text-decoration:none;cursor:none;}
+  .form-header p a{color:var(--fire);text-decoration:none;}
   .form-header p a:hover{text-decoration:underline;}
 
   /* Tabs registo/login */
@@ -131,7 +131,7 @@
   .tab {
     flex:1;padding:12px;text-align:center;
     font-size:13px;font-weight:500;letter-spacing:.03em;
-    color:var(--muted);cursor:none;
+    color:var(--muted);
     transition:background .2s,color .2s;
     border:none;background:transparent;
     font-family:'Bricolage Grotesque',sans-serif;
@@ -158,7 +158,7 @@
     font-family:'Bricolage Grotesque',sans-serif;
     font-size:15px;font-weight:400;
     transition:border-color .2s,background .2s;
-    outline:none;cursor:none;
+    outline:none;
     border-radius:0;
     -webkit-appearance:none;
   }
@@ -175,7 +175,7 @@
     padding:16px;width:100%;
     font-family:'Bebas Neue',sans-serif;
     font-size:20px;letter-spacing:.06em;
-    cursor:none;transition:opacity .2s,transform .15s;
+    transition:opacity .2s,transform .15s;
     margin-top:4px;
   }
   .btn-submit:hover{opacity:.88;transform:translateY(-1px);}
@@ -319,14 +319,22 @@
 
   // Cursor
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
-  (function loop(){
-    cur.style.left=mx+'px';cur.style.top=my+'px';
-    rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
-    curR.style.left=rx+'px';curR.style.top=ry+'px';
-    requestAnimationFrame(loop);
-  })();
+  // Cursor personalizado apenas em desktop
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (isTouch) {
+    if(cur) cur.style.display='none';
+    if(curR) curR.style.display='none';
+  } else {
+    document.body.style.cursor='none';
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+    (function loop(){
+      cur.style.left=mx+'px';cur.style.top=my+'px';
+      rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+      curR.style.left=rx+'px';curR.style.top=ry+'px';
+      requestAnimationFrame(loop);
+    })();
+  }
   document.querySelectorAll('button,a,input').forEach(el=>{
     el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2)';curR.style.opacity='0';});
     el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.opacity='1';});
