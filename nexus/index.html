@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nexus — Alcança o que importa</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF5C00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nexus">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
 <style>
@@ -152,7 +157,7 @@
     Define um objetivo. Recebe um <strong>parceiro ou rival</strong> com a mesma missão. Trinta dias de esforço real — sem distrações, sem likes, sem feed.
   </p>
   <div class="hero-cta">
-<button class="btn-fire" onclick="window.location.href='nexus-auth.html'">Começar agora</button>
+    <button class="btn-fire">Começar agora</button>
     <a href="#funciona" class="link-ghost">Como funciona <span>→</span></a>
   </div>
 </section>
@@ -280,7 +285,7 @@
 <section class="cta-final">
   <h2 class="r">A missão<br>começa <em>agora.</em></h2>
   <p class="r">Define o objetivo. Encontra o par. Faz o trabalho.</p>
-<button class="btn-fire r" style="font-size:16px;padding:18px 48px" onclick="window.location.href='nexus-auth.html'">Quero uma missão →</button>
+  <button class="btn-fire r" style="font-size:16px;padding:18px 48px">Quero uma missão →</button>
 </section>
 
 <footer>
@@ -309,6 +314,15 @@
     });
   },{threshold:.1});
   document.querySelectorAll('.r').forEach(el=>obs.observe(el));
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Nexus SW instalado'))
+        .catch(err => console.log('SW erro:', err));
+    });
+  }
 </script>
 </body>
 </html>
