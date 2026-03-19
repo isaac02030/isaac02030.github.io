@@ -135,6 +135,13 @@
   .r.on{opacity:1;transform:none;}
   @keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 
+  /* Fix cursor em mobile */
+  @media(hover:none),(pointer:coarse){
+    body{cursor:auto!important;}
+    #cur,#cur-r{display:none!important;}
+    button,a{cursor:pointer!important;}
+  }
+
   @media(max-width:768px){
     nav{padding:18px 24px;}
     .nav-links{display:none;}
