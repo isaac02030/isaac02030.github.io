@@ -212,6 +212,12 @@
   @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
   @keyframes spin{to{transform:rotate(360deg)}}
 
+  /* Fix cursor em mobile */
+  @media(hover:none),(pointer:coarse){
+    body{cursor:auto!important;}
+    #cur,#cur-r{display:none!important;}
+    button,a{cursor:pointer!important;}
+  }
   @media(max-width:768px){
     body{grid-template-columns:1fr;}
     .left-panel{display:none;}
