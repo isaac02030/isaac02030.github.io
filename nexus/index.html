@@ -3,35 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexus — Alcança o que importa</title>
+<title>Nexus — O teu objetivo primeiro</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FF5C00">
-
-<!-- Open Graph / WhatsApp / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://isaac02030.github.io/nexus/">
 <meta property="og:title" content="Nexus — O teu objetivo primeiro">
 <meta property="og:description" content="Define um objetivo. Recebe um parceiro ou rival. 30 dias de foco real — sem likes, sem feed, só resultados.">
 <meta property="og:image" content="https://isaac02030.github.io/nexus/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="pt_PT">
-<meta property="og:site_name" content="Nexus">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nexus — O teu objetivo primeiro">
-<meta name="twitter:description" content="Define um objetivo. Recebe um parceiro ou rival. 30 dias de foco real.">
-<meta name="twitter:image" content="https://isaac02030.github.io/nexus/og-image.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Nexus">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
 <style>
   :root {
     --fire: #FF5C00;
-    --fire-dim: rgba(255,92,0,0.12);
     --bg: #0A0A08;
     --bg2: #111110;
     --bg3: #181816;
@@ -41,122 +25,113 @@
     --border: rgba(240,237,230,0.07);
     --border2: rgba(240,237,230,0.13);
   }
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
-  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(255,92,0,0.35);border-radius:50%;pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:opacity .2s;}
-  body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:0;}
 
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:22px 52px;}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.1em;}
-  .logo em{color:var(--fire);font-style:normal;}
-  .nav-right{display:flex;align-items:center;gap:36px;}
-  .nav-links{display:flex;gap:28px;list-style:none;}
-  .nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:.03em;transition:color .2s;}
-  .nav-links a:hover{color:var(--text);}
-  .btn-nav{background:transparent;border:1px solid var(--border2);color:var(--text);padding:9px 22px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:500;transition:border-color .2s,color .2s;letter-spacing:.02em;}
-  .btn-nav:hover{border-color:var(--fire);color:var(--fire);}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Bricolage Grotesque', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px 52px 100px;position:relative;overflow:hidden;}
-  .hero-glow{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(255,92,0,0.07) 0%,transparent 65%);pointer-events:none;}
-  .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fire);margin-bottom:36px;animation:up .7s .1s ease both;}
-  .hero-tag::before{content:'';width:20px;height:1px;background:var(--fire);}
-  .hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,12vw,160px);line-height:.9;letter-spacing:.015em;animation:up .8s .2s ease both;}
-  .hero-h1 .out{-webkit-text-stroke:1px rgba(240,237,230,0.2);color:transparent;}
-  .hero-h1 .fire{color:var(--fire);}
-  .hero-desc{max-width:480px;margin-top:36px;font-size:17px;font-weight:300;color:var(--muted2);line-height:1.7;animation:up .8s .35s ease both;}
-  .hero-desc strong{color:var(--text);font-weight:500;}
-  .hero-cta{display:flex;align-items:center;gap:20px;margin-top:52px;animation:up .8s .45s ease both;}
-  .btn-fire{background:var(--fire);color:#fff;border:none;padding:15px 36px;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;letter-spacing:.02em;transition:opacity .2s,transform .15s;}
-  .btn-fire:hover{opacity:.88;transform:translateY(-2px);}
-  .link-ghost{color:var(--muted);font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;}
-  .link-ghost:hover{color:var(--text);}
-  .link-ghost span{transition:transform .2s;}
-  .link-ghost:hover span{transform:translateX(4px);}
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 52px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .1em; }
+  .logo em { color: var(--fire); font-style: normal; }
+  .nav-right { display: flex; align-items: center; gap: 36px; }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .nav-links a:hover { color: var(--text); }
+  .btn-nav { background: transparent; border: 1px solid var(--border2); color: var(--text); padding: 9px 22px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 13px; font-weight: 500; text-decoration: none; display: inline-block; }
+  .btn-nav:hover { border-color: var(--fire); color: var(--fire); }
 
-  .ticker-wrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;overflow:hidden;position:relative;z-index:2;}
-  .ticker-inner{display:flex;gap:56px;white-space:nowrap;animation:ticker 28s linear infinite;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.1em;color:var(--muted);}
-  .ticker-inner b{color:var(--fire);font-weight:400;}
-  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* HERO */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 140px 52px 100px; position: relative; overflow: hidden; }
+  .hero-glow { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 400px; background: radial-gradient(ellipse, rgba(255,92,0,0.07) 0%, transparent 65%); pointer-events: none; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fire); margin-bottom: 36px; }
+  .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--fire); }
+  .hero-h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(80px, 12vw, 160px); line-height: .9; letter-spacing: .015em; }
+  .hero-h1 .out { -webkit-text-stroke: 1px rgba(240,237,230,0.2); color: transparent; }
+  .hero-h1 .fire { color: var(--fire); }
+  .hero-desc { max-width: 480px; margin-top: 36px; font-size: 17px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
+  .hero-desc strong { color: var(--text); font-weight: 500; }
+  .hero-cta { display: flex; align-items: center; gap: 20px; margin-top: 52px; flex-wrap: wrap; }
+  .btn-fire { background: var(--fire); color: #fff; border: none; padding: 15px 36px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .02em; text-decoration: none; display: inline-block; }
+  .btn-fire:hover { opacity: .88; }
+  .link-ghost { color: var(--muted); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+  .link-ghost:hover { color: var(--text); }
 
-  .features{padding:120px 52px;}
-  .feat-header{margin-bottom:72px;}
-  .feat-header .label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fire);margin-bottom:20px;}
-  .feat-header h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,5.5vw,68px);line-height:.95;letter-spacing:.02em;}
-  .feat-header h2 .out{-webkit-text-stroke:1px rgba(240,237,230,0.2);color:transparent;}
-  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);}
-  .feat-card{background:var(--bg);padding:44px 36px;transition:background .25s;position:relative;overflow:hidden;}
-  .feat-card:hover{background:var(--bg3);}
-  .feat-icon{width:40px;height:40px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-bottom:28px;font-size:18px;}
-  .feat-card h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;margin-bottom:14px;}
-  .feat-card p{font-size:14px;font-weight:300;color:var(--muted2);line-height:1.7;}
-  .feat-card p strong{color:var(--text);font-weight:500;}
-  .feat-num{position:absolute;bottom:16px;right:20px;font-family:'Bebas Neue',sans-serif;font-size:64px;color:var(--fire);opacity:.06;line-height:1;}
+  /* TICKER */
+  .ticker-wrap { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 18px 0; overflow: hidden; }
+  .ticker-inner { display: flex; gap: 56px; white-space: nowrap; animation: ticker 28s linear infinite; font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: .1em; color: var(--muted); }
+  .ticker-inner b { color: var(--fire); font-weight: 400; }
+  @keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
 
-  .modes{padding:0 52px 120px;}
-  .modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);margin-top:64px;}
-  .mode-card{background:var(--bg2);padding:52px 44px;transition:background .25s;}
-  .mode-card:hover{background:var(--bg3);}
-  .mode-card .mode-tag{display:inline-block;padding:4px 12px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;}
-  .mode-card.partner .mode-tag{background:rgba(255,92,0,0.1);color:var(--fire);}
-  .mode-card.rival .mode-tag{background:rgba(240,237,230,0.06);color:var(--muted2);}
-  .mode-card h3{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4vw,52px);letter-spacing:.02em;margin-bottom:18px;line-height:.95;}
-  .mode-card p{font-size:15px;font-weight:300;color:var(--muted2);line-height:1.7;max-width:380px;}
-  .mode-card p strong{color:var(--text);font-weight:500;}
-  .mode-detail{margin-top:32px;padding-top:28px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
-  .mode-detail-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted2);}
-  .mode-detail-item::before{content:'';width:4px;height:4px;background:var(--fire);border-radius:50%;flex-shrink:0;}
+  /* FEATURES */
+  .features { padding: 120px 52px; }
+  .feat-header { margin-bottom: 72px; }
+  .feat-header .label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fire); margin-bottom: 20px; }
+  .feat-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(44px, 5.5vw, 68px); line-height: .95; letter-spacing: .02em; }
+  .feat-header h2 .out { -webkit-text-stroke: 1px rgba(240,237,230,0.2); color: transparent; }
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border); }
+  .feat-card { background: var(--bg); padding: 44px 36px; position: relative; overflow: hidden; }
+  .feat-card:hover { background: var(--bg3); }
+  .feat-icon { width: 40px; height: 40px; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; margin-bottom: 28px; font-size: 18px; }
+  .feat-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: .04em; margin-bottom: 14px; }
+  .feat-card p { font-size: 14px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
+  .feat-card p strong { color: var(--text); font-weight: 500; }
+  .feat-num { position: absolute; bottom: 16px; right: 20px; font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--fire); opacity: .06; line-height: 1; }
 
-  .process{padding:0 52px 120px;background:var(--bg2);}
-  .process-inner{padding-top:120px;}
-  .process-steps{margin-top:64px;display:flex;flex-direction:column;}
-  .p-step{display:grid;grid-template-columns:80px 1fr;padding:36px 0;border-bottom:1px solid var(--border);gap:32px;align-items:start;transition:padding .2s;}
-  .p-step:first-child{border-top:1px solid var(--border);}
-  .p-step:hover{padding-left:8px;}
-  .p-step-num{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--fire);opacity:.22;line-height:1;}
-  .p-step-num.active{opacity:1;}
-  .p-step-body h4{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;margin-bottom:10px;}
-  .p-step-body p{font-size:14px;font-weight:300;color:var(--muted2);line-height:1.7;}
-  .p-step-tag{display:inline-block;margin-top:14px;padding:4px 10px;background:var(--fire-dim);color:var(--fire);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+  /* MODOS */
+  .modes { padding: 0 52px 120px; }
+  .modes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); margin-top: 64px; }
+  .mode-card { background: var(--bg2); padding: 52px 44px; }
+  .mode-card:hover { background: var(--bg3); }
+  .mode-card .mode-tag { display: inline-block; padding: 4px 12px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 24px; }
+  .mode-card.partner .mode-tag { background: rgba(255,92,0,0.1); color: var(--fire); }
+  .mode-card.rival .mode-tag { background: rgba(240,237,230,0.06); color: var(--muted2); }
+  .mode-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4vw, 52px); letter-spacing: .02em; margin-bottom: 18px; line-height: .95; }
+  .mode-card p { font-size: 15px; font-weight: 300; color: var(--muted2); line-height: 1.7; max-width: 380px; }
+  .mode-card p strong { color: var(--text); font-weight: 500; }
+  .mode-detail { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .mode-detail-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted2); }
+  .mode-detail-item::before { content: ''; width: 4px; height: 4px; background: var(--fire); border-radius: 50%; flex-shrink: 0; }
 
-  .cta-final{padding:140px 52px;text-align:center;border-top:1px solid var(--border);position:relative;overflow:hidden;}
-  .cta-final::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:300px;background:radial-gradient(ellipse,rgba(255,92,0,0.09) 0%,transparent 70%);pointer-events:none;}
-  .cta-final h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,9vw,120px);line-height:.9;letter-spacing:.02em;margin-bottom:24px;position:relative;}
-  .cta-final h2 em{font-style:normal;color:var(--fire);}
-  .cta-final p{font-size:17px;font-weight:300;color:var(--muted2);max-width:400px;margin:0 auto 48px;line-height:1.65;position:relative;}
+  /* PROCESSO */
+  .process { padding: 0 52px 120px; background: var(--bg2); }
+  .process-inner { padding-top: 120px; }
+  .process-steps { margin-top: 64px; display: flex; flex-direction: column; }
+  .p-step { display: grid; grid-template-columns: 80px 1fr; padding: 36px 0; border-bottom: 1px solid var(--border); gap: 32px; align-items: start; }
+  .p-step:first-child { border-top: 1px solid var(--border); }
+  .p-step-num { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--fire); opacity: .22; line-height: 1; }
+  .p-step-num.active { opacity: 1; }
+  .p-step-body h4 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .04em; margin-bottom: 10px; }
+  .p-step-body p { font-size: 14px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
+  .p-step-tag { display: inline-block; margin-top: 14px; padding: 4px 10px; background: rgba(255,92,0,0.1); color: var(--fire); font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
 
-  footer{border-top:1px solid var(--border);padding:28px 52px;display:flex;justify-content:space-between;align-items:center;}
-  .f-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;}
-  .f-logo em{color:var(--fire);font-style:normal;}
-  footer small{font-size:12px;color:var(--muted);}
+  /* CTA FINAL */
+  .cta-final { padding: 140px 52px; text-align: center; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+  .cta-final::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 300px; background: radial-gradient(ellipse, rgba(255,92,0,0.09) 0%, transparent 70%); pointer-events: none; }
+  .cta-final h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(56px, 9vw, 120px); line-height: .9; letter-spacing: .02em; margin-bottom: 24px; position: relative; }
+  .cta-final h2 em { font-style: normal; color: var(--fire); }
+  .cta-final p { font-size: 17px; font-weight: 300; color: var(--muted2); max-width: 400px; margin: 0 auto 48px; line-height: 1.65; position: relative; }
 
-  .r{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
-  .r.on{opacity:1;transform:none;}
-  @keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 28px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .f-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .1em; }
+  .f-logo em { color: var(--fire); font-style: normal; }
+  footer small { font-size: 12px; color: var(--muted); }
 
-  /* Fix cursor em mobile */
-  @media(hover:none),(pointer:coarse){
-    body{cursor:auto!important;}
-    #cur,#cur-r{display:none!important;}
-    button,a{cursor:pointer!important;}
-  }
-
-  @media(max-width:768px){
-    nav{padding:18px 24px;}
-    .nav-links{display:none;}
-    .hero{padding:120px 24px 80px;}
-    .features,.modes,.process{padding-left:24px;padding-right:24px;}
-    .cta-final{padding:100px 24px;}
-    .feat-grid,.modes-grid{grid-template-columns:1fr;}
-    footer{padding:24px;flex-direction:column;gap:10px;text-align:center;}
+  @media(max-width: 768px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .features, .modes, .process { padding-left: 24px; padding-right: 24px; }
+    .cta-final { padding: 100px 24px; }
+    .feat-grid, .modes-grid { grid-template-columns: 1fr; }
+    footer { padding: 24px; flex-direction: column; gap: 10px; text-align: center; }
+    .hero-cta { flex-direction: column; align-items: flex-start; }
+    .btn-fire { width: 100%; text-align: center; }
   }
 </style>
 </head>
 <body>
-
-<div id="cur"></div>
-<div id="cur-r"></div>
 
 <nav>
   <div class="logo">NEX<em>U</em>S</div>
@@ -165,7 +140,7 @@
       <li><a href="#funciona">Como funciona</a></li>
       <li><a href="#modos">Parceiro ou rival</a></li>
     </ul>
-    <a href="nexus-auth.html" class="btn-nav" style="text-decoration:none;display:inline-block;text-align:center">Entrar na lista</a>
+    <a href="nexus-auth.html" class="btn-nav">Entrar na lista</a>
   </div>
 </nav>
 
@@ -181,8 +156,8 @@
     Define um objetivo. Recebe um <strong>parceiro ou rival</strong> com a mesma missão. Trinta dias de esforço real — sem distrações, sem likes, sem feed.
   </p>
   <div class="hero-cta">
-    <a href="nexus-auth.html" style="background:#FF5C00;color:white;padding:15px 36px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;position:relative;z-index:9999">Começar agora</a>
-    <a href="#funciona" class="link-ghost">Como funciona <span>→</span></a>
+    <a href="nexus-auth.html" class="btn-fire">Começar agora</a>
+    <a href="#funciona" class="link-ghost">Como funciona →</a>
   </div>
 </section>
 
@@ -208,24 +183,24 @@
 </div>
 
 <section class="features" id="funciona">
-  <div class="feat-header r">
+  <div class="feat-header">
     <p class="label">O que o Nexus faz</p>
     <h2>Construído para<br><span class="out">quem age.</span></h2>
   </div>
   <div class="feat-grid">
-    <div class="feat-card r">
+    <div class="feat-card">
       <div class="feat-icon">◎</div>
       <h3>Missões de 30 dias</h3>
       <p>Defines o teu objetivo e recebes um <strong>plano diário estruturado</strong>. Cada check-in conta. Cada dia perdido também.</p>
       <div class="feat-num">01</div>
     </div>
-    <div class="feat-card r">
+    <div class="feat-card">
       <div class="feat-icon">⇄</div>
       <h3>Match por objetivo</h3>
       <p>A IA encontra alguém <strong>no mesmo ponto da jornada</strong> que tu — seja no mesmo país ou no outro lado do mundo.</p>
       <div class="feat-num">02</div>
     </div>
-    <div class="feat-card r">
+    <div class="feat-card">
       <div class="feat-icon">⬡</div>
       <h3>Porta aberta</h3>
       <p>Depois dos 30 dias, se ambos quiserem, desbloqueiam a <strong>Porta Aberta</strong> — e a ligação passa do Nexus para a vida real.</p>
@@ -235,12 +210,12 @@
 </section>
 
 <section class="modes" id="modos">
-  <div class="feat-header r">
+  <div class="feat-header">
     <p class="label">Dois modos</p>
     <h2>Como preferes<br><span class="out">chegar lá?</span></h2>
   </div>
   <div class="modes-grid">
-    <div class="mode-card partner r">
+    <div class="mode-card partner">
       <span class="mode-tag">Parceiro</span>
       <h3>Juntos<br>chegamos<br>mais longe.</h3>
       <p>Partilham o progresso, celebram os marcos e <strong>mantêm-se responsáveis um pelo outro</strong>. Quando um cai, o outro puxa.</p>
@@ -250,7 +225,7 @@
         <div class="mode-detail-item">Chat direto com o parceiro</div>
       </div>
     </div>
-    <div class="mode-card rival r">
+    <div class="mode-card rival">
       <span class="mode-tag">Rival</span>
       <h3>Ninguém<br>te vai<br>deixar ganhar.</h3>
       <p>Placar ao vivo. Progresso comparado. <strong>A motivação que nenhuma notificação vai dar</strong> — porque há um humano real do outro lado.</p>
@@ -265,40 +240,40 @@
 
 <div class="process">
   <div class="process-inner">
-    <div class="feat-header r">
+    <div class="feat-header">
       <p class="label">O caminho</p>
       <h2>Do objetivo<br><span class="out">à conquista.</span></h2>
     </div>
     <div class="process-steps">
-      <div class="p-step r">
+      <div class="p-step">
         <div class="p-step-num active">01</div>
         <div class="p-step-body">
           <h4>Define o objetivo</h4>
-          <p>Escreve o que queres alcançar nos próximos 30 dias. Aprender guitarra, correr todos os dias, estudar uma língua, treinar — qualquer objetivo concreto e mensurável.</p>
+          <p>Escreve o que queres alcançar nos próximos 30 dias. Qualquer objetivo concreto e mensurável.</p>
           <span class="p-step-tag">2 minutos</span>
         </div>
       </div>
-      <div class="p-step r">
+      <div class="p-step">
         <div class="p-step-num">02</div>
         <div class="p-step-body">
           <h4>Recebe o match</h4>
-          <p>A IA analisa o teu objetivo e nível e encontra alguém compatível. Escolhes o modo — parceiro ou rival. A missão começa imediatamente.</p>
+          <p>A IA encontra alguém compatível. Escolhes o modo — parceiro ou rival. A missão começa imediatamente.</p>
           <span class="p-step-tag">Automático</span>
         </div>
       </div>
-      <div class="p-step r">
+      <div class="p-step">
         <div class="p-step-num">03</div>
         <div class="p-step-body">
           <h4>30 dias de foco</h4>
-          <p>Check-ins diários. Tarefas estruturadas. Progresso visível. Sem feed, sem conteúdo a consumir — só tu e o teu objetivo.</p>
+          <p>Check-ins diários. Tarefas estruturadas. Progresso visível. Sem feed, sem conteúdo a consumir.</p>
           <span class="p-step-tag">Dia a dia</span>
         </div>
       </div>
-      <div class="p-step r">
+      <div class="p-step">
         <div class="p-step-num">04</div>
         <div class="p-step-body">
           <h4>Porta aberta</h4>
-          <p>Missão completa. Se quiserem os dois, a ligação passa para fora do Nexus. Uma conexão construída com esforço real vale mais do que mil seguidores.</p>
+          <p>Missão completa. Se quiserem os dois, a ligação passa para fora do Nexus.</p>
           <span class="p-step-tag">Opcional e mútuo</span>
         </div>
       </div>
@@ -307,56 +282,16 @@
 </div>
 
 <section class="cta-final">
-  <h2 class="r">A missão<br>começa <em>agora.</em></h2>
-  <p class="r">Define o objetivo. Encontra o par. Faz o trabalho.</p>
-  <button class="btn-fire r" style="font-size:16px;padding:18px 48px">Quero uma missão →</button>
+  <h2>A missão<br>começa <em>agora.</em></h2>
+  <p>Define o objetivo. Encontra o par. Faz o trabalho.</p>
+  <a href="nexus-auth.html" class="btn-fire" style="font-size:16px;padding:18px 48px">Quero uma missão →</a>
 </section>
 
 <footer>
   <div class="f-logo">NEX<em>U</em>S</div>
   <small>Construído por Isaac & Claude · 2026</small>
-  <small>Fase 1 · Em construção</small>
+  <small>Fase 5 · Em construção</small>
 </footer>
 
-<script>
-  const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
-  // Cursor personalizado apenas em desktop
-  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-  if (isTouch) {
-    if(cur) cur.style.display='none';
-    if(curR) curR.style.display='none';
-  } else {
-    document.body.style.cursor='none';
-    cur.style.zIndex='9999';
-    curR.style.zIndex='9998';
-    let mx=0,my=0,rx=0,ry=0;
-    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
-    (function loop(){
-      cur.style.left=mx+'px';cur.style.top=my+'px';
-      rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
-      curR.style.left=rx+'px';curR.style.top=ry+'px';
-      requestAnimationFrame(loop);
-    })();
-  }
-  document.querySelectorAll('button,a,.feat-card,.mode-card,.p-step').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2)';curR.style.opacity='0';});
-    el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.opacity='1';});
-  });
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach((e,i)=>{
-      if(e.isIntersecting){setTimeout(()=>e.target.classList.add('on'),i*70);obs.unobserve(e.target);}
-    });
-  },{threshold:.1});
-  document.querySelectorAll('.r').forEach(el=>obs.observe(el));
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Nexus SW instalado'))
-        .catch(err => console.log('SW erro:', err));
-    });
-  }
-</script>
 </body>
 </html>
