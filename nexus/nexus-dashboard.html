@@ -583,6 +583,7 @@
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
     await loadMissions();
+    initNotifications();
   }
 
   // Carregar missões
@@ -745,6 +746,7 @@
       if (res.ok) {
         btn.textContent = '✓ FEITO HOJE!';
         toast(data.message || 'Check-in registado! 🔥');
+        notifyCheckin(activeMission.id);
         await loadMissions();
       } else {
         btn.disabled = false;
@@ -851,6 +853,7 @@
         },
         body: JSON.stringify({ mission_id: activeMission.id, content })
       });
+      notifyMessage(activeMission.id);
       await loadMessages();
     } catch(err) {
       toast('Erro ao enviar mensagem.', 'error');
@@ -1091,6 +1094,80 @@
     } catch(err) {
       toast('Erro de ligação.', 'error');
     }
+  }
+
+  // ============================================
+  // PUSH NOTIFICATIONS
+  // ============================================
+  async function initNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    try {
+      // Obter chave pública do servidor
+      const keyRes = await fetch(`${API}/api/notifications/vapid-key`);
+      const { publicKey } = await keyRes.json();
+
+      // Pedir permissão
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+
+      // Registar service worker
+      const reg = await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+
+      // Subscrever
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      // Enviar subscrição ao servidor
+      await fetch(`${API}/api/notifications/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ subscription })
+      });
+
+      console.log('Notificações ativadas!');
+    } catch(err) {
+      console.log('Notificações não disponíveis:', err);
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
+  async function notifyCheckin(missionId) {
+    try {
+      await fetch(`${API}/api/notifications/checkin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: missionId })
+      });
+    } catch(err) {}
+  }
+
+  async function notifyMessage(missionId) {
+    try {
+      await fetch(`${API}/api/notifications/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: missionId, sender_name: user.username })
+      });
+    } catch(err) {}
   }
 
   init();
