@@ -196,6 +196,12 @@
 
   @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
+  /* Fix cursor em mobile */
+  @media(hover:none),(pointer:coarse){
+    body{cursor:auto!important;}
+    #cur,#cur-r{display:none!important;}
+    button,a{cursor:pointer!important;}
+  }
   @media(max-width:900px){
     .layout{grid-template-columns:1fr;}
     .sidebar{display:none;}
