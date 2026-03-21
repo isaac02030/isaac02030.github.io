@@ -876,6 +876,7 @@
   }
 
   // Chat
+  let lastMsgId = null;
   async function loadMessages() {
     if (!activeMission) return;
     try {
@@ -888,6 +889,11 @@
 
       if (msgs.length === 0) return;
 
+      // Não re-renderizar se não houve mensagens novas
+      const newestId = msgs[msgs.length - 1]?.id;
+      if (newestId === lastMsgId) return;
+      lastMsgId = newestId;
+
       container.innerHTML = msgs.map(m => `
         <div class="chat-msg ${m.sender_id === user.id ? 'mine' : 'theirs'}">
           <div class="msg-sender">${m.sender_name}</div>
@@ -899,11 +905,14 @@
     } catch(err) {}
   }
 
+  let isSending = false;
   async function sendMessage() {
+    if (isSending) return;
     const input = document.getElementById('chat-input');
     const content = input.value.trim();
     if (!content || !activeMission) return;
 
+    isSending = true;
     input.value = '';
     try {
       await fetch(`${API}/api/messages`, {
@@ -918,6 +927,8 @@
       await loadMessages();
     } catch(err) {
       toast('Erro ao enviar mensagem.', 'error');
+    } finally {
+      isSending = false;
     }
   }
 
