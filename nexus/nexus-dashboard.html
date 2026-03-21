@@ -24,8 +24,8 @@
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
+  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);transition:opacity .2s;}
 
   /* LAYOUT */
   .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
@@ -269,6 +269,23 @@
   }
   .toast.show{transform:translateY(0);opacity:1;}
   .toast.error{border-left-color:var(--error);}
+
+  /* VÉRTICE */
+  .vertice-bar{
+    padding:12px 20px;
+    border-left:2px solid var(--fire);
+    margin-bottom:16px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .vertice-name{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:11px;letter-spacing:.1em;
+    color:var(--fire);flex-shrink:0;
+  }
+  .vertice-msg{
+    font-size:13px;color:var(--muted2);
+    font-weight:400;letter-spacing:.01em;
+  }
 
   /* PORTA ABERTA */
   .porta-card{
@@ -545,6 +562,8 @@
     if(curR) curR.style.display='none';
   } else {
     document.body.style.cursor='none';
+    cur.style.zIndex='9999';
+    curR.style.zIndex='9998';
     let mx=0,my=0,rx=0,ry=0;
     document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
     (function loop(){
@@ -623,6 +642,7 @@
         checkRivalActivity();
         checkPortaAberta();
         checkCommunitySuggestion();
+        loadVertice();
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
         }
@@ -1182,6 +1202,37 @@
         body: JSON.stringify({ mission_id: missionId, sender_name: user.username })
       });
     } catch(err) {}
+  }
+
+  // ============================================
+  // VÉRTICE
+  // ============================================
+  async function loadVertice() {
+    try {
+      const res = await fetch(`${API}/api/vertice/message`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.message) renderVertice(data.message);
+    } catch(err) {}
+  }
+
+  function renderVertice(message) {
+    const area = document.getElementById('mission-area');
+    if (!area) return;
+
+    // Remover Vértice anterior se existir
+    const old = document.getElementById('vertice-bar');
+    if (old) old.remove();
+
+    const bar = document.createElement('div');
+    bar.className = 'vertice-bar';
+    bar.id = 'vertice-bar';
+    bar.innerHTML = `
+      <span class="vertice-name">VÉRTICE</span>
+      <span class="vertice-msg">${message}</span>`;
+
+    area.insertBefore(bar, area.firstChild);
   }
 
   init();
