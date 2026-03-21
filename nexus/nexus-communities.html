@@ -26,8 +26,8 @@
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
+  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);transition:opacity .2s;}
 
   .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
 
@@ -306,6 +306,8 @@
     if(curR) curR.style.display='none';
   } else {
     document.body.style.cursor='none';
+    cur.style.zIndex='9999';
+    curR.style.zIndex='9998';
     let mx=0,my=0,rx=0,ry=0;
     document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
     (function loop(){
@@ -532,11 +534,21 @@
         body: JSON.stringify({ content })
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         await openCommunity(currentCommunity.slug);
         toast('Post publicado! 🔥');
+      } else if (data.locked) {
+        toast('Completa uma missão nesta categoria para poderes publicar.', 'error');
+        // Mostrar aviso no fórum
+        const list = document.getElementById('posts-list');
+        if (list) list.innerHTML = `
+          <div style="padding:24px;background:rgba(255,68,68,0.06);border-left:3px solid var(--error);margin-bottom:2px">
+            <div style="font-size:13px;color:#FF8888;font-weight:500;margin-bottom:4px">🔒 Fórum bloqueado</div>
+            <div style="font-size:13px;color:var(--muted2)">Completa a tua missão de <strong style="color:var(--text)">${currentCommunity.category}</strong> para participar no fórum e aparecer no ranking.</div>
+          </div>`;
       } else {
-        const data = await res.json();
         toast(data.error || 'Erro ao publicar.', 'error');
       }
     } catch(err) {
