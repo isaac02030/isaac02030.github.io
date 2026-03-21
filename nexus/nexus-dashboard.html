@@ -536,7 +536,7 @@
           <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
         </div>
         <div class="chat-input-row">
-          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter' && !event.repeat)sendMessage()">
+          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
           <button class="btn-send" onclick="sendMessage()">ENVIAR</button>
         </div>
       </div>
@@ -552,7 +552,6 @@
   let token = null;
   let activeMission = null;
   let chatInterval = null;
-  let isSending = false;
 
   // Cursor
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
@@ -637,9 +636,10 @@
       if (active.length > 0) {
         // Tem missão ativa — mostrar normalmente
         activeMission = active[0];
-        await renderMission(activeMission);
+        renderMission(activeMission);
         document.getElementById('bottom-grid').style.display = 'grid';
         await buildCalendar();
+        loadStreak();
         loadMessages();
         checkRivalActivity();
         checkPortaAberta();
@@ -709,29 +709,18 @@
   }
 
   // Renderizar missão ativa
-  async function renderMission(m) {
+  function renderMission(m) {
     const started = new Date(m.started_at);
     const today   = new Date();
     const day     = Math.min(Math.floor((today - started) / 86400000) + 1, m.duration_days);
     const pct     = Math.round((day / m.duration_days) * 100);
 
     const isRival = m.mode === 'rival';
-    let myScore = 0, partnerScore = 0;
-    if (m.partner_id) {
-      try {
-        const sr = await fetch(`${API}/api/checkins/${m.id}/score`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (sr.ok) {
-          const sd = await sr.json();
-          myScore      = sd.scores[user.username] || 0;
-          partnerScore = sd.scores[m.partner_name] || 0;
-        }
-      } catch(e) {}
-    }
+    const myScore = m.user_score || 0;
+    const partnerScore = m.partner_score || 0;
 
     document.getElementById('stat-days').textContent = day;
-    document.getElementById('stat-streak').textContent = myScore;
+    // streak é carregado separadamente via loadStreak()
 
     const scoreHtml = isRival ? `
       <div class="score-section">
@@ -769,6 +758,32 @@
           <span class="checkin-note" id="checkin-note">A carregar...</span>
         </div>
       </div>`;
+  }
+
+  // Carregar sequência real
+  async function loadStreak() {
+    if (!activeMission) return;
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}/streak`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById('stat-streak').textContent = data.streak || 0;
+      document.getElementById('stat-days').textContent   = data.total  || 0;
+    } catch(err) {}
+  }
+
+  // Sequência real
+  async function loadStreak() {
+    if (!activeMission) return;
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}/streak`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById('stat-streak').textContent = data.streak ?? 0;
+      document.getElementById('stat-days').textContent   = data.total  ?? 0;
+    } catch(err) {}
   }
 
   // Check-in
@@ -885,12 +900,10 @@
   }
 
   async function sendMessage() {
-    if (isSending) return;
     const input = document.getElementById('chat-input');
     const content = input.value.trim();
     if (!content || !activeMission) return;
 
-    isSending = true;
     input.value = '';
     try {
       await fetch(`${API}/api/messages`, {
@@ -905,8 +918,6 @@
       await loadMessages();
     } catch(err) {
       toast('Erro ao enviar mensagem.', 'error');
-    } finally {
-      isSending = false;
     }
   }
 
@@ -1150,6 +1161,11 @@
   // PUSH NOTIFICATIONS
   // ============================================
   async function initNotifications() {
+    // Desregistar service workers antigos
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      regs.forEach(r => r.unregister());
+    }
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
@@ -1161,20 +1177,17 @@
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
 
-      // Registar service worker (reutiliza existente se já estiver registado)
+      // Registar service worker
       const reg = await navigator.serviceWorker.register('sw.js');
       await navigator.serviceWorker.ready;
 
-      // Reutilizar subscrição existente ou criar nova
-      let subscription = await reg.pushManager.getSubscription();
-      if (!subscription) {
-        subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey)
-        });
-      }
+      // Subscrever
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
 
-      // Enviar subscrição ao servidor (upsert)
+      // Enviar subscrição ao servidor
       await fetch(`${API}/api/notifications/subscribe`, {
         method: 'POST',
         headers: {
@@ -1184,6 +1197,7 @@
         body: JSON.stringify({ subscription })
       });
 
+      console.log('Notificações ativadas!');
     } catch(err) {
       console.log('Notificações não disponíveis:', err);
     }
