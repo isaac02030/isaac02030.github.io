@@ -536,7 +536,7 @@
           <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
         </div>
         <div class="chat-input-row">
-          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
+          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter' && !event.repeat)sendMessage()">
           <button class="btn-send" onclick="sendMessage()">ENVIAR</button>
         </div>
       </div>
@@ -552,6 +552,7 @@
   let token = null;
   let activeMission = null;
   let chatInterval = null;
+  let isSending = false;
 
   // Cursor
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
@@ -636,7 +637,7 @@
       if (active.length > 0) {
         // Tem missão ativa — mostrar normalmente
         activeMission = active[0];
-        renderMission(activeMission);
+        await renderMission(activeMission);
         document.getElementById('bottom-grid').style.display = 'grid';
         await buildCalendar();
         loadMessages();
@@ -708,15 +709,26 @@
   }
 
   // Renderizar missão ativa
-  function renderMission(m) {
+  async function renderMission(m) {
     const started = new Date(m.started_at);
     const today   = new Date();
     const day     = Math.min(Math.floor((today - started) / 86400000) + 1, m.duration_days);
     const pct     = Math.round((day / m.duration_days) * 100);
 
     const isRival = m.mode === 'rival';
-    const myScore = m.user_score || 0;
-    const partnerScore = m.partner_score || 0;
+    let myScore = 0, partnerScore = 0;
+    if (m.partner_id) {
+      try {
+        const sr = await fetch(`${API}/api/checkins/${m.id}/score`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (sr.ok) {
+          const sd = await sr.json();
+          myScore      = sd.scores[user.username] || 0;
+          partnerScore = sd.scores[m.partner_name] || 0;
+        }
+      } catch(e) {}
+    }
 
     document.getElementById('stat-days').textContent = day;
     document.getElementById('stat-streak').textContent = myScore;
@@ -873,10 +885,12 @@
   }
 
   async function sendMessage() {
+    if (isSending) return;
     const input = document.getElementById('chat-input');
     const content = input.value.trim();
     if (!content || !activeMission) return;
 
+    isSending = true;
     input.value = '';
     try {
       await fetch(`${API}/api/messages`, {
@@ -891,6 +905,8 @@
       await loadMessages();
     } catch(err) {
       toast('Erro ao enviar mensagem.', 'error');
+    } finally {
+      isSending = false;
     }
   }
 
@@ -1134,11 +1150,6 @@
   // PUSH NOTIFICATIONS
   // ============================================
   async function initNotifications() {
-    // Desregistar service workers antigos
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      regs.forEach(r => r.unregister());
-    }
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
@@ -1150,17 +1161,20 @@
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
 
-      // Registar service worker
+      // Registar service worker (reutiliza existente se já estiver registado)
       const reg = await navigator.serviceWorker.register('sw.js');
       await navigator.serviceWorker.ready;
 
-      // Subscrever
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
-      });
+      // Reutilizar subscrição existente ou criar nova
+      let subscription = await reg.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
+      }
 
-      // Enviar subscrição ao servidor
+      // Enviar subscrição ao servidor (upsert)
       await fetch(`${API}/api/notifications/subscribe`, {
         method: 'POST',
         headers: {
@@ -1170,7 +1184,6 @@
         body: JSON.stringify({ subscription })
       });
 
-      console.log('Notificações ativadas!');
     } catch(err) {
       console.log('Notificações não disponíveis:', err);
     }
