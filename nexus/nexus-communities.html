@@ -202,6 +202,42 @@
     #cur,#cur-r{display:none!important;}
     button,a{cursor:pointer!important;}
   }
+  /* MISSÕES INTERNAS */
+  .missions-card{background:var(--bg2);border:1px solid var(--border);padding:28px;margin-top:24px;}
+  .missions-card h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+  .btn-new-mission{background:var(--fire);color:#fff;border:none;padding:8px 16px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.06em;cursor:none;transition:opacity .2s;}
+  .btn-new-mission:hover{opacity:.88;}
+  .mission-list{display:flex;flex-direction:column;gap:2px;background:var(--border);}
+  .mission-item{background:var(--bg2);padding:20px;transition:background .2s;cursor:none;}
+  .mission-item:hover{background:var(--bg3);}
+  .mission-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .mission-item h4{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.03em;}
+  .mission-mode{padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+  .mission-mode.solo{background:rgba(255,92,0,0.1);color:var(--fire);}
+  .mission-mode.duo{background:rgba(68,204,136,0.1);color:var(--success);}
+  .mission-mode.maratona{background:rgba(74,158,255,0.1);color:#4A9EFF;}
+  .mission-item-meta{display:flex;gap:16px;font-size:12px;color:var(--muted2);margin-bottom:12px;}
+  .btn-join-mission{background:transparent;border:1px solid var(--border2);color:var(--muted2);padding:7px 16px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.04em;cursor:none;transition:all .2s;}
+  .btn-join-mission:hover{border-color:var(--fire);color:var(--fire);}
+  .btn-join-mission.joined{background:var(--fire);border-color:var(--fire);color:#fff;}
+
+  /* MODAL CRIAR MISSÃO */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .modal-overlay.show{opacity:1;pointer-events:all;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);padding:36px;width:100%;max-width:480px;position:relative;}
+  .modal h3{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.04em;margin-bottom:24px;}
+  .modal-field{margin-bottom:16px;}
+  .modal-field label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px;}
+  .modal-input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:11px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+  .modal-input:focus{border-color:var(--fire);}
+  .modal-select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:11px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;outline:none;cursor:none;}
+  .modal-actions{display:flex;gap:8px;margin-top:24px;}
+  .btn-modal-confirm{flex:1;background:var(--fire);color:#fff;border:none;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.06em;cursor:none;transition:opacity .2s;}
+  .btn-modal-confirm:hover{opacity:.88;}
+  .btn-modal-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted2);padding:13px 20px;font-family:'Bebas Neue',sans-serif;font-size:14px;cursor:none;transition:all .2s;}
+  .btn-modal-cancel:hover{border-color:var(--text);color:var(--text);}
+  .btn-modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:none;}
+
   @media(max-width:900px){
     .layout{grid-template-columns:1fr;}
     .sidebar{display:none;}
@@ -279,6 +315,16 @@
           </div>
         </div>
 
+        <!-- MISSÕES INTERNAS -->
+        <div class="missions-card" id="missions-section">
+          <h3>MISSÕES
+            <button class="btn-new-mission" onclick="openModal()">+ NOVA MISSÃO</button>
+          </h3>
+          <div id="missions-list">
+            <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sem missões ainda. Cria a primeira!</div>
+          </div>
+        </div>
+
         <!-- RANKING -->
         <div class="ranking-card">
           <h3>RANKING</h3>
@@ -290,6 +336,42 @@
     </div>
 
   </main>
+</div>
+
+<!-- MODAL CRIAR MISSÃO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="btn-modal-close" onclick="closeModal()">✕</button>
+    <h3>NOVA MISSÃO</h3>
+    <div class="modal-field">
+      <label>Título</label>
+      <input class="modal-input" id="m-title" placeholder="Ex: Correr 5km todos os dias" maxlength="100">
+    </div>
+    <div class="modal-field">
+      <label>Modo</label>
+      <select class="modal-select" id="m-mode">
+        <option value="solo">Solo — compete no ranking individualmente</option>
+        <option value="duo">Duo — rival ou parceiro da comunidade</option>
+        <option value="maratona">Maratona — competição coletiva</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Âmbito</label>
+      <select class="modal-select" id="m-scope">
+        <option value="mundial">Mundial</option>
+        <option value="regional">Regional</option>
+        <option value="local">Local</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Duração (dias)</label>
+      <input class="modal-input" id="m-duration" type="number" value="30" min="7" max="90">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">CANCELAR</button>
+      <button class="btn-modal-confirm" onclick="createMission()">CRIAR MISSÃO</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -450,6 +532,7 @@
       currentCommunity = data.community;
       renderCommunityDetail(data);
       showDetail();
+      loadCommunityMissions(slug);
     } catch(err) {
       toast('Erro ao abrir comunidade.', 'error');
     }
@@ -564,6 +647,135 @@
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h`;
     return `${Math.floor(hrs / 24)}d`;
+  }
+
+  // ============================================
+  // MISSÕES INTERNAS
+  // ============================================
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('show');
+  }
+
+  async function loadCommunityMissions(slug) {
+    try {
+      const res = await fetch(`${API}/api/community-missions/${slug}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      renderMissions(data.missions || []);
+    } catch(err) {}
+  }
+
+  function renderMissions(missions) {
+    const list = document.getElementById('missions-list');
+    if (!list) return;
+
+    if (missions.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sem missões ainda. Cria a primeira!</div>';
+      return;
+    }
+
+    const modeLabels = { solo: 'Solo', duo: 'Duo', maratona: 'Maratona' };
+
+    list.innerHTML = `<div class="mission-list">${missions.map(m => `
+      <div class="mission-item">
+        <div class="mission-item-top">
+          <h4>${m.title}</h4>
+          <span class="mission-mode ${m.mode}">${modeLabels[m.mode] || m.mode}</span>
+        </div>
+        <div class="mission-item-meta">
+          <span>📅 ${m.duration_days} dias</span>
+          <span>👥 ${m.participant_count} participantes</span>
+          <span>🌍 ${m.scope}</span>
+          <span>${m.status === 'open' ? '🟢 Aberta' : m.status === 'active' ? '🔥 Ativa' : '✅ Completa'}</span>
+        </div>
+        ${m.status === 'open' && !m.is_participant
+          ? `<button class="btn-join-mission" onclick="joinMission('${currentCommunity?.slug}', ${m.id}, this)">ENTRAR</button>`
+          : m.is_participant
+            ? `<button class="btn-join-mission joined" onclick="checkinMission('${currentCommunity?.slug}', ${m.id}, this)">✓ CHECK-IN</button>`
+            : ''
+        }
+      </div>`).join('')}
+    </div>`;
+  }
+
+  async function createMission() {
+    const title    = document.getElementById('m-title').value.trim();
+    const mode     = document.getElementById('m-mode').value;
+    const scope    = document.getElementById('m-scope').value;
+    const duration = document.getElementById('m-duration').value;
+
+    if (!title) { toast('Escreve um título para a missão.', 'error'); return; }
+    if (!currentCommunity) return;
+
+    try {
+      const res = await fetch(`${API}/api/community-missions/${currentCommunity.slug}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, mode, scope, duration_days: parseInt(duration) })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        closeModal();
+        toast('Missão criada! 🔥');
+        await loadCommunityMissions(currentCommunity.slug);
+      } else {
+        toast(data.error || 'Erro ao criar missão.', 'error');
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  async function joinMission(slug, missionId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'A entrar...';
+    try {
+      const res = await fetch(`${API}/api/community-missions/${slug}/${missionId}/join`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast('Entraste na missão! 🔥');
+        await loadCommunityMissions(slug);
+      } else {
+        toast(data.error || 'Erro ao entrar.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'ENTRAR';
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  async function checkinMission(slug, missionId, btn) {
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/community-missions/${slug}/${missionId}/checkin`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast(data.message);
+        await loadCommunityMissions(slug);
+      } else {
+        toast(data.error || 'Erro ao fazer check-in.', 'error');
+        btn.disabled = false;
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+      btn.disabled = false;
+    }
   }
 
   init();
