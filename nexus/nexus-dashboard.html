@@ -616,6 +616,7 @@
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
     await loadMissions();
+    await loadVertice();
     initNotifications();
   }
 
@@ -642,7 +643,6 @@
         checkRivalActivity();
         checkPortaAberta();
         checkCommunitySuggestion();
-        loadVertice();
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
         }
@@ -1218,21 +1218,18 @@
   }
 
   function renderVertice(message) {
+    // Remover Vértice anterior se existir
+    const existing = document.getElementById('vertice-bar');
+    if (existing) existing.remove();
+
     const area = document.getElementById('mission-area');
     if (!area) return;
 
-    // Remover Vértice anterior se existir
-    const old = document.getElementById('vertice-bar');
-    if (old) old.remove();
-
-    const bar = document.createElement('div');
-    bar.className = 'vertice-bar';
-    bar.id = 'vertice-bar';
-    bar.innerHTML = `
-      <span class="vertice-name">VÉRTICE</span>
-      <span class="vertice-msg">${message}</span>`;
-
-    area.insertBefore(bar, area.firstChild);
+    area.insertAdjacentHTML('afterbegin', `
+      <div class="vertice-bar" id="vertice-bar">
+        <span class="vertice-name">VÉRTICE</span>
+        <span class="vertice-msg">${message}</span>
+      </div>`);
   }
 
   init();
