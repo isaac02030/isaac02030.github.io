@@ -26,8 +26,8 @@
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
+  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
+  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);transition:opacity .2s;}
 
   .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
 
@@ -304,6 +304,8 @@
     if(curR) curR.style.display='none';
   } else {
     document.body.style.cursor='none';
+    cur.style.zIndex='9999';
+    curR.style.zIndex='9998';
     let mx=0,my=0,rx=0,ry=0;
     document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
     (function loop(){
@@ -462,20 +464,42 @@
 
     if (!username) return toast('Username não pode estar vazio.', 'error');
 
-    // Por agora guardar localmente (backend de update de perfil vem a seguir)
-    user.username = username;
-    user.bio = bio;
-    localStorage.setItem('nexus_user', JSON.stringify(user));
+    try {
+      const res = await fetch(`${API}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ username, bio })
+      });
 
-    document.getElementById('profile-name').innerHTML =
-      username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
-    document.getElementById('profile-bio').textContent = bio || 'Sem bio ainda.';
-    document.getElementById('sidebar-username').textContent = username;
-    document.getElementById('sidebar-avatar').textContent = username[0].toUpperCase();
-    document.getElementById('profile-avatar').textContent = username[0].toUpperCase();
+      const data = await res.json();
 
-    document.getElementById('modal').classList.remove('open');
-    toast('Perfil atualizado! ✓');
+      if (!res.ok) {
+        return toast(data.error || 'Erro ao atualizar perfil.', 'error');
+      }
+
+      // Atualizar token e dados locais
+      token = data.token;
+      user = data.user;
+      localStorage.setItem('nexus_token', token);
+      localStorage.setItem('nexus_user', JSON.stringify(user));
+
+      // Atualizar UI
+      document.getElementById('profile-name').innerHTML =
+        username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
+      document.getElementById('profile-bio').textContent = bio || 'Sem bio ainda.';
+      document.getElementById('sidebar-username').textContent = username;
+      document.getElementById('sidebar-avatar').textContent = username[0].toUpperCase();
+      document.getElementById('profile-avatar').textContent = username[0].toUpperCase();
+
+      document.getElementById('modal').classList.remove('open');
+      toast('Perfil atualizado! ✓');
+
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
   }
 
   init();
