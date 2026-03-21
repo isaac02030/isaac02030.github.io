@@ -514,3 +514,731 @@
 
     <!-- MISSÃO ATIVA -->
     <p class="section-label">Missão ativa</p>
+    <div id="mission-area">
+      <div class="empty-state">
+        <h3>NENHUMA MISSÃO ATIVA</h3>
+        <p>Define o teu objetivo e começa hoje.</p>
+        <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSÃO</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid" id="bottom-grid" style="display:none">
+      <!-- Calendário -->
+      <div class="calendar-card">
+        <h3>PROGRESSO DO MÊS</h3>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <!-- Chat -->
+      <div class="chat-card">
+        <h3>CHAT</h3>
+        <div class="chat-messages" id="chat-messages">
+          <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
+          <button class="btn-send" onclick="sendMessage()">ENVIAR</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const API = 'https://nexus-backend-production-3f61.up.railway.app';
+
+  // Estado
+  let user = null;
+  let token = null;
+  let activeMission = null;
+  let chatInterval = null;
+
+  // Cursor
+  const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+  // Cursor personalizado apenas em desktop
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (isTouch) {
+    if(cur) cur.style.display='none';
+    if(curR) curR.style.display='none';
+  } else {
+    document.body.style.cursor='none';
+    cur.style.zIndex='9999';
+    curR.style.zIndex='9998';
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+    (function loop(){
+      cur.style.left=mx+'px';cur.style.top=my+'px';
+      rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+      curR.style.left=rx+'px';curR.style.top=ry+'px';
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  // Toast
+  function toast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type==='error' ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  // Auth
+  function logout() {
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user');
+    window.location.href = 'nexus-auth.html';
+  }
+
+  function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
+  }
+
+  // Init
+  async function init() {
+    token = localStorage.getItem('nexus_token');
+    const userData = localStorage.getItem('nexus_user');
+
+    if (!token || !userData) {
+      window.location.href = 'nexus-auth.html';
+      return;
+    }
+
+    user = JSON.parse(userData);
+
+    // Preencher UI com dados do utilizador
+    document.getElementById('header-name').textContent = user.username.toUpperCase();
+    document.getElementById('sidebar-username').textContent = user.username;
+    document.getElementById('sidebar-avatar').textContent = user.username[0].toUpperCase();
+
+    // Data de hoje
+    const now = new Date();
+    document.getElementById('header-date').textContent =
+      now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+
+    await loadMissions();
+    await loadVertice();
+    initNotifications();
+  }
+
+  // Carregar missões
+  async function loadMissions() {
+    try {
+      const res = await fetch(`${API}/api/missions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const missions = await res.json();
+
+      const active  = missions.filter(m => m.status === 'active');
+      const waiting = missions.filter(m => m.status === 'waiting');
+
+      document.getElementById('stat-missions').textContent = active.length;
+
+      if (active.length > 0) {
+        // Tem missão ativa — mostrar normalmente
+        activeMission = active[0];
+        renderMission(activeMission);
+        document.getElementById('bottom-grid').style.display = 'grid';
+        await buildCalendar();
+        loadMessages();
+        checkRivalActivity();
+        checkPortaAberta();
+        checkCommunitySuggestion();
+        if (!chatInterval) {
+          chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
+        }
+
+      } else if (waiting.length > 0) {
+        // Está em fila de espera — mostrar estado de espera
+        renderWaiting(waiting[0]);
+
+      } else {
+        // Sem missões — mostrar estado vazio
+        document.getElementById('mission-area').innerHTML = `
+          <div class="empty-state">
+            <h3>NENHUMA MISSÃO ATIVA</h3>
+            <p>Define o teu objetivo e começa hoje.</p>
+            <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSÃO</button>
+          </div>`;
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  // Mostrar missão em espera de match
+  function renderWaiting(mission) {
+    document.getElementById('mission-area').innerHTML = `
+      <div class="mission-card" style="border-color:rgba(255,92,0,0.2)">
+        <div class="mission-top">
+          <div class="mission-title">${mission.title}</div>
+          <span class="mission-mode ${mission.mode}">${mission.mode.toUpperCase()}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;padding:24px;background:var(--bg3);margin-bottom:16px;">
+          <div style="width:12px;height:12px;background:var(--fire);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0"></div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.04em;margin-bottom:4px">À PROCURA DE ${mission.mode === 'rival' ? 'RIVAL' : 'PARCEIRO'}...</div>
+            <div style="font-size:13px;color:var(--muted2)">Serás notificado quando encontrarmos alguém com o mesmo objetivo.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border)">
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.category}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Categoria</div>
+          </div>
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.duration_days}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Dias</div>
+          </div>
+          <div style="background:var(--bg);padding:20px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.level}</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Nível</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--muted2);text-align:center;padding:12px">
+          Partilha o Nexus com um amigo para competir diretamente →
+          <button onclick="navigator.clipboard.writeText('isaac02030.github.io/nexus');toast('Link copiado! 🔥')" 
+            style="background:var(--fire-dim);border:1px solid rgba(255,92,0,0.3);color:var(--fire);padding:6px 14px;font-size:12px;font-weight:600;margin-left:8px;font-family:'Bricolage Grotesque',sans-serif">
+            COPIAR LINK
+          </button>
+        </div>
+      </div>`;
+
+    // Verificar match a cada 15 segundos automaticamente
+    setTimeout(loadMissions, 15000);
+  }
+
+  // Renderizar missão ativa
+  function renderMission(m) {
+    const started = new Date(m.started_at);
+    const today   = new Date();
+    const day     = Math.min(Math.floor((today - started) / 86400000) + 1, m.duration_days);
+    const pct     = Math.round((day / m.duration_days) * 100);
+
+    const isRival = m.mode === 'rival';
+    const myScore = m.user_score || 0;
+    const partnerScore = m.partner_score || 0;
+
+    document.getElementById('stat-days').textContent = day;
+    document.getElementById('stat-streak').textContent = myScore;
+
+    const scoreHtml = isRival ? `
+      <div class="score-section">
+        <div class="score-side">
+          <div class="s-name">Tu</div>
+          <div class="s-num fire">${myScore}</div>
+        </div>
+        <div class="score-vs">VS</div>
+        <div class="score-side">
+          <div class="s-name">${m.partner_name || 'Rival'}</div>
+          <div class="s-num">${partnerScore}</div>
+        </div>
+      </div>` : '';
+
+    document.getElementById('mission-area').innerHTML = `
+      <div class="mission-card">
+        <div class="mission-top">
+          <div class="mission-title">${m.title}</div>
+          <span class="mission-mode ${m.mode}">${m.mode.toUpperCase()}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-info">
+            <span>Dia ${day} de ${m.duration_days}</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+        ${scoreHtml}
+        <div class="checkin-section">
+          <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
+            A verificar...
+          </button>
+          <span class="checkin-note" id="checkin-note">A carregar...</span>
+        </div>
+      </div>`;
+  }
+
+  // Check-in
+  async function doCheckin() {
+    if (!activeMission) return;
+    const btn = document.getElementById('btn-checkin');
+    btn.disabled = true;
+    btn.textContent = 'A registar...';
+
+    try {
+      const res = await fetch(`${API}/api/checkins`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        btn.textContent = '✓ FEITO HOJE!';
+        toast(data.message || 'Check-in registado! 🔥');
+        notifyCheckin(activeMission.id);
+        await loadMissions();
+      } else {
+        btn.disabled = false;
+        btn.textContent = '✓ CHECK-IN DE HOJE';
+        toast(data.error || 'Erro ao registar.', 'error');
+      }
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = '✓ CHECK-IN DE HOJE';
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  // Calendário de progresso
+  async function buildCalendar() {
+    if (!activeMission) return;
+
+    let doneDays = new Set();
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.progress && data.progress[user.id]) {
+        data.progress[user.id].checkins
+          .filter(c => c.completed)
+          .forEach(c => doneDays.add(c.day));
+      }
+    } catch(err) {}
+
+    const started  = new Date(activeMission.started_at);
+    const today    = new Date();
+    const todayDay = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+    const grid     = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    for (let i = 1; i <= activeMission.duration_days; i++) {
+      const div = document.createElement('div');
+      div.className = 'cal-day';
+      if (i > todayDay) {
+        div.classList.add('future');
+      } else if (i === todayDay) {
+        div.classList.add(doneDays.has(i) ? 'done' : 'today');
+      } else {
+        div.classList.add(doneDays.has(i) ? 'done' : 'missed');
+      }
+      div.textContent = i;
+      grid.appendChild(div);
+    }
+
+    const btn = document.getElementById('btn-checkin');
+    const note = document.getElementById('checkin-note');
+    if (btn) {
+      if (doneDays.has(todayDay)) {
+        btn.textContent = '\u2713 FEITO HOJE!';
+        btn.disabled = true;
+        btn.style.opacity = '1';
+        if (note) note.textContent = 'Voltas amanhã para o dia ' + (todayDay + 1) + '.';
+      } else {
+        btn.textContent = '\u2713 CHECK-IN DE HOJE';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        if (note) note.textContent = 'Regista o teu progresso de hoje.';
+      }
+    }
+  }
+
+  // Chat
+  async function loadMessages() {
+    if (!activeMission) return;
+    try {
+      const res = await fetch(`${API}/api/messages/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const msgs = data.messages || [];
+      const container = document.getElementById('chat-messages');
+
+      if (msgs.length === 0) return;
+
+      container.innerHTML = msgs.map(m => `
+        <div class="chat-msg ${m.sender_id === user.id ? 'mine' : 'theirs'}">
+          <div class="msg-sender">${m.sender_name}</div>
+          ${m.content}
+        </div>`).join('');
+
+      checkUnreadMessages(msgs);
+      container.scrollTop = container.scrollHeight;
+    } catch(err) {}
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const content = input.value.trim();
+    if (!content || !activeMission) return;
+
+    input.value = '';
+    try {
+      await fetch(`${API}/api/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id, content })
+      });
+      notifyMessage(activeMission.id);
+      await loadMessages();
+    } catch(err) {
+      toast('Erro ao enviar mensagem.', 'error');
+    }
+  }
+
+  // Criar missão
+  async function createMission() {
+    const title    = document.getElementById('m-title').value.trim();
+    const category = document.getElementById('m-category').value;
+    const level    = document.getElementById('m-level').value;
+    const mode     = document.getElementById('m-mode').value;
+    const desc     = document.getElementById('m-desc').value.trim();
+
+    if (!title) return toast('Escreve o objetivo da missão.', 'error');
+
+    try {
+      const res = await fetch(`${API}/api/missions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, category, level, mode, description: desc })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('modal').classList.remove('open');
+        toast(data.message || 'Missão criada!');
+        await loadMissions();
+      } else {
+        toast(data.error || 'Erro ao criar missão.', 'error');
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  function showSection(s) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.target.closest('.nav-item').classList.add('active');
+  }
+
+  // Verificar se o rival fez check-in hoje mas tu não
+  async function checkRivalActivity() {
+    if (!activeMission || !activeMission.partner_id) return;
+    try {
+      const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.progress) return;
+
+      const started   = new Date(activeMission.started_at);
+      const today     = new Date();
+      const todayDay  = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Check-ins do utilizador
+      const myCheckins = data.progress[user.id]?.checkins || [];
+      const idoneToday = myCheckins.some(c => c.day === todayDay && c.completed);
+
+      // Check-ins do rival
+      const partnerId = activeMission.user_id === user.id
+        ? activeMission.partner_id
+        : activeMission.user_id;
+      const rivalCheckins = data.progress[partnerId]?.checkins || [];
+      const rivalDoneToday = rivalCheckins.some(c => c.day === todayDay && c.completed);
+
+      // Mostrar dot se rival fez e eu não fiz
+      const dot = document.getElementById('dot-rival');
+      if (dot) dot.style.display = (rivalDoneToday && !idoneToday) ? 'block' : 'none';
+
+    } catch(err) {}
+  }
+
+  // Verificar mensagens não lidas
+  let lastMessageCount = 0;
+  function checkUnreadMessages(msgs) {
+    const dot = document.getElementById('dot-chat');
+    if (!dot) return;
+    if (msgs.length > lastMessageCount) {
+      // Só mostrar se não estiver na secção de chat
+      const chatNav = document.getElementById('nav-chat');
+      if (chatNav && !chatNav.classList.contains('active')) {
+        dot.style.display = 'block';
+      }
+    }
+    lastMessageCount = msgs.length;
+  }
+
+  function clearChatDot() {
+    const dot = document.getElementById('dot-chat');
+    if (dot) dot.style.display = 'none';
+    lastMessageCount = document.querySelectorAll('.chat-msg').length;
+  }
+
+  // ============================================
+  // SUGESTÃO DE COMUNIDADE
+  // ============================================
+  async function checkCommunitySuggestion() {
+    if (!activeMission || activeMission.status !== 'active') return;
+
+    // Só verificar se já passou o dia 15
+    const started  = new Date(activeMission.started_at);
+    const today    = new Date();
+    const dayNum   = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+    if (dayNum < 15) return;
+
+    // Verificar se já dispensou a sugestão
+    const dismissed = localStorage.getItem(`nexus_suggest_${activeMission.id}`);
+    if (dismissed) return;
+
+    try {
+      const res = await fetch(`${API}/api/communities/smart-suggest/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (data.suggest && data.community) {
+        renderCommunitySuggestion(data);
+      }
+    } catch(err) {}
+  }
+
+  function renderCommunitySuggestion(data) {
+    const area = document.getElementById('mission-area');
+    if (!area || document.getElementById('suggest-card')) return;
+
+    const c = data.community;
+    area.insertAdjacentHTML('beforeend', `
+      <div class="suggest-card" id="suggest-card">
+        <div class="suggest-icon">${c.icon}</div>
+        <div class="suggest-body">
+          <div class="suggest-label">✦ Sugestão do Nexus — Dia ${data.day}</div>
+          <h4>${c.name}</h4>
+          <p>${data.message} Há uma comunidade para o teu objetivo com ${c.member_count} membros.</p>
+          <div class="consist-bar">
+            <div class="consist-fill" style="width:${data.consistency}%"></div>
+          </div>
+          <div class="suggest-actions">
+            <button class="btn-suggest-yes" onclick="joinFromSuggestion('${c.slug}')">VER COMUNIDADE →</button>
+            <button class="btn-suggest-no" onclick="dismissSuggestion()">Agora não</button>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  async function joinFromSuggestion(slug) {
+    window.location.href = `nexus-communities.html`;
+  }
+
+  function dismissSuggestion() {
+    if (activeMission) {
+      localStorage.setItem(`nexus_suggest_${activeMission.id}`, 'dismissed');
+    }
+    const card = document.getElementById('suggest-card');
+    if (card) card.remove();
+  }
+
+  // ============================================
+  // PORTA ABERTA
+  // ============================================
+  async function checkPortaAberta() {
+    if (!activeMission || activeMission.status !== 'completed') return;
+
+    try {
+      const res = await fetch(`${API}/api/porta-aberta/${activeMission.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      renderPortaAberta(data);
+    } catch(err) {}
+  }
+
+  function renderPortaAberta(data) {
+    const area = document.getElementById('mission-area');
+    if (!area) return;
+
+    if (data.both_open && data.partner_contact) {
+      // Ambos abriram — mostrar contacto
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">🔓</div>
+          <h3>PORTA ABERTA!</h3>
+          <p>Os 30 dias foram completados. Aqui está o contacto de <strong>${data.partner_name}</strong>:</p>
+          <div class="porta-resultado">
+            <div class="contact-name">Contacto de ${data.partner_name}</div>
+            <div class="contact-value">${data.partner_contact}</div>
+          </div>
+        </div>`);
+
+    } else if (data.i_opened) {
+      // Eu já abri, a aguardar o rival
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">⏳</div>
+          <h3>AGUARDANDO ${data.partner_name.toUpperCase()}</h3>
+          <p>Já partilhaste o teu contacto. Quando <strong>${data.partner_name}</strong> abrir a porta, os contactos ficam visíveis para os dois.</p>
+          <div class="porta-waiting">A aguardar que ${data.partner_name} abra a porta...</div>
+        </div>`);
+
+    } else {
+      // Missão completa mas ainda não abriu a porta
+      area.insertAdjacentHTML('beforeend', `
+        <div class="porta-card">
+          <div class="porta-icon">🚪</div>
+          <h3>PORTA ABERTA</h3>
+          <p>Completaste os 30 dias com <strong>${data.partner_name}</strong>! Se quiserem manter o contacto fora do Nexus, partilha o teu contacto. É mútuo — só vês o dele se ele também partilhar.</p>
+          <input class="porta-input" id="porta-contact" placeholder="email, instagram, número..." maxlength="100">
+          <br>
+          <button class="btn-porta" onclick="abrirPorta()">ABRIR A PORTA →</button>
+        </div>`);
+    }
+  }
+
+  async function abrirPorta() {
+    const contact = document.getElementById('porta-contact')?.value.trim();
+    if (!contact) return toast('Escreve um contacto primeiro.', 'error');
+
+    try {
+      const res = await fetch(`${API}/api/porta-aberta`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: activeMission.id, contact })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast(data.message);
+        await checkPortaAberta();
+      } else {
+        toast(data.error || 'Erro ao abrir porta.', 'error');
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  // ============================================
+  // PUSH NOTIFICATIONS
+  // ============================================
+  async function initNotifications() {
+    // Desregistar service workers antigos
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      regs.forEach(r => r.unregister());
+    }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    try {
+      // Obter chave pública do servidor
+      const keyRes = await fetch(`${API}/api/notifications/vapid-key`);
+      const { publicKey } = await keyRes.json();
+
+      // Pedir permissão
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+
+      // Registar service worker
+      const reg = await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+
+      // Subscrever
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      // Enviar subscrição ao servidor
+      await fetch(`${API}/api/notifications/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ subscription })
+      });
+
+      console.log('Notificações ativadas!');
+    } catch(err) {
+      console.log('Notificações não disponíveis:', err);
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
+  async function notifyCheckin(missionId) {
+    try {
+      await fetch(`${API}/api/notifications/checkin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: missionId })
+      });
+    } catch(err) {}
+  }
+
+  async function notifyMessage(missionId) {
+    try {
+      await fetch(`${API}/api/notifications/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ mission_id: missionId, sender_name: user.username })
+      });
+    } catch(err) {}
+  }
+
+  // ============================================
+  // VÉRTICE
+  // ============================================
+  async function loadVertice() {
+    try {
+      const res = await fetch(`${API}/api/vertice/message`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.message) return;
+
+      // Remover anterior
+      const ex = document.getElementById('vertice-bar');
+      if (ex) ex.remove();
+
+      // Criar elemento
+      const div = document.createElement('div');
+      div.id = 'vertice-bar';
+      div.className = 'vertice-bar';
+      div.innerHTML = '<span class="vertice-name">VÉRTICE</span><span class="vertice-msg"> ' + data.message + '</span>';
+
+      // Inserir antes da missão
+      const area = document.getElementById('mission-area');
+      if (area) area.parentNode.insertBefore(div, area);
+
+    } catch(err) { console.error('Vertice error:', err); }
+  }
+
+  init();
+</script>
+</body>
+</html>
