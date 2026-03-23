@@ -880,6 +880,22 @@
       <label>Descrição (opcional)</label>
       <textarea id="m-desc" rows="2" placeholder="mais detalhes sobre o teu objetivo..." style="resize:none"></textarea>
     </div>
+    <div class="field">
+      <label>MÃ­nimo diÃ¡rio</label>
+      <input type="text" id="m-minimum" placeholder="ex: 45 minutos ou 5 pÃ¡ginas">
+    </div>
+    <div class="field">
+      <label>Janela de compromisso</label>
+      <input type="text" id="m-window" placeholder="ex: 19:00-21:00">
+    </div>
+    <div class="field">
+      <label>Porque isto importa</label>
+      <textarea id="m-why" rows="2" placeholder="o motivo real para levares isto a sÃ©rio..." style="resize:none"></textarea>
+    </div>
+    <div class="field">
+      <label>Plano se falhares um dia</label>
+      <textarea id="m-fallback" rows="2" placeholder="ex: amanhÃ£ comeÃ§o mais cedo com um mÃ­nimo menor, mas nÃ£o falho outra vez" style="resize:none"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">CANCELAR</button>
       <button class="btn-confirm" onclick="createMission()">CRIAR MISSÃO →</button>
@@ -1119,6 +1135,7 @@
             COPIAR LINK
           </button>
         </div>
+        ${renderMissionContract(mission)}
       </div>`;
 
     // Verificar match a cada 15 segundos automaticamente
@@ -1168,6 +1185,7 @@
           </div>
         </div>
         ${scoreHtml}
+        ${renderMissionContract(m)}
         <div class="checkin-section">
           <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
             A verificar...
@@ -1397,6 +1415,10 @@
     const level    = document.getElementById('m-level').value;
     const mode     = document.getElementById('m-mode').value;
     const desc     = document.getElementById('m-desc').value.trim();
+    const dailyMinimum = document.getElementById('m-minimum').value.trim();
+    const commitmentWindow = document.getElementById('m-window').value.trim();
+    const whyItMatters = document.getElementById('m-why').value.trim();
+    const fallbackPlan = document.getElementById('m-fallback').value.trim();
 
     if (!title) return toast('Escreve o objetivo da missão.', 'error');
 
@@ -1407,12 +1429,26 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ title, category, level, mode, description: desc })
+        body: JSON.stringify({
+          title,
+          category,
+          level,
+          mode,
+          description: desc,
+          daily_minimum: dailyMinimum,
+          commitment_window: commitmentWindow,
+          why_it_matters: whyItMatters,
+          fallback_plan: fallbackPlan
+        })
       });
       const data = await res.json();
 
       if (res.ok) {
         document.getElementById('modal').classList.remove('open');
+        ['m-title', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
         toast(data.message || 'Missão criada!');
         await loadMissions();
       } else {
@@ -1426,6 +1462,24 @@
   function showSection(s) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.target.closest('.nav-item').classList.add('active');
+  }
+
+  function renderMissionContract(mission) {
+    const rows = [
+      mission.daily_minimum ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Mínimo diário</strong><span>${mission.daily_minimum}</span></div>` : '',
+      mission.commitment_window ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Janela</strong><span>${mission.commitment_window}</span></div>` : '',
+      mission.why_it_matters ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Porque importa</strong><span>${mission.why_it_matters}</span></div>` : '',
+      mission.fallback_plan ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Se falhar</strong><span>${mission.fallback_plan}</span></div>` : ''
+    ].filter(Boolean);
+
+    if (rows.length === 0) return '';
+
+    return `
+      <div style="margin-top:18px;padding:18px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.03)">
+        <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#ffb067;margin-bottom:12px;font-weight:700">Contrato da missão</div>
+        <div style="display:grid;gap:12px;font-size:.95rem;color:var(--text)">${rows.join('')}</div>
+      </div>
+    `;
   }
 
   // Verificar se o rival fez check-in hoje mas tu não
