@@ -1594,22 +1594,34 @@
     const total = lastStreakData?.total ?? 0;
     const consistency = lastStreakData?.consistency ?? 0;
     const todayDone = !!lastStreakData?.today_done;
+    const recoveryNeeded = !!lastStreakData?.recovery_needed;
+    const missedDays = lastStreakData?.missed_days ?? 0;
+    const noteEl = document.getElementById('checkin-note');
 
     if (todayDone) {
       titleEl.textContent = 'Hoje a palavra foi mantida.';
       copyEl.textContent = `Brio ${brio}. Sequencia ${streak}. Amanhã voltas para defender ${total} dias ja conquistados.`;
+      if (noteEl) noteEl.textContent = 'Voltas amanha para o proximo dia.';
+    } else if (recoveryNeeded) {
+      titleEl.textContent = 'Hoje e dia de recuperacao.';
+      copyEl.textContent = `Brio ${brio}. Falhaste ${missedDays} dia${missedDays === 1 ? '' : 's'} seguido${missedDays === 1 ? '' : 's'}. O objetivo agora e nao deixar a quebra virar padrao.`;
+      if (noteEl) noteEl.textContent = 'Hoje nao e um dia normal. E um retorno.';
     } else if (streak >= 5) {
       titleEl.textContent = 'A tua sequencia esta viva.';
       copyEl.textContent = `Brio ${brio}. Levas ${streak} dias seguidos. Falhar hoje quebra o melhor padrao recente.`;
+      if (noteEl) noteEl.textContent = 'Defende a tua sequencia hoje.';
     } else if (consistency >= 70) {
       titleEl.textContent = 'O padrao esta a consolidar.';
       copyEl.textContent = `Brio ${brio}. Tens ${consistency}% de consistencia. O trabalho de hoje decide se isto vira identidade.`;
+      if (noteEl) noteEl.textContent = 'Hoje conta para consolidar o padrao.';
     } else if (total > 0) {
       titleEl.textContent = 'Ainda podes endireitar o padrao.';
       copyEl.textContent = `Brio ${brio}. Ja provaste ${total} dias. O que importa agora e a resposta de hoje.`;
+      if (noteEl) noteEl.textContent = 'Hoje ainda consegues corrigir a direcao.';
     } else {
       titleEl.textContent = 'Hoje ainda nao existe prova.';
       copyEl.textContent = 'O primeiro check-in nao fecha a missao, mas abre o padrao que vais defender nos proximos dias.';
+      if (noteEl) noteEl.textContent = 'O primeiro registo define o inicio do padrao.';
     }
 
     if (activeMission.why_it_matters) {
