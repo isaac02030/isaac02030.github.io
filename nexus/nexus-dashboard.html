@@ -536,8 +536,8 @@
           <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
         </div>
         <div class="chat-input-row">
-          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter' && !event.repeat)sendMessage()">
-          <button class="btn-send" id="btn-send" type="button" onclick="sendMessage()">ENVIAR</button>
+          <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="return handleChatKeydown(event)">
+          <button class="btn-send" id="btn-send" type="button" onclick="return sendMessage(event)">ENVIAR</button>
         </div>
       </div>
     </div>
@@ -909,14 +909,34 @@
   }
 
   let isSending = false;
-  async function sendMessage() {
+  let lastSentContent = '';
+  let lastSentAt = 0;
+
+  function handleChatKeydown(event) {
+    if (event.key !== 'Enter' || event.repeat || event.isComposing) return true;
+    event.preventDefault();
+    event.stopPropagation();
+    sendMessage(event);
+    return false;
+  }
+
+  async function sendMessage(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     if (isSending) return;
     const input = document.getElementById('chat-input');
     const btn = document.getElementById('btn-send');
     const content = input.value.trim();
     if (!content || !activeMission) return;
 
+    const now = Date.now();
+    if (content === lastSentContent && (now - lastSentAt) < 2500) return;
+
     isSending = true;
+    lastSentContent = content;
+    lastSentAt = now;
     if (btn) {
       btn.disabled = true;
       btn.style.opacity = '.6';
@@ -939,6 +959,8 @@
       await loadMessages();
     } catch(err) {
       input.value = content;
+      lastSentContent = '';
+      lastSentAt = 0;
       toast('Erro ao enviar mensagem.', 'error');
     } finally {
       input.disabled = false;
