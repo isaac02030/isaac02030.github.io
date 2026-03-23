@@ -105,7 +105,7 @@
   .btn-new-mission:hover{opacity:.88;transform:translateY(-1px);}
 
   /* STATS */
-  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
   .stat-card{background:var(--bg);padding:28px 24px;}
   .stat-card .stat-num{
     font-family:'Bebas Neue',sans-serif;font-size:52px;
@@ -398,7 +398,7 @@
     .sidebar{display:none;}
     .main{padding:24px;}
     .bottom-grid{grid-template-columns:1fr;}
-    .stats-row{grid-template-columns:1fr 1fr 1fr;}
+    .stats-row{grid-template-columns:1fr 1fr;}
   }
 </style>
 <style>
@@ -960,6 +960,10 @@
         <div class="stat-num" id="stat-streak">0</div>
         <div class="stat-label">Sequência atual</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-brio">0</div>
+        <div class="stat-label">Brio</div>
+      </div>
     </div>
 
     <!-- MISSÃO ATIVA -->
@@ -1083,10 +1087,18 @@
 
       } else if (waiting.length > 0) {
         // Está em fila de espera — mostrar estado de espera
+        activeMission = null;
+        document.getElementById('stat-days').textContent = 0;
+        document.getElementById('stat-streak').textContent = 0;
+        document.getElementById('stat-brio').textContent = 0;
         renderWaiting(waiting[0]);
 
       } else {
         // Sem missões — mostrar estado vazio
+        activeMission = null;
+        document.getElementById('stat-days').textContent = 0;
+        document.getElementById('stat-streak').textContent = 0;
+        document.getElementById('stat-brio').textContent = 0;
         document.getElementById('mission-area').innerHTML = `
           <div class="empty-state">
             <h3>NENHUMA MISSÃO ATIVA</h3>
@@ -1205,6 +1217,7 @@
       const data = await res.json();
       document.getElementById('stat-streak').textContent = data.streak || 0;
       document.getElementById('stat-days').textContent   = data.total  || 0;
+      document.getElementById('stat-brio').textContent   = data.brio   || 0;
     } catch(err) {}
   }
 
@@ -1218,6 +1231,7 @@
       const data = await res.json();
       document.getElementById('stat-streak').textContent = data.streak ?? 0;
       document.getElementById('stat-days').textContent   = data.total  ?? 0;
+      document.getElementById('stat-brio').textContent   = data.brio   ?? 0;
     } catch(err) {}
   }
 
