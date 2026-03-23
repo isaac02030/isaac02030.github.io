@@ -21,6 +21,8 @@
     .card{padding:22px}.card-top,.meta,.stats,.row,.mission-meta,.post-head{display:flex;gap:12px}.card-top{justify-content:space-between}
     .icon{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:28px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
     .badge,.chip,.mode{display:inline-flex;align-items:center;padding:7px 11px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05);font-size:12px;color:var(--muted)}
+    .badge.open{color:var(--accent2)}
+    .badge.member{color:#6fe0a4}
     .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.meta > div,.stats > div{padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;flex-direction:column;gap:6px;color:var(--muted)}
     .meta strong,.stats strong{font-size:20px;color:var(--text)} .rankline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted)}
     button,input,select{font:inherit} button{cursor:pointer}
@@ -38,6 +40,15 @@
     .locked{padding:18px;background:linear-gradient(180deg,rgba(255,95,86,.08),rgba(255,255,255,.02))}
     .kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px}.locked-title{font-size:20px;font-weight:800;margin-bottom:8px}
     .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .progress-wrap{margin-top:14px;display:grid;gap:8px}
+    .progress-top{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px}
+    .progress-track{width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid var(--border)}
+    .progress-fill{height:100%;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+    .focus-box{padding:16px 18px;border-radius:18px;border:1px solid rgba(255,122,24,.18);background:linear-gradient(135deg,rgba(255,122,24,.10),rgba(255,255,255,.03));display:grid;gap:8px}
+    .focus-title{font-size:15px;font-weight:800}
+    .focus-copy{font-size:14px;line-height:1.55;color:var(--muted)}
+    .card-guide{margin-top:14px;padding:14px 16px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.03);display:grid;gap:8px}
+    .card-guide strong{font-size:14px}
     .step-title{font-weight:800;margin:8px 0}.step-copy{color:var(--muted);line-height:1.5;min-height:44px}.step-status{margin-top:12px}
     .modal-wrap{position:fixed;inset:0;background:rgba(5,8,14,.76);display:none;align-items:center;justify-content:center;padding:20px}.modal-wrap.show{display:flex}.modal{width:min(560px,100%);padding:22px}
     .field{display:flex;flex-direction:column;gap:8px;margin-top:14px} label{color:var(--muted);font-size:14px}
@@ -182,6 +193,48 @@
     function getCommunityUnlockCopy(){ return getCommunityAccessState().post_requirement; }
     function getCommunityReadCopy(){ return getCommunityAccessState().read_requirement; }
     function getMissionUnlockCopy(){ return currentMissionAccessMessage || getCommunityAccessState().mission_requirement; }
+    function getAccessMetrics(community, accessOverride){
+      const base = community || currentCommunity || {};
+      const access = accessOverride || currentCommunityAccess || getCommunityAccessState();
+      const totalDays = Number(base.total_days) || 0;
+      const missionsDone = Number(base.missions_done) || 0;
+      const readTarget = 5;
+      const voiceTarget = 1;
+      const readProgress = Math.min(100, Math.round((Math.min(totalDays, readTarget) / readTarget) * 100));
+      const voiceProgress = Math.min(100, Math.round((Math.min(missionsDone, voiceTarget) / voiceTarget) * 100));
+
+      if (!access.can_read_forum) {
+        return {
+          stage: 'read',
+          title: 'Falta desbloquear a leitura',
+          copy: `Faz mais ${Math.max(0, readTarget - totalDays)} check-ins nesta categoria ou conclui 1 missão para entrares no fórum e veres as missões internas.`,
+          label: `${totalDays}/${readTarget} check-ins`,
+          progress: readProgress
+        };
+      }
+
+      if (!access.can_post_forum) {
+        return {
+          stage: 'voice',
+          title: 'A leitura já abriu. Falta ganhar voz',
+          copy: `Conclui ${Math.max(0, voiceTarget - missionsDone)} missão nesta categoria para publicares no fórum e criares missões internas.`,
+          label: `${missionsDone}/${voiceTarget} missões concluídas`,
+          progress: voiceProgress
+        };
+      }
+
+      return {
+        stage: 'open',
+        title: 'Comunidade desbloqueada',
+        copy: 'Já podes ler, publicar e criar missões internas nesta categoria.',
+        label: 'Voz ativa',
+        progress: 100
+      };
+    }
+
+    function renderProgressBar(metrics){
+      return `<div class="progress-wrap"><div class="progress-top"><strong>${metrics.title}</strong><span class="sub">${metrics.label}</span></div><div class="progress-track"><div class="progress-fill" style="width:${metrics.progress}%"></div></div></div>`;
+    }
 
     function renderAccessLadder(){
       const access=getCommunityAccessState();
@@ -196,7 +249,8 @@
     function renderLockedPanel(title, body){
       const missionsDone=Number(currentCommunity?.missions_done)||0;
       const totalDays=Number(currentCommunity?.total_days)||0;
-      return `<div class="locked"><div class="kicker">Acesso por compromisso</div><div class="locked-title">${title}</div><div class="muted">${body}</div><div class="chips"><span class="chip">${missionsDone}/1 miss\u00f5es conclu\u00eddas</span><span class="chip">${totalDays}/5 check-ins de presen\u00e7a</span></div>${renderAccessLadder()}</div>`;
+      const metrics = getAccessMetrics();
+      return `<div class="locked"><div class="kicker">Acesso por compromisso</div><div class="locked-title">${title}</div><div class="muted">${body}</div>${renderProgressBar(metrics)}<div class="chips"><span class="chip">${missionsDone}/1 miss\u00f5es conclu\u00eddas</span><span class="chip">${totalDays}/5 check-ins de presen\u00e7a</span></div>${renderAccessLadder()}</div>`;
     }
 
     function updateCommunityAccessUI(){
@@ -227,7 +281,8 @@
 
     function renderCommunityDetail(data){
       const c=data.community; currentCommunity=c;
-      document.getElementById('detail-header').innerHTML=`<div class="icon" style="border-color:${c.cover_color}40">${c.icon}</div><div style="width:100%;display:flex;flex-direction:column;gap:14px"><h2>${c.name}</h2><p class="muted">${c.description||''}</p><div class="stats"><div><strong>${c.member_count||0}</strong>Membros</div><div><strong style="color:${c.cover_color}">${RANK_LABELS[c.my_rank]||c.my_rank||'-'}</strong>A tua patente</div></div>${renderAccessLadder()}</div>`;
+      const metrics = getAccessMetrics(c, data.access || currentCommunityAccess);
+      document.getElementById('detail-header').innerHTML=`<div class="icon" style="border-color:${c.cover_color}40">${c.icon}</div><div style="width:100%;display:flex;flex-direction:column;gap:14px"><h2>${c.name}</h2><p class="muted">${c.description||''}</p><div class="stats"><div><strong>${c.member_count||0}</strong>Membros</div><div><strong style="color:${c.cover_color}">${RANK_LABELS[c.my_rank]||c.my_rank||'-'}</strong>A tua patente</div></div><div class="focus-box"><div class="kicker">Próximo desbloqueio</div><div class="focus-title">${metrics.title}</div><div class="focus-copy">${metrics.copy}</div>${renderProgressBar(metrics)}</div>${renderAccessLadder()}</div>`;
       const rankList=document.getElementById('ranking-list');
       rankList.innerHTML=!data.ranking||data.ranking.length===0?'<div class="locked">Sem membros ainda.</div>':data.ranking.map((r,i)=>`<div class="rank-item"><div class="chip">${i+1}</div><div class="rank-avatar">${r.username[0].toUpperCase()}</div><div><div>${r.username}</div><div class="sub">${RANK_LABELS[r.rank]||r.rank}</div></div><div class="score">${r.missions_done}</div></div>`).join('');
       renderPosts(data.posts||[]); updateCommunityAccessUI();
@@ -236,7 +291,16 @@
     function renderCommunities(communities){
       const grid=document.getElementById('communities-grid');
       if(!communities||communities.length===0){ grid.innerHTML='<div class="card muted" style="grid-column:1/-1;text-align:center">Nenhuma comunidade ainda.</div>'; return; }
-      grid.innerHTML=communities.map(c=>`<div class="card"><div class="card-top"><div class="icon" style="border-color:${c.cover_color}30">${c.icon}</div><span class="badge">${c.is_member?'Membro':'Aberta'}</span></div><h3>${c.name}</h3><p class="muted">${c.description||''}</p><div class="meta"><div><strong>${c.member_count||0}</strong>Membros</div><div><strong>${c.category}</strong>Categoria</div></div>${c.is_member?`<div class="rankline"><span class="badge" style="color:${c.cover_color}">${RANK_LABELS[c.my_rank]||c.my_rank}</span><span>&bull; ${c.missions_done||0} miss\u00f5es nesta categoria</span></div>`:''}<div class="row" style="flex-wrap:wrap">${c.is_member?`<button class="btn-soft" onclick="openCommunity('${c.slug}')">VER COMUNIDADE &rarr;</button>`:`<button class="btn" onclick="joinCommunity('${c.slug}', this)">ENTRAR NA COMUNIDADE</button>`}</div></div>`).join('');
+      grid.innerHTML=communities.map(c=>{
+        const access = {
+          can_read_forum: (Number(c.total_days) || 0) >= 5 || (Number(c.missions_done) || 0) >= 1,
+          can_post_forum: (Number(c.missions_done) || 0) >= 1,
+          can_view_internal_missions: (Number(c.total_days) || 0) >= 5 || (Number(c.missions_done) || 0) >= 1,
+          can_create_internal_missions: (Number(c.missions_done) || 0) >= 1
+        };
+        const metrics = getAccessMetrics(c, access);
+        return `<div class="card"><div class="card-top"><div class="icon" style="border-color:${c.cover_color}30">${c.icon}</div><span class="badge ${c.is_member?'member':'open'}">${c.is_member?'Membro':'Aberta'}</span></div><h3>${c.name}</h3><p class="muted">${c.description||''}</p><div class="meta"><div><strong>${c.member_count||0}</strong>Membros</div><div><strong>${c.category}</strong>Categoria</div></div>${c.is_member?`<div class="rankline"><span class="badge" style="color:${c.cover_color}">${RANK_LABELS[c.my_rank]||c.my_rank}</span><span>&bull; ${c.missions_done||0} miss\u00f5es nesta categoria</span></div><div class="card-guide"><strong>${metrics.title}</strong><span class="sub">${metrics.copy}</span>${renderProgressBar(metrics)}</div>`:`<div class="card-guide"><strong>Entra e começa a ganhar espaço</strong><span class="sub">Depois de entrares, desbloqueias a comunidade por presença e conclusão.</span></div>`}<div class="row" style="flex-wrap:wrap">${c.is_member?`<button class="btn-soft" onclick="openCommunity('${c.slug}')">VER COMUNIDADE &rarr;</button>`:`<button class="btn" onclick="joinCommunity('${c.slug}', this)">ENTRAR NA COMUNIDADE</button>`}</div></div>`;
+      }).join('');
     }
 
     async function loadCommunities(){ try{ const res=await fetch(`${API}/api/communities`,{headers:{Authorization:`Bearer ${token}`}}); renderCommunities(await res.json()); }catch{ document.getElementById('communities-grid').innerHTML='<div class="card muted" style="grid-column:1/-1;text-align:center">Erro ao carregar comunidades.</div>'; } }
