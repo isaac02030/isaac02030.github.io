@@ -272,7 +272,7 @@
   .toast.show{transform:translateY(0);opacity:1;}
   .toast.error{border-left-color:var(--error);}
 
-  /* VÉRTICE */
+  /* GRANDE IRMAO */
   .vertice-bar{
     padding:12px 20px;
     border-left:2px solid var(--fire);
@@ -1706,7 +1706,7 @@
   }
 
   // ============================================
-  // VÉRTICE
+  // GRANDE IRMAO
   // ============================================
   async function loadVertice() {
     try {
@@ -1725,13 +1725,13 @@
       const div = document.createElement('div');
       div.id = 'vertice-bar';
       div.className = 'vertice-bar';
-      div.innerHTML = '<span class="vertice-name">VÉRTICE</span><span class="vertice-msg"> ' + data.message + '</span>';
+      div.innerHTML = '<span class="vertice-name">GRANDE IRMAO</span><span class="vertice-msg"> ' + data.message + '</span>';
 
       // Inserir antes da missão
       const area = document.getElementById('mission-area');
       if (area) area.parentNode.insertBefore(div, area);
 
-    } catch(err) { console.error('Vertice error:', err); }
+    } catch(err) { console.error('Grande Irmao error:', err); }
   }
 
   init();
