@@ -7,7 +7,9 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FF5C00">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --fire: #FF5C00;
@@ -246,6 +248,265 @@
     .detail-grid{grid-template-columns:1fr;}
   }
 </style>
+<style>
+  :root {
+    --fire: #ff6a1a;
+    --fire-dim: rgba(255,106,26,0.14);
+    --bg: #071019;
+    --bg2: rgba(14,23,34,0.88);
+    --bg3: rgba(255,255,255,0.04);
+    --text: #f4f7fb;
+    --muted: #97a4b4;
+    --muted2: #6b7b8e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --success: #57d69a;
+    --error: #ff6471;
+  }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(255,106,26,0.16), transparent 24%),
+      radial-gradient(circle at bottom right, rgba(87,214,154,0.10), transparent 22%),
+      linear-gradient(180deg, #071019 0%, #09121b 100%);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+    opacity: .16;
+    pointer-events: none;
+  }
+  #cur,#cur-r{display:none!important;}
+
+  .layout {
+    width: min(1480px, calc(100% - 28px));
+    margin: 14px auto;
+    grid-template-columns: 290px 1fr;
+    gap: 18px;
+  }
+  .sidebar,
+  .main,
+  .comm-card,
+  .comm-detail-header,
+  .forum-card,
+  .ranking-card,
+  .missions-card,
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.38);
+    backdrop-filter: blur(18px);
+  }
+  .sidebar {
+    padding: 22px;
+  }
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 4px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+  }
+  .sidebar-logo::before {
+    content: 'N';
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--fire), #ff9457);
+    box-shadow: 0 16px 28px rgba(255,106,26,0.28);
+  }
+  .nav-item {
+    border: 1px solid transparent;
+    border-radius: 16px;
+    color: var(--muted);
+    font-size: .96rem;
+    font-weight: 600;
+  }
+  .nav-item:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.05);
+  }
+  .nav-item.active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(255,106,26,0.20), rgba(255,255,255,0.03));
+    border-color: rgba(255,106,26,0.24);
+  }
+  .nav-item.active::before { display:none; }
+  .sidebar-user {
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,106,26,0.22);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-logout {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .main {
+    padding: 26px;
+  }
+  .page-header .label {
+    color: #ffd166;
+    font-size: .76rem;
+    letter-spacing: .16em;
+    font-weight: 800;
+  }
+  .page-header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.4rem);
+    line-height: .95;
+    letter-spacing: -.05em;
+  }
+  .page-header h1 .out {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+    color: transparent;
+  }
+  .page-header p {
+    color: var(--muted);
+    max-width: 58ch;
+    line-height: 1.8;
+  }
+
+  .communities-grid {
+    gap: 18px;
+    background: transparent;
+  }
+  .comm-card {
+    padding: 28px;
+  }
+  .comm-card h3,
+  .comm-detail-info h2,
+  .forum-card h3,
+  .ranking-card h3,
+  .missions-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -.04em;
+  }
+  .comm-card p,
+  .comm-detail-info p,
+  .post-content,
+  .mission-item-meta {
+    color: var(--muted);
+    line-height: 1.75;
+  }
+  .comm-icon,
+  .comm-detail-icon,
+  .rank-avatar,
+  .post-avatar {
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+  }
+  .comm-badge.member {
+    background: rgba(87,214,154,0.12);
+    color: var(--success);
+    border-radius: 999px;
+  }
+  .comm-badge.open {
+    background: rgba(255,106,26,0.14);
+    color: var(--fire);
+    border-radius: 999px;
+  }
+  .comm-meta-item strong,
+  .comm-detail-stat strong,
+  .rank-score {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .comm-rank,
+  .mission-item,
+  .rank-item,
+  .post-item {
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+  }
+  .btn-join,
+  .btn-post,
+  .btn-new-mission,
+  .btn-modal-confirm {
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--fire), #ff9457);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+  }
+  .btn-join.joined,
+  .btn-join-mission,
+  .btn-modal-cancel {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    color: var(--muted);
+  }
+  .back-btn {
+    color: var(--muted);
+    font-size: .92rem;
+  }
+  .post-input,
+  .modal-input,
+  .modal-select {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+  .toast {
+    border-radius: 16px;
+    border: 1px solid rgba(87,214,154,0.18);
+    background: rgba(10,18,28,0.94);
+    box-shadow: 0 28px 80px rgba(0,0,0,0.38);
+  }
+  .modal-overlay {
+    background: rgba(5,10,15,0.72);
+    backdrop-filter: blur(12px);
+  }
+  .modal {
+    border-radius: 26px;
+  }
+  .modal h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+  }
+  .modal-field label {
+    color: var(--muted2);
+    font-size: .74rem;
+    letter-spacing: .14em;
+    font-weight: 800;
+  }
+
+  @media(max-width:1100px){
+    .layout{grid-template-columns:1fr;width:min(100%,calc(100% - 20px));}
+    .communities-grid{grid-template-columns:1fr;}
+    .detail-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:760px){
+    .sidebar{display:none;}
+    .main{padding:18px;}
+  }
+</style>
 </head>
 <body>
 
@@ -381,24 +642,8 @@
 
   // Cursor
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
-  // Cursor personalizado apenas em desktop
-  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-  if (isTouch) {
-    if(cur) cur.style.display='none';
-    if(curR) curR.style.display='none';
-  } else {
-    document.body.style.cursor='none';
-    cur.style.zIndex='9999';
-    curR.style.zIndex='9998';
-    let mx=0,my=0,rx=0,ry=0;
-    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
-    (function loop(){
-      cur.style.left=mx+'px';cur.style.top=my+'px';
-      rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
-      curR.style.left=rx+'px';curR.style.top=ry+'px';
-      requestAnimationFrame(loop);
-    })();
-  }
+  if(cur) cur.style.display='none';
+  if(curR) curR.style.display='none';
 
   function toast(msg, type='success') {
     const t = document.getElementById('toast');

@@ -3,294 +3,752 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexus — O teu objetivo primeiro</title>
+<title>Nexus - O teu objetivo primeiro</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#FF5C00">
+<meta name="theme-color" content="#ff6a1a">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://isaac02030.github.io/nexus/">
-<meta property="og:title" content="Nexus — O teu objetivo primeiro">
-<meta property="og:description" content="Define um objetivo. Recebe um parceiro ou rival. 30 dias de foco real — sem likes, sem feed, só resultados.">
+<meta property="og:title" content="Nexus - O teu objetivo primeiro">
+<meta property="og:description" content="Define um objetivo. Recebe um parceiro ou rival. 30 dias de foco real, sem likes, sem feed, so resultados.">
 <meta property="og:image" content="https://isaac02030.github.io/nexus/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --fire: #FF5C00;
-    --bg: #0A0A08;
-    --bg2: #111110;
-    --bg3: #181816;
-    --text: #F0EDE6;
-    --muted: #6E6C65;
-    --muted2: #9A9890;
-    --border: rgba(240,237,230,0.07);
-    --border2: rgba(240,237,230,0.13);
+    --bg: #09111a;
+    --bg-soft: #0f1823;
+    --panel: rgba(12, 19, 29, 0.78);
+    --panel-strong: #111d2a;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --text: #f4f7fb;
+    --muted: #99a5b5;
+    --muted-soft: #728092;
+    --accent: #ff6a1a;
+    --accent-soft: rgba(255, 106, 26, 0.16);
+    --accent-2: #ffd166;
+    --success: #57d69a;
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    --radius-xl: 32px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+    --max: 1180px;
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { font-family: 'Bricolage Grotesque', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(255, 106, 26, 0.18), transparent 30%),
+      radial-gradient(circle at top right, rgba(87, 214, 154, 0.12), transparent 22%),
+      linear-gradient(180deg, #08111a 0%, #0b131d 42%, #081019 100%);
+    color: var(--text);
+    overflow-x: hidden;
+  }
 
-  /* NAV */
-  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 52px; }
-  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .1em; }
-  .logo em { color: var(--fire); font-style: normal; }
-  .nav-right { display: flex; align-items: center; gap: 36px; }
-  .nav-links { display: flex; gap: 28px; list-style: none; }
-  .nav-links a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; }
-  .nav-links a:hover { color: var(--text); }
-  .btn-nav { background: transparent; border: 1px solid var(--border2); color: var(--text); padding: 9px 22px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 13px; font-weight: 500; text-decoration: none; display: inline-block; }
-  .btn-nav:hover { border-color: var(--fire); color: var(--fire); }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+    pointer-events: none;
+    opacity: 0.28;
+  }
 
-  /* HERO */
-  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 140px 52px 100px; position: relative; overflow: hidden; }
-  .hero-glow { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 400px; background: radial-gradient(ellipse, rgba(255,92,0,0.07) 0%, transparent 65%); pointer-events: none; }
-  .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fire); margin-bottom: 36px; }
-  .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--fire); }
-  .hero-h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(80px, 12vw, 160px); line-height: .9; letter-spacing: .015em; }
-  .hero-h1 .out { -webkit-text-stroke: 1px rgba(240,237,230,0.2); color: transparent; }
-  .hero-h1 .fire { color: var(--fire); }
-  .hero-desc { max-width: 480px; margin-top: 36px; font-size: 17px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
-  .hero-desc strong { color: var(--text); font-weight: 500; }
-  .hero-cta { display: flex; align-items: center; gap: 20px; margin-top: 52px; flex-wrap: wrap; }
-  .btn-fire { background: var(--fire); color: #fff; border: none; padding: 15px 36px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .02em; text-decoration: none; display: inline-block; }
-  .btn-fire:hover { opacity: .88; }
-  .link-ghost { color: var(--muted); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; }
-  .link-ghost:hover { color: var(--text); }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  .container { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
 
-  /* TICKER */
-  .ticker-wrap { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 18px 0; overflow: hidden; }
-  .ticker-inner { display: flex; gap: 56px; white-space: nowrap; animation: ticker 28s linear infinite; font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: .1em; color: var(--muted); }
-  .ticker-inner b { color: var(--fire); font-weight: 400; }
-  @keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(18px);
+    background: rgba(8, 17, 26, 0.72);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .site-nav .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 84px;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #ff8f53);
+    box-shadow: 0 18px 32px rgba(255, 106, 26, 0.28);
+  }
+  .brand em { color: var(--accent); font-style: normal; }
+  .nav-links {
+    display: flex;
+    gap: 26px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+  .nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 999px;
+    padding: 14px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: transform .18s ease, opacity .18s ease, background .18s ease, border-color .18s ease;
+    border: 1px solid transparent;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #ff914d);
+    color: #fff;
+    box-shadow: 0 20px 42px rgba(255, 106, 26, 0.24);
+  }
+  .btn-ghost {
+    color: var(--text);
+    border-color: var(--line-strong);
+    background: rgba(255,255,255,0.03);
+  }
 
-  /* FEATURES */
-  .features { padding: 120px 52px; }
-  .feat-header { margin-bottom: 72px; }
-  .feat-header .label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fire); margin-bottom: 20px; }
-  .feat-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(44px, 5.5vw, 68px); line-height: .95; letter-spacing: .02em; }
-  .feat-header h2 .out { -webkit-text-stroke: 1px rgba(240,237,230,0.2); color: transparent; }
-  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border); }
-  .feat-card { background: var(--bg); padding: 44px 36px; position: relative; overflow: hidden; }
-  .feat-card:hover { background: var(--bg3); }
-  .feat-icon { width: 40px; height: 40px; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; margin-bottom: 28px; font-size: 18px; }
-  .feat-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: .04em; margin-bottom: 14px; }
-  .feat-card p { font-size: 14px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
-  .feat-card p strong { color: var(--text); font-weight: 500; }
-  .feat-num { position: absolute; bottom: 16px; right: 20px; font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--fire); opacity: .06; line-height: 1; }
+  .hero {
+    padding: 88px 0 48px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 34px;
+    align-items: stretch;
+  }
+  .hero-copy,
+  .hero-preview {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(16px);
+  }
+  .hero-copy {
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-copy::after {
+    content: '';
+    position: absolute;
+    inset: auto -140px -140px auto;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 106, 26, 0.18), transparent 72%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: var(--accent-2);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 18px rgba(255, 106, 26, 0.7);
+  }
+  .hero h1 {
+    margin-top: 24px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(3.5rem, 7vw, 6.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    max-width: 11ch;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-copy p {
+    margin-top: 26px;
+    max-width: 58ch;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+  .hero-actions {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .hero-meta {
+    margin-top: 34px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .hero-stat {
+    padding: 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.03);
+  }
+  .hero-stat strong {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.7rem;
+    margin-bottom: 6px;
+  }
+  .hero-stat span {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
 
-  /* MODOS */
-  .modes { padding: 0 52px 120px; }
-  .modes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); margin-top: 64px; }
-  .mode-card { background: var(--bg2); padding: 52px 44px; }
-  .mode-card:hover { background: var(--bg3); }
-  .mode-card .mode-tag { display: inline-block; padding: 4px 12px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 24px; }
-  .mode-card.partner .mode-tag { background: rgba(255,92,0,0.1); color: var(--fire); }
-  .mode-card.rival .mode-tag { background: rgba(240,237,230,0.06); color: var(--muted2); }
-  .mode-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4vw, 52px); letter-spacing: .02em; margin-bottom: 18px; line-height: .95; }
-  .mode-card p { font-size: 15px; font-weight: 300; color: var(--muted2); line-height: 1.7; max-width: 380px; }
-  .mode-card p strong { color: var(--text); font-weight: 500; }
-  .mode-detail { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
-  .mode-detail-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted2); }
-  .mode-detail-item::before { content: ''; width: 4px; height: 4px; background: var(--fire); border-radius: 50%; flex-shrink: 0; }
+  .hero-preview {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .preview-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .preview-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 26px;
+    padding: 22px;
+  }
+  .preview-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted-soft);
+  }
+  .preview-title {
+    margin-top: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.65rem;
+    line-height: 1.1;
+  }
+  .preview-progress {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.22);
+  }
+  .preview-progress-row {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+  }
+  .preview-bar {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.06);
+  }
+  .preview-bar span {
+    display: block;
+    width: 72%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .score-card {
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .score-card b {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    margin-top: 8px;
+  }
+  .preview-chat {
+    display: grid;
+    gap: 10px;
+  }
+  .bubble {
+    max-width: 88%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+  .bubble.me {
+    margin-left: auto;
+    background: var(--accent-soft);
+    border: 1px solid rgba(255, 106, 26, 0.28);
+  }
+  .bubble.them {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
 
-  /* PROCESSO */
-  .process { padding: 0 52px 120px; background: var(--bg2); }
-  .process-inner { padding-top: 120px; }
-  .process-steps { margin-top: 64px; display: flex; flex-direction: column; }
-  .p-step { display: grid; grid-template-columns: 80px 1fr; padding: 36px 0; border-bottom: 1px solid var(--border); gap: 32px; align-items: start; }
-  .p-step:first-child { border-top: 1px solid var(--border); }
-  .p-step-num { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--fire); opacity: .22; line-height: 1; }
-  .p-step-num.active { opacity: 1; }
-  .p-step-body h4 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .04em; margin-bottom: 10px; }
-  .p-step-body p { font-size: 14px; font-weight: 300; color: var(--muted2); line-height: 1.7; }
-  .p-step-tag { display: inline-block; margin-top: 14px; padding: 4px 10px; background: rgba(255,92,0,0.1); color: var(--fire); font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+  .section {
+    padding: 44px 0;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: end;
+    margin-bottom: 26px;
+  }
+  .section-kicker {
+    color: var(--accent-2);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .section h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .section-head p {
+    max-width: 46ch;
+    color: var(--muted);
+    line-height: 1.8;
+  }
 
-  /* CTA FINAL */
-  .cta-final { padding: 140px 52px; text-align: center; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
-  .cta-final::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 300px; background: radial-gradient(ellipse, rgba(255,92,0,0.09) 0%, transparent 70%); pointer-events: none; }
-  .cta-final h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(56px, 9vw, 120px); line-height: .9; letter-spacing: .02em; margin-bottom: 24px; position: relative; }
-  .cta-final h2 em { font-style: normal; color: var(--fire); }
-  .cta-final p { font-size: 17px; font-weight: 300; color: var(--muted2); max-width: 400px; margin: 0 auto 48px; line-height: 1.65; position: relative; }
+  .feature-grid,
+  .mode-grid,
+  .steps-grid {
+    display: grid;
+    gap: 18px;
+  }
+  .feature-grid { grid-template-columns: repeat(3, 1fr); }
+  .mode-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps-grid { grid-template-columns: repeat(4, 1fr); }
 
-  /* FOOTER */
-  footer { border-top: 1px solid var(--border); padding: 28px 52px; display: flex; justify-content: space-between; align-items: center; }
-  .f-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .1em; }
-  .f-logo em { color: var(--fire); font-style: normal; }
-  footer small { font-size: 12px; color: var(--muted); }
+  .card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+  }
+  .feature-card,
+  .mode-card,
+  .step-card {
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-icon,
+  .step-index {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  .feature-card h3,
+  .mode-card h3,
+  .step-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.45rem;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .feature-card p,
+  .mode-card p,
+  .step-card p {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 0.96rem;
+  }
+  .feature-card::after,
+  .mode-card::after {
+    content: '';
+    position: absolute;
+    inset: auto -60px -60px auto;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(255, 106, 26, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+  .mode-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+  }
+  .mode-chip.partner {
+    background: rgba(87, 214, 154, 0.12);
+    color: var(--success);
+  }
+  .mode-chip.rival {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .mode-list {
+    margin-top: 18px;
+    display: grid;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .mode-list span::before {
+    content: '•';
+    color: var(--accent);
+    margin-right: 10px;
+  }
+  .step-index {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+  }
 
-  @media(max-width: 768px) {
-    nav { padding: 18px 24px; }
-    .nav-links { display: none; }
-    .hero { padding: 100px 24px 60px; }
-    .features, .modes, .process { padding-left: 24px; padding-right: 24px; }
-    .cta-final { padding: 100px 24px; }
-    .feat-grid, .modes-grid { grid-template-columns: 1fr; }
-    footer { padding: 24px; flex-direction: column; gap: 10px; text-align: center; }
-    .hero-cta { flex-direction: column; align-items: flex-start; }
-    .btn-fire { width: 100%; text-align: center; }
+  .final-cta {
+    padding: 62px 0 92px;
+  }
+  .final-cta .card {
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    background:
+      radial-gradient(circle at right, rgba(255, 106, 26, 0.18), transparent 28%),
+      rgba(12, 19, 29, 0.82);
+  }
+  .final-cta h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 4.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    max-width: 10ch;
+  }
+  .final-cta p {
+    max-width: 46ch;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-top: 14px;
+  }
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 24px 0 40px;
+    color: var(--muted-soft);
+    font-size: 0.88rem;
+  }
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 1024px) {
+    .hero-grid,
+    .feature-grid,
+    .mode-grid,
+    .steps-grid,
+    .final-cta .card {
+      grid-template-columns: 1fr;
+    }
+    .hero-meta { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 760px) {
+    .site-nav .container {
+      min-height: 74px;
+    }
+    .nav-links {
+      display: none;
+    }
+    .nav-actions .btn-ghost {
+      display: none;
+    }
+    .hero,
+    .section,
+    .final-cta {
+      padding-top: 28px;
+    }
+    .hero-copy,
+    .hero-preview,
+    .final-cta .card,
+    .feature-card,
+    .mode-card,
+    .step-card {
+      padding: 22px;
+    }
+    .hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .btn {
+      width: 100%;
+    }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="logo">NEX<em>U</em>S</div>
-  <div class="nav-right">
-    <ul class="nav-links">
-      <li><a href="#funciona">Como funciona</a></li>
-      <li><a href="#modos">Parceiro ou rival</a></li>
-    </ul>
-    <a href="nexus-auth.html" class="btn-nav">Entrar na lista</a>
+<header class="site-nav">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">N</span>
+      <span>NEX<em>U</em>S</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#modos">Parceiro ou rival</a>
+      <a href="#processo">Processo</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="nexus-auth.html" class="btn btn-ghost">Entrar</a>
+      <a href="nexus-auth.html" class="btn btn-primary">Comecar</a>
+    </div>
   </div>
-</nav>
+</header>
 
-<section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-tag">Foco total no objetivo</div>
-  <h1 class="hero-h1">
-    O TEU<br>
-    <span class="fire">OBJETIVO</span><br>
-    <span class="out">PRIMEIRO.</span>
-  </h1>
-  <p class="hero-desc">
-    Define um objetivo. Recebe um <strong>parceiro ou rival</strong> com a mesma missão. Trinta dias de esforço real — sem distrações, sem likes, sem feed.
-  </p>
-  <div class="hero-cta">
-    <a href="nexus-auth.html" class="btn-fire">Começar agora</a>
-    <a href="#funciona" class="link-ghost">Como funciona →</a>
-  </div>
-</section>
-
-<div class="ticker-wrap">
-  <div class="ticker-inner">
-    <span>MISSÃO ATIVA</span><b>·</b>
-    <span>30 dias de foco</span><b>·</b>
-    <span>RIVAL ENCONTRADO</span><b>·</b>
-    <span>zero distrações</span><b>·</b>
-    <span>OBJETIVO DEFINIDO</span><b>·</b>
-    <span>parceiro ou rival — tu escolhes</span><b>·</b>
-    <span>PORTA ABERTA</span><b>·</b>
-    <span>do esforço nasce a conexão</span><b>·</b>
-    <span>MISSÃO ATIVA</span><b>·</b>
-    <span>30 dias de foco</span><b>·</b>
-    <span>RIVAL ENCONTRADO</span><b>·</b>
-    <span>zero distrações</span><b>·</b>
-    <span>OBJETIVO DEFINIDO</span><b>·</b>
-    <span>parceiro ou rival — tu escolhes</span><b>·</b>
-    <span>PORTA ABERTA</span><b>·</b>
-    <span>do esforço nasce a conexão</span><b>·</b>
-  </div>
-</div>
-
-<section class="features" id="funciona">
-  <div class="feat-header">
-    <p class="label">O que o Nexus faz</p>
-    <h2>Construído para<br><span class="out">quem age.</span></h2>
-  </div>
-  <div class="feat-grid">
-    <div class="feat-card">
-      <div class="feat-icon">◎</div>
-      <h3>Missões de 30 dias</h3>
-      <p>Defines o teu objetivo e recebes um <strong>plano diário estruturado</strong>. Cada check-in conta. Cada dia perdido também.</p>
-      <div class="feat-num">01</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">⇄</div>
-      <h3>Match por objetivo</h3>
-      <p>A IA encontra alguém <strong>no mesmo ponto da jornada</strong> que tu — seja no mesmo país ou no outro lado do mundo.</p>
-      <div class="feat-num">02</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">⬡</div>
-      <h3>Porta aberta</h3>
-      <p>Depois dos 30 dias, se ambos quiserem, desbloqueiam a <strong>Porta Aberta</strong> — e a ligação passa do Nexus para a vida real.</p>
-      <div class="feat-num">03</div>
-    </div>
-  </div>
-</section>
-
-<section class="modes" id="modos">
-  <div class="feat-header">
-    <p class="label">Dois modos</p>
-    <h2>Como preferes<br><span class="out">chegar lá?</span></h2>
-  </div>
-  <div class="modes-grid">
-    <div class="mode-card partner">
-      <span class="mode-tag">Parceiro</span>
-      <h3>Juntos<br>chegamos<br>mais longe.</h3>
-      <p>Partilham o progresso, celebram os marcos e <strong>mantêm-se responsáveis um pelo outro</strong>. Quando um cai, o outro puxa.</p>
-      <div class="mode-detail">
-        <div class="mode-detail-item">Check-ins partilhados diariamente</div>
-        <div class="mode-detail-item">Marcos semanais em conjunto</div>
-        <div class="mode-detail-item">Chat direto com o parceiro</div>
-      </div>
-    </div>
-    <div class="mode-card rival">
-      <span class="mode-tag">Rival</span>
-      <h3>Ninguém<br>te vai<br>deixar ganhar.</h3>
-      <p>Placar ao vivo. Progresso comparado. <strong>A motivação que nenhuma notificação vai dar</strong> — porque há um humano real do outro lado.</p>
-      <div class="mode-detail">
-        <div class="mode-detail-item">Placar atualizado em tempo real</div>
-        <div class="mode-detail-item">Desafios de superação semanais</div>
-        <div class="mode-detail-item">Rivais tornam-se amigos — sempre</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="process">
-  <div class="process-inner">
-    <div class="feat-header">
-      <p class="label">O caminho</p>
-      <h2>Do objetivo<br><span class="out">à conquista.</span></h2>
-    </div>
-    <div class="process-steps">
-      <div class="p-step">
-        <div class="p-step-num active">01</div>
-        <div class="p-step-body">
-          <h4>Define o objetivo</h4>
-          <p>Escreve o que queres alcançar nos próximos 30 dias. Qualquer objetivo concreto e mensurável.</p>
-          <span class="p-step-tag">2 minutos</span>
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <div class="hero-tag">Anti-rede social de accountability</div>
+        <h1>O teu objetivo merece um <span>sistema</span>, nao um feed.</h1>
+        <p>
+          O Nexus troca distração por compromisso. Escolhes uma missão de 30 dias, recebes um parceiro ou rival real e
+          fazes check-in todos os dias num espaço construído para execução, clareza e progresso.
+        </p>
+        <div class="hero-actions">
+          <a href="nexus-auth.html" class="btn btn-primary">Criar missão</a>
+          <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-stat">
+            <strong>30</strong>
+            <span>dias de foco real por missão</span>
+          </div>
+          <div class="hero-stat">
+            <strong>0</strong>
+            <span>likes, feed ou scroll infinito</span>
+          </div>
+          <div class="hero-stat">
+            <strong>1x</strong>
+            <span>check-in por dia, sem ruído</span>
+          </div>
         </div>
       </div>
-      <div class="p-step">
-        <div class="p-step-num">02</div>
-        <div class="p-step-body">
-          <h4>Recebe o match</h4>
-          <p>A IA encontra alguém compatível. Escolhes o modo — parceiro ou rival. A missão começa imediatamente.</p>
-          <span class="p-step-tag">Automático</span>
+
+      <div class="hero-preview">
+        <div class="preview-top">
+          <span>Missão ativa</span>
+          <span>Dia 11 de 30</span>
         </div>
-      </div>
-      <div class="p-step">
-        <div class="p-step-num">03</div>
-        <div class="p-step-body">
-          <h4>30 dias de foco</h4>
-          <p>Check-ins diários. Tarefas estruturadas. Progresso visível. Sem feed, sem conteúdo a consumir.</p>
-          <span class="p-step-tag">Dia a dia</span>
+        <div class="preview-card">
+          <div class="preview-label">Rivalidade em curso</div>
+          <div class="preview-title">Academia 5 vezes na semana</div>
+          <div class="preview-progress">
+            <div class="preview-progress-row">
+              <span>Consistência</span>
+              <span>72%</span>
+            </div>
+            <div class="preview-bar"><span></span></div>
+          </div>
+          <div class="score-grid">
+            <div class="score-card">
+              <small>Tu</small>
+              <b>11</b>
+            </div>
+            <div class="score-card">
+              <small>Rival</small>
+              <b>9</b>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="p-step">
-        <div class="p-step-num">04</div>
-        <div class="p-step-body">
-          <h4>Porta aberta</h4>
-          <p>Missão completa. Se quiserem os dois, a ligação passa para fora do Nexus.</p>
-          <span class="p-step-tag">Opcional e mútuo</span>
+        <div class="preview-chat">
+          <div class="bubble them">Ele já fez check-in.</div>
+          <div class="bubble me">Hoje eu não falho.</div>
+          <div class="bubble them">Dia 11. Manténs.</div>
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </section>
 
-<section class="cta-final">
-  <h2>A missão<br>começa <em>agora.</em></h2>
-  <p>Define o objetivo. Encontra o par. Faz o trabalho.</p>
-  <a href="nexus-auth.html" class="btn-fire" style="font-size:16px;padding:18px 48px">Quero uma missão →</a>
-</section>
+  <section class="section" id="como-funciona">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Estrutura</div>
+          <h2>Menos estímulo. Mais execução.</h2>
+        </div>
+        <p>
+          Cada peça do Nexus foi desenhada para aumentar consistência: missão curta, placar claro, chat direto, calendário
+          visível e um fim objetivo ao ciclo de 30 dias.
+        </p>
+      </div>
+      <div class="feature-grid">
+        <article class="card feature-card">
+          <div class="feature-icon">01</div>
+          <h3>Missões fechadas e concretas</h3>
+          <p>Defines um objetivo mensurável e entras num ciclo com início, meio e fim. Sem perder energia com o que não importa.</p>
+        </article>
+        <article class="card feature-card">
+          <div class="feature-icon">02</div>
+          <h3>Match por intenção real</h3>
+          <p>O sistema encontra alguém alinhado com a tua categoria e momento. Cooperação quando precisas de apoio, rivalidade quando precisas de pressão.</p>
+        </article>
+        <article class="card feature-card">
+          <div class="feature-icon">03</div>
+          <h3>Porta Aberta opcional</h3>
+          <p>Se os dois completarem a missão e quiserem continuar a ligação fora do app, a Porta Aberta transforma esforço mútuo em conexão real.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="modos">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Dois caminhos</div>
+          <h2>Chegar lá com aliança ou confronto.</h2>
+        </div>
+        <p>
+          O Nexus não te obriga a uma energia só. Há momentos para construir junto e há momentos para correr contra alguém.
+        </p>
+      </div>
+      <div class="mode-grid">
+        <article class="card mode-card">
+          <div class="mode-chip partner">Parceiro</div>
+          <h3>Disciplina sustentada por presença.</h3>
+          <p>Ideal para quem quer constância, apoio mútuo e uma sensação de equipa ao longo dos 30 dias.</p>
+          <div class="mode-list">
+            <span>Check-ins partilhados diariamente</span>
+            <span>Chat direto sem distrações</span>
+            <span>Ritmo consistente e menos isolamento</span>
+          </div>
+        </article>
+        <article class="card mode-card">
+          <div class="mode-chip rival">Rival</div>
+          <h3>Pressão boa. Placar limpo. Zero teatro.</h3>
+          <p>Ideal para quem responde melhor a comparação real, metas claras e a sensação de que perder um dia custa de verdade.</p>
+          <div class="mode-list">
+            <span>Tu vs rival em tempo real</span>
+            <span>Check-in diário com consequência simbólica</span>
+            <span>Motivação humana em vez de notificação vazia</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="processo">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Ritmo</div>
+          <h2>Do objetivo ao resultado em quatro passos.</h2>
+        </div>
+        <p>
+          Um onboarding curto, um match real, um período de execução disciplinada e um fecho que dá sentido ao ciclo.
+        </p>
+      </div>
+      <div class="steps-grid">
+        <article class="card step-card">
+          <div class="step-index">1</div>
+          <h3>Definir missão</h3>
+          <p>Escolhes um objetivo claro para os próximos 30 dias e indicas categoria, nível e modo.</p>
+        </article>
+        <article class="card step-card">
+          <div class="step-index">2</div>
+          <h3>Receber match</h3>
+          <p>O motor do Nexus liga-te a um parceiro ou rival compatível sem duplicações nem espera desnecessária.</p>
+        </article>
+        <article class="card step-card">
+          <div class="step-index">3</div>
+          <h3>Executar diariamente</h3>
+          <p>Fazes check-in, acompanhas o placar, usas o chat e manténs consistência visível no calendário.</p>
+        </article>
+        <article class="card step-card">
+          <div class="step-index">4</div>
+          <h3>Fechar o ciclo</h3>
+          <p>Depois dos 30 dias, a missão termina e a Porta Aberta decide se a relação continua fora do Nexus.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <div class="container">
+      <div class="card">
+        <div>
+          <h2>O compromisso começa no primeiro dia.</h2>
+          <p>Não é uma rede social. É uma infraestrutura mínima para fazer o trabalho acontecer todos os dias.</p>
+        </div>
+        <a href="nexus-auth.html" class="btn btn-primary">Entrar no Nexus</a>
+      </div>
+    </div>
+  </section>
+</main>
 
 <footer>
-  <div class="f-logo">NEX<em>U</em>S</div>
-  <small>Construído por Isaac & Claude · 2026</small>
-  <small>Fase 5 · Em construção</small>
+  <div class="container">
+    <span>NEXUS · accountability sem feed</span>
+    <span>Frontend no GitHub Pages · Backend no Railway</span>
+  </div>
 </footer>
 
 </body>

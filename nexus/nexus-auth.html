@@ -3,381 +3,497 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexus — Entrar</title>
+<title>Nexus - Entrar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --fire: #FF5C00;
-    --fire-dim: rgba(255,92,0,0.1);
-    --bg: #0A0A08;
-    --bg2: #111110;
-    --bg3: #181816;
-    --text: #F0EDE6;
-    --muted: #6E6C65;
-    --muted2: #9A9890;
-    --border: rgba(240,237,230,0.07);
-    --border2: rgba(240,237,230,0.13);
-    --error: #FF4444;
-    --success: #44CC88;
+    --bg: #071019;
+    --bg-soft: #0d1721;
+    --panel: rgba(14, 23, 34, 0.9);
+    --panel-soft: rgba(255, 255, 255, 0.03);
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --text: #f5f7fb;
+    --muted: #98a3b2;
+    --muted-soft: #6f7b8b;
+    --accent: #ff6a1a;
+    --accent-soft: rgba(255, 106, 26, 0.14);
+    --success: #57d69a;
+    --error: #ff5d6c;
+    --radius-xl: 30px;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
   }
 
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html{height:100%;}
-  body{
-    font-family:'Bricolage Grotesque',sans-serif;
-    background:var(--bg);color:var(--text);
-    min-height:100vh;overflow-x:hidden;
-    display:grid;grid-template-columns:1fr 1fr;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: 'Manrope', sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(255, 106, 26, 0.16), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(87, 214, 154, 0.12), transparent 22%),
+      linear-gradient(180deg, #071019 0%, #0a131d 100%);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 68px 68px;
+    opacity: .22;
+    pointer-events: none;
   }
 
-  /* Cursor */
-  #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
-  #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .2s;}
-
-  /* Grain */
-  body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:0;}
-
-  /* LADO ESQUERDO — visual */
-  .left-panel {
-    background:var(--bg2);
-    display:flex;flex-direction:column;justify-content:space-between;
-    padding:48px;position:relative;overflow:hidden;
-    border-right:1px solid var(--border);
+  .auth-shell {
+    min-height: 100vh;
+    width: min(1240px, calc(100% - 32px));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 24px;
+    padding: 20px 0;
   }
 
-  .left-glow {
-    position:absolute;bottom:-100px;left:-100px;
-    width:500px;height:500px;
-    background:radial-gradient(ellipse,rgba(255,92,0,0.08) 0%,transparent 65%);
-    pointer-events:none;
+  .showcase,
+  .auth-panel {
+    position: relative;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
   }
 
-  .left-logo {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:28px;letter-spacing:.1em;
-    text-decoration:none;color:var(--text);
+  .showcase {
+    background:
+      radial-gradient(circle at top right, rgba(255, 106, 26, 0.22), transparent 25%),
+      linear-gradient(180deg, rgba(10,17,25,0.92), rgba(10,17,25,0.96));
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
-  .left-logo em{color:var(--fire);font-style:normal;}
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+  }
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--accent), #ff9659);
+    box-shadow: 0 16px 30px rgba(255, 106, 26, 0.28);
+  }
+  .brand em { color: var(--accent); font-style: normal; }
+  .showcase-copy {
+    max-width: 540px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: #ffd166;
+    font-size: .74rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  .showcase h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 5rem);
+    line-height: .95;
+    letter-spacing: -.05em;
+    max-width: 10ch;
+  }
+  .showcase h2 span { color: var(--accent); }
+  .showcase p {
+    margin-top: 24px;
+    max-width: 50ch;
+    color: var(--muted);
+    line-height: 1.85;
+    font-size: 1rem;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .showcase-stat {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    padding: 18px;
+  }
+  .showcase-stat strong {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+  .showcase-stat span {
+    color: var(--muted);
+    font-size: .86rem;
+    line-height: 1.5;
+  }
+  .showcase-flow {
+    display: grid;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--muted);
+    font-size: .94rem;
+  }
+  .flow-index {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
 
-  .left-headline {
-    position:relative;z-index:1;
+  .auth-panel {
+    background: rgba(10, 18, 28, 0.92);
+    backdrop-filter: blur(16px);
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  .left-headline h2 {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(52px,5.5vw,80px);
-    line-height:.92;letter-spacing:.02em;
-    margin-bottom:24px;
+  .top-link {
+    align-self: flex-start;
+    color: var(--muted);
+    font-size: .9rem;
+    margin-bottom: 36px;
   }
-  .left-headline h2 .out {
-    -webkit-text-stroke:1px rgba(240,237,230,0.2);
-    color:transparent;
-  }
-  .left-headline h2 .fire{color:var(--fire);}
-  .left-headline p{
-    font-size:15px;font-weight:300;
-    color:var(--muted2);line-height:1.7;
-    max-width:340px;
-  }
-
-  .left-steps {
-    display:flex;flex-direction:column;gap:16px;
-    position:relative;z-index:1;
-  }
-  .l-step {
-    display:flex;align-items:center;gap:14px;
-    font-size:13px;color:var(--muted2);
-  }
-  .l-step-num {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:18px;color:var(--fire);
-    width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);
-    display:flex;align-items:center;justify-content:center;
-    flex-shrink:0;
-  }
-
-  /* LADO DIREITO — formulário */
-  .right-panel {
-    display:flex;flex-direction:column;justify-content:center;
-    padding:48px 64px;position:relative;
-  }
-
-  .form-header {
-    margin-bottom:40px;
-    animation:up .6s ease both;
-  }
+  .top-link:hover { color: var(--text); }
   .form-header .tag {
-    font-size:11px;font-weight:600;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--fire);
-    display:flex;align-items:center;gap:8px;
-    margin-bottom:16px;
+    color: #ffd166;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-weight: 800;
+    margin-bottom: 14px;
   }
-  .form-header .tag::before{content:'';width:20px;height:1px;background:var(--fire);}
   .form-header h1 {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:52px;line-height:.95;letter-spacing:.02em;
-    margin-bottom:8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    line-height: .95;
+    letter-spacing: -.05em;
   }
-  .form-header p{font-size:14px;color:var(--muted2);}
-  .form-header p a{color:var(--fire);text-decoration:none;}
-  .form-header p a:hover{text-decoration:underline;}
+  .form-header p {
+    margin-top: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .form-header a { color: var(--accent); }
 
-  /* Tabs registo/login */
   .tabs {
-    display:flex;gap:0;margin-bottom:36px;
-    border:1px solid var(--border2);
-    animation:up .6s .05s ease both;opacity:0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 30px 0 20px;
+    padding: 8px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
   }
   .tab {
-    flex:1;padding:12px;text-align:center;
-    font-size:13px;font-weight:500;letter-spacing:.03em;
-    color:var(--muted);
-    transition:background .2s,color .2s;
-    border:none;background:transparent;
-    font-family:'Bricolage Grotesque',sans-serif;
+    border: 0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font: inherit;
+    font-weight: 700;
+    background: transparent;
+    color: var(--muted);
+    transition: background .18s ease, color .18s ease;
   }
-  .tab.active{background:var(--fire);color:#fff;}
-  .tab:not(.active):hover{color:var(--text);}
+  .tab.active {
+    background: linear-gradient(135deg, var(--accent), #ff9150);
+    color: #fff;
+  }
 
-  /* Form */
+  .msg {
+    display: none;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-size: .92rem;
+    line-height: 1.6;
+    border: 1px solid transparent;
+  }
+  .msg.error {
+    display: block;
+    background: rgba(255, 93, 108, 0.10);
+    border-color: rgba(255, 93, 108, 0.18);
+    color: #ffb2ba;
+  }
+  .msg.success {
+    display: block;
+    background: rgba(87, 214, 154, 0.10);
+    border-color: rgba(87, 214, 154, 0.18);
+    color: #8de4b7;
+  }
+
   form {
-    display:flex;flex-direction:column;gap:18px;
-    animation:up .6s .1s ease both;opacity:0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
-
-  .field{display:flex;flex-direction:column;gap:8px;}
-  .field label{
-    font-size:11px;font-weight:600;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--muted2);
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field label {
+    font-size: .74rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted-soft);
+    font-weight: 800;
   }
   .field input {
-    background:var(--bg2);
-    border:1px solid var(--border2);
-    color:var(--text);
-    padding:14px 16px;
-    font-family:'Bricolage Grotesque',sans-serif;
-    font-size:15px;font-weight:400;
-    transition:border-color .2s,background .2s;
-    outline:none;
-    border-radius:0;
-    -webkit-appearance:none;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    border-radius: 16px;
+    padding: 16px 18px;
+    font: inherit;
+    font-size: .98rem;
+    outline: none;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
   }
-  .field input::placeholder{color:var(--muted);}
-  .field input:focus{
-    border-color:var(--fire);
-    background:var(--bg3);
+  .field input::placeholder { color: var(--muted-soft); }
+  .field input:focus {
+    border-color: rgba(255, 106, 26, 0.45);
+    background: rgba(255,255,255,0.04);
   }
-  .field input.error{border-color:var(--error);}
-  .field input.success{border-color:var(--success);}
 
   .btn-submit {
-    background:var(--fire);color:#fff;border:none;
-    padding:16px;width:100%;
-    font-family:'Bebas Neue',sans-serif;
-    font-size:20px;letter-spacing:.06em;
-    transition:opacity .2s,transform .15s;
-    margin-top:4px;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 18px;
+    padding: 17px 20px;
+    background: linear-gradient(135deg, var(--accent), #ff9455);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    transition: transform .18s ease, opacity .18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
-  .btn-submit:hover{opacity:.88;transform:translateY(-1px);}
-  .btn-submit:disabled{opacity:.4;transform:none;cursor:not-allowed;}
-
-  /* Mensagem de feedback */
-  .msg {
-    padding:12px 16px;font-size:13px;font-weight:500;
-    display:none;align-items:center;gap:8px;
-    border-left:3px solid;
-  }
-  .msg.error{border-color:var(--error);background:rgba(255,68,68,0.06);color:#FF8888;display:flex;}
-  .msg.success{border-color:var(--success);background:rgba(68,204,136,0.06);color:#66DDAA;display:flex;}
-
-  /* Loading spinner */
+  .btn-submit:hover { transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: .45; transform: none; cursor: not-allowed; }
   .spinner {
-    width:16px;height:16px;
-    border:2px solid rgba(255,255,255,0.3);
-    border-top-color:#fff;border-radius:50%;
-    animation:spin .7s linear infinite;
-    display:none;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    display: none;
+    animation: spin .7s linear infinite;
   }
-  .btn-submit.loading .spinner{display:inline-block;}
-  .btn-submit.loading .btn-text{display:none;}
+  .btn-submit.loading .spinner { display: inline-block; }
+  .btn-submit.loading .btn-text { display: none; }
 
-  .divider {
-    display:flex;align-items:center;gap:12px;
-    color:var(--muted);font-size:12px;
-  }
-  .divider::before,.divider::after{
-    content:'';flex:1;height:1px;background:var(--border);
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 1024px) {
+    .auth-shell {
+      grid-template-columns: 1fr;
+    }
+    .showcase-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
-  @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* Fix cursor em mobile */
-  @media(hover:none),(pointer:coarse){
-    body{cursor:auto!important;}
-    #cur,#cur-r{display:none!important;}
-    button,a{cursor:pointer!important;}
-  }
-  @media(max-width:768px){
-    body{grid-template-columns:1fr;}
-    .left-panel{display:none;}
-    .right-panel{padding:40px 24px;}
+  @media (max-width: 720px) {
+    .auth-shell {
+      width: calc(100% - 20px);
+      padding: 10px 0;
+    }
+    .showcase,
+    .auth-panel {
+      padding: 22px;
+    }
   }
 </style>
 </head>
 <body>
 
-<div id="cur"></div>
-<div id="cur-r"></div>
+<div class="auth-shell">
+  <section class="showcase">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">N</span>
+      <span>NEX<em>U</em>S</span>
+    </a>
 
-<!-- LADO ESQUERDO -->
-<div class="left-panel">
-  <div class="left-glow"></div>
-  <a href="index.html" class="left-logo">NEX<em>U</em>S</a>
+    <div class="showcase-copy">
+      <div class="eyebrow">Missões de 30 dias</div>
+      <h2>Entra para um sistema feito para <span>cumprir</span>.</h2>
+      <p>
+        Cria a tua conta, define o objetivo, recebe o teu parceiro ou rival e acompanha o progresso num produto
+        desenhado para disciplina real, não para distração.
+      </p>
 
-  <div class="left-headline">
-    <h2>O teu<br><span class="fire">objetivo</span><br><span class="out">começa</span><br>aqui.</h2>
-    <p>Define a missão, encontra o par, faz o trabalho. Trinta dias que mudam o resultado.</p>
-  </div>
-
-  <div class="left-steps">
-    <div class="l-step">
-      <div class="l-step-num">1</div>
-      <span>Cria a tua conta em 30 segundos</span>
+      <div class="showcase-grid">
+        <div class="showcase-stat">
+          <strong>30</strong>
+          <span>dias com início e fim claros</span>
+        </div>
+        <div class="showcase-stat">
+          <strong>1</strong>
+          <span>check-in por dia, sem ruído</span>
+        </div>
+        <div class="showcase-stat">
+          <strong>0</strong>
+          <span>feed, likes ou dopamina barata</span>
+        </div>
+      </div>
     </div>
-    <div class="l-step">
-      <div class="l-step-num">2</div>
-      <span>Define o objetivo dos próximos 30 dias</span>
-    </div>
-    <div class="l-step">
-      <div class="l-step-num">3</div>
-      <span>Recebe o teu parceiro ou rival</span>
-    </div>
-  </div>
-</div>
 
-<!-- LADO DIREITO -->
-<div class="right-panel">
-
-  <div class="form-header">
-    <div class="tag">Bem-vindo ao Nexus</div>
-    <h1 id="form-title">CRIAR CONTA</h1>
-    <p id="form-sub">Já tens conta? <a href="#" onclick="switchTab('login')">Entra aqui →</a></p>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" id="tab-register" onclick="switchTab('register')">Registar</button>
-    <button class="tab" id="tab-login" onclick="switchTab('login')">Entrar</button>
-  </div>
-
-  <div id="msg" class="msg"></div>
-
-  <!-- FORMULÁRIO REGISTO -->
-  <form id="form-register" onsubmit="handleRegister(event)">
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="reg-username" placeholder="o_teu_nome" autocomplete="off">
+    <div class="showcase-flow">
+      <div class="flow-step"><span class="flow-index">1</span><span>Crias a conta em menos de um minuto</span></div>
+      <div class="flow-step"><span class="flow-index">2</span><span>Escolhes a missão e o modo: parceiro ou rival</span></div>
+      <div class="flow-step"><span class="flow-index">3</span><span>Começas o ciclo com calendário, placar e chat</span></div>
     </div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="reg-password" placeholder="mínimo 6 caracteres">
-    </div>
-    <div class="field">
-      <label>Confirmar Password</label>
-      <input type="password" id="reg-confirm" placeholder="repete a password">
-    </div>
-    <button type="submit" class="btn-submit" id="btn-register">
-      <span class="btn-text">CRIAR CONTA →</span>
-      <span class="spinner"></span>
-    </button>
-  </form>
+  </section>
 
-  <!-- FORMULÁRIO LOGIN -->
-  <form id="form-login" onsubmit="handleLogin(event)" style="display:none">
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="login-password" placeholder="a tua password">
-    </div>
-    <button type="submit" class="btn-submit" id="btn-login">
-      <span class="btn-text">ENTRAR →</span>
-      <span class="spinner"></span>
-    </button>
-  </form>
+  <section class="auth-panel">
+    <a href="index.html" class="top-link">← Voltar ao site</a>
 
+    <div class="form-header">
+      <div class="tag">Bem-vindo ao Nexus</div>
+      <h1 id="form-title">Criar conta</h1>
+      <p id="form-sub">Já tens conta? <a href="#" onclick="switchTab('login')">Entra aqui</a></p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-register" onclick="switchTab('register')">Registar</button>
+      <button class="tab" id="tab-login" onclick="switchTab('login')">Entrar</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <form id="form-register" onsubmit="handleRegister(event)">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="reg-username" placeholder="o_teu_nome" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="mínimo 6 caracteres">
+      </div>
+      <div class="field">
+        <label>Confirmar password</label>
+        <input type="password" id="reg-confirm" placeholder="repete a password">
+      </div>
+      <button type="submit" class="btn-submit" id="btn-register">
+        <span class="btn-text">Criar conta</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+
+    <form id="form-login" onsubmit="handleLogin(event)" style="display:none">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="a tua password">
+      </div>
+      <button type="submit" class="btn-submit" id="btn-login">
+        <span class="btn-text">Entrar</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </section>
 </div>
 
 <script>
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
 
-  // Cursor
-  const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
-  // Cursor personalizado apenas em desktop
-  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-  if (isTouch) {
-    if(cur) cur.style.display='none';
-    if(curR) curR.style.display='none';
-  } else {
-    document.body.style.cursor='none';
-    let mx=0,my=0,rx=0,ry=0;
-    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
-    (function loop(){
-      cur.style.left=mx+'px';cur.style.top=my+'px';
-      rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
-      curR.style.left=rx+'px';curR.style.top=ry+'px';
-      requestAnimationFrame(loop);
-    })();
-  }
-  document.querySelectorAll('button,a,input').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2)';curR.style.opacity='0';});
-    el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.opacity='1';});
-  });
-
-  // Trocar entre tabs
   function switchTab(tab) {
     const isRegister = tab === 'register';
     document.getElementById('tab-register').classList.toggle('active', isRegister);
     document.getElementById('tab-login').classList.toggle('active', !isRegister);
     document.getElementById('form-register').style.display = isRegister ? 'flex' : 'none';
-    document.getElementById('form-login').style.display   = isRegister ? 'none' : 'flex';
-    document.getElementById('form-title').textContent = isRegister ? 'CRIAR CONTA' : 'BEM-VINDO DE VOLTA';
+    document.getElementById('form-login').style.display = isRegister ? 'none' : 'flex';
+    document.getElementById('form-title').textContent = isRegister ? 'Criar conta' : 'Bem-vindo de volta';
     document.getElementById('form-sub').innerHTML = isRegister
-      ? 'Já tens conta? <a href="#" onclick="switchTab(\'login\')">Entra aqui →</a>'
-      : 'Ainda não tens conta? <a href="#" onclick="switchTab(\'register\')">Regista-te →</a>';
+      ? 'Já tens conta? <a href="#" onclick="switchTab(\'login\')">Entra aqui</a>'
+      : 'Ainda não tens conta? <a href="#" onclick="switchTab(\'register\')">Regista-te</a>';
     hideMsg();
   }
 
-  // Mostrar mensagem
   function showMsg(text, type) {
     const el = document.getElementById('msg');
     el.textContent = text;
     el.className = 'msg ' + type;
   }
+
   function hideMsg() {
     document.getElementById('msg').className = 'msg';
   }
 
-  // Loading state
   function setLoading(btnId, loading) {
     const btn = document.getElementById(btnId);
     btn.classList.toggle('loading', loading);
     btn.disabled = loading;
   }
 
-  // REGISTO
   async function handleRegister(e) {
     e.preventDefault();
     hideMsg();
 
     const username = document.getElementById('reg-username').value.trim();
-    const email    = document.getElementById('reg-email').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
 
     if (!username || !email || !password) {
@@ -386,6 +502,7 @@
     if (password.length < 6) {
       return showMsg('A password deve ter pelo menos 6 caracteres.', 'error');
     }
+
     const confirm = document.getElementById('reg-confirm').value;
     if (password !== confirm) {
       return showMsg('As passwords não coincidem.', 'error');
@@ -404,10 +521,9 @@
       if (!res.ok) {
         showMsg(data.error || 'Erro ao criar conta.', 'error');
       } else {
-        // Guardar token
         localStorage.setItem('nexus_token', data.token);
         localStorage.setItem('nexus_user', JSON.stringify(data.user));
-        showMsg('Conta criada! A redirecionar...', 'success');
+        showMsg('Conta criada. A redirecionar...', 'success');
         setTimeout(() => window.location.href = 'nexus-dashboard.html', 1200);
       }
     } catch (err) {
@@ -417,12 +533,11 @@
     }
   }
 
-  // LOGIN
   async function handleLogin(e) {
     e.preventDefault();
     hideMsg();
 
-    const email    = document.getElementById('login-email').value.trim();
+    const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
     if (!email || !password) {
@@ -444,7 +559,7 @@
       } else {
         localStorage.setItem('nexus_token', data.token);
         localStorage.setItem('nexus_user', JSON.stringify(data.user));
-        showMsg('Bem-vindo de volta! A redirecionar...', 'success');
+        showMsg('Bem-vindo de volta. A redirecionar...', 'success');
         setTimeout(() => window.location.href = 'nexus-dashboard.html', 1200);
       }
     } catch (err) {
@@ -454,7 +569,6 @@
     }
   }
 
-  // Se já está logado, vai direto ao dashboard
   if (localStorage.getItem('nexus_token')) {
     window.location.href = 'nexus-dashboard.html';
   }
