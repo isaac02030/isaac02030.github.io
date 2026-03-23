@@ -136,6 +136,38 @@
   .comm-detail-stats{display:flex;gap:24px;margin-top:12px;}
   .comm-detail-stat{font-size:12px;color:var(--muted2);}
   .comm-detail-stat strong{color:var(--fire);font-family:'Bebas Neue',sans-serif;font-size:22px;display:block;line-height:1;}
+  .access-ladder{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    margin-top:20px;
+  }
+  .access-step{
+    padding:14px 16px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    border-radius:18px;
+  }
+  .access-step.active{
+    border-color:rgba(255,132,60,.38);
+    background:rgba(255,132,60,.08);
+  }
+  .access-step.locked{opacity:.72;}
+  .access-step-kicker{
+    font-size:10px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .access-step.active .access-step-kicker{color:var(--fire);}
+  .access-step-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px;}
+  .access-step-copy{font-size:12px;line-height:1.55;color:var(--muted2);}
+  .access-step-status{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:10px;font-size:11px;font-weight:700;color:var(--muted);
+  }
+  .access-step.active .access-step-status{color:var(--fire);}
 
   .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;}
 
@@ -158,6 +190,35 @@
     transition:opacity .2s;
   }
   .btn-post:hover{opacity:.88;}
+  .btn-post:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-new-mission:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .locked-panel{
+    display:grid;gap:10px;
+    padding:18px 20px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(255,132,60,.08), rgba(255,255,255,.03));
+    margin-bottom:20px;
+  }
+  .locked-kicker{
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--fire);font-weight:800;
+  }
+  .locked-title{font-size:17px;font-weight:800;color:var(--text);}
+  .locked-copy{font-size:13px;line-height:1.65;color:var(--muted2);}
+  .locked-progress{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:12px;color:var(--muted);
+  }
+  .locked-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 12px;border-radius:999px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:var(--text);font-weight:700;
+  }
+  .post-input.locked{cursor:not-allowed;background:rgba(255,255,255,.03);}
+  .section-lock-note{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);}
 
   .posts-list{display:flex;flex-direction:column;gap:2px;background:var(--border);}
   .post-item{background:var(--bg2);padding:16px 20px;}
@@ -501,6 +562,7 @@
     .layout{grid-template-columns:1fr;width:min(100%,calc(100% - 20px));}
     .communities-grid{grid-template-columns:1fr;}
     .detail-grid{grid-template-columns:1fr;}
+    .access-ladder{grid-template-columns:1fr;}
   }
   @media(max-width:760px){
     .sidebar{display:none;}
@@ -567,9 +629,10 @@
         <!-- FÓRUM -->
         <div class="forum-card">
           <h3>FÓRUM</h3>
+          <div id="post-gate"></div>
           <div class="post-input-wrap">
             <input class="post-input" id="post-input" placeholder="Partilha algo com a comunidade..." maxlength="500">
-            <button class="btn-post" onclick="submitPost()">PUBLICAR</button>
+            <button class="btn-post" id="btn-post" onclick="submitPost()">PUBLICAR</button>
           </div>
           <div id="posts-list">
             <div class="empty-forum">Ainda não há posts. Sê o primeiro! 🔥</div>
@@ -588,7 +651,8 @@
       <!-- MISSÕES INTERNAS — largura total, abaixo do fórum e ranking -->
       <div class="missions-card" id="missions-section">
         <h3>MISSÕES INTERNAS
-          <button class="btn-new-mission" onclick="openModal()">+ NOVA MISSÃO</button>
+          <span class="section-lock-note" id="missions-lock-note"></span>
+          <button class="btn-new-mission" id="btn-new-mission" onclick="openModal()">+ NOVA MISSÃO</button>
         </h3>
         <div id="missions-list">
           <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sem missões ainda. Cria a primeira!</div>
@@ -639,6 +703,8 @@
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
   let user = null, token = null;
   let currentCommunity = null;
+  let currentCommunityAccess = null;
+  let currentMissionAccessMessage = '';
 
   // Cursor
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
@@ -667,6 +733,157 @@
   function showDetail() {
     document.getElementById('view-list').classList.remove('active');
     document.getElementById('view-detail').classList.add('active');
+  }
+
+  function getCommunityAccessState() {
+    if (currentCommunityAccess) return currentCommunityAccess;
+
+    const missionsDone = Number(currentCommunity?.missions_done) || 0;
+    const totalDays = Number(currentCommunity?.total_days) || 0;
+    const canReadForum = totalDays >= 5 || missionsDone >= 1;
+    const canPostForum = missionsDone >= 1;
+
+    return {
+      can_read_forum: canReadForum,
+      can_post_forum: canPostForum,
+      can_view_internal_missions: canReadForum,
+      can_create_internal_missions: canPostForum,
+      read_requirement: 'Faz 5 check-ins nesta categoria ou conclui 1 missão para desbloquear a leitura da comunidade.',
+      post_requirement: 'Conclui 1 missão nesta categoria para ganhares voz no fórum.',
+      mission_requirement: 'Conclui 1 missão nesta categoria para criares missões internas.'
+    };
+  }
+
+  function communityUnlocked() {
+    return !!getCommunityAccessState().can_post_forum;
+  }
+
+  function communityCanRead() {
+    return !!getCommunityAccessState().can_read_forum;
+  }
+
+  function communityCanViewMissions() {
+    return !!getCommunityAccessState().can_view_internal_missions;
+  }
+
+  function getCommunityUnlockCopy() {
+    return getCommunityAccessState().post_requirement;
+  }
+
+  function getCommunityReadCopy() {
+    return getCommunityAccessState().read_requirement;
+  }
+
+  function getMissionUnlockCopy() {
+    if (currentMissionAccessMessage) return currentMissionAccessMessage;
+    return getCommunityAccessState().mission_requirement;
+  }
+
+  function renderAccessLadder() {
+    const access = getCommunityAccessState();
+    const steps = [
+      {
+        kicker: 'Degrau 1',
+        title: 'Entrar e marcar presença',
+        copy: 'Acumula 5 check-ins nesta categoria para desbloquear a leitura.',
+        active: true,
+        status: `${Number(currentCommunity?.total_days) || 0}/5 check-ins`
+      },
+      {
+        kicker: 'Degrau 2',
+        title: 'Ler a comunidade',
+        copy: 'Depois do compromisso inicial, o fórum e as missões internas ficam visíveis.',
+        active: access.can_read_forum,
+        status: access.can_read_forum ? 'Desbloqueado' : 'Bloqueado'
+      },
+      {
+        kicker: 'Degrau 3',
+        title: 'Ganhar voz',
+        copy: 'Conclui 1 missão nesta categoria para publicar e criar missões internas.',
+        active: access.can_post_forum && access.can_create_internal_missions,
+        status: `${Number(currentCommunity?.missions_done) || 0}/1 missões concluídas`
+      }
+    ];
+
+    return `
+      <div class="access-ladder">
+        ${steps.map(step => `
+          <div class="access-step ${step.active ? 'active' : 'locked'}">
+            <div class="access-step-kicker">${step.kicker}</div>
+            <div class="access-step-title">${step.title}</div>
+            <div class="access-step-copy">${step.copy}</div>
+            <div class="access-step-status">${step.active ? '●' : '○'} ${step.status}</div>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
+  function renderLockedPanel(title, body) {
+    const missionsDone = Number(currentCommunity?.missions_done) || 0;
+    const totalDays = Number(currentCommunity?.total_days) || 0;
+
+    return `
+      <div class="locked-panel">
+        <div class="locked-kicker">Acesso por compromisso</div>
+        <div class="locked-title">${title}</div>
+        <div class="locked-copy">${body}</div>
+        <div class="locked-progress">
+          <span class="locked-chip">${missionsDone}/1 missões concluídas</span>
+          <span class="locked-chip">${totalDays}/5 check-ins de presença</span>
+        </div>
+        ${renderAccessLadder()}
+      </div>`;
+  }
+
+  function updateCommunityAccessUI() {
+    const canReadForum = communityCanRead();
+    const canPostForum = communityUnlocked();
+    const canViewMissions = communityCanViewMissions();
+    const canCreateMissions = !!getCommunityAccessState().can_create_internal_missions;
+    const input = document.getElementById('post-input');
+    const postButton = document.getElementById('btn-post');
+    const postGate = document.getElementById('post-gate');
+    const postsList = document.getElementById('posts-list');
+    const newMissionButton = document.getElementById('btn-new-mission');
+    const missionLock = document.getElementById('missions-lock-note');
+
+    if (input) {
+      input.disabled = !canPostForum;
+      input.classList.toggle('locked', !canPostForum);
+      input.placeholder = canPostForum
+        ? 'Partilha algo com a comunidade...'
+        : getCommunityUnlockCopy();
+    }
+
+    if (postButton) {
+      postButton.disabled = !canPostForum;
+      postButton.title = canPostForum ? '' : getCommunityUnlockCopy();
+    }
+
+    if (postGate) {
+      postGate.innerHTML = canPostForum
+        ? ''
+        : renderLockedPanel(
+            canReadForum ? 'Leitura desbloqueada. Voz ainda bloqueada.' : 'Fórum bloqueado até provares compromisso.',
+            canReadForum ? getCommunityUnlockCopy() : getCommunityReadCopy()
+          );
+    }
+
+    if (!canReadForum && postsList) {
+      postsList.innerHTML = renderLockedPanel('Ainda não podes ler o fórum.', getCommunityReadCopy());
+    }
+
+    if (newMissionButton) {
+      newMissionButton.disabled = !canCreateMissions;
+      newMissionButton.title = canCreateMissions ? '' : getMissionUnlockCopy();
+      newMissionButton.textContent = canCreateMissions ? '+ NOVA MISSÃO' : '+ NOVA MISSÃO (BLOQUEADA)';
+    }
+
+    if (missionLock) {
+      missionLock.textContent = canViewMissions
+        ? (canCreateMissions ? '' : getMissionUnlockCopy())
+        : getMissionUnlockCopy();
+    }
   }
 
   const RANK_LABELS = {
@@ -775,6 +992,8 @@
       const data = await res.json();
 
       currentCommunity = data.community;
+      currentCommunityAccess = data.access || null;
+      currentMissionAccessMessage = '';
       renderCommunityDetail(data);
       showDetail();
       loadCommunityMissions(slug);
@@ -785,6 +1004,7 @@
 
   function renderCommunityDetail(data) {
     const c = data.community;
+    currentCommunity = c;
 
     // Header
     document.getElementById('detail-header').innerHTML = `
@@ -825,10 +1045,16 @@
 
     // Posts
     renderPosts(data.posts);
+    updateCommunityAccessUI();
   }
 
   function renderPosts(posts) {
     const list = document.getElementById('posts-list');
+    if (!list) return;
+    if (!communityCanRead()) {
+      list.innerHTML = renderLockedPanel('Ainda não podes ler o fórum.', getCommunityReadCopy());
+      return;
+    }
     if (posts.length === 0) {
       list.innerHTML = '<div class="empty-forum">Ainda não há posts. Sê o primeiro! 🔥</div>';
       return;
@@ -1020,6 +1246,228 @@
     } catch(err) {
       toast('Erro de ligação.', 'error');
       btn.disabled = false;
+    }
+  }
+
+  async function openCommunity(slug) {
+    try {
+      const res = await fetch(`${API}/api/communities/${slug}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      currentCommunity = data.community;
+      currentCommunityAccess = data.access || null;
+      currentMissionAccessMessage = '';
+      renderCommunityDetail(data);
+      showDetail();
+      loadCommunityMissions(slug);
+    } catch(err) {
+      toast('Erro ao abrir comunidade.', 'error');
+    }
+  }
+
+  function renderCommunityDetail(data) {
+    const c = data.community;
+    currentCommunity = c;
+
+    document.getElementById('detail-header').innerHTML = `
+      <div class="comm-detail-icon" style="border-color:${c.cover_color}40">${c.icon}</div>
+      <div class="comm-detail-info">
+        <h2>${c.name}</h2>
+        <p>${c.description || ''}</p>
+        <div class="comm-detail-stats">
+          <div class="comm-detail-stat">
+            <strong>${c.member_count || 0}</strong>
+            Membros
+          </div>
+          <div class="comm-detail-stat">
+            <strong style="color:${c.cover_color}">${RANK_LABELS[c.my_rank] || '-'}</strong>
+            A tua patente
+          </div>
+        </div>
+        ${renderAccessLadder()}
+      </div>`;
+
+    const rankList = document.getElementById('ranking-list');
+    if (data.ranking.length === 0) {
+      rankList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sem membros ainda.</div>';
+    } else {
+      const posColors = ['gold', 'silver', 'bronze'];
+      rankList.innerHTML = `<div class="rank-list">${data.ranking.map((r, i) => `
+        <div class="rank-item">
+          <div class="rank-pos ${posColors[i] || ''}">${i + 1}</div>
+          <div class="rank-avatar">${r.username[0].toUpperCase()}</div>
+          <div class="rank-info">
+            <div class="rank-name">${r.username}</div>
+            <div class="rank-badge-text">${RANK_LABELS[r.rank] || r.rank}</div>
+          </div>
+          <div class="rank-score">${r.missions_done}</div>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    renderPosts(data.posts || []);
+    updateCommunityAccessUI();
+  }
+
+  function renderPosts(posts) {
+    const list = document.getElementById('posts-list');
+    if (!list) return;
+
+    if (!communityCanRead()) {
+      list.innerHTML = renderLockedPanel('Ainda não podes ler o fórum.', getCommunityReadCopy());
+      return;
+    }
+
+    if (!posts || posts.length === 0) {
+      list.innerHTML = '<div class="empty-forum">Ainda não há posts. Sê o primeiro.</div>';
+      return;
+    }
+
+    list.innerHTML = `<div class="posts-list">${posts.map(p => `
+      <div class="post-item">
+        <div class="post-header">
+          <div class="post-avatar">${p.username[0].toUpperCase()}</div>
+          <div class="post-username">${p.username}</div>
+          <div class="post-time">${timeAgo(p.created_at)}</div>
+        </div>
+        <div class="post-content">${p.content}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  async function loadCommunityMissions(slug) {
+    try {
+      const res = await fetch(`${API}/api/community-missions/${slug}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      currentMissionAccessMessage = data.access_message || '';
+      renderMissions(data.missions || []);
+      updateCommunityAccessUI();
+    } catch(err) {}
+  }
+
+  async function submitPost() {
+    const input = document.getElementById('post-input');
+    if (!communityUnlocked()) {
+      toast(getCommunityUnlockCopy(), 'error');
+      updateCommunityAccessUI();
+      return;
+    }
+
+    const content = input.value.trim();
+    if (!content || !currentCommunity) return;
+
+    input.value = '';
+    try {
+      const res = await fetch(`${API}/api/communities/${currentCommunity.slug}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        await openCommunity(currentCommunity.slug);
+        toast('Post publicado!');
+      } else {
+        toast(data.error || getCommunityUnlockCopy(), 'error');
+        updateCommunityAccessUI();
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
+    }
+  }
+
+  function openModal() {
+    if (!getCommunityAccessState().can_create_internal_missions) {
+      toast(getMissionUnlockCopy(), 'error');
+      updateCommunityAccessUI();
+      return;
+    }
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+
+  function renderMissions(missions) {
+    const list = document.getElementById('missions-list');
+    if (!list) return;
+
+    if (!communityCanViewMissions()) {
+      list.innerHTML = renderLockedPanel('Missões internas bloqueadas.', getMissionUnlockCopy());
+      return;
+    }
+
+    if (!missions || missions.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sem missões internas ainda. Quando desbloqueias voz, podes criar a primeira.</div>';
+      return;
+    }
+
+    const modeLabels = { solo: 'Solo', duo: 'Duo', maratona: 'Maratona' };
+
+    list.innerHTML = `<div class="mission-list">${missions.map(m => `
+      <div class="mission-item">
+        <div class="mission-item-top">
+          <h4>${m.title}</h4>
+          <span class="mission-mode ${m.mode}">${modeLabels[m.mode] || m.mode}</span>
+        </div>
+        <div class="mission-item-meta">
+          <span>${m.duration_days} dias</span>
+          <span>${m.participant_count} participantes</span>
+          <span>${m.scope}</span>
+          <span>${m.status === 'open' ? 'Aberta' : m.status === 'active' ? 'Ativa' : 'Completa'}</span>
+        </div>
+        ${m.status === 'open' && !m.is_participant
+          ? `<button class="btn-join-mission" onclick="joinMission('${currentCommunity?.slug}', ${m.id}, this)">ENTRAR</button>`
+          : m.is_participant
+            ? `<button class="btn-join-mission joined" onclick="checkinMission('${currentCommunity?.slug}', ${m.id}, this)">CHECK-IN</button>`
+            : ''
+        }
+      </div>`).join('')}
+    </div>`;
+  }
+
+  async function createMission() {
+    const title = document.getElementById('m-title').value.trim();
+    const mode = document.getElementById('m-mode').value;
+    const scope = document.getElementById('m-scope').value;
+    const duration = document.getElementById('m-duration').value;
+
+    if (!getCommunityAccessState().can_create_internal_missions) {
+      toast(getMissionUnlockCopy(), 'error');
+      closeModal();
+      updateCommunityAccessUI();
+      return;
+    }
+    if (!title) { toast('Escreve um título para a missão.', 'error'); return; }
+    if (!currentCommunity) return;
+
+    try {
+      const res = await fetch(`${API}/api/community-missions/${currentCommunity.slug}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, mode, scope, duration_days: parseInt(duration) })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        closeModal();
+        toast('Missão criada!');
+        await loadCommunityMissions(currentCommunity.slug);
+      } else {
+        closeModal();
+        toast(data.error || getMissionUnlockCopy(), 'error');
+        updateCommunityAccessUI();
+      }
+    } catch(err) {
+      toast('Erro de ligação.', 'error');
     }
   }
 
