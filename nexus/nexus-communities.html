@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
@@ -207,7 +207,7 @@
         return {
           stage: 'read',
           title: 'Falta desbloquear a leitura',
-          copy: `Faz mais ${Math.max(0, readTarget - totalDays)} check-ins nesta categoria ou conclui 1 missão para entrares no fórum e veres as missões internas.`,
+          copy: `Faz mais ${Math.max(0, readTarget - totalDays)} check-ins nesta categoria ou conclui 1 missÃ£o para entrares no fÃ³rum e veres as missÃµes internas.`,
           label: `${totalDays}/${readTarget} check-ins`,
           progress: readProgress
         };
@@ -216,9 +216,9 @@
       if (!access.can_post_forum) {
         return {
           stage: 'voice',
-          title: 'A leitura já abriu. Falta ganhar voz',
-          copy: `Conclui ${Math.max(0, voiceTarget - missionsDone)} missão nesta categoria para publicares no fórum e criares missões internas.`,
-          label: `${missionsDone}/${voiceTarget} missões concluídas`,
+          title: 'A leitura jÃ¡ abriu. Falta ganhar voz',
+          copy: `Conclui ${Math.max(0, voiceTarget - missionsDone)} missÃ£o nesta categoria para publicares no fÃ³rum e criares missÃµes internas.`,
+          label: `${missionsDone}/${voiceTarget} missÃµes concluÃ­das`,
           progress: voiceProgress
         };
       }
@@ -226,7 +226,7 @@
       return {
         stage: 'open',
         title: 'Comunidade desbloqueada',
-        copy: 'Já podes ler, publicar e criar missões internas nesta categoria.',
+        copy: 'JÃ¡ podes ler, publicar e criar missÃµes internas nesta categoria.',
         label: 'Voz ativa',
         progress: 100
       };
@@ -312,8 +312,12 @@
     async function createMission(){ if(!getCommunityAccessState().can_create_internal_missions){ toast(getMissionUnlockCopy(),'error'); closeModal(); updateCommunityAccessUI(); return; } const title=document.getElementById('m-title').value.trim(); const mode=document.getElementById('m-mode').value; const scope=document.getElementById('m-scope').value; const duration=Number(document.getElementById('m-duration').value); if(!title){ toast('Escreve um t\u00edtulo para a miss\u00e3o.','error'); return; } if(!currentCommunity)return; try{ const res=await fetch(`${API}/api/community-missions/${currentCommunity.slug}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({title,mode,scope,duration_days:duration})}); const data=await res.json(); if(res.ok){ closeModal(); document.getElementById('m-title').value=''; toast('Miss\u00e3o criada!'); await loadCommunityMissions(currentCommunity.slug); } else { closeModal(); toast(data.error||getMissionUnlockCopy(),'error'); updateCommunityAccessUI(); } }catch{ toast('Erro de liga\u00e7\u00e3o.','error'); } }
     async function joinMission(slug,missionId,btn){ btn.disabled=true; btn.textContent='A entrar...'; try{ const res=await fetch(`${API}/api/community-missions/${slug}/${missionId}/join`,{method:'POST',headers:{Authorization:`Bearer ${token}`}}); const data=await res.json(); if(res.ok){ toast('Entraste na miss\u00e3o!'); await loadCommunityMissions(slug); } else { toast(data.error||'Erro ao entrar.','error'); btn.disabled=false; btn.textContent='ENTRAR'; } }catch{ toast('Erro de liga\u00e7\u00e3o.','error'); } }
     async function checkinMission(slug,missionId,btn){ btn.disabled=true; try{ const res=await fetch(`${API}/api/community-missions/${slug}/${missionId}/checkin`,{method:'POST',headers:{Authorization:`Bearer ${token}`}}); const data=await res.json(); if(res.ok){ toast(data.message||'Check-in feito.'); await loadCommunityMissions(slug); } else { toast(data.error||'Erro ao fazer check-in.','error'); btn.disabled=false; } }catch{ toast('Erro de liga\u00e7\u00e3o.','error'); btn.disabled=false; } }
+    async function refreshCommunityProgress(){ if(currentCommunity?.slug){ await openCommunity(currentCommunity.slug); } else { await loadCommunities(); } }
+    window.addEventListener('focus', () => { refreshCommunityProgress(); });
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshCommunityProgress(); });
     async function init(){ token=localStorage.getItem('nexus_token'); const userData=localStorage.getItem('nexus_user'); if(!token||!userData){ window.location.href='nexus-auth.html'; return; } user=JSON.parse(userData); document.getElementById('sidebar-avatar').textContent=user.username[0].toUpperCase(); document.getElementById('sidebar-username').textContent=user.username; await loadCommunities(); }
     init();
   </script>
 </body>
 </html>
+
