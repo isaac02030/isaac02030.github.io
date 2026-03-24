@@ -3,7 +3,7 @@
   "short_name": "Nexus",
   "id": "/nexus/",
   "description": "Define um objetivo. Encontra um rival. 30 dias de foco real.",
-  "start_url": "/nexus/",
+  "start_url": "/nexus/nexus-dashboard.html",
   "scope": "/nexus/",
   "display": "standalone",
   "background_color": "#0A0A08",
