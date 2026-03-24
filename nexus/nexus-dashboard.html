@@ -1225,6 +1225,25 @@
   </div>
 </div>
 
+<!-- MODAL PROVA DE TEXTO -->
+<div class="modal-overlay" id="note-proof-modal" onclick="closeNoteProofModal(event)">
+  <div class="modal">
+    <h2 id="note-proof-title">PROVA DA MISSÃO</h2>
+    <div class="mission-onboarding-guide">
+      <strong id="note-proof-kicker">Registo do dia</strong>
+      <div class="mission-onboarding-copy" id="note-proof-copy">Esta missão pede uma nota curta antes do check-in.</div>
+    </div>
+    <div class="field">
+      <label id="note-proof-label">O que fizeste hoje</label>
+      <textarea id="note-proof-text" rows="4" placeholder="Regista de forma curta e concreta o que fizeste hoje." style="resize:none"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('note-proof-modal').classList.remove('open')">CANCELAR</button>
+      <button class="btn-confirm" onclick="submitNoteProof()">REGISTAR PROVA</button>
+    </div>
+  </div>
+</div>
+
 <div class="layout">
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -1329,6 +1348,7 @@
   let activeMission = null;
   let lastStreakData = null;
   let latestFitnessProofHtml = '';
+  let activeNoteProofMode = 'text_note';
   let chatInterval = null;
 
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
@@ -1615,6 +1635,69 @@
     document.getElementById('fitness-proof-modal').classList.add('open');
   }
 
+  function getNoteProofConfig(mode) {
+    const configs = {
+      study_note: {
+        title: 'NOTA DE ESTUDO',
+        kicker: 'Registo do estudo',
+        copy: 'Em missões de aprendizagem, o check-in pede uma nota curta com o que estudaste ou fechaste hoje.',
+        label: 'O que estudaste hoje',
+        placeholder: 'ex: fechei funções e fiz 4 exercícios sobre arrays',
+        minLength: 12,
+        error: 'Escreve uma nota curta com o que estudaste hoje.'
+      },
+      artifact_note: {
+        title: 'SAIDA DO DIA',
+        kicker: 'Registo da produção',
+        copy: 'Em missões criativas, o check-in pede um registo curto do que saiu hoje. O importante é haver entrega.',
+        label: 'O que produziste hoje',
+        placeholder: 'ex: escrevi 300 palavras e fechei a primeira versão da cena',
+        minLength: 12,
+        error: 'Descreve de forma curta o que produziste hoje.'
+      },
+      text_note: {
+        title: 'REGISTO DO DIA',
+        kicker: 'Registo da missão',
+        copy: 'Esta missão pede uma nota curta antes do check-in. O objetivo é deixar um facto, não só intenção.',
+        label: 'O que foi feito hoje',
+        placeholder: 'ex: cumpri o mínimo diário e fechei a parte principal da missão',
+        minLength: 8,
+        error: 'Escreve uma nota curta antes do check-in.'
+      }
+    };
+
+    return configs[mode] || configs.text_note;
+  }
+
+  function closeNoteProofModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('note-proof-modal').classList.remove('open');
+  }
+
+  function openNoteProofModal(mode) {
+    const config = getNoteProofConfig(mode);
+    activeNoteProofMode = mode || 'text_note';
+    document.getElementById('note-proof-title').textContent = config.title;
+    document.getElementById('note-proof-kicker').textContent = config.kicker;
+    document.getElementById('note-proof-copy').textContent = config.copy;
+    document.getElementById('note-proof-label').textContent = config.label;
+    document.getElementById('note-proof-text').value = '';
+    document.getElementById('note-proof-text').placeholder = config.placeholder;
+    document.getElementById('note-proof-modal').classList.add('open');
+  }
+
+  async function submitNoteProof() {
+    const config = getNoteProofConfig(activeNoteProofMode);
+    const note = document.getElementById('note-proof-text').value.trim();
+
+    if (note.length < config.minLength) {
+      return toast(config.error, 'error');
+    }
+
+    document.getElementById('note-proof-modal').classList.remove('open');
+    await sendCheckin(note);
+  }
+
   async function submitFitnessProof() {
     const proofType = document.getElementById('fitness-proof-type').value;
     const duration = document.getElementById('fitness-proof-duration').value.trim();
@@ -1630,10 +1713,19 @@
 
   async function doCheckin() {
     if (!activeMission) return;
-    if (activeMission.category === 'fitness') {
+
+    const proofMode = activeMission.proof_mode || (activeMission.category === 'fitness' ? 'workout_proof' : 'self_report');
+
+    if (proofMode === 'workout_proof') {
       openFitnessProofModal();
       return;
     }
+
+    if (proofMode === 'study_note' || proofMode === 'artifact_note' || proofMode === 'text_note') {
+      openNoteProofModal(proofMode);
+      return;
+    }
+
     await sendCheckin(null);
   }
 
@@ -1736,11 +1828,21 @@
         btn.textContent = '\u2713 CHECK-IN DE HOJE';
         btn.disabled = false;
         btn.style.opacity = '1';
-        if (note) note.textContent = activeMission.category === 'fitness'
-          ? 'Regista o treino com uma prova curta.'
-          : 'Regista o teu progresso de hoje.';
+        if (note) note.textContent = getCheckinPrompt(activeMission);
       }
     }
+  }
+
+  function getCheckinPrompt(mission) {
+    if (!mission) return 'Regista o teu progresso de hoje.';
+
+    const proofMode = mission.proof_mode || (mission.category === 'fitness' ? 'workout_proof' : 'self_report');
+
+    if (proofMode === 'workout_proof') return 'Regista o treino com uma prova curta.';
+    if (proofMode === 'study_note') return 'Regista o estudo com uma nota curta do que fechaste hoje.';
+    if (proofMode === 'artifact_note') return 'Regista a saída de hoje com o que produziste.';
+    if (proofMode === 'text_note') return 'Regista o teu progresso de hoje com uma nota curta.';
+    return 'Regista o teu progresso de hoje.';
   }
 
   // Chat
