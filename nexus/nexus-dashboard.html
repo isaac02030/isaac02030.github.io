@@ -1144,6 +1144,12 @@
       <label>Descrição (opcional)</label>
       <textarea id="m-desc" rows="2" placeholder="mais detalhes sobre o teu objetivo..." style="resize:none"></textarea>
     </div>
+    <div style="margin:0 0 18px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,176,103,.16);background:rgba(255,255,255,.03);display:grid;gap:8px">
+      <strong style="font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#ffb067">Leitura do contrato</strong>
+      <div id="mission-preview-title" style="font-size:1rem;font-weight:700;color:var(--text)">Ainda falta dar forma a esta missao.</div>
+      <div id="mission-preview-copy" style="font-size:.92rem;line-height:1.55;color:var(--muted)">Escolhe categoria, modo, minimo e janela para o Nexus te devolver a missao em linguagem clara.</div>
+      <div id="mission-preview-risk" style="font-size:.85rem;line-height:1.5;color:#ffcfad">Sem contrato claro, a missao vira intencao vaga.</div>
+    </div>
     <div class="field">
       <label>MÃ­nimo diÃ¡rio</label>
       <input type="text" id="m-minimum" placeholder="ex: 45 minutos ou 5 pÃ¡ginas">
@@ -1400,6 +1406,8 @@
     document.getElementById('header-date').textContent =
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
+    initMissionDraftInputs();
+    resetMissionModal();
     await loadMissions();
     await loadVertice();
     initNotifications();
@@ -2051,6 +2059,55 @@
       : 'A firmeza da tua palavra.';
   }
 
+  function updateMissionDraftPreview() {
+    const titleEl = document.getElementById('mission-preview-title');
+    const copyEl = document.getElementById('mission-preview-copy');
+    const riskEl = document.getElementById('mission-preview-risk');
+    if (!titleEl || !copyEl || !riskEl) return;
+
+    const title = document.getElementById('m-title')?.value.trim() || 'esta missao';
+    const category = document.getElementById('m-category')?.value || 'outro';
+    const mode = document.getElementById('m-mode')?.value || 'solo';
+    const minimum = document.getElementById('m-minimum')?.value.trim() || 'um minimo diario claro';
+    const windowText = document.getElementById('m-window')?.value.trim() || 'uma janela definida';
+    const why = document.getElementById('m-why')?.value.trim() || 'um motivo real';
+    const fallback = document.getElementById('m-fallback')?.value.trim() || 'um plano de recuperacao';
+    const proofMode = document.getElementById('m-proof-mode')?.value || 'self_report';
+    const studyFocus = document.getElementById('m-study-focus')?.value.trim() || '';
+    const studyStage = document.getElementById('m-study-stage')?.value.trim() || '';
+
+    const modeCopy = { rival: 'em rival', parceiro: 'com parceiro', solo: 'em solo' };
+    const categoryCopy = {
+      fitness: 'fitness',
+      aprendizagem: 'aprendizagem',
+      habito: 'habito',
+      criatividade: 'criatividade',
+      outro: 'objetivo pessoal'
+    };
+
+    titleEl.textContent = `${title} - ${categoryCopy[category] || 'missao'} ${modeCopy[mode] || 'em solo'}`;
+
+    if (category === 'aprendizagem') {
+      const focus = studyFocus || title;
+      const stage = studyStage || 'o bloco atual';
+      copyEl.textContent = `Todos os dias vais fechar ${minimum} em ${windowText}, deixando ${getProofModeLabel(proofMode)} sobre ${focus}. O ponto de partida atual e ${stage}.`;
+    } else {
+      copyEl.textContent = `Todos os dias vais fechar ${minimum} em ${windowText}, com ${getProofModeLabel(proofMode)}. O objetivo nao e parecer motivado. E tornar ${title} executavel.`;
+    }
+
+    riskEl.textContent = `Se falhares, respondes com: ${fallback}. O motivo desta missao e ${why}.`;
+  }
+
+  function initMissionDraftInputs() {
+    ['m-title', 'm-category', 'm-level', 'm-mode', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback', 'm-proof-mode', 'm-study-focus', 'm-study-stage', 'm-study-target']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', updateMissionDraftPreview);
+        el.addEventListener('change', updateMissionDraftPreview);
+      });
+  }
+
   function updateMissionOnboardingCopy() {
     const category = document.getElementById('m-category')?.value || 'outro';
     const mode = document.getElementById('m-mode')?.value || 'solo';
@@ -2061,6 +2118,7 @@
     if (guide) guide.textContent = template.guide;
     if (modeGuide) modeGuide.textContent = template.mode[mode] || template.mode.solo;
     if (proofGuide) proofGuide.textContent = `Contrato recomendado: minimo "${template.minimum}", janela "${template.window}", prova "${getProofModeLabel(template.proofMode || 'self_report')}", motivo real e plano de recuperacao.`;
+    updateMissionDraftPreview();
   }
 
   function toggleStudySetup() {
