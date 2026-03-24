@@ -204,6 +204,123 @@ Nexus should teach:
 
 This is critical for retention.
 
+## Mission Assistance Layer
+
+After mission creation, Nexus should help the user execute the specific mission type better.
+
+This means adding a second layer to the product:
+
+- not only accountability
+- but clarity, proof, and next-step guidance
+
+Core principle:
+
+The app should reduce confusion inside the mission, not only measure whether the user returned.
+
+### Mission Types
+
+Each mission should evolve into a typed experience:
+
+- study
+- fitness
+- reading
+- habit
+- creative
+
+Each type can keep the same 30-day accountability loop while receiving different support.
+
+### Study Missions
+
+The major enemy in study missions is not only inconsistency.
+It is drift and confusion.
+
+Study missions should eventually include:
+
+- current level
+- learning destination
+- roadmap by stage
+- today's next block
+- revision reminder
+- recovery path when the user gets lost
+
+The user should be able to see:
+
+- where I am
+- what comes next
+- what I should review
+- what today's useful step is
+
+### Fitness Missions
+
+Fitness missions need stronger proof than a simple check-in.
+
+Recommended proof ladder:
+
+- self report
+- text note
+- photo proof
+- wearable or distance/time data
+- mixed proof
+
+The goal is not paranoia.
+The goal is raising honesty and reducing fake completion.
+
+### Mission Proof Modes
+
+Each mission should later carry a proof mode:
+
+- self_report
+- text_note
+- photo
+- wearable
+- mixed
+
+Examples:
+
+- study: text note or mixed
+- fitness: photo, wearable, or mixed
+- reading: note or page-based proof
+- creativity: artifact, photo, or link
+
+### Next Step Engine
+
+Every typed mission should generate:
+
+- a useful next step
+- a weekly direction
+- the most likely point of confusion
+- a fallback when the user stalls
+
+Examples:
+
+- study: finish module 1, revise arrays, solve 3 exercises
+- fitness: complete workout A, prove duration, use minimum version if energy is low
+- reading: read 10 pages, extract one idea, resume from last marker
+- creativity: produce one artifact fragment, not just “work on project”
+
+### Grande Irmao By Mission Type
+
+GRANDE IRMAO should eventually speak with mission context.
+
+Examples:
+
+- study: You still have not closed this concept.
+- fitness: Without proof, it remains intention.
+- reading: Did you read, or only open the book.
+- creative: Show what the session produced.
+
+## Delivery Roadmap
+
+Recommended build order for this layer:
+
+1. Improve mission onboarding so new missions are specific and executable.
+2. Add mission_type to the product model.
+3. Add proof_mode to missions.
+4. Build the first study roadmap experience.
+5. Build stronger proof for fitness missions.
+6. Add mission-specific next-step guidance.
+7. Add mission-specific GRANDE IRMAO messages.
+
 ## Why The User Returns
 
 The user returns when one of these tensions is alive:

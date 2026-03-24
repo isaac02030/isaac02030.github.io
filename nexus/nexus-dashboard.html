@@ -571,6 +571,40 @@
     font-size: .94rem;
     text-transform: uppercase;
   }
+  .mission-onboarding-guide{
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(135deg, rgba(255,106,26,.10), rgba(255,255,255,.03));
+    display:grid;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .mission-onboarding-guide strong{
+    font-size:.76rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#ffb067;
+  }
+  .mission-onboarding-copy{
+    font-size:.95rem;
+    line-height:1.55;
+    color:var(--text);
+  }
+  .mission-onboarding-hint{
+    display:grid;
+    gap:8px;
+    margin-top:10px;
+    padding:12px 14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .mission-onboarding-hint span{
+    font-size:.82rem;
+    color:var(--muted);
+    line-height:1.45;
+  }
 
   .stats-row {
     gap: 14px;
@@ -891,13 +925,21 @@
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal">
     <h2>NOVA MISSÃO</h2>
+    <div class="mission-onboarding-guide">
+      <strong>Contrato de entrada</strong>
+      <div class="mission-onboarding-copy" id="mission-guide-copy">Define uma missão concreta, uma regra diária clara e uma forma de recuperação. O objetivo aqui não é parecer motivado. É ficar executável.</div>
+      <div class="mission-onboarding-hint">
+        <span id="mission-guide-mode">Modo: escolhe o tipo de pressão que melhor te faz agir.</span>
+        <span id="mission-guide-proof">Missão forte: mínimo diário, janela, motivo real e plano para o dia em que falhares.</span>
+      </div>
+    </div>
     <div class="field">
       <label>Objetivo</label>
       <input type="text" id="m-title" placeholder="ex: Correr 5km todos os dias">
     </div>
     <div class="field">
       <label>Categoria</label>
-      <select id="m-category">
+      <select id="m-category" onchange="applyMissionTemplate()">
         <option value="fitness">Fitness / Desporto</option>
         <option value="aprendizagem">Aprendizagem</option>
         <option value="habito">Hábito diário</option>
@@ -915,7 +957,7 @@
     </div>
     <div class="field">
       <label>Modo</label>
-      <select id="m-mode">
+      <select id="m-mode" onchange="updateMissionOnboardingCopy()">
         <option value="rival">Rival — competir com alguém</option>
         <option value="parceiro">Parceiro — cooperar com alguém</option>
         <option value="solo">Solo — IA como companheiro</option>
@@ -1475,6 +1517,109 @@
     }
   }
 
+  const MISSION_TEMPLATES = {
+    fitness: {
+      minimum: '45 minutos ou 1 treino completo',
+      window: '18:00-21:00',
+      why: 'Quero melhorar o meu corpo e a minha disciplina.',
+      fallback: 'Se falhar hoje, amanhã faço uma versão mínima sem negociar.',
+      guide: 'Missão fitness forte: define volume mínimo, janela realista e uma forma de prova do treino.',
+      mode: {
+        rival: 'Rival: bom para quem responde a comparação e pressão.',
+        parceiro: 'Parceiro: bom para quem precisa de apoio e ritmo partilhado.',
+        solo: 'Solo: tu contra a tua consistência física.'
+      }
+    },
+    aprendizagem: {
+      minimum: '45 minutos ou 1 bloco de estudo focado',
+      window: '19:00-21:00',
+      why: 'Quero avançar sem me perder no processo.',
+      fallback: 'Se falhar hoje, amanhã recomeço com um bloco menor mas fecho o conteúdo do dia.',
+      guide: 'Missão de estudo forte: diz o que vais estudar, quanto tempo e qual é o próximo bloco real.',
+      mode: {
+        rival: 'Rival: usa pressão para não adiar o estudo.',
+        parceiro: 'Parceiro: cria ritmo e responsabilidade mútua.',
+        solo: 'Solo: ideal para quem quer concentração sem ruído.'
+      }
+    },
+    habito: {
+      minimum: '1 execução mínima clara',
+      window: '07:00-09:00',
+      why: 'Quero tornar isto automático no meu dia.',
+      fallback: 'Se falhar hoje, amanhã faço a versão mínima logo na primeira janela possível.',
+      guide: 'Hábito forte: mínimo pequeno, hora previsível e zero ambiguidade.',
+      mode: {
+        rival: 'Rival: mantém a tensão alta num hábito simples.',
+        parceiro: 'Parceiro: bom para consistência leve e diária.',
+        solo: 'Solo: tu contra a tua tendência para adiar.'
+      }
+    },
+    criatividade: {
+      minimum: '30 minutos ou 1 artefacto pequeno',
+      window: '20:00-22:00',
+      why: 'Quero produzir algo real e não só pensar sobre isso.',
+      fallback: 'Se falhar hoje, amanhã entrego uma versão pequena mas concreta.',
+      guide: 'Criatividade forte: define o que conta como saída real, não só tempo gasto.',
+      mode: {
+        rival: 'Rival: bom para transformar intenção em entrega.',
+        parceiro: 'Parceiro: bom para cadência e feedback.',
+        solo: 'Solo: espaço para criar, mas com consequência diária.'
+      }
+    },
+    outro: {
+      minimum: 'Define a menor versão que conta',
+      window: 'Escolhe uma janela específica',
+      why: 'Escreve o motivo real para manteres esta promessa.',
+      fallback: 'Define o que fazes no dia seguinte sem deixar a missão cair.',
+      guide: 'Se a missão não é óbvia, torna-a concreta antes de a começares.',
+      mode: {
+        rival: 'Rival: pressão externa para não aliviar.',
+        parceiro: 'Parceiro: compromisso partilhado.',
+        solo: 'Solo: responsabilidade pessoal total.'
+      }
+    }
+  };
+
+  function updateMissionOnboardingCopy() {
+    const category = document.getElementById('m-category')?.value || 'outro';
+    const mode = document.getElementById('m-mode')?.value || 'solo';
+    const template = MISSION_TEMPLATES[category] || MISSION_TEMPLATES.outro;
+    const guide = document.getElementById('mission-guide-copy');
+    const modeGuide = document.getElementById('mission-guide-mode');
+    const proofGuide = document.getElementById('mission-guide-proof');
+    if (guide) guide.textContent = template.guide;
+    if (modeGuide) modeGuide.textContent = template.mode[mode] || template.mode.solo;
+    if (proofGuide) proofGuide.textContent = `Contrato recomendado: mínimo "${template.minimum}", janela "${template.window}", motivo real e plano de recuperação.`;
+  }
+
+  function applyMissionTemplate() {
+    const category = document.getElementById('m-category')?.value || 'outro';
+    const template = MISSION_TEMPLATES[category] || MISSION_TEMPLATES.outro;
+    const minimum = document.getElementById('m-minimum');
+    const windowField = document.getElementById('m-window');
+    const why = document.getElementById('m-why');
+    const fallback = document.getElementById('m-fallback');
+    if (minimum && !minimum.value.trim()) minimum.value = template.minimum;
+    if (windowField && !windowField.value.trim()) windowField.value = template.window;
+    if (why && !why.value.trim()) why.value = template.why;
+    if (fallback && !fallback.value.trim()) fallback.value = template.fallback;
+    updateMissionOnboardingCopy();
+  }
+
+  function resetMissionModal() {
+    ['m-title', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const category = document.getElementById('m-category');
+    const level = document.getElementById('m-level');
+    const mode = document.getElementById('m-mode');
+    if (category) category.value = 'fitness';
+    if (level) level.value = 'iniciante';
+    if (mode) mode.value = 'rival';
+    applyMissionTemplate();
+  }
+
   // Criar missão
   async function createMission() {
     const title    = document.getElementById('m-title').value.trim();
@@ -1488,6 +1633,10 @@
     const fallbackPlan = document.getElementById('m-fallback').value.trim();
 
     if (!title) return toast('Escreve o objetivo da missão.', 'error');
+    if (!dailyMinimum) return toast('Define o mínimo diário antes de criar a missão.', 'error');
+    if (!commitmentWindow) return toast('Define a janela de compromisso.', 'error');
+    if (!whyItMatters) return toast('Escreve porque isto importa mesmo.', 'error');
+    if (!fallbackPlan) return toast('Define o plano para o dia em que falhares.', 'error');
 
     try {
       const res = await fetch(`${API}/api/missions`, {
@@ -1512,10 +1661,7 @@
 
       if (res.ok) {
         document.getElementById('modal').classList.remove('open');
-        ['m-title', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
-        });
+        resetMissionModal();
         toast(data.message || 'Missão criada!');
         await loadMissions();
       } else {
@@ -1548,6 +1694,8 @@
       </div>
     `;
   }
+
+  applyMissionTemplate();
 
   function getSoloFocusHtml(mission) {
     if (mission.mode !== 'solo') return '';
