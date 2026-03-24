@@ -1350,6 +1350,7 @@
   let lastStreakData = null;
   let latestFitnessProofHtml = '';
   let latestCreativeSupportHtml = '';
+  let latestHabitSupportHtml = '';
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
 
@@ -1550,6 +1551,7 @@
         ${getSoloFocusHtml(m)}
         ${renderStudyMissionSupport(m)}
         ${latestCreativeSupportHtml}
+        ${latestHabitSupportHtml}
         ${renderMissionContract(m)}
         ${latestFitnessProofHtml}
         <div class="checkin-section">
@@ -1785,6 +1787,9 @@
 
     let myCheckins = [];
     let doneDays = new Set();
+    const started  = new Date(activeMission.started_at);
+    const today    = new Date();
+    const todayDay = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
     try {
       const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -1800,13 +1805,10 @@
 
     latestFitnessProofHtml = renderFitnessProofPanel(myCheckins);
     latestCreativeSupportHtml = renderCreativeMissionSupport(activeMission, myCheckins);
-    if (activeMission.category === 'fitness' || activeMission.category === 'criatividade') {
+    latestHabitSupportHtml = renderHabitMissionSupport(activeMission, myCheckins, doneDays, todayDay);
+    if (activeMission.category === 'fitness' || activeMission.category === 'criatividade' || activeMission.category === 'habito') {
       renderMission(activeMission);
     }
-
-    const started  = new Date(activeMission.started_at);
-    const today    = new Date();
-    const todayDay = Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
     const grid     = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
@@ -2434,6 +2436,116 @@
             </div>
           </div>
           <div class="proof-history">${outputHtml}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function getHabitDirective(mission, doneDays, todayDay) {
+    const minimum = mission.daily_minimum || '1 execucao minima clara';
+    const todayDone = !!lastStreakData?.today_done;
+    const recoveryNeeded = !!lastStreakData?.recovery_needed;
+    const streak = lastStreakData?.streak ?? 0;
+    const consistency = lastStreakData?.consistency ?? 0;
+    const previousDone = todayDay > 1 && doneDays.has(todayDay - 1);
+
+    if (todayDone) {
+      return {
+        title: 'Habito de hoje fechado',
+        copy: `Hoje ja cumpriste ${minimum}. O objetivo agora e voltares amanha sem renegociar o minimo.`
+      };
+    }
+
+    if (recoveryNeeded) {
+      return {
+        title: 'Hoje e dia de recolocar o habito',
+        copy: `Nao compliques. Fecha ${minimum} na janela certa e usa o dia de hoje para voltar ao padrao.`
+      };
+    }
+
+    if (streak >= 5) {
+      return {
+        title: 'Protege a automatizacao',
+        copy: `Levas ${streak} dias seguidos. O que interessa hoje nao e fazer muito. E nao quebrar o ciclo.`
+      };
+    }
+
+    if (consistency >= 70) {
+      return {
+        title: 'O habito esta a ganhar forma',
+        copy: `Ja existe consistencia. Fecha ${minimum} no horario prometido para o habito deixar de depender da vontade.`
+      };
+    }
+
+    if (previousDone) {
+      return {
+        title: 'Repete sem pensar demasiado',
+        copy: `Ontem houve prova. Hoje a meta e repetir ${minimum} antes que o dia abra espaco para desculpas.`
+      };
+    }
+
+    return {
+      title: 'Presenca minima do dia',
+      copy: `Hoje o foco e simples: fecha ${minimum} dentro da tua janela e deixa um facto no registo.`
+    };
+  }
+
+  function renderHabitMissionSupport(mission, checkins, doneDays, todayDay) {
+    if (!mission || mission.category !== 'habito') return '';
+
+    const directive = getHabitDirective(mission, doneDays, todayDay);
+    const minimum = mission.daily_minimum || '1 execucao minima clara';
+    const windowText = mission.commitment_window || 'janela livre';
+    const fallback = mission.fallback_plan || 'Se falhar hoje, amanha volto na primeira janela possivel.';
+    const whyText = mission.why_it_matters || 'Transformar repeticao em padrao.';
+    const recent = (checkins || [])
+      .filter(item => item.completed)
+      .sort((a, b) => b.day - a.day)
+      .slice(0, 3);
+
+    const recentHtml = recent.length
+      ? recent.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note && item.note.trim() ? item.note : 'Check-in confirmado.'}</span></div>`).join('')
+      : `<div class="proof-panel-copy">Ainda nao existe um registo recente deste habito. O primeiro passo e tornar o minimo inevitavel hoje.</div>`;
+
+    return `
+      <div class="study-roadmap">
+        <div class="study-roadmap-kicker">Missao assistida</div>
+        <div class="study-roadmap-head">
+          <h3>Ritmo do habito: ${mission.title}</h3>
+          <p>Em habitos diarios, o Nexus tenta reduzir friccao. A meta e repetir o minimo certo, na janela certa, ate deixar de parecer negociavel.</p>
+        </div>
+        <div class="study-next-step">
+          <strong>Foco do dia</strong>
+          <h4>${directive.title}</h4>
+          <p>${directive.copy}</p>
+          <p>Se falhar hoje: ${fallback}</p>
+        </div>
+        <div class="study-roadmap-grid">
+          <div class="study-roadmap-stat">
+            <strong>Minimo</strong>
+            <span>${minimum}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Janela</strong>
+            <span>${windowText}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Prova pedida</strong>
+            <span>${getProofModeLabel(mission.proof_mode || 'self_report')}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Porque importa</strong>
+            <span>${whyText}</span>
+          </div>
+        </div>
+        <div class="proof-panel">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Rasto recente</div>
+              <div class="proof-panel-title">${recent.length > 0 ? `Ultimo registo: dia ${recent[0].day}` : 'Ainda sem rasto recente'}</div>
+            </div>
+          </div>
+          <div class="proof-history">${recentHtml}</div>
         </div>
       </div>
     `;
