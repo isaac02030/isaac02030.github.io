@@ -207,7 +207,7 @@
         return {
           stage: 'read',
           title: 'Falta desbloquear a leitura',
-          copy: `Faz mais ${Math.max(0, readTarget - totalDays)} check-ins nesta categoria ou conclui 1 missÃ£o para entrares no fÃ³rum e veres as missÃµes internas.`,
+          copy: `Faz mais ${Math.max(0, readTarget - totalDays)} check-ins nesta categoria ou conclui 1 missão para entrares no fórum e veres as missões internas.`,
           label: `${totalDays}/${readTarget} check-ins`,
           progress: readProgress
         };
@@ -216,9 +216,9 @@
       if (!access.can_post_forum) {
         return {
           stage: 'voice',
-          title: 'A leitura jÃ¡ abriu. Falta ganhar voz',
-          copy: `Conclui ${Math.max(0, voiceTarget - missionsDone)} missÃ£o nesta categoria para publicares no fÃ³rum e criares missÃµes internas.`,
-          label: `${missionsDone}/${voiceTarget} missÃµes concluÃ­das`,
+          title: 'A leitura já abriu. Falta ganhar voz',
+          copy: `Conclui ${Math.max(0, voiceTarget - missionsDone)} missão nesta categoria para publicares no fórum e criares missões internas.`,
+          label: `${missionsDone}/${voiceTarget} missões concluídas`,
           progress: voiceProgress
         };
       }
@@ -226,7 +226,7 @@
       return {
         stage: 'open',
         title: 'Comunidade desbloqueada',
-        copy: 'JÃ¡ podes ler, publicar e criar missÃµes internas nesta categoria.',
+        copy: 'Já podes ler, publicar e criar missões internas nesta categoria.',
         label: 'Voz ativa',
         progress: 100
       };
