@@ -6,6 +6,7 @@
 <title>Nexus — Dashboard</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff6a1a">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3131,11 +3132,6 @@
   // PUSH NOTIFICATIONS
   // ============================================
   async function initNotifications() {
-    // Desregistar service workers antigos
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      regs.forEach(r => r.unregister());
-    }
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
