@@ -107,6 +107,19 @@
     transition:opacity .2s,transform .15s;white-space:nowrap;
   }
   .btn-new-mission:hover{opacity:.88;transform:translateY(-1px);}
+  .main-header-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;}
+  .btn-install-app{
+    display:none;
+    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    padding:12px 18px;
+    border-radius:16px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:15px;
+    letter-spacing:.06em;
+  }
+  .btn-install-app.visible{display:inline-flex;align-items:center;justify-content:center;}
 
   /* STATS */
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
@@ -1474,10 +1487,22 @@
   let latestHabitSupportHtml = '';
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
+  let deferredInstallPrompt = null;
 
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
   if(cur) cur.style.display='none';
   if(curR) curR.style.display='none';
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    renderInstallAppButton(true);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    renderInstallAppButton(false);
+  });
 
   // Toast
   function toast(msg, type='success') {
@@ -1521,6 +1546,7 @@
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
     initMissionDraftInputs();
+    ensureInstallAppButton();
     initMobileTabbar();
     resetMissionModal();
     await loadMissions();
@@ -1546,6 +1572,45 @@
       if (icon) icon.textContent = content.icon;
       if (label) label.textContent = content.label;
     });
+  }
+
+  function ensureInstallAppButton() {
+    if (document.getElementById('btn-install-app')) return;
+    const statsRow = document.querySelector('.stats-row');
+    if (!statsRow || !statsRow.parentNode) return;
+
+    const button = document.createElement('button');
+    button.id = 'btn-install-app';
+    button.type = 'button';
+    button.className = 'btn-install-app';
+    button.textContent = 'INSTALAR APP';
+    button.onclick = installNexusApp;
+    statsRow.insertAdjacentElement('afterend', button);
+
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (standalone) {
+      renderInstallAppButton(false);
+    }
+  }
+
+  function renderInstallAppButton(visible) {
+    const button = document.getElementById('btn-install-app');
+    if (!button) return;
+    button.classList.toggle('visible', !!visible);
+  }
+
+  async function installNexusApp() {
+    if (!deferredInstallPrompt) {
+      toast('Se o Chrome nao mostrar a instalacao, usa o menu e escolhe "Instalar app".', 'error');
+      return;
+    }
+
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (choice.outcome === 'accepted') {
+      renderInstallAppButton(false);
+    }
+    deferredInstallPrompt = null;
   }
 
   // Carregar missões
