@@ -605,6 +605,104 @@
     color:var(--muted);
     line-height:1.45;
   }
+  .study-setup-card{
+    display:none;
+    gap:10px;
+    margin-top:4px;
+    padding:14px;
+    border-radius:18px;
+    border:1px solid rgba(255,176,103,.18);
+    background:rgba(255,176,103,.06);
+  }
+  .study-setup-card.open{
+    display:grid;
+  }
+  .study-setup-note{
+    font-size:.82rem;
+    color:var(--muted);
+    line-height:1.45;
+  }
+  .study-roadmap{
+    margin-top:18px;
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  }
+  .study-roadmap-kicker{
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#ffb067;
+    margin-bottom:8px;
+    font-weight:700;
+  }
+  .study-roadmap-head{
+    display:grid;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .study-roadmap-head h3{
+    font-size:1.1rem;
+    margin:0;
+  }
+  .study-roadmap-head p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.5;
+  }
+  .study-roadmap-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .study-roadmap-stat{
+    padding:12px 14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .study-roadmap-stat strong{
+    display:block;
+    font-size:.72rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#ffb067;
+    margin-bottom:6px;
+  }
+  .study-roadmap-stat span{
+    color:var(--text);
+    line-height:1.45;
+    font-size:.94rem;
+  }
+  .study-roadmap-steps{
+    display:grid;
+    gap:10px;
+  }
+  .study-roadmap-step{
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.03);
+  }
+  .study-roadmap-step.current{
+    border-color:rgba(255,176,103,.3);
+    background:rgba(255,176,103,.08);
+  }
+  .study-roadmap-step.done{
+    opacity:.72;
+  }
+  .study-roadmap-step strong{
+    display:block;
+    margin-bottom:5px;
+  }
+  .study-roadmap-step span{
+    display:block;
+    color:var(--muted);
+    line-height:1.45;
+    font-size:.9rem;
+  }
 
   .stats-row {
     gap: 14px;
@@ -983,6 +1081,22 @@
       <label>Plano se falhares um dia</label>
       <textarea id="m-fallback" rows="2" placeholder="ex: amanhÃ£ comeÃ§o mais cedo com um mÃ­nimo menor, mas nÃ£o falho outra vez" style="resize:none"></textarea>
     </div>
+    <div class="study-setup-card" id="study-setup-card">
+      <strong style="font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#ffb067">Plano de estudo</strong>
+      <div class="study-setup-note">Se a missÃ£o for de aprendizagem, o Nexus jÃ¡ comeÃ§a com contexto: onde estÃ¡s, o que queres fechar em 30 dias e qual Ã© a frente atual.</div>
+      <div class="field">
+        <label>O que estÃ¡s a estudar</label>
+        <input type="text" id="m-study-focus" placeholder="ex: JavaScript, inglÃªs, matemÃ¡tica">
+      </div>
+      <div class="field">
+        <label>Onde estÃ¡s agora</label>
+        <input type="text" id="m-study-stage" placeholder="ex: fundamentos, mÃ³dulo 2, vocabulÃ¡rio bÃ¡sico">
+      </div>
+      <div class="field">
+        <label>O que queres fechar nestes 30 dias</label>
+        <textarea id="m-study-target" rows="2" placeholder="ex: fechar DOM e fazer um projeto pequeno" style="resize:none"></textarea>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">CANCELAR</button>
       <button class="btn-confirm" onclick="createMission()">CRIAR MISSÃO →</button>
@@ -1288,6 +1402,7 @@
         </div>
         ${scoreHtml}
         ${getSoloFocusHtml(m)}
+        ${renderStudyMissionSupport(m)}
         ${renderMissionContract(m)}
         <div class="checkin-section">
           <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
@@ -1589,7 +1704,26 @@
     const proofGuide = document.getElementById('mission-guide-proof');
     if (guide) guide.textContent = template.guide;
     if (modeGuide) modeGuide.textContent = template.mode[mode] || template.mode.solo;
-    if (proofGuide) proofGuide.textContent = `Contrato recomendado: mínimo "${template.minimum}", janela "${template.window}", motivo real e plano de recuperação.`;
+    if (proofGuide) proofGuide.textContent = `Contrato recomendado: minimo "${template.minimum}", janela "${template.window}", motivo real e plano de recuperacao.`;
+  }
+
+  function toggleStudySetup() {
+    const category = document.getElementById('m-category')?.value || 'outro';
+    const card = document.getElementById('study-setup-card');
+    const focus = document.getElementById('m-study-focus');
+    const stage = document.getElementById('m-study-stage');
+    const target = document.getElementById('m-study-target');
+
+    if (!card || !focus || !stage || !target) return;
+
+    const isStudy = category === 'aprendizagem';
+    card.classList.toggle('open', isStudy);
+
+    if (!isStudy) return;
+
+    if (!focus.value.trim()) focus.value = 'JavaScript';
+    if (!stage.value.trim()) stage.value = 'fundamentos';
+    if (!target.value.trim()) target.value = 'fechar um modulo e produzir uma aplicacao pequena';
   }
 
   function applyMissionTemplate() {
@@ -1603,11 +1737,12 @@
     if (windowField && !windowField.value.trim()) windowField.value = template.window;
     if (why && !why.value.trim()) why.value = template.why;
     if (fallback && !fallback.value.trim()) fallback.value = template.fallback;
+    toggleStudySetup();
     updateMissionOnboardingCopy();
   }
 
   function resetMissionModal() {
-    ['m-title', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback'].forEach(id => {
+    ['m-title', 'm-desc', 'm-minimum', 'm-window', 'm-why', 'm-fallback', 'm-study-focus', 'm-study-stage', 'm-study-target'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -1620,7 +1755,7 @@
     applyMissionTemplate();
   }
 
-  // Criar missão
+  // Criar missao
   async function createMission() {
     const title    = document.getElementById('m-title').value.trim();
     const category = document.getElementById('m-category').value;
@@ -1631,12 +1766,18 @@
     const commitmentWindow = document.getElementById('m-window').value.trim();
     const whyItMatters = document.getElementById('m-why').value.trim();
     const fallbackPlan = document.getElementById('m-fallback').value.trim();
+    const studyFocus = document.getElementById('m-study-focus')?.value.trim() || '';
+    const studyCurrentStage = document.getElementById('m-study-stage')?.value.trim() || '';
+    const studyTargetOutcome = document.getElementById('m-study-target')?.value.trim() || '';
 
-    if (!title) return toast('Escreve o objetivo da missão.', 'error');
-    if (!dailyMinimum) return toast('Define o mínimo diário antes de criar a missão.', 'error');
+    if (!title) return toast('Escreve o objetivo da missao.', 'error');
+    if (!dailyMinimum) return toast('Define o minimo diario antes de criar a missao.', 'error');
     if (!commitmentWindow) return toast('Define a janela de compromisso.', 'error');
     if (!whyItMatters) return toast('Escreve porque isto importa mesmo.', 'error');
     if (!fallbackPlan) return toast('Define o plano para o dia em que falhares.', 'error');
+    if (category === 'aprendizagem' && !studyFocus) return toast('Diz o que estas a estudar.', 'error');
+    if (category === 'aprendizagem' && !studyCurrentStage) return toast('Diz onde estas agora no estudo.', 'error');
+    if (category === 'aprendizagem' && !studyTargetOutcome) return toast('Define o que queres fechar nestes 30 dias.', 'error');
 
     try {
       const res = await fetch(`${API}/api/missions`, {
@@ -1654,7 +1795,10 @@
           daily_minimum: dailyMinimum,
           commitment_window: commitmentWindow,
           why_it_matters: whyItMatters,
-          fallback_plan: fallbackPlan
+          fallback_plan: fallbackPlan,
+          study_focus: category === 'aprendizagem' ? studyFocus : null,
+          study_current_stage: category === 'aprendizagem' ? studyCurrentStage : null,
+          study_target_outcome: category === 'aprendizagem' ? studyTargetOutcome : null
         })
       });
       const data = await res.json();
@@ -1662,19 +1806,127 @@
       if (res.ok) {
         document.getElementById('modal').classList.remove('open');
         resetMissionModal();
-        toast(data.message || 'Missão criada!');
+        toast(data.message || 'Missao criada!');
         await loadMissions();
       } else {
-        toast(data.error || 'Erro ao criar missão.', 'error');
+        toast(data.error || 'Erro ao criar missao.', 'error');
       }
     } catch(err) {
-      toast('Erro de ligação.', 'error');
+      toast('Erro de ligacao.', 'error');
     }
   }
 
   function showSection(s) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.target.closest('.nav-item').classList.add('active');
+  }
+
+  function getStudyTrack(mission) {
+    const source = `${mission.study_focus || ''} ${mission.title || ''}`.toLowerCase();
+
+    if (source.match(/javascript|python|react|node|html|css|program|codigo|coding|web/)) {
+      return [
+        { title: 'Fundamentos', description: 'Fecha a base da linguagem e elimina lacunas basicas.' },
+        { title: 'Pratica guiada', description: 'Resolve exercicios pequenos e exemplos completos.' },
+        { title: 'Projeto pequeno', description: 'Transforma o estudo em algo funcional e visivel.' },
+        { title: 'Revisao', description: 'Reve erros, consolida e repete os pontos fracos.' }
+      ];
+    }
+
+    if (source.match(/ingles|english|idioma|frances|espanhol|alemao/)) {
+      return [
+        { title: 'Base', description: 'Fecha gramatica e vocabulario que precisas agora.' },
+        { title: 'Compreensao', description: 'Leitura e escuta com material ligeiramente acima do teu nivel.' },
+        { title: 'Producao', description: 'Escreve e fala usando o bloco desta semana.' },
+        { title: 'Revisao', description: 'Volta aos erros recorrentes e fixa expressoes chave.' }
+      ];
+    }
+
+    if (source.match(/enem|prova|exame|concurso|teste/)) {
+      return [
+        { title: 'Base teorica', description: 'Reorganiza a teoria principal antes de acelerar.' },
+        { title: 'Exercicios', description: 'Resolve blocos curtos para identificar fraquezas reais.' },
+        { title: 'Simulados', description: 'Treina em condicao mais parecida com a prova.' },
+        { title: 'Revisao final', description: 'Corrige erros repetidos e fecha o que ainda escapa.' }
+      ];
+    }
+
+    return [
+      { title: 'Base', description: 'Define o primeiro bloco que precisas dominar.' },
+      { title: 'Pratica', description: 'Aplica o conteudo em exercicios ou exemplos reais.' },
+      { title: 'Aplicacao', description: 'Usa o que estudaste num output concreto.' },
+      { title: 'Revisao', description: 'Volta aos pontos fracos antes de avançares.' }
+    ];
+  }
+
+  function getStudyCurrentStepIndex(mission, track) {
+    const current = (mission.study_current_stage || '').toLowerCase();
+    if (!current) return 0;
+
+    const matchIndex = track.findIndex(step => current.includes(step.title.toLowerCase().split(' ')[0]));
+    if (matchIndex >= 0) return matchIndex;
+
+    if (current.match(/fund|base|inicio|modulo 1|comeco/)) return 0;
+    if (current.match(/pratica|exercicio|modulo 2|intermedio/)) return 1;
+    if (current.match(/projeto|aplic|produc|simulado|modulo 3/)) return 2;
+    if (current.match(/revis|final|fecho/)) return 3;
+
+    return 0;
+  }
+
+  function getStudyNextStep(mission, track, currentIndex) {
+    const currentStep = track[currentIndex] || track[0];
+    const nextStep = track[Math.min(currentIndex + 1, track.length - 1)] || currentStep;
+    const minimum = mission.daily_minimum || '1 bloco focado';
+    const target = mission.study_target_outcome || 'fechar o bloco de 30 dias';
+
+    return `Hoje fecha ${minimum} em ${currentStep.title.toLowerCase()}. Quando esse bloco assentar, avanca para ${nextStep.title.toLowerCase()} e aproxima-te de ${target}.`;
+  }
+
+  function renderStudyMissionSupport(mission) {
+    if (mission.category !== 'aprendizagem') return '';
+
+    const focus = mission.study_focus || mission.title;
+    const currentStage = mission.study_current_stage || 'fase inicial';
+    const target = mission.study_target_outcome || 'fechar um bloco concreto nestes 30 dias';
+    const track = getStudyTrack(mission);
+    const currentIndex = getStudyCurrentStepIndex(mission, track);
+    const nextStep = getStudyNextStep(mission, track, currentIndex);
+
+    const stepsHtml = track.map((step, index) => {
+      const stateClass = index < currentIndex ? 'study-roadmap-step done' : (index === currentIndex ? 'study-roadmap-step current' : 'study-roadmap-step');
+      const prefix = index < currentIndex ? 'Fechado' : (index === currentIndex ? 'Agora' : 'Depois');
+      return `<div class="${stateClass}"><strong>${step.title}</strong><span>${prefix}: ${step.description}</span></div>`;
+    }).join('');
+
+    return `
+      <div class="study-roadmap">
+        <div class="study-roadmap-kicker">Missao assistida</div>
+        <div class="study-roadmap-head">
+          <h3>Rota de estudo: ${focus}</h3>
+          <p>O Nexus nao so cobra presenca. Tambem te lembra onde estas, o que fecha este bloco e qual e o proximo passo executavel.</p>
+        </div>
+        <div class="study-roadmap-grid">
+          <div class="study-roadmap-stat">
+            <strong>Onde estas</strong>
+            <span>${currentStage}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Fecho de 30 dias</strong>
+            <span>${target}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Bloco atual</strong>
+            <span>${track[currentIndex]?.title || 'Base'}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Proximo passo</strong>
+            <span>${nextStep}</span>
+          </div>
+        </div>
+        <div class="study-roadmap-steps">${stepsHtml}</div>
+      </div>
+    `;
   }
 
   function renderMissionContract(mission) {
@@ -2087,3 +2339,5 @@
 </script>
 </body>
 </html>
+
+
