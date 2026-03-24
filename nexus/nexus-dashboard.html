@@ -1304,6 +1304,7 @@
       <div class="stat-card">
         <div class="stat-num" id="stat-brio">0</div>
         <div class="stat-label">Brio</div>
+        <div class="stat-meta" id="stat-brio-copy" style="margin-top:8px;color:var(--muted);font-size:.85rem;line-height:1.45">A firmeza da tua palavra.</div>
       </div>
     </div>
 
@@ -1436,6 +1437,7 @@
         document.getElementById('stat-days').textContent = 0;
         document.getElementById('stat-streak').textContent = 0;
         document.getElementById('stat-brio').textContent = 0;
+        updateBrioCopy(0);
         renderWaiting(waiting[0]);
 
       } else {
@@ -1445,6 +1447,7 @@
         document.getElementById('stat-days').textContent = 0;
         document.getElementById('stat-streak').textContent = 0;
         document.getElementById('stat-brio').textContent = 0;
+        updateBrioCopy(0);
         document.getElementById('mission-area').innerHTML = `
           <div class="empty-state">
             <h3>NENHUMA MISSÃO ATIVA</h3>
@@ -1568,6 +1571,7 @@
       document.getElementById('stat-streak').textContent = data.streak || 0;
       document.getElementById('stat-days').textContent   = data.total  || 0;
       document.getElementById('stat-brio').textContent   = data.brio   || 0;
+      updateBrioCopy(data.brio || 0);
       refreshSoloFocus();
     } catch(err) {}
   }
@@ -1584,6 +1588,7 @@
       document.getElementById('stat-streak').textContent = data.streak ?? 0;
       document.getElementById('stat-days').textContent   = data.total  ?? 0;
       document.getElementById('stat-brio').textContent   = data.brio   ?? 0;
+      updateBrioCopy(data.brio ?? 0);
       refreshSoloFocus();
     } catch(err) {}
   }
@@ -2021,6 +2026,24 @@
     };
     return labels[mode] || 'check-in simples';
   }
+
+  function getBrioDescriptor(brio) {
+    if (brio >= 85) return 'palavra sustentada';
+    if (brio >= 70) return 'compromisso forte';
+    if (brio >= 50) return 'ritmo em consolidacao';
+    if (brio >= 30) return 'ritmo instavel';
+    if (brio > 0) return 'inicio de compromisso';
+    return 'a firmeza da tua palavra';
+  }
+
+  function updateBrioCopy(brio) {
+    const copyEl = document.getElementById('stat-brio-copy');
+    if (!copyEl) return;
+    copyEl.textContent = brio > 0
+      ? `Brio ${brio} - ${getBrioDescriptor(brio)}`
+      : 'A firmeza da tua palavra.';
+  }
+
   function updateMissionOnboardingCopy() {
     const category = document.getElementById('m-category')?.value || 'outro';
     const mode = document.getElementById('m-mode')?.value || 'solo';
@@ -2382,23 +2405,23 @@
 
     if (todayDone) {
       titleEl.textContent = 'Hoje a palavra foi mantida.';
-      copyEl.textContent = `Brio ${brio}. Sequencia ${streak}. Amanhã voltas para defender ${total} dias ja conquistados.`;
+      copyEl.textContent = `Brio ${brio} - ${getBrioDescriptor(brio)}. Sequencia ${streak}. Amanhã voltas para defender ${total} dias ja conquistados.`;
       if (noteEl) noteEl.textContent = 'Voltas amanha para o proximo dia.';
     } else if (recoveryNeeded) {
       titleEl.textContent = 'Hoje e dia de recuperacao.';
-      copyEl.textContent = `Brio ${brio}. Falhaste ${missedDays} dia${missedDays === 1 ? '' : 's'} seguido${missedDays === 1 ? '' : 's'}. O objetivo agora e nao deixar a quebra virar padrao.`;
+      copyEl.textContent = `Brio ${brio} - ${getBrioDescriptor(brio)}. Falhaste ${missedDays} dia${missedDays === 1 ? '' : 's'} seguido${missedDays === 1 ? '' : 's'}. O objetivo agora e nao deixar a quebra virar padrao.`;
       if (noteEl) noteEl.textContent = 'Hoje nao e um dia normal. E um retorno.';
     } else if (streak >= 5) {
       titleEl.textContent = 'A tua sequencia esta viva.';
-      copyEl.textContent = `Brio ${brio}. Levas ${streak} dias seguidos. Falhar hoje quebra o melhor padrao recente.`;
+      copyEl.textContent = `Brio ${brio} - ${getBrioDescriptor(brio)}. Levas ${streak} dias seguidos. Falhar hoje quebra o melhor padrao recente.`;
       if (noteEl) noteEl.textContent = 'Defende a tua sequencia hoje.';
     } else if (consistency >= 70) {
       titleEl.textContent = 'O padrao esta a consolidar.';
-      copyEl.textContent = `Brio ${brio}. Tens ${consistency}% de consistencia. O trabalho de hoje decide se isto vira identidade.`;
+      copyEl.textContent = `Brio ${brio} - ${getBrioDescriptor(brio)}. Tens ${consistency}% de consistencia. O trabalho de hoje decide se isto vira identidade.`;
       if (noteEl) noteEl.textContent = 'Hoje conta para consolidar o padrao.';
     } else if (total > 0) {
       titleEl.textContent = 'Ainda podes endireitar o padrao.';
-      copyEl.textContent = `Brio ${brio}. Ja provaste ${total} dias. O que importa agora e a resposta de hoje.`;
+      copyEl.textContent = `Brio ${brio} - ${getBrioDescriptor(brio)}. Ja provaste ${total} dias. O que importa agora e a resposta de hoje.`;
       if (noteEl) noteEl.textContent = 'Hoje ainda consegues corrigir a direcao.';
     } else {
       titleEl.textContent = 'Hoje ainda nao existe prova.';
