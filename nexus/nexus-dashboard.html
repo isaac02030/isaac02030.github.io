@@ -3135,6 +3135,10 @@
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
+      // Regista o service worker primeiro para a app ser reconhecida como instalável.
+      const reg = await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+
       // Obter chave pública do servidor
       const keyRes = await fetch(`${API}/api/notifications/vapid-key`);
       const { publicKey } = await keyRes.json();
@@ -3142,10 +3146,6 @@
       // Pedir permissão
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
-
-      // Registar service worker
-      const reg = await navigator.serviceWorker.register('sw.js');
-      await navigator.serviceWorker.ready;
 
       // Subscrever
       const subscription = await reg.pushManager.subscribe({
