@@ -757,6 +757,31 @@
     line-height:1.45;
     font-size:.9rem;
   }
+  .study-next-step{
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid rgba(255,176,103,.2);
+    background:linear-gradient(135deg, rgba(255,176,103,.10), rgba(255,255,255,.03));
+    display:grid;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .study-next-step strong{
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#ffb067;
+  }
+  .study-next-step h4{
+    margin:0;
+    font-size:1rem;
+  }
+  .study-next-step p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.5;
+    font-size:.92rem;
+  }
 
   .stats-row {
     gap: 14px;
@@ -2057,6 +2082,55 @@
     return `Hoje fecha ${minimum} em ${currentStep.title.toLowerCase()}. Quando esse bloco assentar, avanca para ${nextStep.title.toLowerCase()} e aproxima-te de ${target}.`;
   }
 
+  function getStudyDailyDirective(mission, track, currentIndex) {
+    const currentStep = track[currentIndex] || track[0];
+    const nextStep = track[Math.min(currentIndex + 1, track.length - 1)] || currentStep;
+    const minimum = mission.daily_minimum || '1 bloco focado';
+    const todayDone = !!lastStreakData?.today_done;
+    const recoveryNeeded = !!lastStreakData?.recovery_needed;
+    const consistency = lastStreakData?.consistency ?? 0;
+
+    if (todayDone) {
+      return {
+        title: 'Bloco de hoje fechado',
+        copy: `Hoje ja fechaste ${minimum}. Usa o resto do dia para rever erros rapidos e prepara amanha em ${nextStep.title.toLowerCase()}.`
+      };
+    }
+
+    if (recoveryNeeded) {
+      return {
+        title: 'Hoje e recuperacao',
+        copy: `Nao tentes compensar tudo. Fecha ${minimum} em ${currentStep.title.toLowerCase()} e volta a por o estudo em movimento antes de avancares.`
+      };
+    }
+
+    if (consistency >= 75) {
+      return {
+        title: 'Mantem o ritmo alto',
+        copy: `Tens consistencia suficiente para atacar ${currentStep.title.toLowerCase()} com exigencia. Fecha ${minimum} e deixa uma nota curta do que ainda nao assentou.`
+      };
+    }
+
+    return {
+      title: 'Ordem do dia',
+      copy: `Abre por ${currentStep.title.toLowerCase()}, fecha ${minimum} e sai com uma prova concreta do que entendeste. Amanha o passo natural e ${nextStep.title.toLowerCase()}.`
+    };
+  }
+
+  function renderStudyDailyDirective(mission, track, currentIndex) {
+    const directive = getStudyDailyDirective(mission, track, currentIndex);
+    const fallback = mission.fallback_plan || 'Se travares hoje, volta amanha com uma versao menor mas concreta.';
+
+    return `
+      <div class="study-next-step">
+        <strong>Proximo passo diario</strong>
+        <h4>${directive.title}</h4>
+        <p>${directive.copy}</p>
+        <p>Se falhar hoje: ${fallback}</p>
+      </div>
+    `;
+  }
+
   function renderStudyMissionSupport(mission) {
     if (mission.category !== 'aprendizagem') return '';
 
@@ -2066,6 +2140,7 @@
     const track = getStudyTrack(mission);
     const currentIndex = getStudyCurrentStepIndex(mission, track);
     const nextStep = getStudyNextStep(mission, track, currentIndex);
+    const dailyDirective = renderStudyDailyDirective(mission, track, currentIndex);
 
     const stepsHtml = track.map((step, index) => {
       const stateClass = index < currentIndex ? 'study-roadmap-step done' : (index === currentIndex ? 'study-roadmap-step current' : 'study-roadmap-step');
@@ -2080,6 +2155,7 @@
           <h3>Rota de estudo: ${focus}</h3>
           <p>O Nexus nao so cobra presenca. Tambem te lembra onde estas, o que fecha este bloco e qual e o proximo passo executavel.</p>
         </div>
+        ${dailyDirective}
         <div class="study-roadmap-grid">
           <div class="study-roadmap-stat">
             <strong>Onde estas</strong>
@@ -2513,6 +2589,7 @@
 </script>
 </body>
 </html>
+
 
 
 
