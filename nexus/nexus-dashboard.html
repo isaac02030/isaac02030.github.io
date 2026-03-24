@@ -1160,6 +1160,16 @@
       <label>Plano se falhares um dia</label>
       <textarea id="m-fallback" rows="2" placeholder="ex: amanhÃ£ comeÃ§o mais cedo com um mÃ­nimo menor, mas nÃ£o falho outra vez" style="resize:none"></textarea>
     </div>
+    <div class="field">
+      <label>Modo de prova</label>
+      <select id="m-proof-mode">
+        <option value="self_report">Check-in simples</option>
+        <option value="text_note">Nota curta</option>
+        <option value="workout_proof">Prova de treino</option>
+        <option value="study_note">Nota de estudo</option>
+        <option value="artifact_note">Saida / artefacto</option>
+      </select>
+    </div>
     <div class="study-setup-card" id="study-setup-card">
       <strong style="font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#ffb067">Plano de estudo</strong>
       <div class="study-setup-note">Se a missÃ£o for de aprendizagem, o Nexus jÃ¡ comeÃ§a com contexto: onde estÃ¡s, o que queres fechar em 30 dias e qual Ã© a frente atual.</div>
@@ -1837,6 +1847,7 @@
       window: '18:00-21:00',
       why: 'Quero melhorar o meu corpo e a minha disciplina.',
       fallback: 'Se falhar hoje, amanhã faço uma versão mínima sem negociar.',
+      proofMode: 'workout_proof',
       guide: 'Missão fitness forte: define volume mínimo, janela realista e uma forma de prova do treino.',
       mode: {
         rival: 'Rival: bom para quem responde a comparação e pressão.',
@@ -1849,6 +1860,7 @@
       window: '19:00-21:00',
       why: 'Quero avançar sem me perder no processo.',
       fallback: 'Se falhar hoje, amanhã recomeço com um bloco menor mas fecho o conteúdo do dia.',
+      proofMode: 'study_note',
       guide: 'Missão de estudo forte: diz o que vais estudar, quanto tempo e qual é o próximo bloco real.',
       mode: {
         rival: 'Rival: usa pressão para não adiar o estudo.',
@@ -1861,6 +1873,7 @@
       window: '07:00-09:00',
       why: 'Quero tornar isto automático no meu dia.',
       fallback: 'Se falhar hoje, amanhã faço a versão mínima logo na primeira janela possível.',
+      proofMode: 'self_report',
       guide: 'Hábito forte: mínimo pequeno, hora previsível e zero ambiguidade.',
       mode: {
         rival: 'Rival: mantém a tensão alta num hábito simples.',
@@ -1873,6 +1886,7 @@
       window: '20:00-22:00',
       why: 'Quero produzir algo real e não só pensar sobre isso.',
       fallback: 'Se falhar hoje, amanhã entrego uma versão pequena mas concreta.',
+      proofMode: 'artifact_note',
       guide: 'Criatividade forte: define o que conta como saída real, não só tempo gasto.',
       mode: {
         rival: 'Rival: bom para transformar intenção em entrega.',
@@ -1885,6 +1899,7 @@
       window: 'Escolhe uma janela específica',
       why: 'Escreve o motivo real para manteres esta promessa.',
       fallback: 'Define o que fazes no dia seguinte sem deixar a missão cair.',
+      proofMode: 'text_note',
       guide: 'Se a missão não é óbvia, torna-a concreta antes de a começares.',
       mode: {
         rival: 'Rival: pressão externa para não aliviar.',
@@ -1894,6 +1909,16 @@
     }
   };
 
+  function getProofModeLabel(mode) {
+    const labels = {
+      self_report: 'check-in simples',
+      text_note: 'nota curta',
+      workout_proof: 'prova de treino',
+      study_note: 'nota de estudo',
+      artifact_note: 'saida / artefacto'
+    };
+    return labels[mode] || 'check-in simples';
+  }
   function updateMissionOnboardingCopy() {
     const category = document.getElementById('m-category')?.value || 'outro';
     const mode = document.getElementById('m-mode')?.value || 'solo';
@@ -1903,7 +1928,7 @@
     const proofGuide = document.getElementById('mission-guide-proof');
     if (guide) guide.textContent = template.guide;
     if (modeGuide) modeGuide.textContent = template.mode[mode] || template.mode.solo;
-    if (proofGuide) proofGuide.textContent = `Contrato recomendado: minimo "${template.minimum}", janela "${template.window}", motivo real e plano de recuperacao.`;
+    if (proofGuide) proofGuide.textContent = `Contrato recomendado: minimo "${template.minimum}", janela "${template.window}", prova "${getProofModeLabel(template.proofMode || 'self_report')}", motivo real e plano de recuperacao.`;
   }
 
   function toggleStudySetup() {
@@ -1932,10 +1957,12 @@
     const windowField = document.getElementById('m-window');
     const why = document.getElementById('m-why');
     const fallback = document.getElementById('m-fallback');
+    const proofMode = document.getElementById('m-proof-mode');
     if (minimum && !minimum.value.trim()) minimum.value = template.minimum;
     if (windowField && !windowField.value.trim()) windowField.value = template.window;
     if (why && !why.value.trim()) why.value = template.why;
     if (fallback && !fallback.value.trim()) fallback.value = template.fallback;
+    if (proofMode) proofMode.value = template.proofMode || 'self_report';
     toggleStudySetup();
     updateMissionOnboardingCopy();
   }
@@ -1965,6 +1992,7 @@
     const commitmentWindow = document.getElementById('m-window').value.trim();
     const whyItMatters = document.getElementById('m-why').value.trim();
     const fallbackPlan = document.getElementById('m-fallback').value.trim();
+    const proofMode = document.getElementById('m-proof-mode').value;
     const studyFocus = document.getElementById('m-study-focus')?.value.trim() || '';
     const studyCurrentStage = document.getElementById('m-study-stage')?.value.trim() || '';
     const studyTargetOutcome = document.getElementById('m-study-target')?.value.trim() || '';
@@ -1995,6 +2023,7 @@
           commitment_window: commitmentWindow,
           why_it_matters: whyItMatters,
           fallback_plan: fallbackPlan,
+          proof_mode: proofMode,
           study_focus: category === 'aprendizagem' ? studyFocus : null,
           study_current_stage: category === 'aprendizagem' ? studyCurrentStage : null,
           study_target_outcome: category === 'aprendizagem' ? studyTargetOutcome : null
@@ -2184,7 +2213,8 @@
       mission.daily_minimum ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Mínimo diário</strong><span>${mission.daily_minimum}</span></div>` : '',
       mission.commitment_window ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Janela</strong><span>${mission.commitment_window}</span></div>` : '',
       mission.why_it_matters ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Porque importa</strong><span>${mission.why_it_matters}</span></div>` : '',
-      mission.fallback_plan ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Se falhar</strong><span>${mission.fallback_plan}</span></div>` : ''
+      mission.fallback_plan ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Se falhar</strong><span>${mission.fallback_plan}</span></div>` : '',
+      mission.proof_mode ? `<div><strong style="display:block;color:#ffb067;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Modo de prova</strong><span>${getProofModeLabel(mission.proof_mode)}</span></div>` : ''
     ].filter(Boolean);
 
     if (rows.length === 0) return '';
@@ -2589,6 +2619,10 @@
 </script>
 </body>
 </html>
+
+
+
+
 
 
 
