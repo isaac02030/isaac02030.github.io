@@ -1072,6 +1072,47 @@
     background: rgba(255,255,255,0.06);
   }
   .consist-fill { background: linear-gradient(90deg, var(--fire), #ffd166); }
+  .mobile-tabbar{
+    display:none;
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:14px;
+    z-index:80;
+    padding:10px;
+    border-radius:24px;
+    background:rgba(10,16,30,0.94);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 18px 42px rgba(0,0,0,0.38);
+    backdrop-filter:blur(18px);
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:8px;
+  }
+  .mobile-tabbar .nav-item{
+    min-width:0;
+    padding:10px 8px;
+    border-radius:16px;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    font-size:11px;
+    text-align:center;
+    line-height:1.15;
+  }
+  .mobile-tabbar .nav-icon{
+    width:auto;
+    height:auto;
+    min-width:0;
+    background:none;
+    border:none;
+    box-shadow:none;
+    font-size:15px;
+  }
+  .mobile-tabbar .notif-dot{
+    top:8px;
+    right:calc(50% - 18px);
+  }
 
   @media(max-width:1100px){
     .layout{grid-template-columns:1fr;width:min(100%,calc(100% - 20px));}
@@ -1119,21 +1160,19 @@
   @media(max-width:760px){
     .layout{margin:10px auto;}
     .sidebar{
-      padding:14px;
-      gap:12px;
+      padding:14px 16px;
+      gap:0;
     }
-    .sidebar-nav{
-      grid-template-columns:1fr;
-    }
-    .sidebar-user{
-      display:none;
-    }
-    .main{padding:16px;}
+    .sidebar-logo{padding:0;}
+    .sidebar-nav,
+    .sidebar-user{display:none;}
+    .main{padding:16px;padding-bottom:110px;}
     .main-header,.checkin-section,.chat-input-row{grid-template-columns:1fr;}
     .main-header{display:grid;align-items:start;}
     .mission-top{flex-direction:column;}
     .stats-row{grid-template-columns:1fr;}
     .score-section{grid-template-columns:1fr;}
+    .mobile-tabbar{display:grid;}
   }
 </style>
 </head>
@@ -1302,21 +1341,21 @@
   <aside class="sidebar">
     <div class="sidebar-logo">NEX<em>U</em>S</div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" id="nav-dashboard" onclick="showSection('overview')">
+      <button class="nav-item active" id="nav-dashboard" onclick="showSection('overview', this)">
         <span class="nav-icon">◎</span> Dashboard
         <span class="notif-dot" id="dot-rival" style="display:none"></span>
       </button>
-      <button class="nav-item" onclick="showSection('missions')">
+      <button class="nav-item" id="nav-missions" onclick="showSection('missions', this)">
         <span class="nav-icon">⬡</span> Missões
       </button>
-      <button class="nav-item" id="nav-chat" onclick="showSection('chat');clearChatDot()">
+      <button class="nav-item" id="nav-chat" onclick="showSection('chat', this);clearChatDot()">
         <span class="nav-icon">⇄</span> Chat
         <span class="notif-dot" id="dot-chat" style="display:none"></span>
       </button>
-      <a class="nav-item" href="nexus-communities.html" style="text-decoration:none">
+      <a class="nav-item" id="nav-communities" href="nexus-communities.html" style="text-decoration:none">
         <span class="nav-icon">⬡</span> Comunidades
       </a>
-      <a class="nav-item" href="nexus-profile.html" style="text-decoration:none">
+      <a class="nav-item" id="nav-profile" href="nexus-profile.html" style="text-decoration:none">
         <span class="nav-icon">◈</span> Perfil
       </a>
     </nav>
@@ -1332,7 +1371,7 @@
 
   <!-- MAIN -->
   <main class="main">
-    <div class="main-header">
+    <div class="main-header" id="section-overview">
       <div>
         <h1>OLÁ, <span id="header-name">—</span></h1>
         <p id="header-date"></p>
@@ -1363,7 +1402,7 @@
 
     <!-- MISSÃO ATIVA -->
     <p class="section-label">Missão ativa</p>
-    <div id="mission-area">
+    <div id="mission-area" data-section="missions">
       <div class="empty-state">
         <h3>NENHUMA MISSÃO ATIVA</h3>
         <p>Define o teu objetivo e começa hoje.</p>
@@ -1372,7 +1411,7 @@
     </div>
 
     <!-- BOTTOM GRID -->
-    <div class="bottom-grid" id="bottom-grid" style="display:none">
+    <div class="bottom-grid" id="bottom-grid" data-section="chat" style="display:none">
       <!-- Calendário -->
       <div class="calendar-card">
         <h3>PROGRESSO DO MÊS</h3>
@@ -1392,6 +1431,30 @@
     </div>
   </main>
 </div>
+
+<nav class="mobile-tabbar" aria-label="Navegacao principal">
+  <button class="nav-item active" id="mobile-nav-dashboard" onclick="showSection('overview', this)">
+    <span class="nav-icon">â—Ž</span>
+    <span>Dashboard</span>
+  </button>
+  <button class="nav-item" id="mobile-nav-missions" onclick="showSection('missions', this)">
+    <span class="nav-icon">â¬¡</span>
+    <span>MissÃµes</span>
+  </button>
+  <button class="nav-item" id="mobile-nav-chat" onclick="showSection('chat', this);clearChatDot()">
+    <span class="nav-icon">â‡„</span>
+    <span>Chat</span>
+    <span class="notif-dot" id="dot-chat-mobile" style="display:none"></span>
+  </button>
+  <a class="nav-item" id="mobile-nav-communities" href="nexus-communities.html" style="text-decoration:none">
+    <span class="nav-icon">â¬¡</span>
+    <span>Comun.</span>
+  </a>
+  <a class="nav-item" id="mobile-nav-profile" href="nexus-profile.html" style="text-decoration:none">
+    <span class="nav-icon">â—ˆ</span>
+    <span>Perfil</span>
+  </a>
+</nav>
 
 <script>
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
@@ -1454,10 +1517,31 @@
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
     initMissionDraftInputs();
+    initMobileTabbar();
     resetMissionModal();
     await loadMissions();
     await loadVertice();
     initNotifications();
+  }
+
+  function initMobileTabbar() {
+    const mobileLabels = {
+      'mobile-nav-dashboard': { icon: 'D', label: 'Dashboard' },
+      'mobile-nav-missions': { icon: 'M', label: 'Missoes' },
+      'mobile-nav-chat': { icon: 'C', label: 'Chat' },
+      'mobile-nav-communities': { icon: 'G', label: 'Comun.' },
+      'mobile-nav-profile': { icon: 'P', label: 'Perfil' }
+    };
+
+    Object.entries(mobileLabels).forEach(([id, content]) => {
+      const item = document.getElementById(id);
+      if (!item) return;
+      const icon = item.querySelector('.nav-icon');
+      const spans = item.querySelectorAll('span');
+      const label = spans[1];
+      if (icon) icon.textContent = content.icon;
+      if (label) label.textContent = content.label;
+    });
   }
 
   // Carregar missões
@@ -2281,9 +2365,40 @@
     }
   }
 
-  function showSection(s) {
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    event.target.closest('.nav-item').classList.add('active');
+  function setActiveNav(section) {
+    const navMap = {
+      overview: ['nav-dashboard', 'mobile-nav-dashboard'],
+      missions: ['nav-missions', 'mobile-nav-missions'],
+      chat: ['nav-chat', 'mobile-nav-chat']
+    };
+
+    document.querySelectorAll('.sidebar .nav-item, .mobile-tabbar .nav-item').forEach(el => {
+      el.classList.remove('active');
+    });
+
+    (navMap[section] || []).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    });
+  }
+
+  function showSection(section, trigger) {
+    const targets = {
+      overview: document.getElementById('section-overview'),
+      missions: document.getElementById('mission-area'),
+      chat: document.getElementById('bottom-grid')
+    };
+
+    setActiveNav(section);
+
+    const target = targets[section];
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (trigger && typeof trigger.blur === 'function') {
+      trigger.blur();
+    }
   }
 
   function getStudyTrack(mission) {
@@ -2843,12 +2958,14 @@
   let lastMessageCount = 0;
   function checkUnreadMessages(msgs) {
     const dot = document.getElementById('dot-chat');
+    const mobileDot = document.getElementById('dot-chat-mobile');
     if (!dot) return;
     if (msgs.length > lastMessageCount) {
       // Só mostrar se não estiver na secção de chat
       const chatNav = document.getElementById('nav-chat');
       if (chatNav && !chatNav.classList.contains('active')) {
         dot.style.display = 'block';
+        if (mobileDot) mobileDot.style.display = 'block';
       }
     }
     lastMessageCount = msgs.length;
@@ -2856,7 +2973,9 @@
 
   function clearChatDot() {
     const dot = document.getElementById('dot-chat');
+    const mobileDot = document.getElementById('dot-chat-mobile');
     if (dot) dot.style.display = 'none';
+    if (mobileDot) mobileDot.style.display = 'none';
     lastMessageCount = document.querySelectorAll('.chat-msg').length;
   }
 
