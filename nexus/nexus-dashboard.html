@@ -1349,6 +1349,7 @@
   let activeMission = null;
   let lastStreakData = null;
   let latestFitnessProofHtml = '';
+  let latestCreativeSupportHtml = '';
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
 
@@ -1548,6 +1549,7 @@
         ${scoreHtml}
         ${getSoloFocusHtml(m)}
         ${renderStudyMissionSupport(m)}
+        ${latestCreativeSupportHtml}
         ${renderMissionContract(m)}
         ${latestFitnessProofHtml}
         <div class="checkin-section">
@@ -1797,7 +1799,8 @@
     } catch(err) {}
 
     latestFitnessProofHtml = renderFitnessProofPanel(myCheckins);
-    if (activeMission.category === 'fitness') {
+    latestCreativeSupportHtml = renderCreativeMissionSupport(activeMission, myCheckins);
+    if (activeMission.category === 'fitness' || activeMission.category === 'criatividade') {
       renderMission(activeMission);
     }
 
@@ -2329,6 +2332,109 @@
           </div>
         </div>
         <div class="study-roadmap-steps">${stepsHtml}</div>
+      </div>
+    `;
+  }
+
+  function getCreativeDirective(mission, outputs) {
+    const minimum = mission.daily_minimum || '1 artefacto pequeno';
+    const todayDone = !!lastStreakData?.today_done;
+    const recoveryNeeded = !!lastStreakData?.recovery_needed;
+    const consistency = lastStreakData?.consistency ?? 0;
+    const outputCount = outputs.length;
+
+    if (todayDone) {
+      return {
+        title: 'Saida de hoje registada',
+        copy: `Hoje ja entregaste ${minimum}. Guarda a energia para rever o que saiu e deixa o proximo bloco preparado.`
+      };
+    }
+
+    if (recoveryNeeded) {
+      return {
+        title: 'Recupera com uma entrega menor',
+        copy: `Nao tentes compensar tudo. Fecha ${minimum} com uma versao simples e volta a por a producao em movimento.`
+      };
+    }
+
+    if (consistency >= 70) {
+      return {
+        title: 'Mantem a cadencia criativa',
+        copy: `Ja existe ritmo. Fecha ${minimum} e sai do bloco de hoje com algo que possas mostrar sem explicar demasiado.`
+      };
+    }
+
+    if (outputCount > 0) {
+      return {
+        title: 'Ha prova de producao',
+        copy: `Ja entregaste ${outputCount} registo${outputCount === 1 ? '' : 's'}. O objetivo agora e transformar isso em cadencia diaria.`
+      };
+    }
+
+    return {
+      title: 'Primeira saida concreta',
+      copy: `Hoje o importante e sair com ${minimum}. Nao procures perfeicao. Procura uma entrega pequena mas real.`
+    };
+  }
+
+  function renderCreativeMissionSupport(mission, checkins) {
+    if (!mission || mission.category !== 'criatividade') return '';
+
+    const outputs = (checkins || [])
+      .filter(item => item.completed && item.note && item.note.trim())
+      .sort((a, b) => b.day - a.day)
+      .slice(0, 3);
+
+    const directive = getCreativeDirective(mission, outputs);
+    const fallback = mission.fallback_plan || 'Se falhar hoje, amanha entrega uma versao pequena mas concreta.';
+    const minimum = mission.daily_minimum || '1 artefacto pequeno';
+    const windowText = mission.commitment_window || 'janela livre';
+    const whyText = mission.why_it_matters || 'Produzir algo real todos os dias.';
+
+    const outputHtml = outputs.length
+      ? outputs.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
+      : `<div class="proof-panel-copy">Ainda nao existe uma saida registada nesta missao. O primeiro objetivo e deixar uma prova pequena mas concreta do teu trabalho.</div>`;
+
+    return `
+      <div class="study-roadmap">
+        <div class="study-roadmap-kicker">Missao assistida</div>
+        <div class="study-roadmap-head">
+          <h3>Oficina criativa: ${mission.title}</h3>
+          <p>Em criatividade, o Nexus tenta empurrar saida real. Menos tempo abstrato. Mais prova do que saiu do bloco de hoje.</p>
+        </div>
+        <div class="study-next-step">
+          <strong>Saida do dia</strong>
+          <h4>${directive.title}</h4>
+          <p>${directive.copy}</p>
+          <p>Se falhar hoje: ${fallback}</p>
+        </div>
+        <div class="study-roadmap-grid">
+          <div class="study-roadmap-stat">
+            <strong>Minimo criativo</strong>
+            <span>${minimum}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Janela</strong>
+            <span>${windowText}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Prova pedida</strong>
+            <span>${getProofModeLabel(mission.proof_mode || 'artifact_note')}</span>
+          </div>
+          <div class="study-roadmap-stat">
+            <strong>Porque importa</strong>
+            <span>${whyText}</span>
+          </div>
+        </div>
+        <div class="proof-panel">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Saidas recentes</div>
+              <div class="proof-panel-title">${outputs.length > 0 ? `Ultima entrega: dia ${outputs[0].day}` : 'Ainda sem saida registada'}</div>
+            </div>
+          </div>
+          <div class="proof-history">${outputHtml}</div>
+        </div>
       </div>
     `;
   }
