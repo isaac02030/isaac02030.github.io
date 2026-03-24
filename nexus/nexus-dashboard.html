@@ -1106,6 +1106,38 @@
   </div>
 </div>
 
+<!-- MODAL PROVA FITNESS -->
+<div class="modal-overlay" id="fitness-proof-modal" onclick="closeFitnessProofModal(event)">
+  <div class="modal">
+    <h2>PROVA DO TREINO</h2>
+    <div class="mission-onboarding-guide">
+      <strong>Registo do treino</strong>
+      <div class="mission-onboarding-copy">Em missões fitness, o check-in pede uma prova curta. Não precisa ser perfeita. Precisa ser concreta.</div>
+    </div>
+    <div class="field">
+      <label>Tipo de prova</label>
+      <select id="fitness-proof-type">
+        <option value="academia">Academia</option>
+        <option value="corrida">Corrida / caminhada</option>
+        <option value="treino-casa">Treino em casa</option>
+        <option value="versao-minima">Versão mínima</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Duração</label>
+      <input type="text" id="fitness-proof-duration" placeholder="ex: 45 min ou 5 km">
+    </div>
+    <div class="field">
+      <label>O que foi feito</label>
+      <textarea id="fitness-proof-note" rows="3" placeholder="ex: treino de pernas + 15 min de cardio" style="resize:none"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('fitness-proof-modal').classList.remove('open')">CANCELAR</button>
+      <button class="btn-confirm" onclick="submitFitnessProof()">REGISTAR PROVA</button>
+    </div>
+  </div>
+</div>
+
 <div class="layout">
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -1448,7 +1480,7 @@
   }
 
   // Check-in
-  async function doCheckin() {
+  async function sendCheckin(note = null) {
     if (!activeMission) return;
     const btn = document.getElementById('btn-checkin');
     btn.disabled = true;
@@ -1461,7 +1493,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ mission_id: activeMission.id })
+        body: JSON.stringify({ mission_id: activeMission.id, note })
       });
       const data = await res.json();
 
@@ -1480,6 +1512,40 @@
       btn.textContent = '✓ CHECK-IN DE HOJE';
       toast('Erro de ligação.', 'error');
     }
+  }
+
+  function closeFitnessProofModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('fitness-proof-modal').classList.remove('open');
+  }
+
+  function openFitnessProofModal() {
+    document.getElementById('fitness-proof-type').value = 'academia';
+    document.getElementById('fitness-proof-duration').value = '';
+    document.getElementById('fitness-proof-note').value = '';
+    document.getElementById('fitness-proof-modal').classList.add('open');
+  }
+
+  async function submitFitnessProof() {
+    const proofType = document.getElementById('fitness-proof-type').value;
+    const duration = document.getElementById('fitness-proof-duration').value.trim();
+    const note = document.getElementById('fitness-proof-note').value.trim();
+
+    if (!duration) return toast('Indica a duração ou distância do treino.', 'error');
+    if (!note) return toast('Descreve o que foi feito no treino.', 'error');
+
+    document.getElementById('fitness-proof-modal').classList.remove('open');
+    const proofNote = `Prova: ${proofType} | Duração: ${duration} | Nota: ${note}`;
+    await sendCheckin(proofNote);
+  }
+
+  async function doCheckin() {
+    if (!activeMission) return;
+    if (activeMission.category === 'fitness') {
+      openFitnessProofModal();
+      return;
+    }
+    await sendCheckin(null);
   }
 
   // Calendário de progresso
@@ -2341,5 +2407,7 @@
 </script>
 </body>
 </html>
+
+
 
 
