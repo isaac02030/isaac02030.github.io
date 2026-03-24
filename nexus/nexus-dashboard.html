@@ -1545,6 +1545,7 @@
     document.getElementById('header-date').textContent =
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
+    await initPwa();
     initMissionDraftInputs();
     ensureInstallAppButton();
     initMobileTabbar();
@@ -1611,6 +1612,17 @@
       renderInstallAppButton(false);
     }
     deferredInstallPrompt = null;
+  }
+
+  async function initPwa() {
+    if (!('serviceWorker' in navigator)) return;
+
+    try {
+      await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+    } catch(err) {
+      console.log('PWA nao disponivel:', err);
+    }
   }
 
   // Carregar missões
@@ -3200,9 +3212,7 @@
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     try {
-      // Regista o service worker primeiro para a app ser reconhecida como instalável.
-      const reg = await navigator.serviceWorker.register('sw.js');
-      await navigator.serviceWorker.ready;
+      const reg = await navigator.serviceWorker.ready;
 
       // Obter chave pública do servidor
       const keyRes = await fetch(`${API}/api/notifications/vapid-key`);
