@@ -705,6 +705,58 @@
     line-height:1.45;
     font-size:.9rem;
   }
+  .proof-panel{
+    margin-top:18px;
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:18px;
+    background:rgba(255,255,255,0.03);
+    display:grid;
+    gap:12px;
+  }
+  .proof-panel-head{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .proof-panel-kicker{
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#ffb067;
+    font-weight:700;
+  }
+  .proof-panel-title{
+    font-size:1.02rem;
+    font-weight:700;
+    margin-top:6px;
+  }
+  .proof-panel-copy{
+    color:var(--muted);
+    line-height:1.5;
+    font-size:.92rem;
+  }
+  .proof-history{
+    display:grid;
+    gap:10px;
+  }
+  .proof-item{
+    padding:12px 14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .proof-item strong{
+    display:block;
+    margin-bottom:6px;
+  }
+  .proof-item span{
+    display:block;
+    color:var(--muted);
+    line-height:1.45;
+    font-size:.9rem;
+  }
 
   .stats-row {
     gap: 14px;
@@ -1241,6 +1293,7 @@
   let token = null;
   let activeMission = null;
   let lastStreakData = null;
+  let latestFitnessProofHtml = '';
   let chatInterval = null;
 
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
@@ -1438,6 +1491,7 @@
         ${getSoloFocusHtml(m)}
         ${renderStudyMissionSupport(m)}
         ${renderMissionContract(m)}
+        ${latestFitnessProofHtml}
         <div class="checkin-section">
           <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
             A verificar...
@@ -1549,9 +1603,53 @@
   }
 
   // Calendário de progresso
+  function renderFitnessProofPanel(checkins) {
+    if (!activeMission || activeMission.category !== 'fitness') return '';
+
+    const proofs = (checkins || [])
+      .filter(c => c.completed && c.note && c.note.trim())
+      .sort((a, b) => b.day - a.day)
+      .slice(0, 3);
+
+    if (proofs.length === 0) {
+      return `
+        <div class="proof-panel">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Prova do treino</div>
+              <div class="proof-panel-title">Ainda sem prova registada</div>
+            </div>
+          </div>
+          <div class="proof-panel-copy">Quando fizeres check-in numa missao fitness, a tua prova curta fica guardada aqui para nao parecer so um clique vazio.</div>
+        </div>
+      `;
+    }
+
+    const latest = proofs[0];
+    const historyHtml = proofs.map(item => `
+      <div class="proof-item">
+        <strong>Dia ${item.day}</strong>
+        <span>${item.note}</span>
+      </div>
+    `).join('');
+
+    return `
+      <div class="proof-panel">
+        <div class="proof-panel-head">
+          <div>
+            <div class="proof-panel-kicker">Prova do treino</div>
+            <div class="proof-panel-title">Ultimo registo: dia ${latest.day}</div>
+          </div>
+        </div>
+        <div class="proof-panel-copy">${latest.note}</div>
+        <div class="proof-history">${historyHtml}</div>
+      </div>
+    `;
+  }
   async function buildCalendar() {
     if (!activeMission) return;
 
+    let myCheckins = [];
     let doneDays = new Set();
     try {
       const res = await fetch(`${API}/api/checkins/${activeMission.id}`, {
@@ -1559,11 +1657,17 @@
       });
       const data = await res.json();
       if (data.progress && data.progress[user.id]) {
-        data.progress[user.id].checkins
+        myCheckins = data.progress[user.id].checkins || [];
+        myCheckins
           .filter(c => c.completed)
           .forEach(c => doneDays.add(c.day));
       }
     } catch(err) {}
+
+    latestFitnessProofHtml = renderFitnessProofPanel(myCheckins);
+    if (activeMission.category === 'fitness') {
+      renderMission(activeMission);
+    }
 
     const started  = new Date(activeMission.started_at);
     const today    = new Date();
@@ -1597,7 +1701,9 @@
         btn.textContent = '\u2713 CHECK-IN DE HOJE';
         btn.disabled = false;
         btn.style.opacity = '1';
-        if (note) note.textContent = 'Regista o teu progresso de hoje.';
+        if (note) note.textContent = activeMission.category === 'fitness'
+          ? 'Regista o treino com uma prova curta.'
+          : 'Regista o teu progresso de hoje.';
       }
     }
   }
@@ -2407,6 +2513,7 @@
 </script>
 </body>
 </html>
+
 
 
 
