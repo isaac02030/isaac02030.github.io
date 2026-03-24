@@ -1348,6 +1348,7 @@
   let token = null;
   let activeMission = null;
   let lastStreakData = null;
+  let latestStudySupportHtml = '';
   let latestFitnessProofHtml = '';
   let latestCreativeSupportHtml = '';
   let latestHabitSupportHtml = '';
@@ -1549,7 +1550,7 @@
         </div>
         ${scoreHtml}
         ${getSoloFocusHtml(m)}
-        ${renderStudyMissionSupport(m)}
+        ${latestStudySupportHtml}
         ${latestCreativeSupportHtml}
         ${latestHabitSupportHtml}
         ${renderMissionContract(m)}
@@ -1803,10 +1804,11 @@
       }
     } catch(err) {}
 
+    latestStudySupportHtml = renderStudyMissionSupport(activeMission, myCheckins);
     latestFitnessProofHtml = renderFitnessProofPanel(myCheckins);
     latestCreativeSupportHtml = renderCreativeMissionSupport(activeMission, myCheckins);
     latestHabitSupportHtml = renderHabitMissionSupport(activeMission, myCheckins, doneDays, todayDay);
-    if (activeMission.category === 'fitness' || activeMission.category === 'criatividade' || activeMission.category === 'habito') {
+    if (activeMission.category === 'aprendizagem' || activeMission.category === 'fitness' || activeMission.category === 'criatividade' || activeMission.category === 'habito') {
       renderMission(activeMission);
     }
     const grid     = document.getElementById('cal-grid');
@@ -2183,38 +2185,67 @@
     const source = `${mission.study_focus || ''} ${mission.title || ''}`.toLowerCase();
 
     if (source.match(/javascript|python|react|node|html|css|program|codigo|coding|web/)) {
-      return [
-        { title: 'Fundamentos', description: 'Fecha a base da linguagem e elimina lacunas basicas.' },
-        { title: 'Pratica guiada', description: 'Resolve exercicios pequenos e exemplos completos.' },
-        { title: 'Projeto pequeno', description: 'Transforma o estudo em algo funcional e visivel.' },
-        { title: 'Revisao', description: 'Reve erros, consolida e repete os pontos fracos.' }
-      ];
+      return {
+        lane: 'Codigo',
+        targetLabel: 'Entrega de 30 dias',
+        steps: [
+          { title: 'Fundamentos', description: 'Fecha sintaxe, estruturas e bases sem lacunas perigosas.' },
+          { title: 'Exercicios', description: 'Resolve problemas curtos ate o raciocinio deixar de travar.' },
+          { title: 'Projeto', description: 'Transforma o estudo num artefacto pequeno e funcional.' },
+          { title: 'Revisao', description: 'Volta aos bugs e aos conceitos que ainda nao assentaram.' }
+        ]
+      };
     }
 
     if (source.match(/ingles|english|idioma|frances|espanhol|alemao/)) {
-      return [
-        { title: 'Base', description: 'Fecha gramatica e vocabulario que precisas agora.' },
-        { title: 'Compreensao', description: 'Leitura e escuta com material ligeiramente acima do teu nivel.' },
-        { title: 'Producao', description: 'Escreve e fala usando o bloco desta semana.' },
-        { title: 'Revisao', description: 'Volta aos erros recorrentes e fixa expressoes chave.' }
-      ];
+      return {
+        lane: 'Idioma',
+        targetLabel: 'Fecho de 30 dias',
+        steps: [
+          { title: 'Base', description: 'Fecha vocabulario e estruturas que precisas mesmo de usar.' },
+          { title: 'Compreensao', description: 'Leitura e escuta em material ligeiramente acima do teu nivel.' },
+          { title: 'Producao', description: 'Escreve, fala ou responde usando o bloco desta semana.' },
+          { title: 'Revisao', description: 'Corrige erros recorrentes e fixa expressoes-chave.' }
+        ]
+      };
+    }
+
+    if (source.match(/matematica|calculo|fisica|quimica|biologia/)) {
+      return {
+        lane: 'Exatas',
+        targetLabel: 'Fecho de 30 dias',
+        steps: [
+          { title: 'Conceitos', description: 'Fecha a teoria que sustenta os exercicios do bloco.' },
+          { title: 'Resolucao', description: 'Resolve questoes curtas com metodo e sem saltar passos.' },
+          { title: 'Aplicacao', description: 'Ataca problemas mistos ou um mini-simulado.' },
+          { title: 'Correcao', description: 'Reve erros, formulas e pontos em que ainda tropeças.' }
+        ]
+      };
     }
 
     if (source.match(/enem|prova|exame|concurso|teste/)) {
-      return [
-        { title: 'Base teorica', description: 'Reorganiza a teoria principal antes de acelerar.' },
-        { title: 'Exercicios', description: 'Resolve blocos curtos para identificar fraquezas reais.' },
-        { title: 'Simulados', description: 'Treina em condicao mais parecida com a prova.' },
-        { title: 'Revisao final', description: 'Corrige erros repetidos e fecha o que ainda escapa.' }
-      ];
+      return {
+        lane: 'Preparacao',
+        targetLabel: 'Fecho de 30 dias',
+        steps: [
+          { title: 'Base teorica', description: 'Reorganiza a teoria principal antes de acelerar.' },
+          { title: 'Exercicios', description: 'Resolve blocos curtos para identificar fraquezas reais.' },
+          { title: 'Simulados', description: 'Treina em condicao mais parecida com a prova.' },
+          { title: 'Revisao final', description: 'Corrige erros repetidos e fecha o que ainda escapa.' }
+        ]
+      };
     }
 
-    return [
-      { title: 'Base', description: 'Define o primeiro bloco que precisas dominar.' },
-      { title: 'Pratica', description: 'Aplica o conteudo em exercicios ou exemplos reais.' },
-      { title: 'Aplicacao', description: 'Usa o que estudaste num output concreto.' },
-      { title: 'Revisao', description: 'Volta aos pontos fracos antes de avançares.' }
-    ];
+    return {
+      lane: 'Aprendizagem',
+      targetLabel: 'Fecho de 30 dias',
+      steps: [
+        { title: 'Base', description: 'Define o primeiro bloco que precisas dominar.' },
+        { title: 'Pratica', description: 'Aplica o conteudo em exercicios ou exemplos reais.' },
+        { title: 'Aplicacao', description: 'Usa o que estudaste num output concreto.' },
+        { title: 'Revisao', description: 'Volta aos pontos fracos antes de avancares.' }
+      ]
+    };
   }
 
   function getStudyCurrentStepIndex(mission, track) {
@@ -2290,16 +2321,21 @@
     `;
   }
 
-  function renderStudyMissionSupport(mission) {
+  function renderStudyMissionSupport(mission, checkins) {
     if (mission.category !== 'aprendizagem') return '';
 
     const focus = mission.study_focus || mission.title;
     const currentStage = mission.study_current_stage || 'fase inicial';
     const target = mission.study_target_outcome || 'fechar um bloco concreto nestes 30 dias';
-    const track = getStudyTrack(mission);
+    const profile = getStudyTrack(mission);
+    const track = profile.steps;
     const currentIndex = getStudyCurrentStepIndex(mission, track);
     const nextStep = getStudyNextStep(mission, track, currentIndex);
     const dailyDirective = renderStudyDailyDirective(mission, track, currentIndex);
+    const studyNotes = (checkins || [])
+      .filter(item => item.completed && item.note && item.note.trim())
+      .sort((a, b) => b.day - a.day)
+      .slice(0, 3);
 
     const stepsHtml = track.map((step, index) => {
       const stateClass = index < currentIndex ? 'study-roadmap-step done' : (index === currentIndex ? 'study-roadmap-step current' : 'study-roadmap-step');
@@ -2307,12 +2343,16 @@
       return `<div class="${stateClass}"><strong>${step.title}</strong><span>${prefix}: ${step.description}</span></div>`;
     }).join('');
 
+    const studyNotesHtml = studyNotes.length
+      ? studyNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
+      : `<div class="proof-panel-copy">Ainda nao existe nota de estudo registada. Quando fechares o bloco de hoje, a tua nota aparece aqui como rasto do que realmente assentou.</div>`;
+
     return `
       <div class="study-roadmap">
         <div class="study-roadmap-kicker">Missao assistida</div>
         <div class="study-roadmap-head">
           <h3>Rota de estudo: ${focus}</h3>
-          <p>O Nexus nao so cobra presenca. Tambem te lembra onde estas, o que fecha este bloco e qual e o proximo passo executavel.</p>
+          <p>O Nexus nao so cobra presenca. Tambem te lembra em que trilha estas, o que fecha este bloco e qual e o proximo passo executavel.</p>
         </div>
         ${dailyDirective}
         <div class="study-roadmap-grid">
@@ -2321,7 +2361,7 @@
             <span>${currentStage}</span>
           </div>
           <div class="study-roadmap-stat">
-            <strong>Fecho de 30 dias</strong>
+            <strong>${profile.targetLabel}</strong>
             <span>${target}</span>
           </div>
           <div class="study-roadmap-stat">
@@ -2332,6 +2372,16 @@
             <strong>Proximo passo</strong>
             <span>${nextStep}</span>
           </div>
+        </div>
+        <div class="proof-panel">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Trilha ativa</div>
+              <div class="proof-panel-title">${profile.lane} - ${track[currentIndex]?.title || 'Base'}</div>
+            </div>
+          </div>
+          <div class="proof-panel-copy">As notas de estudo abaixo servem para nao perderes o fio do que ja fechaste e do que ainda precisa de revisao.</div>
+          <div class="proof-history">${studyNotesHtml}</div>
         </div>
         <div class="study-roadmap-steps">${stepsHtml}</div>
       </div>
