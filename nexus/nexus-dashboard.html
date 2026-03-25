@@ -1872,6 +1872,50 @@
     }
   }
 
+  function renderMissionExitHtml(mission) {
+    if (!mission || !mission.partner_id || mission.mode === 'solo') return '';
+
+    const counterpart = mission.partner_name || (mission.mode === 'rival' ? 'o rival' : 'a outra pessoa');
+    const modeLabel = mission.mode === 'rival' ? 'rivalidade' : 'dupla';
+
+    return `
+      <div style="margin-top:18px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,110,90,0.24);background:rgba(255,92,0,0.08)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;color:#ffb067;margin-bottom:8px">Se precisares sair</div>
+        <p style="margin:0 0 12px;color:var(--muted);line-height:1.5">
+          Podes sair desta ${modeLabel} sem deixar ${counterpart} preso. Se saires, a outra pessoa continua em solo.
+        </p>
+        <button
+          type="button"
+          onclick="abandonMission(${mission.id})"
+          style="border:1px solid rgba(255,120,100,0.34);background:rgba(255,120,100,0.12);color:#ffd5cd;padding:12px 16px;border-radius:14px;font-weight:700;letter-spacing:.03em;cursor:pointer"
+        >
+          SAIR DA MISSAO
+        </button>
+      </div>`;
+  }
+
+  async function abandonMission(missionId) {
+    const confirmed = confirm('Queres mesmo sair desta missao? A outra pessoa vai continuar em solo.');
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`${API}/api/missions/${missionId}/abandon`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        return toast(data.error || 'Nao foi possivel sair da missao.', 'error');
+      }
+
+      toast(data.message || 'Saíste da missão.');
+      await loadMissions();
+    } catch (err) {
+      toast('Erro de ligacao.', 'error');
+    }
+  }
+
   // Renderizar missão ativa
   function renderMission(m) {
     const started = new Date(m.started_at);
@@ -1921,6 +1965,7 @@
         ${latestHabitSupportHtml}
         ${renderMissionContract(m)}
         ${latestFitnessProofHtml}
+        ${renderMissionExitHtml(m)}
         <div class="checkin-section">
           <button class="btn-checkin" id="btn-checkin" onclick="doCheckin()" disabled style="opacity:.4">
             A verificar...
