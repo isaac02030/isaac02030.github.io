@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus - Insights</title>
+<meta name="theme-color" content="#0f1724">
+<style>
+  :root{
+    --bg:#0a1018;
+    --panel:#101826;
+    --panel-2:#151f30;
+    --border:rgba(255,255,255,0.08);
+    --text:#f4efe8;
+    --muted:#9aa4b4;
+    --fire:#ff6a1a;
+    --fire-soft:rgba(255,106,26,0.12);
+    --ok:#44cc88;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at top left, rgba(255,106,26,0.12), transparent 24%),
+      linear-gradient(180deg, #09111b 0%, #060a11 100%);
+    color:var(--text);
+    font-family:Arial, sans-serif;
+    padding:24px;
+  }
+  .shell{
+    width:min(1160px, 100%);
+    margin:0 auto;
+    display:grid;
+    gap:20px;
+  }
+  .hero,.panel{
+    background:linear-gradient(180deg, rgba(19,27,40,0.96), rgba(16,24,38,0.94));
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:0 18px 45px rgba(0,0,0,0.22);
+  }
+  .hero{
+    padding:28px;
+    display:grid;
+    gap:12px;
+  }
+  .eyebrow{
+    color:#ffb067;
+    font-size:.76rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  h1{
+    font-family:'Bebas Neue', Arial, sans-serif;
+    font-size:clamp(2.5rem, 6vw, 4.2rem);
+    letter-spacing:.04em;
+  }
+  .hero p{
+    max-width:64ch;
+    color:var(--muted);
+    line-height:1.65;
+    font-size:1rem;
+  }
+  .topline{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .status{
+    padding:10px 14px;
+    border-radius:999px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+  }
+  .stat{
+    padding:18px;
+    border-radius:20px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    display:grid;
+    gap:8px;
+  }
+  .stat .value{
+    font-family:'Bebas Neue', Arial, sans-serif;
+    font-size:3rem;
+    color:var(--fire);
+    line-height:1;
+    letter-spacing:.04em;
+  }
+  .stat .label{
+    color:#d7dfeb;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:.76rem;
+  }
+  .stat .hint{
+    color:var(--muted);
+    font-size:.92rem;
+    line-height:1.45;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:20px;
+  }
+  .panel{
+    padding:22px;
+    display:grid;
+    gap:16px;
+  }
+  .panel h2{
+    font-family:'Bebas Neue', Arial, sans-serif;
+    font-size:1.9rem;
+    letter-spacing:.08em;
+  }
+  .panel p.lead{
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .list{
+    display:grid;
+    gap:12px;
+  }
+  .item{
+    padding:14px 16px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--border);
+    display:grid;
+    gap:6px;
+  }
+  .row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .name{
+    font-weight:700;
+    color:#fff;
+  }
+  .meta{
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  .pill{
+    display:inline-flex;
+    width:max-content;
+    padding:6px 10px;
+    border-radius:999px;
+    background:var(--fire-soft);
+    border:1px solid rgba(255,106,26,0.2);
+    color:#ffb067;
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-weight:700;
+  }
+  .empty{
+    padding:18px;
+    border-radius:18px;
+    border:1px dashed rgba(255,255,255,0.12);
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .foot{
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  @media (max-width: 960px){
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid{grid-template-columns:1fr}
+  }
+  @media (max-width: 620px){
+    body{padding:16px}
+    .hero,.panel{padding:18px}
+    .stats{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Primeiros testers</div>
+          <h1>Pulso do Nexus</h1>
+        </div>
+        <div class="status" id="load-status">Carregando sinais do app...</div>
+      </div>
+      <p>
+        Esta página foi feita pra você ver rápido como o Nexus está se comportando com gente real:
+        quem entrou, quem travou, quem voltou no dia seguinte e onde o ciclo ainda está quebrando.
+      </p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="value" id="stat-users">0</div>
+        <div class="label">Usuários</div>
+        <div class="hint" id="stat-users-hint">0 novos na última semana</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="stat-today">0</div>
+        <div class="label">Voltaram hoje</div>
+        <div class="hint">Pessoas que realmente registraram algo hoje.</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="stat-retention">0%</div>
+        <div class="label">Dia Seguinte</div>
+        <div class="hint">Quem voltou no dia seguinte depois do primeiro check-in.</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="stat-active">0</div>
+        <div class="label">Missões Ativas</div>
+        <div class="hint" id="stat-active-hint">0 em espera • 0 concluídas</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <h2>Onde as pessoas travam</h2>
+        <p class="lead">Aqui ficam os principais gargalos do começo do ciclo. É a parte mais valiosa pra você decidir o que corrigir antes de empurrar mais divulgação.</p>
+
+        <div>
+          <div class="eyebrow">Entraram e não criaram missão</div>
+          <div class="list" id="registered-no-mission"></div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Esperando match</div>
+          <div class="list" id="waiting-queue"></div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Criaram, mas não começaram</div>
+          <div class="list" id="active-no-first-checkin"></div>
+        </div>
+
+        <div>
+          <div class="eyebrow">Sumidos no meio do ciclo</div>
+          <div class="list" id="inactive-participants"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Últimos usuários</h2>
+        <p class="lead">Uma leitura rápida de onde cada pessoa mais recente está dentro do Nexus.</p>
+        <div class="list" id="latest-users"></div>
+        <div class="foot">Dica: se muita gente estiver parando em “criou, mas ainda não começou”, o problema costuma estar no onboarding ou na força do primeiro retorno.</div>
+      </section>
+    </section>
+  </main>
+
+<script>
+  const API = 'https://nexus-backend-production-3f61.up.railway.app';
+  const token = localStorage.getItem('nexus_token');
+  const userData = localStorage.getItem('nexus_user');
+
+  if (!token || !userData) {
+    window.location.href = 'nexus-auth.html';
+  }
+
+  function formatWhen(dateValue) {
+    if (!dateValue) return 'agora mesmo';
+    const date = new Date(dateValue);
+    return date.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function renderSimpleList(containerId, rows, mapper) {
+    const el = document.getElementById(containerId);
+    if (!rows || !rows.length) {
+      el.innerHTML = '<div class="empty">Nada preocupante aqui agora.</div>';
+      return;
+    }
+
+    el.innerHTML = rows.map(mapper).join('');
+  }
+
+  function userCard(name, meta, pill, extra = '') {
+    return `
+      <article class="item">
+        <div class="row">
+          <div class="name">${name}</div>
+          ${pill ? `<span class="pill">${pill}</span>` : ''}
+        </div>
+        <div class="meta">${meta}</div>
+        ${extra ? `<div class="meta">${extra}</div>` : ''}
+      </article>
+    `;
+  }
+
+  async function loadInsights() {
+    const status = document.getElementById('load-status');
+
+    try {
+      const res = await fetch(`${API}/api/insights/overview`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Não foi possível carregar os insights.');
+      }
+
+      document.getElementById('stat-users').textContent = data.summary.total_users || 0;
+      document.getElementById('stat-users-hint').textContent = `${data.summary.new_users_7d || 0} novos na última semana`;
+      document.getElementById('stat-today').textContent = data.summary.checked_today || 0;
+      document.getElementById('stat-retention').textContent = `${data.summary.returned_next_day_rate || 0}%`;
+      document.getElementById('stat-active').textContent = data.summary.active_missions || 0;
+      document.getElementById('stat-active-hint').textContent = `${data.summary.waiting_missions || 0} em espera • ${data.summary.completed_missions || 0} concluídas`;
+
+      renderSimpleList('registered-no-mission', data.blockers.registered_no_mission, row =>
+        userCard(row.username, 'Entrou, mas ainda não criou nenhuma missão.', '', `Conta criada em ${formatWhen(row.created_at)}`)
+      );
+
+      renderSimpleList('waiting-queue', data.blockers.waiting_queue, row =>
+        userCard(row.username, `${row.title} • ${row.category} • ${row.mode}`, 'na fila', `Entrou na fila em ${formatWhen(row.created_at)}`)
+      );
+
+      renderSimpleList('active-no-first-checkin', data.blockers.active_no_first_checkin, row =>
+        userCard(row.username, `${row.title} • ${row.category}`, 'sem primeiro check-in', `Missão criada em ${formatWhen(row.mission_created_at)}`)
+      );
+
+      renderSimpleList('inactive-participants', data.blockers.inactive_participants, row =>
+        userCard(row.username, `${row.title} • ${row.category}`, `${row.missed_days} dias sem registrar`, `Último check-in no dia ${row.last_checkin_day || 0}`)
+      );
+
+      renderSimpleList('latest-users', data.latest_users, row =>
+        userCard(row.username, row.status_label, row.category || 'sem missão', row.title ? `${row.title} • ${row.mode || '—'}` : `Conta criada em ${formatWhen(row.created_at)}`)
+      );
+
+      status.textContent = 'Insights carregados.';
+    } catch (err) {
+      status.textContent = 'Não deu pra carregar agora.';
+      document.querySelector('.grid').innerHTML = `<section class="panel"><h2>Sem acesso</h2><div class="empty">${err.message}</div></section>`;
+    }
+  }
+
+  loadInsights();
+</script>
+</body>
+</html>
