@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus - Cartaz Premium</title>
+<meta name="theme-color" content="#ff5c00">
+<style>
+  :root{
+    --paper:#f6efe5;
+    --ink:#171717;
+    --muted:#66615a;
+    --line:rgba(23,23,23,0.12);
+    --fire:#ff6220;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;
+    background:linear-gradient(180deg, #efe5d8 0%, #e8dccb 100%);
+    color:var(--ink);
+    font-family:Georgia, "Times New Roman", serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .poster{
+    width:min(100%, 900px);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:0 24px 64px rgba(25,18,12,0.12);
+    padding:48px 40px;
+    display:grid;
+    gap:28px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .brand img{
+    width:58px;
+    height:58px;
+    border-radius:16px;
+    background:#121b2a;
+    padding:6px;
+  }
+  .brand small{
+    display:block;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    color:var(--muted);
+    font:700 .72rem/1 Arial, sans-serif;
+    margin-bottom:6px;
+  }
+  .brand strong{
+    font:700 1.35rem/1 Arial, sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+  }
+  .headline{
+    font-size:clamp(3rem, 7vw, 5.1rem);
+    line-height:.95;
+    letter-spacing:-.07em;
+    max-width:9ch;
+  }
+  .headline .fire{color:var(--fire)}
+  .sub{
+    max-width:34ch;
+    font-size:1.14rem;
+    line-height:1.7;
+    color:#2f2b26;
+  }
+  .line{
+    height:1px;
+    background:var(--line);
+  }
+  .cols{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+  }
+  .block h3{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--muted);
+    font:700 .74rem/1 Arial, sans-serif;
+    margin-bottom:12px;
+  }
+  .block p{
+    font-size:1.08rem;
+    line-height:1.65;
+  }
+  .quote{
+    font-size:1.34rem;
+    line-height:1.7;
+  }
+  .quote strong{color:var(--fire)}
+  .footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .url{
+    font:700 1rem/1.4 Arial, sans-serif;
+  }
+  .cta{
+    display:inline-flex;
+    padding:14px 18px;
+    border-radius:999px;
+    background:var(--ink);
+    color:#fff;
+    text-decoration:none;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font:700 .82rem/1 Arial, sans-serif;
+  }
+  @media (max-width: 860px){
+    .poster{padding:30px 22px}
+    .cols{grid-template-columns:1fr}
+    .footer{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+  <section class="poster">
+    <div class="brand">
+      <img src="nexus-logo.svg" alt="Logo Nexus">
+      <div>
+        <small>Beta aberto</small>
+        <strong>Nexus</strong>
+      </div>
+    </div>
+
+    <h1 class="headline">
+      Uma meta deixa de ser intenção quando <span class="fire">cobra resposta.</span>
+    </h1>
+
+    <p class="sub">
+      O Nexus transforma uma meta em um compromisso real de 30 dias.
+      Sem feed, sem likes e sem distração.
+      Só a verdade do que foi feito ou ficou faltando.
+    </p>
+
+    <div class="line"></div>
+
+    <div class="cols">
+      <div class="block">
+        <h3>Como funciona</h3>
+        <p>
+          Você escolhe uma meta, define o mínimo diário, entra em solo, parceiro, rival ou comunidade e volta todos os dias para registrar.
+        </p>
+      </div>
+      <div class="block">
+        <h3>Por que prende</h3>
+        <p>
+          Porque o dia não desaparece. Ele fica registrado. E o app te chama de volta antes da quebra virar hábito.
+        </p>
+      </div>
+    </div>
+
+    <p class="quote">
+      O Nexus é o lugar onde a sua meta para de parecer bonita e <strong>começa a exigir constância</strong>.
+    </p>
+
+    <div class="footer">
+      <div class="url">isaac02030.github.io/nexus</div>
+      <a class="cta" href="https://isaac02030.github.io/nexus/">Testar agora</a>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus - Cartaz Brutal</title>
+<meta name="theme-color" content="#ff5c00">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#121212;
+    --text:#f4efe6;
+    --muted:#9b9388;
+    --fire:#ff5c00;
+    --line:rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at top left, rgba(255,92,0,0.18), transparent 30%),
+      linear-gradient(180deg, #090909 0%, #121212 100%);
+    color:var(--text);
+    font-family:Arial, Helvetica, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .poster{
+    width:min(100%, 920px);
+    border:1px solid var(--line);
+    border-radius:30px;
+    background:rgba(10,10,10,0.96);
+    box-shadow:0 24px 80px rgba(0,0,0,0.45);
+    padding:42px;
+    display:grid;
+    gap:28px;
+  }
+  .top{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .top img{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    background:#101926;
+    padding:6px;
+  }
+  .tag{
+    display:inline-flex;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,92,0,0.35);
+    color:#ffb180;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    font-size:.72rem;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .brand{
+    font-size:1.45rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .headline{
+    font-size:clamp(3rem, 8vw, 6rem);
+    font-weight:900;
+    line-height:.9;
+    letter-spacing:-.08em;
+    max-width:9ch;
+  }
+  .headline .fire{color:var(--fire)}
+  .sub{
+    max-width:34ch;
+    color:#d9d3cb;
+    font-size:1.12rem;
+    line-height:1.6;
+  }
+  .strip{
+    border-left:4px solid var(--fire);
+    padding:18px 18px 18px 20px;
+    background:rgba(255,92,0,0.08);
+    border-radius:0 18px 18px 0;
+    font-size:1.24rem;
+    line-height:1.55;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+  .cell{
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:18px;
+    background:rgba(255,255,255,0.02);
+  }
+  .cell h3{
+    color:#ffb180;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.75rem;
+    margin-bottom:10px;
+  }
+  .cell p{
+    color:#f4efe6;
+    line-height:1.5;
+    font-size:1rem;
+  }
+  .footer{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:18px;
+  }
+  .card{
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:22px;
+    background:rgba(255,255,255,0.02);
+  }
+  .card h4{
+    color:#ffb180;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.74rem;
+    margin-bottom:12px;
+  }
+  .quote{
+    font-size:1.32rem;
+    line-height:1.6;
+  }
+  .quote strong{color:var(--fire)}
+  .url{
+    font-weight:700;
+    margin-bottom:14px;
+  }
+  .cta{
+    display:inline-flex;
+    width:max-content;
+    padding:14px 18px;
+    border-radius:999px;
+    background:var(--fire);
+    color:#fff;
+    text-decoration:none;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.82rem;
+    font-weight:700;
+  }
+  @media (max-width: 860px){
+    .poster{padding:26px}
+    .grid,.footer{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <section class="poster">
+    <div class="top">
+      <img src="nexus-logo.svg" alt="Logo Nexus">
+      <div>
+        <div class="tag">Beta aberto</div>
+        <div class="brand">Nexus</div>
+      </div>
+    </div>
+
+    <h1 class="headline">
+      Se a sua meta vive morrendo, <span class="fire">o problema não é falta de app.</span>
+    </h1>
+
+    <p class="sub">
+      O Nexus foi feito pra quem já cansou de começar na empolgação e largar no silêncio.
+      Aqui você escolhe uma meta e volta todo dia pra encarar o registro.
+    </p>
+
+    <div class="strip">
+      Sem feed. Sem likes. Sem teatrinho de produtividade.
+      Ou você fez, ou não fez.
+    </div>
+
+    <div class="grid">
+      <div class="cell">
+        <h3>Solo</h3>
+        <p>Pra quando você precisa parar de se enrolar.</p>
+      </div>
+      <div class="cell">
+        <h3>Parceiro</h3>
+        <p>Pra quando presença vale mais do que motivação.</p>
+      </div>
+      <div class="cell">
+        <h3>Rival</h3>
+        <p>Pra quando pressão é o que te faz sair do lugar.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="card">
+        <h4>O que tem dentro</h4>
+        <p class="quote">
+          Brio, sequência, contrato diário, comunidades por comprometimento e notificações feitas pra te irritar <strong>na medida certa</strong>.
+        </p>
+      </div>
+      <div class="card">
+        <h4>Entrar no beta</h4>
+        <div class="url">isaac02030.github.io/nexus</div>
+        <a class="cta" href="https://isaac02030.github.io/nexus/">Testar agora</a>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
