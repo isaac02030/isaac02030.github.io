@@ -2,127 +2,128 @@
 
 ## Bio Curta
 
-Nexus e uma app de 30 dias para quem quer parar de comecar e finalmente concluir.
-Sem feed, sem likes, so compromisso, brio e registo diario.
+Nexus é um app de 30 dias pra quem quer parar de começar e finalmente terminar.
+Sem feed, sem likes, só compromisso, brio e registro diário.
 
-## Bio Media
+## Bio Média
 
-Nexus transforma um objetivo num compromisso real de 30 dias.
-Entras em solo, duo, rival ou comunidade, fazes check-in diario e vives com a verdade do registo.
-Nao e uma rede social. E uma infraestrutura para manter a tua palavra.
+Nexus transforma uma meta em um compromisso real de 30 dias.
+Você entra em solo, parceiro, rival ou comunidade, faz check-in todo dia e encara a verdade do próprio registro.
+Não é rede social. É um sistema pra manter a palavra.
 
 ## Pitch Curto
 
-O Nexus e uma app de 30 dias para cumprir objetivos de verdade.
-Tu defines uma missao, assumes um contrato diario e o sistema obriga-te a viver com o registo do que fizeste ou nao fizeste.
+O Nexus é um app de 30 dias pra cumprir metas de verdade.
+Você define uma meta, assume um contrato diário e o sistema te obriga a viver com o que fez ou deixou de fazer.
 
-## Pitch De 30 Segundos
+## Pitch de 30 Segundos
 
-Estou a construir o Nexus, uma app para quem quer concluir um objetivo real em 30 dias.
-Em vez de feed, likes e motivacao vazia, o utilizador escolhe uma missao, entra em solo, rival, duo ou comunidade e faz check-in todos os dias.
-O foco nao e parecer produtivo. E manter a palavra.
+Eu tô construindo o Nexus, um app pra quem quer terminar uma meta real em 30 dias.
+No lugar de feed, likes e motivação vazia, a pessoa escolhe uma missão, entra em solo, parceiro, rival ou comunidade e faz check-in todo dia.
+O foco não é parecer produtivo. É manter a palavra.
 
-## Texto Para WhatsApp
+## Texto para WhatsApp
 
-Estou a construir uma app chamada Nexus.
-E para quem quer cumprir um objetivo real em 30 dias sem feed, sem likes e sem distrações.
-Tens solo, rival, duo e comunidades. O foco e compromisso diario e conclusao.
-Se quiseres testar: https://isaac02030.github.io/nexus/
+Tô construindo um app chamado Nexus.
+Ele é pra quem quer cumprir uma meta real em 30 dias sem feed, sem likes e sem distração.
+Tem modo solo, parceiro, rival e comunidades.
+O foco é compromisso diário e conclusão.
+Se quiser testar: https://isaac02030.github.io/nexus/
 
 ## Post 1
 
-Most productivity apps want engagement.
-Nexus wants completion.
+A maioria dos apps quer prender sua atenção.
+O Nexus quer que você termine o que começou.
 
-One objective.
-Thirty days.
-No feed.
-No likes.
-Just the truth of the record.
+Uma meta.
+Trinta dias.
+Sem feed.
+Sem likes.
+Só o registro do que foi feito ou não foi.
 
 ## Post 2
 
-The point is not feeling motivated.
-The point is keeping your word.
+O ponto não é se sentir motivado.
+O ponto é manter a palavra.
 
-Nexus is a 30-day commitment app with solo, duo, rival and community modes.
+Nexus é um app de 30 dias com modo solo, parceiro, rival e comunidade.
 
 ## Post 3
 
-Solo when you need silence.
-Duo when you need presence.
-Rival when you need pressure.
+Solo quando você precisa parar de se enrolar.
+Parceiro quando você precisa de presença.
+Rival quando você precisa de pressão.
 
-Nexus was built for people who are tired of starting and not finishing.
+O Nexus foi feito pra quem tá cansado de começar e não terminar.
 
 ## Post 4
 
-I did not want another habit app with soft gamification.
-I wanted a system where the day is either registered or it is not.
+Eu não queria mais um app de hábito com gamificação bonitinha.
+Eu queria um sistema em que o dia foi feito ou não foi.
 
-That is why I built Nexus.
+Foi por isso que eu criei o Nexus.
 
 ## Post 5
 
-Nexus is anti-feed by design.
-No content treadmill.
-No public performance.
-No fake productivity.
+O Nexus é anti-feed por escolha.
+Sem performance.
+Sem teatrinho de produtividade.
+Sem fingimento.
 
-Just a mission, a record, and 30 days to prove you meant it.
+Só uma meta, um registro e 30 dias pra provar que você falou sério.
 
-## Video Script 1
+## Roteiro de Vídeo 1
 
-Open on the dashboard.
-Say:
+Abre no dashboard.
+Fala:
 
-"This is Nexus.
-You choose one real objective for 30 days.
-Then you enter solo, duo, rival or community mode.
-Every day you come back and register whether you kept your word.
-No feed. No likes. Just completion."
+"Esse é o Nexus.
+Você escolhe uma meta real pra 30 dias.
+Depois entra em solo, parceiro, rival ou comunidade.
+Todo dia você volta e registra se cumpriu ou não.
+Sem feed. Sem likes. Só conclusão."
 
-## Video Script 2
+## Roteiro de Vídeo 2
 
-Open on mission creation.
-Say:
+Abre na criação da missão.
+Fala:
 
-"In Nexus, a mission is not just a title.
-You define the minimum, the commitment window, why it matters, and what happens if you fail a day.
-The objective becomes a contract."
+"No Nexus, a missão não é só um título.
+Você define o mínimo, o horário, por que isso importa e o que vai fazer se falhar um dia.
+A meta vira contrato."
 
-## Video Script 3
+## Roteiro de Vídeo 3
 
-Open on a solo mission.
-Say:
+Abre numa missão solo.
+Fala:
 
-"Solo mode is not the weak mode.
-It is you against your own record.
-The app shows your Brio, your streak, and whether today is normal or a recovery day."
+"O modo solo não é o modo fraco.
+É você contra o seu próprio registro.
+O app mostra seu Brio, sua sequência e se hoje é um dia normal ou um dia de recuperação."
 
-## Screenshots To Show
+## Screenshots para Mostrar
 
-1. Landing hero
-2. Mission contract modal
-3. Solo dashboard with Brio
-4. Rival scoreboard
-5. Grande Irmao message
-6. Communities locked by commitment
+1. Landing principal
+2. Modal de contrato da missão
+3. Dashboard solo com Brio
+4. Placar rival
+5. Mensagem do Grande Irmão
+6. Comunidades travadas por comprometimento
 
-## First Audience Targets
+## Primeiras Pessoas para Chamar
 
-1. Students preparing for exams
-2. People trying to build gym consistency
-3. Writers, builders and creators doing 30-day sprints
+1. Estudantes
+2. Gente tentando criar consistência na academia
+3. Criadores e pessoas fazendo sprint de 30 dias
 
-## Launch Checklist
+## Checklist de Lançamento
 
-1. Post 3 short clips
-2. Post 1 carousel or thread
-3. Send WhatsApp message to 20 people
-4. Ask first testers one thing only: did it make you come back tomorrow?
-5. Collect screenshots and testimonials
+1. Postar 3 vídeos curtos
+2. Postar 1 carrossel ou thread
+3. Mandar mensagem no WhatsApp pra 20 pessoas
+4. Perguntar só uma coisa pros primeiros testers: isso te fez querer voltar amanhã?
+5. Guardar prints e depoimentos
 
-## Best One-Liner
+## Melhor Frase
 
-Nexus is where your objective stops being an intention and becomes a word you have to keep.
+Nexus é o lugar onde a sua meta para de ser intenção e vira uma palavra que você precisa sustentar.

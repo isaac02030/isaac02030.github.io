@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +13,6 @@
     --line:rgba(18,18,18,0.12);
     --fire:#ff6220;
     --fire-deep:#d84f14;
-    --tape:#efe2bb;
-    --navy:#121b2a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -46,10 +44,9 @@
     height:30px;
     background:rgba(239,226,187,0.72);
     border:1px solid rgba(18,18,18,0.08);
-    transform:rotate(-3deg);
     top:18px;
   }
-  .poster::before{left:42px}
+  .poster::before{left:42px;transform:rotate(-3deg)}
   .poster::after{right:48px;transform:rotate(4deg)}
   .inner{
     padding:56px 42px 40px;
@@ -57,10 +54,7 @@
     grid-template-columns:1.15fr .85fr;
     gap:28px;
   }
-  .left{
-    display:grid;
-    gap:22px;
-  }
+  .left,.right{display:grid;gap:22px}
   .brand{
     display:flex;
     align-items:center;
@@ -70,12 +64,8 @@
     width:62px;
     height:62px;
     border-radius:18px;
-    background:var(--navy);
+    background:#121b2a;
     padding:6px;
-  }
-  .brand-text{
-    display:grid;
-    gap:5px;
   }
   .stamp{
     display:inline-flex;
@@ -87,6 +77,7 @@
     font:700 .72rem/1.1 Arial, sans-serif;
     letter-spacing:.16em;
     text-transform:uppercase;
+    margin-bottom:6px;
   }
   .brand-name{
     font:700 1.45rem/1 Arial, sans-serif;
@@ -94,10 +85,10 @@
     text-transform:uppercase;
   }
   .headline{
-    font-size:clamp(3rem, 7vw, 5.4rem);
+    font-size:clamp(3rem, 7vw, 5.3rem);
     line-height:.92;
     letter-spacing:-.07em;
-    max-width:8.6ch;
+    max-width:8.7ch;
   }
   .headline .fire{color:var(--fire)}
   .dek{
@@ -120,68 +111,36 @@
     grid-template-columns:repeat(3,minmax(0,1fr));
     gap:12px;
   }
-  .cell{
+  .cell,.card{
     border:1px solid var(--line);
     border-radius:18px;
     padding:16px;
-    background:rgba(255,255,255,0.36);
-    min-height:126px;
+    background:rgba(255,255,255,0.42);
   }
-  .cell h3{
+  .card{border-radius:22px;padding:22px}
+  .cell h3,.card h4{
     font:700 .76rem/1 Arial, sans-serif;
     text-transform:uppercase;
     letter-spacing:.14em;
     margin-bottom:10px;
     color:var(--muted);
   }
-  .cell p{
+  .cell p,.small,.list div{
     font-size:1rem;
-    line-height:1.5;
+    line-height:1.55;
   }
-  .right{
-    display:grid;
-    gap:16px;
-    align-content:start;
-  }
-  .card{
-    border:1px solid var(--line);
-    border-radius:22px;
-    padding:22px;
-    background:rgba(255,255,255,0.46);
-  }
-  .card h4{
-    font:700 .74rem/1 Arial, sans-serif;
-    text-transform:uppercase;
-    letter-spacing:.15em;
-    color:var(--muted);
-    margin-bottom:12px;
-  }
-  .list{
-    display:grid;
-    gap:10px;
-  }
+  .list{display:grid;gap:10px}
   .list div{
     padding:12px 14px;
     border-radius:14px;
     background:#fffaf2;
     border:1px solid rgba(18,18,18,0.07);
-    font-size:1rem;
-    line-height:1.45;
   }
   .quote{
     font-size:1.34rem;
     line-height:1.6;
   }
   .quote strong{color:var(--fire-deep)}
-  .small{
-    font-size:.95rem;
-    line-height:1.6;
-    color:#3f3b35;
-  }
-  .footer{
-    display:grid;
-    gap:10px;
-  }
   .url{
     font:700 1rem/1.4 Arial, sans-serif;
     word-break:break-word;
@@ -218,7 +177,7 @@
       <div class="left">
         <div class="brand">
           <img src="nexus-logo.svg" alt="Logo Nexus">
-          <div class="brand-text">
+          <div>
             <span class="stamp">Beta aberto</span>
             <div class="brand-name">Nexus</div>
           </div>
@@ -226,58 +185,58 @@
 
         <h1 class="headline">
           <span class="fire">30 dias.</span><br>
-          Sem desculpas bonitas.
+          Sem desculpa bonita.
         </h1>
 
         <p class="dek">
-          O Nexus foi feito para quem esta cansado de <strong>comecar e largar</strong>.
-          Tu escolhes uma missao, assumes um minimo diario e voltas todos os dias para viver com o registo.
+          Eu criei o Nexus pra quem tá cansado de começar animado e largar no meio.
+          Você escolhe uma meta, assume um mínimo diário e volta todo dia pra encarar o que fez ou não fez.
         </p>
 
         <div class="proof-note">
-          Sem feed. Sem likes. Sem “parece que estou a evoluir”.
-          Aqui o dia fica registado ou fica vazio.
+          Sem feed. Sem likes. Sem fingimento.
+          Aqui o dia foi feito ou não foi.
         </div>
 
         <div class="grid">
           <div class="cell">
             <h3>Solo</h3>
-            <p>Para quando o problema nao e falta de apoio. E falta de firmeza.</p>
+            <p>Pra quando o problema não é apoio. É firmeza.</p>
           </div>
           <div class="cell">
             <h3>Parceiro</h3>
-            <p>Para duas pessoas puxarem uma pela outra sem teatro.</p>
+            <p>Pra duas pessoas se puxarem de verdade.</p>
           </div>
           <div class="cell">
             <h3>Rival</h3>
-            <p>Para quem precisa de pressao real para nao adiar.</p>
+            <p>Pra quem rende melhor quando sente pressão.</p>
           </div>
         </div>
       </div>
 
       <div class="right">
         <div class="card">
-          <h4>O que existe la dentro</h4>
+          <h4>O que tem lá dentro</h4>
           <div class="list">
-            <div>Contrato de missao com minimo diario, janela e plano de recuperacao.</div>
-            <div>Brio, sequencia e registo do dia sem fingimento.</div>
-            <div>Comunidades que so abrem para quem prova compromisso.</div>
-            <div>Notificacoes feitas para te trazer de volta antes da quebra virar padrao.</div>
+            <div>Contrato da meta com mínimo diário, horário e plano se falhar.</div>
+            <div>Brio, sequência e registro do dia sem autoengano.</div>
+            <div>Comunidades que só abrem pra quem prova comprometimento.</div>
+            <div>Notificações feitas pra te trazer de volta antes da quebra virar padrão.</div>
           </div>
         </div>
 
         <div class="card">
           <h4>Frase central</h4>
           <p class="quote">
-            O Nexus e o sitio onde o teu objetivo deixa de pedir intencao e <strong>comeca a cobrar resposta</strong>.
+            O Nexus é o lugar onde a sua meta para de parecer bonita e <strong>começa a cobrar resposta</strong>.
           </p>
         </div>
 
-        <div class="card footer">
+        <div class="card">
           <h4>Entra no beta</h4>
           <div class="url">isaac02030.github.io/nexus</div>
           <a class="cta" href="https://isaac02030.github.io/nexus/">Testar agora</a>
-          <div class="beta">Ainda em construcao. Ja forte o suficiente para testar de verdade.</div>
+          <div class="beta">Ainda em construção. Já forte o suficiente pra testar de verdade.</div>
         </div>
       </div>
     </div>
