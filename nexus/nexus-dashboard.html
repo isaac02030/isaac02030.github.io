@@ -120,6 +120,49 @@
     letter-spacing:.06em;
   }
   .btn-install-app.visible{display:inline-flex;align-items:center;justify-content:center;}
+  .notification-prompt{
+    margin:18px 0 28px;
+    padding:18px 20px;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:22px;
+    background:linear-gradient(135deg, rgba(255,106,26,0.08), rgba(255,255,255,0.02));
+    display:none;
+    gap:14px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .notification-prompt.visible{display:flex;}
+  .notification-prompt-copy{min-width:0;}
+  .notification-prompt-kicker{
+    color:#ffb27a;
+    font-size:.72rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+    font-weight:800;
+  }
+  .notification-prompt-title{
+    font-size:1rem;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:4px;
+  }
+  .notification-prompt-text{
+    color:var(--muted);
+    font-size:.92rem;
+    line-height:1.55;
+  }
+  .btn-enable-notifications{
+    flex-shrink:0;
+    border:1px solid rgba(255,255,255,0.08);
+    background:var(--fire);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:16px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:15px;
+    letter-spacing:.06em;
+  }
 
   /* STATS */
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin-bottom:32px;}
@@ -1488,6 +1531,7 @@
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
   let deferredInstallPrompt = null;
+  let notificationsReady = false;
 
   const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
   if(cur) cur.style.display='none';
@@ -1548,6 +1592,7 @@
     await initPwa();
     initMissionDraftInputs();
     ensureInstallAppButton();
+    ensureNotificationPrompt();
     initMobileTabbar();
     resetMissionModal();
     await loadMissions();
@@ -1612,6 +1657,81 @@
       renderInstallAppButton(false);
     }
     deferredInstallPrompt = null;
+  }
+
+  function ensureNotificationPrompt() {
+    if (document.getElementById('notification-prompt')) return;
+
+    const installButton = document.getElementById('btn-install-app');
+    const anchor = installButton || document.querySelector('.stats-row');
+    if (!anchor) return;
+
+    const prompt = document.createElement('div');
+    prompt.id = 'notification-prompt';
+    prompt.className = 'notification-prompt';
+    prompt.innerHTML = `
+      <div class="notification-prompt-copy">
+        <div class="notification-prompt-kicker">Alertas Nexus</div>
+        <div class="notification-prompt-title" id="notification-prompt-title">Ativa as notificacoes para nao te esconderes do dia.</div>
+        <div class="notification-prompt-text" id="notification-prompt-text">O Nexus avisa quando o rival avanca, quando o chat mexe e quando o dia esta a fechar sem prova.</div>
+      </div>
+      <button class="btn-enable-notifications" id="btn-enable-notifications" type="button">ATIVAR ALERTAS</button>
+    `;
+
+    anchor.insertAdjacentElement('afterend', prompt);
+    const button = document.getElementById('btn-enable-notifications');
+    if (button) button.onclick = enableNotifications;
+
+    updateNotificationPrompt();
+  }
+
+  function updateNotificationPrompt() {
+    const prompt = document.getElementById('notification-prompt');
+    const title = document.getElementById('notification-prompt-title');
+    const text = document.getElementById('notification-prompt-text');
+    const button = document.getElementById('btn-enable-notifications');
+    if (!prompt || !title || !text || !button) return;
+
+    if (!('Notification' in window)) {
+      prompt.classList.remove('visible');
+      return;
+    }
+
+    const permission = Notification.permission;
+
+    if (notificationsReady && permission === 'granted') {
+      prompt.classList.add('visible');
+      title.textContent = 'Alertas ativos.';
+      text.textContent = 'O Nexus ja te pode chamar quando o rival avanca, quando o chat mexe e quando o dia fica em risco.';
+      button.textContent = 'ATIVO';
+      button.disabled = true;
+      button.style.opacity = '0.65';
+      return;
+    }
+
+    if (permission === 'denied') {
+      prompt.classList.add('visible');
+      title.textContent = 'Os alertas estao bloqueados no browser.';
+      text.textContent = 'Sem isto, o Nexus perde a parte chata que te traz de volta. Reativa nas definicoes do Chrome para este site.';
+      button.textContent = 'BLOQUEADO';
+      button.disabled = true;
+      button.style.opacity = '0.65';
+      return;
+    }
+
+    prompt.classList.add('visible');
+    title.textContent = 'Ativa as notificacoes para nao te esconderes do dia.';
+    text.textContent = 'O Nexus avisa quando o rival avanca, quando o chat mexe e quando o dia esta a fechar sem prova.';
+    button.textContent = 'ATIVAR ALERTAS';
+    button.disabled = false;
+    button.style.opacity = '1';
+  }
+
+  async function enableNotifications() {
+    const success = await initNotifications(true);
+    if (success) {
+      toast('Alertas Nexus ativados.');
+    }
   }
 
   async function initPwa() {
@@ -3208,19 +3328,47 @@
   // ============================================
   // PUSH NOTIFICATIONS
   // ============================================
-  async function initNotifications() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  async function initNotifications(forcePrompt = false) {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      updateNotificationPrompt();
+      return false;
+    }
 
     try {
       const reg = await navigator.serviceWorker.ready;
+      const existingSubscription = await reg.pushManager.getSubscription();
+
+      if (existingSubscription) {
+        notificationsReady = true;
+        updateNotificationPrompt();
+        return true;
+      }
+
+      if (Notification.permission === 'denied') {
+        notificationsReady = false;
+        updateNotificationPrompt();
+        return false;
+      }
+
+      if (Notification.permission === 'default' && !forcePrompt) {
+        notificationsReady = false;
+        updateNotificationPrompt();
+        return false;
+      }
 
       // Obter chave pública do servidor
       const keyRes = await fetch(`${API}/api/notifications/vapid-key`);
       const { publicKey } = await keyRes.json();
 
       // Pedir permissão
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
+      const permission = Notification.permission === 'granted'
+        ? 'granted'
+        : await Notification.requestPermission();
+      if (permission !== 'granted') {
+        notificationsReady = false;
+        updateNotificationPrompt();
+        return false;
+      }
 
       // Subscrever
       const subscription = await reg.pushManager.subscribe({
@@ -3238,9 +3386,15 @@
         body: JSON.stringify({ subscription })
       });
 
+      notificationsReady = true;
+      updateNotificationPrompt();
       console.log('Notificações ativadas!');
+      return true;
     } catch(err) {
+      notificationsReady = false;
+      updateNotificationPrompt();
       console.log('Notificações não disponíveis:', err);
+      return false;
     }
   }
 
