@@ -1839,11 +1839,37 @@
             COPIAR LINK
           </button>
         </div>
+        <div style="margin-top:10px;padding:16px;border:1px solid rgba(255,255,255,0.06);border-radius:18px;background:rgba(255,255,255,0.02);display:grid;gap:10px">
+          <div style="font-size:14px;color:var(--text);font-weight:600">Ainda não queres esperar?</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Podes sair da fila agora e criar outra missão depois, sem ficares preso a uma espera que já não faz sentido.</div>
+          <button onclick="leaveWaitingMission(${mission.id})" style="justify-self:start;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:10px 14px;border-radius:14px;font-size:12px;font-weight:700;letter-spacing:.08em">
+            SAIR DA FILA
+          </button>
+        </div>
         ${renderMissionContract(mission)}
       </div>`;
 
     // Verificar match a cada 15 segundos automaticamente
     setTimeout(loadMissions, 15000);
+  }
+
+  async function leaveWaitingMission(missionId) {
+    try {
+      const res = await fetch(`${API}/api/missions/${missionId}/waiting`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        return toast(data.error || 'Não foi possível sair da fila.', 'error');
+      }
+
+      toast(data.message || 'Saíste da fila.');
+      await loadMissions();
+    } catch (err) {
+      toast('Erro de ligação.', 'error');
+    }
   }
 
   // Renderizar missão ativa
