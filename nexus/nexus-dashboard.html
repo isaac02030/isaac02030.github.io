@@ -1850,7 +1850,9 @@
     if (!missions || missions.length <= 1) return '';
 
     return `
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div style="display:grid;gap:10px;margin-bottom:16px">
+        <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
         ${missions.map(mission => `
           <button
             type="button"
@@ -1861,6 +1863,7 @@
             <span style="font-size:14px;font-weight:700;line-height:1.35">${mission.title}</span>
           </button>
         `).join('')}
+        </div>
       </div>`;
   }
 
@@ -1888,7 +1891,7 @@
       document.getElementById('stat-missions').textContent = active.length;
 
       if (openMissions.length > 0) {
-        const selectedMission = openMissions.find(m => m.id === selectedMissionId)
+        const selectedMission = openMissions.find(m => String(m.id) === String(selectedMissionId))
           || active[0]
           || waiting[0]
           || openMissions[0];
