@@ -724,11 +724,21 @@
       });
       const missions = await res.json();
 
+      if (!res.ok || !Array.isArray(missions)) {
+        throw new Error((missions && missions.error) || 'Nao foi possivel carregar as missoes.');
+      }
+
       const completed = missions.filter(m => m.status === 'completed');
       const total     = missions.length;
-      const days      = missions.reduce((acc, m) => acc + (m.user_score || 0), 0);
+      const days      = missions.reduce((acc, m) => {
+        const myScore = m.user_id === user.id ? (m.user_score || 0) : (m.partner_score || 0);
+        return acc + myScore;
+      }, 0);
       const wins      = missions.filter(m =>
-        m.status === 'completed' && (m.user_score || 0) > (m.partner_score || 0)
+        m.status === 'completed' && (
+          (m.user_id === user.id ? (m.user_score || 0) : (m.partner_score || 0)) >
+          (m.user_id === user.id ? (m.partner_score || 0) : (m.user_score || 0))
+        )
       ).length;
 
       document.getElementById('s-total').textContent = total;

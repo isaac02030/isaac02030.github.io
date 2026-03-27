@@ -1753,6 +1753,10 @@
       });
       const missions = await res.json();
 
+      if (!res.ok || !Array.isArray(missions)) {
+        throw new Error((missions && missions.error) || 'Nao foi possivel carregar as missoes.');
+      }
+
       const active  = missions.filter(m => m.status === 'active');
       const waiting = missions.filter(m => m.status === 'waiting');
 
@@ -1800,6 +1804,12 @@
       }
     } catch(err) {
       console.error(err);
+      document.getElementById('mission-area').innerHTML = `
+        <div class="empty-state">
+          <h3>NAO DEU PRA CARREGAR A MISSAO</h3>
+          <p>O Nexus nao conseguiu ler o teu estado agora. Tenta recarregar a pagina.</p>
+          <button class="btn-new-mission" onclick="loadMissions()">TENTAR DE NOVO</button>
+        </div>`;
     }
   }
 
