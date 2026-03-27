@@ -694,12 +694,32 @@
     }
   }
 
+  async function syncSessionUser() {
+    const res = await fetch(`${API}/api/users/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.user) {
+      throw new Error((data && data.error) || 'Nao foi possivel validar a sessao.');
+    }
+
+    user = data.user;
+    localStorage.setItem('nexus_user', JSON.stringify(user));
+  }
+
   async function init() {
     token = localStorage.getItem('nexus_token');
     const userData = localStorage.getItem('nexus_user');
     if (!token || !userData) { window.location.href = 'nexus-auth.html'; return; }
 
     user = JSON.parse(userData);
+    try {
+      await syncSessionUser();
+    } catch (err) {
+      logout();
+      return;
+    }
 
     // Preencher dados básicos
     const initial = user.username[0].toUpperCase();

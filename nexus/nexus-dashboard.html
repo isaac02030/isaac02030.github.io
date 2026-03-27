@@ -1567,6 +1567,20 @@
     if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
   }
 
+  async function syncSessionUser() {
+    const res = await fetch(`${API}/api/users/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.user) {
+      throw new Error((data && data.error) || 'Nao foi possivel validar a sessao.');
+    }
+
+    user = data.user;
+    localStorage.setItem('nexus_user', JSON.stringify(user));
+  }
+
   // Init
   async function init() {
     token = localStorage.getItem('nexus_token');
@@ -1578,6 +1592,12 @@
     }
 
     user = JSON.parse(userData);
+    try {
+      await syncSessionUser();
+    } catch (err) {
+      logout();
+      return;
+    }
 
     // Preencher UI com dados do utilizador
     document.getElementById('header-name').textContent = user.username.toUpperCase();
