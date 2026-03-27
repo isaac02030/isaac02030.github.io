@@ -1324,13 +1324,13 @@
     </div>
     <div class="study-setup-card" id="study-setup-card">
       <strong style="font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#ffb067">Plano de estudo</strong>
-      <div class="study-setup-note">Se a missÃ£o for de aprendizagem, o Nexus jÃ¡ comeÃ§a com contexto: onde estÃ¡s, o que queres fechar em 30 dias e qual Ã© a frente atual.</div>
+      <div class="study-setup-note">Se a missao for de aprendizagem, o Nexus ja comeca com contexto: onde estas, o que queres fechar em 30 dias e qual e a frente atual.</div>
       <div class="field">
-        <label>O que estÃ¡s a estudar</label>
+        <label>O que estas a estudar</label>
         <input type="text" id="m-study-focus" placeholder="ex: JavaScript, inglÃªs, matemÃ¡tica">
       </div>
       <div class="field">
-        <label>Onde estÃ¡s agora</label>
+        <label>Onde estas agora</label>
         <input type="text" id="m-study-stage" placeholder="ex: fundamentos, mÃ³dulo 2, vocabulÃ¡rio bÃ¡sico">
       </div>
       <div class="field">
@@ -1523,6 +1523,9 @@
   let user = null;
   let token = null;
   let activeMission = null;
+  let openMissions = [];
+  let selectedMissionId = null;
+  let lastMissionTemplateCategory = null;
   let lastStreakData = null;
   let latestStudySupportHtml = '';
   let latestFitnessProofHtml = '';
@@ -1610,6 +1613,7 @@
       now.toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
 
     await initPwa();
+    normalizeMissionModalCopy();
     initMissionDraftInputs();
     ensureInstallAppButton();
     ensureNotificationPrompt();
@@ -1765,7 +1769,107 @@
     }
   }
 
-  // Carregar missões
+  function normalizeMissionModalCopy() {
+    const modal = document.getElementById('modal');
+    if (!modal) return;
+
+    const title = modal.querySelector('h2');
+    if (title) title.textContent = 'NOVA MISSAO';
+
+    const textMap = {
+      'Nível': 'Nivel',
+      'Descrição (opcional)': 'Descricao (opcional)',
+      'Mínimo diário': 'Minimo diario',
+      'MÃƒÂ­nimo diÃƒÂ¡rio': 'Minimo diario',
+      'O que estás a estudar': 'O que estas a estudar',
+      'O que estÃƒÂ¡s a estudar': 'O que estas a estudar',
+      'Onde estás agora': 'Onde estas agora',
+      'Onde estÃƒÂ¡s agora': 'Onde estas agora'
+    };
+
+    modal.querySelectorAll('label').forEach(label => {
+      const clean = textMap[label.textContent.trim()];
+      if (clean) label.textContent = clean;
+    });
+
+    const habitOption = document.querySelector('#m-category option[value="habito"]');
+    if (habitOption) habitOption.textContent = 'Habito diario';
+
+    const levelIntermedio = document.querySelector('#m-level option[value="intermedio"]');
+    if (levelIntermedio) levelIntermedio.textContent = 'Intermedio';
+
+    const levelAvancado = document.querySelector('#m-level option[value="avancado"]');
+    if (levelAvancado) levelAvancado.textContent = 'Avancado';
+
+    const modeSelect = document.getElementById('m-mode');
+    if (modeSelect) {
+      const modeMap = {
+        rival: 'Rival - competir com alguem',
+        parceiro: 'Parceiro - cooperar com alguem',
+        solo: 'Solo - seguir por conta propria'
+      };
+      [...modeSelect.options].forEach(option => {
+        if (modeMap[option.value]) option.textContent = modeMap[option.value];
+      });
+    }
+
+    const minimum = document.getElementById('m-minimum');
+    if (minimum) minimum.placeholder = 'ex: 45 minutos ou 5 paginas';
+
+    const why = document.getElementById('m-why');
+    if (why) why.placeholder = 'o motivo real para levares isto a serio...';
+
+    const fallback = document.getElementById('m-fallback');
+    if (fallback) fallback.placeholder = 'ex: amanha comeco mais cedo com um minimo menor, mas nao falho outra vez';
+
+    const studyNote = document.querySelector('#study-setup-card .study-setup-note');
+    if (studyNote) studyNote.textContent = 'Se a missao for de aprendizagem, o Nexus ja comeca com contexto: onde estas, o que queres fechar em 30 dias e qual e a frente atual.';
+
+    const focus = document.getElementById('m-study-focus');
+    if (focus) focus.placeholder = 'ex: filosofia, JavaScript, ingles, matematica';
+
+    const stage = document.getElementById('m-study-stage');
+    if (stage) stage.placeholder = 'ex: fundamentos, modulo 2, vocabulario basico';
+
+    const target = document.getElementById('m-study-target');
+    if (target) target.placeholder = 'ex: fechar um modulo e fazer um projeto pequeno';
+
+    const confirm = modal.querySelector('.btn-confirm');
+    if (confirm) confirm.textContent = 'CRIAR MISSAO ->';
+  }
+
+  function getMissionBadge(mission) {
+    if (mission.status === 'waiting') return 'Em espera';
+    if (mission.mode === 'solo') return 'Solo';
+    if (mission.mode === 'parceiro') return 'Parceiro';
+    if (mission.mode === 'rival') return 'Rival';
+    return mission.status;
+  }
+
+  function renderMissionSelector(missions) {
+    if (!missions || missions.length <= 1) return '';
+
+    return `
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        ${missions.map(mission => `
+          <button
+            type="button"
+            onclick="selectMission(${mission.id})"
+            style="padding:10px 12px;border-radius:14px;border:1px solid ${mission.id === selectedMissionId ? 'rgba(255,92,0,0.45)' : 'rgba(255,255,255,0.08)'};background:${mission.id === selectedMissionId ? 'rgba(255,92,0,0.12)' : 'rgba(255,255,255,0.02)'};color:var(--text);display:grid;gap:4px;text-align:left;min-width:170px"
+          >
+            <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)">${getMissionBadge(mission)}</span>
+            <span style="font-size:14px;font-weight:700;line-height:1.35">${mission.title}</span>
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  function selectMission(missionId) {
+    selectedMissionId = missionId;
+    loadMissions();
+  }
+
+  // Carregar missoes
   async function loadMissions() {
     try {
       const res = await fetch(`${API}/api/missions`, {
@@ -1779,13 +1883,21 @@
 
       const active  = missions.filter(m => m.status === 'active');
       const waiting = missions.filter(m => m.status === 'waiting');
+      openMissions = [...active, ...waiting];
 
       document.getElementById('stat-missions').textContent = active.length;
 
-      if (active.length > 0) {
-        // Tem missão ativa — mostrar normalmente
-        activeMission = active[0];
-        renderMission(activeMission);
+      if (openMissions.length > 0) {
+        const selectedMission = openMissions.find(m => m.id === selectedMissionId)
+          || active[0]
+          || waiting[0]
+          || openMissions[0];
+        const selectorHtml = renderMissionSelector(openMissions);
+        selectedMissionId = selectedMission.id;
+
+        if (selectedMission.status === 'active') {
+          activeMission = selectedMission;
+          renderMission(activeMission, selectorHtml);
         document.getElementById('bottom-grid').style.display = 'grid';
         await buildCalendar();
         loadStreak();
@@ -1796,30 +1908,29 @@
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
         }
-
-      } else if (waiting.length > 0) {
-        // Está em fila de espera — mostrar estado de espera
-        activeMission = null;
-        lastStreakData = null;
-        document.getElementById('stat-days').textContent = 0;
-        document.getElementById('stat-streak').textContent = 0;
-        document.getElementById('stat-brio').textContent = 0;
-        updateBrioCopy(0);
-        renderWaiting(waiting[0]);
-
+        } else {
+          activeMission = null;
+          lastStreakData = null;
+          document.getElementById('stat-days').textContent = 0;
+          document.getElementById('stat-streak').textContent = 0;
+          document.getElementById('stat-brio').textContent = 0;
+          updateBrioCopy(0);
+          document.getElementById('bottom-grid').style.display = 'none';
+          renderWaiting(selectedMission, selectorHtml);
+        }
       } else {
-        // Sem missões — mostrar estado vazio
         activeMission = null;
         lastStreakData = null;
+        selectedMissionId = null;
         document.getElementById('stat-days').textContent = 0;
         document.getElementById('stat-streak').textContent = 0;
         document.getElementById('stat-brio').textContent = 0;
         updateBrioCopy(0);
         document.getElementById('mission-area').innerHTML = `
           <div class="empty-state">
-            <h3>NENHUMA MISSÃO ATIVA</h3>
-            <p>Define o teu objetivo e começa hoje.</p>
-            <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSÃO</button>
+            <h3>NENHUMA MISSAO ATIVA</h3>
+            <p>Define o teu objetivo e comeca hoje.</p>
+            <button class="btn-new-mission" onclick="document.getElementById('modal').classList.add('open')">+ CRIAR PRIMEIRA MISSAO</button>
           </div>`;
       }
     } catch(err) {
@@ -1833,9 +1944,10 @@
     }
   }
 
-  // Mostrar missão em espera de match
-  function renderWaiting(mission) {
+  // Mostrar missao em espera de match
+  function renderWaiting(mission, selectorHtml = '') {
     document.getElementById('mission-area').innerHTML = `
+      ${selectorHtml}
       <div class="mission-card" style="border-color:rgba(255,92,0,0.2)">
         <div class="mission-top">
           <div class="mission-title">${mission.title}</div>
@@ -1844,8 +1956,8 @@
         <div style="display:flex;align-items:center;gap:16px;padding:24px;background:var(--bg3);margin-bottom:16px;">
           <div style="width:12px;height:12px;background:var(--fire);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0"></div>
           <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.04em;margin-bottom:4px">À PROCURA DE ${mission.mode === 'rival' ? 'RIVAL' : 'PARCEIRO'}...</div>
-            <div style="font-size:13px;color:var(--muted2)">Serás notificado quando encontrarmos alguém com o mesmo objetivo.</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.04em;margin-bottom:4px">A PROCURA DE ${mission.mode === 'rival' ? 'RIVAL' : 'PARCEIRO'}...</div>
+            <div style="font-size:13px;color:var(--muted2)">Vais ser avisado quando encontrarmos alguem com o mesmo objetivo.</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border)">
@@ -1859,19 +1971,19 @@
           </div>
           <div style="background:var(--bg);padding:20px;text-align:center">
             <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--fire)">${mission.level}</div>
-            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Nível</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Nivel</div>
           </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted2);text-align:center;padding:12px">
-          Partilha o Nexus com um amigo para competir diretamente →
-          <button onclick="navigator.clipboard.writeText('isaac02030.github.io/nexus');toast('Link copiado! 🔥')" 
+          Partilha o Nexus com um amigo para competir diretamente ->
+          <button onclick="navigator.clipboard.writeText('isaac02030.github.io/nexus');toast('Link copiado!')" 
             style="background:var(--fire-dim);border:1px solid rgba(255,92,0,0.3);color:var(--fire);padding:6px 14px;font-size:12px;font-weight:600;margin-left:8px;font-family:'Bricolage Grotesque',sans-serif">
             COPIAR LINK
           </button>
         </div>
         <div style="margin-top:10px;padding:16px;border:1px solid rgba(255,255,255,0.06);border-radius:18px;background:rgba(255,255,255,0.02);display:grid;gap:10px">
-          <div style="font-size:14px;color:var(--text);font-weight:600">Ainda não queres esperar?</div>
-          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Podes sair da fila agora e criar outra missão depois, sem ficares preso a uma espera que já não faz sentido.</div>
+          <div style="font-size:14px;color:var(--text);font-weight:600">Ainda nao queres esperar?</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Podes sair da fila agora e criar outra missao depois, sem ficares preso a uma espera que ja nao faz sentido.</div>
           <button onclick="leaveWaitingMission(${mission.id})" style="justify-self:start;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:10px 14px;border-radius:14px;font-size:12px;font-weight:700;letter-spacing:.08em">
             SAIR DA FILA
           </button>
@@ -1999,7 +2111,7 @@
   }
 
   // Renderizar missão ativa
-  function renderMission(m) {
+  function renderMission(m, selectorHtml = '') {
     const started = new Date(m.started_at);
     const today   = new Date();
     const day     = Math.min(Math.floor((today - started) / 86400000) + 1, m.duration_days);
@@ -2026,6 +2138,7 @@
       </div>` : '';
 
     document.getElementById('mission-area').innerHTML = `
+      ${selectorHtml}
       <div class="mission-card">
         <div class="mission-top">
           <div class="mission-title">${m.title}</div>
@@ -2523,7 +2636,7 @@
       text_note: 'nota curta',
       workout_proof: 'prova de treino',
       study_note: 'nota de estudo',
-      artifact_note: 'saida / artefacto'
+      artifact_note: 'saida / artefato'
     };
     return labels[mode] || 'check-in simples';
   }
@@ -2534,7 +2647,7 @@
     if (brio >= 50) return 'ritmo em consolidacao';
     if (brio >= 30) return 'ritmo instavel';
     if (brio > 0) return 'inicio de compromisso';
-    return 'a firmeza da tua palavra';
+    return 'a firmeza da sua palavra';
   }
 
   function updateBrioCopy(brio) {
@@ -2542,7 +2655,7 @@
     if (!copyEl) return;
     copyEl.textContent = brio > 0
       ? `Brio ${brio} - ${getBrioDescriptor(brio)}`
-      : 'A firmeza da tua palavra.';
+      : 'A firmeza da sua palavra.';
   }
 
   function updateMissionDraftPreview() {
@@ -2576,12 +2689,25 @@
     if (category === 'aprendizagem') {
       const focus = studyFocus || title;
       const stage = studyStage || 'o bloco atual';
-      copyEl.textContent = `Todos os dias vais fechar ${minimum} em ${windowText}, deixando ${getProofModeLabel(proofMode)} sobre ${focus}. O ponto de partida atual e ${stage}.`;
+      copyEl.textContent = `Todos os dias vais fechar ${minimum} em ${windowText}, deixando ${getProofModeLabel(proofMode)} sobre ${focus}. O teu ponto de partida agora e ${stage}.`;
     } else {
       copyEl.textContent = `Todos os dias vais fechar ${minimum} em ${windowText}, com ${getProofModeLabel(proofMode)}. O objetivo nao e parecer motivado. E tornar ${title} executavel.`;
     }
 
     riskEl.textContent = `Se falhares, respondes com: ${fallback}. O motivo desta missao e ${why}.`;
+  }
+
+  function getMissionTemplate(category) {
+    return MISSION_TEMPLATES[category] || MISSION_TEMPLATES.outro;
+  }
+
+  function fillMissionField(fieldId, previousValue, nextValue) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    const current = field.value.trim();
+    if (!current || current === previousValue) {
+      field.value = nextValue;
+    }
   }
 
   function initMissionDraftInputs() {
@@ -2597,12 +2723,46 @@
   function updateMissionOnboardingCopy() {
     const category = document.getElementById('m-category')?.value || 'outro';
     const mode = document.getElementById('m-mode')?.value || 'solo';
-    const template = MISSION_TEMPLATES[category] || MISSION_TEMPLATES.outro;
+    const template = getMissionTemplate(category);
+    const cleanGuideCopy = {
+      fitness: 'Missao fitness forte: define volume minimo, janela realista e uma forma de provar o treino.',
+      aprendizagem: 'Missao de estudo forte: diz o que voce vai estudar, quanto tempo e qual e o proximo bloco real.',
+      habito: 'Habito forte: minimo pequeno, horario previsivel e zero ambiguidade.',
+      criatividade: 'Criatividade forte: define o que conta como saida real, nao so tempo gasto.',
+      outro: 'Se a missao nao e obvia, deixe ela concreta antes de comecar.'
+    };
+    const cleanModeCopy = {
+      fitness: {
+        rival: 'Rival: bom para quem responde a comparacao e pressao.',
+        parceiro: 'Parceiro: bom para quem precisa de apoio e ritmo junto.',
+        solo: 'Solo: voce contra a sua consistencia fisica.'
+      },
+      aprendizagem: {
+        rival: 'Rival: usa pressao para nao adiar o estudo.',
+        parceiro: 'Parceiro: cria ritmo e responsabilidade mutua.',
+        solo: 'Solo: ideal para quem quer concentracao sem ruido.'
+      },
+      habito: {
+        rival: 'Rival: mantem a tensao alta num habito simples.',
+        parceiro: 'Parceiro: bom para consistencia leve e diaria.',
+        solo: 'Solo: voce contra a sua tendencia de adiar.'
+      },
+      criatividade: {
+        rival: 'Rival: bom para transformar intencao em entrega.',
+        parceiro: 'Parceiro: bom para cadencia e feedback.',
+        solo: 'Solo: espaco para criar, mas com consequencia diaria.'
+      },
+      outro: {
+        rival: 'Rival: pressao externa para nao aliviar.',
+        parceiro: 'Parceiro: compromisso em dupla.',
+        solo: 'Solo: responsabilidade pessoal total.'
+      }
+    };
     const guide = document.getElementById('mission-guide-copy');
     const modeGuide = document.getElementById('mission-guide-mode');
     const proofGuide = document.getElementById('mission-guide-proof');
-    if (guide) guide.textContent = template.guide;
-    if (modeGuide) modeGuide.textContent = template.mode[mode] || template.mode.solo;
+    if (guide) guide.textContent = cleanGuideCopy[category] || template.guide;
+    if (modeGuide) modeGuide.textContent = cleanModeCopy[category]?.[mode] || template.mode[mode] || template.mode.solo;
     if (proofGuide) proofGuide.textContent = `Contrato recomendado: minimo "${template.minimum}", janela "${template.window}", prova "${getProofModeLabel(template.proofMode || 'self_report')}", motivo real e plano de recuperacao.`;
     updateMissionDraftPreview();
   }
@@ -2619,26 +2779,28 @@
     const isStudy = category === 'aprendizagem';
     card.classList.toggle('open', isStudy);
 
-    if (!isStudy) return;
-
-    if (!focus.value.trim()) focus.value = 'JavaScript';
-    if (!stage.value.trim()) stage.value = 'fundamentos';
-    if (!target.value.trim()) target.value = 'fechar um modulo e produzir uma aplicacao pequena';
+    if (!isStudy) {
+      focus.value = '';
+      stage.value = '';
+      target.value = '';
+    }
   }
 
   function applyMissionTemplate() {
     const category = document.getElementById('m-category')?.value || 'outro';
-    const template = MISSION_TEMPLATES[category] || MISSION_TEMPLATES.outro;
-    const minimum = document.getElementById('m-minimum');
-    const windowField = document.getElementById('m-window');
-    const why = document.getElementById('m-why');
-    const fallback = document.getElementById('m-fallback');
+    const template = getMissionTemplate(category);
     const proofMode = document.getElementById('m-proof-mode');
-    if (minimum && !minimum.value.trim()) minimum.value = template.minimum;
-    if (windowField && !windowField.value.trim()) windowField.value = template.window;
-    if (why && !why.value.trim()) why.value = template.why;
-    if (fallback && !fallback.value.trim()) fallback.value = template.fallback;
+    const minimumField = document.getElementById('m-minimum');
+    const windowField = document.getElementById('m-window');
+    const whyField = document.getElementById('m-why');
+    const fallbackField = document.getElementById('m-fallback');
+    if (minimumField) minimumField.value = template.minimum;
+    if (windowField) windowField.value = template.window;
+    if (whyField) whyField.value = template.why;
+    if (fallbackField) fallbackField.value = template.fallback;
     if (proofMode) proofMode.value = template.proofMode || 'self_report';
+    lastMissionTemplateCategory = category;
+    normalizeMissionModalCopy();
     toggleStudySetup();
     updateMissionOnboardingCopy();
   }
@@ -2654,6 +2816,7 @@
     if (category) category.value = 'fitness';
     if (level) level.value = 'iniciante';
     if (mode) mode.value = 'rival';
+    lastMissionTemplateCategory = null;
     applyMissionTemplate();
   }
 
@@ -2708,6 +2871,7 @@
       const data = await res.json();
 
       if (res.ok) {
+        selectedMissionId = data?.mission?.id || selectedMissionId;
         document.getElementById('modal').classList.remove('open');
         resetMissionModal();
         toast(data.message || 'Missao criada!');
