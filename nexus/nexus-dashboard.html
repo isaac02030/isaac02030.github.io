@@ -1851,7 +1851,11 @@
 
     return `
       <div style="display:grid;gap:10px;margin-bottom:16px">
-        <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
+          <div style="font-size:12px;color:var(--muted2)">${missions.length} no momento</div>
+        </div>
+        <div style="font-size:13px;color:var(--muted2);line-height:1.5">Toque numa missao para trocar o foco do dashboard.</div>
         <div style="display:flex;flex-wrap:wrap;gap:10px">
         ${missions.map(mission => `
           <button
@@ -1888,7 +1892,7 @@
       const waiting = missions.filter(m => m.status === 'waiting');
       openMissions = [...active, ...waiting];
 
-      document.getElementById('stat-missions').textContent = active.length;
+      document.getElementById('stat-missions').textContent = openMissions.length;
 
       if (openMissions.length > 0) {
         const selectedMission = openMissions.find(m => String(m.id) === String(selectedMissionId))
