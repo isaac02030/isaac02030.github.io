@@ -1533,6 +1533,7 @@
   let latestFitnessProofHtml = '';
   let latestCreativeSupportHtml = '';
   let latestHabitSupportHtml = '';
+  let latestAssistantExchange = null;
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
   let deferredInstallPrompt = null;
@@ -2604,6 +2605,69 @@
     return { strength, review, next };
   }
 
+  function getSoloAssistantAnswer(mission, question, checkins) {
+    const cleanQuestion = (question || '').trim();
+    if (!cleanQuestion) return null;
+
+    const lower = cleanQuestion.toLowerCase();
+    const focus = mission.study_focus || mission.title || 'a tua missao';
+    const lastNote = (checkins || [])
+      .filter(item => item.completed && item.note && item.note.trim())
+      .sort((a, b) => b.day - a.day)[0]?.note;
+
+    if (mission.category === 'aprendizagem') {
+      const plan = getStudySoloAssistantPlan(mission);
+      const mentor = lastNote ? getStudyNoteMentorResponse(mission, lastNote) : null;
+
+      if (lower.match(/hoje|agora|comec|começ|fa[cç]o primeiro|por onde/)) {
+        return `Hoje faz isto: ${plan.action} Fecha com esta entrega: ${plan.deliverable}`;
+      }
+
+      if (lower.match(/nota|escrev|registr|regist/)) {
+        return `Na tua nota, responde assim: ${plan.prompt}`;
+      }
+
+      if (lower.match(/perdid|trav|bloque|nao sei|não sei|confus/)) {
+        return `${plan.support} Se mesmo assim travares, reduz o bloco e fecha so uma ideia principal hoje.`;
+      }
+
+      if (lower.match(/amanh|depois|proxim/)) {
+        return mentor ? mentor.next : `Amanha repete a mesma logica: fecha um bloco curto em ${focus} e sai com uma nota concreta do que entendeu.`;
+      }
+
+      if (lower.match(/rev|revis/)) {
+        return mentor ? mentor.review : 'Revisa primeiro a tua propria nota mais recente. O que tu mesmo escreveste e o melhor mapa do que precisa consolidar.';
+      }
+
+      return `Sobre ${focus}: ${plan.action} Se quiseres, pergunta "o que eu faco hoje?", "como escrevo a nota?" ou "o que revisar amanha?".`;
+    }
+
+    const proofMode = getProofModeLabel(mission.proof_mode || 'self_report');
+    if (lower.match(/hoje|agora|fa[cç]o|comec|começ/)) {
+      return `Hoje fecha ${mission.daily_minimum || 'o minimo diario'} em ${mission.commitment_window || 'uma janela clara'} e deixa uma prova em ${proofMode}.`;
+    }
+    if (lower.match(/trav|desist|sem vontade|pregui/)) {
+      return `${mission.fallback_plan || 'Volta com uma versao menor, mas nao deixa a missao cair.'}`;
+    }
+    return `Foco de hoje: fecha ${mission.daily_minimum || 'o minimo diario'} e regista um facto no fim. Se quiseres, pergunta "o que eu faco hoje?" ou "o que fazer se eu travar?".`;
+  }
+
+  function askSoloAssistant() {
+    if (!activeMission || activeMission.mode !== 'solo') return;
+    const input = document.getElementById('solo-assistant-question');
+    if (!input) return;
+    const question = input.value.trim();
+    if (!question) {
+      toast('Escreve uma pergunta curta para o assistente.', 'error');
+      return;
+    }
+
+    const answer = getSoloAssistantAnswer(activeMission, question, latestMissionCheckins);
+    latestAssistantExchange = { missionId: activeMission.id, question, answer };
+    input.value = '';
+    renderChatExperience();
+  }
+
   function renderSoloAssistantPanel(mission, checkins) {
     if (!mission) return '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem assistente disponivel.</div>';
 
@@ -2616,6 +2680,7 @@
     if (mission.category === 'aprendizagem') {
       const plan = getStudySoloAssistantPlan(mission);
       const mentor = lastNotes.length ? getStudyNoteMentorResponse(mission, lastNotes[0].note) : null;
+      const exchange = latestAssistantExchange && latestAssistantExchange.missionId === mission.id ? latestAssistantExchange : null;
       const notesHtml = lastNotes.length
         ? lastNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
         : `<div class="proof-panel-copy">Ainda nao existe nota de estudo guardada. Quando fechares o bloco de hoje, o teu registo aparece aqui para te tirar da sensacao de estar perdido.</div>`;
@@ -2652,11 +2717,26 @@
                 <div class="proof-panel-title">Notas que ja ficaram no caminho</div>
             </div>
           </div>
-          <div class="proof-history">${notesHtml}</div>
-        </div>
-        <div style="display:grid;gap:10px">
-          <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
-          <button class="btn-send" type="button" style="width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);color:var(--text)" onclick="showSection('missions', this)">VER A ROTA DA MISSAO</button>
+            <div class="proof-history">${notesHtml}</div>
+          </div>
+          <div class="proof-panel" style="margin-bottom:14px">
+            <div class="proof-panel-head">
+              <div>
+                <div class="proof-panel-kicker">Pergunta ao assistente</div>
+                <div class="proof-panel-title">Fala so sobre esta missao</div>
+              </div>
+            </div>
+            <div class="proof-panel-copy">Exemplos: "o que eu faco hoje?", "como escrevo a nota?" ou "o que revisar amanha?"</div>
+            <div style="display:grid;gap:10px">
+              <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual...">
+              <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
+            </div>
+            ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
+            <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>` : ''}
+          </div>
+          <div style="display:grid;gap:10px">
+            <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
+            <button class="btn-send" type="button" style="width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);color:var(--text)" onclick="showSection('missions', this)">VER A ROTA DA MISSAO</button>
         </div>
       `;
     }
@@ -2664,6 +2744,7 @@
     const genericNotesHtml = lastNotes.length
       ? lastNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
       : `<div class="proof-panel-copy">Ainda nao existe registo recente desta missao. O objetivo agora e deixar um facto claro no fim do dia.</div>`;
+    const exchange = latestAssistantExchange && latestAssistantExchange.missionId === mission.id ? latestAssistantExchange : null;
 
     return `
       <div class="proof-panel" style="margin-bottom:14px">
@@ -2685,6 +2766,21 @@
           </div>
         </div>
         <div class="proof-history">${genericNotesHtml}</div>
+      </div>
+      <div class="proof-panel" style="margin-bottom:14px">
+        <div class="proof-panel-head">
+          <div>
+            <div class="proof-panel-kicker">Pergunta ao assistente</div>
+            <div class="proof-panel-title">Foco na tua missao de hoje</div>
+          </div>
+        </div>
+        <div class="proof-panel-copy">Exemplos: "o que eu faco hoje?" ou "o que fazer se eu travar?"</div>
+        <div style="display:grid;gap:10px">
+          <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual...">
+          <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
+        </div>
+        ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
+        <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>` : ''}
       </div>
       <button class="btn-send" type="button" style="width:100%" onclick="doCheckin()">ABRIR REGISTO DE HOJE</button>
     `;
