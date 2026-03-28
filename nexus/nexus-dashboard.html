@@ -1480,11 +1480,11 @@
       </div>
       <!-- Chat -->
       <div class="chat-card">
-        <h3>CHAT</h3>
+        <h3 id="chat-title">CHAT</h3>
         <div class="chat-messages" id="chat-messages">
           <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem mensagens ainda.</div>
         </div>
-        <div class="chat-input-row">
+        <div class="chat-input-row" id="chat-input-row">
           <input class="chat-input" id="chat-input" placeholder="Escreve uma mensagem..." onkeydown="return handleChatKeydown(event)">
           <button class="btn-send" id="btn-send" type="button" onclick="return sendMessage(event)">ENVIAR</button>
         </div>
@@ -1528,6 +1528,7 @@
   let selectedMissionId = null;
   let lastMissionTemplateCategory = null;
   let lastStreakData = null;
+  let latestMissionCheckins = [];
   let latestStudySupportHtml = '';
   let latestFitnessProofHtml = '';
   let latestCreativeSupportHtml = '';
@@ -2429,6 +2430,7 @@
       }
     } catch(err) {}
 
+    latestMissionCheckins = myCheckins;
     latestStudySupportHtml = renderStudyMissionSupport(activeMission, myCheckins);
     latestFitnessProofHtml = renderFitnessProofPanel(myCheckins);
     latestCreativeSupportHtml = renderCreativeMissionSupport(activeMission, myCheckins);
@@ -2436,6 +2438,7 @@
     if (activeMission.category === 'aprendizagem' || activeMission.category === 'fitness' || activeMission.category === 'criatividade' || activeMission.category === 'habito') {
       renderMission(activeMission);
     }
+    renderChatExperience();
     const grid     = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
@@ -2482,10 +2485,156 @@
     return 'Regista o teu progresso de hoje.';
   }
 
+  function getStudySoloAssistantPlan(mission) {
+    const profile = getStudyTrack(mission);
+    const track = profile.steps;
+    const currentIndex = getStudyCurrentStepIndex(mission, track);
+    const currentStep = track[currentIndex] || track[0];
+    const focus = mission.study_focus || mission.title || 'o teu tema';
+    const minimum = mission.daily_minimum || '1 bloco focado';
+    const source = `${focus} ${mission.title || ''}`.toLowerCase();
+
+    if (source.match(/filosof/)) {
+      return {
+        title: 'Sessao guiada de hoje',
+        action: `Le uma introducao curta sobre ${focus} e fecha ${minimum} sem tentar abracar tudo.`,
+        deliverable: 'Sai da sessao com 3 ideias centrais, 1 pergunta que ficou aberta e 1 linha sobre por que isso importa.',
+        prompt: `Escreve no final: "Hoje em ${focus} eu entendi...", "Ainda fiquei na duvida sobre..." e "A ideia mais forte foi...".`
+      };
+    }
+
+    if (profile.lane === 'Codigo') {
+      return {
+        title: 'Sessao guiada de hoje',
+        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e termina com um exemplo pequeno funcionando.`,
+        deliverable: 'A entrega de hoje deve ser 1 conceito entendido e 1 exemplo escrito por voce.',
+        prompt: 'Escreve no final: o conceito estudado, o exemplo que montaste e onde ainda travaste.'
+      };
+    }
+
+    if (profile.lane === 'Idioma') {
+      return {
+        title: 'Sessao guiada de hoje',
+        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e usa o bloco de hoje em frases ou respostas curtas.`,
+        deliverable: 'A entrega de hoje deve ter vocabulario novo, 3 frases ou uma resposta escrita/dita por voce.',
+        prompt: 'Escreve no final: palavras novas, uma frase que conseguiste formar e o que ainda te confunde.'
+      };
+    }
+
+    if (profile.lane === 'Exatas' || profile.lane === 'Preparacao') {
+      return {
+        title: 'Sessao guiada de hoje',
+        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e resolve um bloco curto sem saltar passos.`,
+        deliverable: 'A entrega de hoje deve mostrar o conceito revisto e pelo menos 2 exercicios ou questoes enfrentadas.',
+        prompt: 'Escreve no final: o topico estudado, os exercicios tentados e o erro que mais se repetiu.'
+      };
+    }
+
+    return {
+      title: 'Sessao guiada de hoje',
+      action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e sai da sessao com uma prova concreta do que assentou.`,
+      deliverable: 'A entrega de hoje deve mostrar o que foi estudado, o que ficou claro e qual e o proximo bloco.',
+      prompt: 'Escreve no final: o que estudaste, o que entendeste e o proximo passo de amanha.'
+    };
+  }
+
+  function renderSoloAssistantPanel(mission, checkins) {
+    if (!mission) return '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem assistente disponivel.</div>';
+
+    const proofMode = mission.proof_mode || (mission.category === 'fitness' ? 'workout_proof' : 'self_report');
+    const lastNotes = (checkins || [])
+      .filter(item => item.completed && item.note && item.note.trim())
+      .sort((a, b) => b.day - a.day)
+      .slice(0, 3);
+
+    if (mission.category === 'aprendizagem') {
+      const plan = getStudySoloAssistantPlan(mission);
+      const notesHtml = lastNotes.length
+        ? lastNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
+        : `<div class="proof-panel-copy">Ainda nao existe nota de estudo guardada. Quando fechares o bloco de hoje, o teu registo aparece aqui para te tirar da sensacao de estar perdido.</div>`;
+
+      return `
+        <div class="proof-panel" style="margin-bottom:14px">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Assistente da missao</div>
+              <div class="proof-panel-title">${plan.title}</div>
+            </div>
+          </div>
+          <div class="proof-panel-copy"><strong>Hoje:</strong> ${plan.action}</div>
+          <div class="proof-item"><strong>Entrega de hoje</strong><span>${plan.deliverable}</span></div>
+          <div class="proof-item"><strong>Como escrever a nota</strong><span>${plan.prompt}</span></div>
+        </div>
+        <div class="proof-panel" style="margin-bottom:14px">
+          <div class="proof-panel-head">
+            <div>
+              <div class="proof-panel-kicker">Registro recente</div>
+              <div class="proof-panel-title">Notas que ja ficaram no caminho</div>
+            </div>
+          </div>
+          <div class="proof-history">${notesHtml}</div>
+        </div>
+        <div style="display:grid;gap:10px">
+          <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
+          <button class="btn-send" type="button" style="width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);color:var(--text)" onclick="showSection('missions', this)">VER A ROTA DA MISSAO</button>
+        </div>
+      `;
+    }
+
+    const genericNotesHtml = lastNotes.length
+      ? lastNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
+      : `<div class="proof-panel-copy">Ainda nao existe registo recente desta missao. O objetivo agora e deixar um facto claro no fim do dia.</div>`;
+
+    return `
+      <div class="proof-panel" style="margin-bottom:14px">
+        <div class="proof-panel-head">
+          <div>
+            <div class="proof-panel-kicker">Assistente da missao</div>
+            <div class="proof-panel-title">Solo nao e chat vazio</div>
+          </div>
+        </div>
+        <div class="proof-panel-copy">Hoje a tua meta e fechar ${mission.daily_minimum || 'o minimo diario'} em ${mission.commitment_window || 'uma janela definida'} e sair com uma prova clara do que foi feito.</div>
+        <div class="proof-item"><strong>Modo de prova</strong><span>${getProofModeLabel(proofMode)}</span></div>
+        <div class="proof-item"><strong>Se travar</strong><span>${mission.fallback_plan || 'Volta com uma versao menor, mas nao deixa a missao cair.'}</span></div>
+      </div>
+      <div class="proof-panel" style="margin-bottom:14px">
+        <div class="proof-panel-head">
+          <div>
+            <div class="proof-panel-kicker">Registro recente</div>
+            <div class="proof-panel-title">O que ja ficou marcado</div>
+          </div>
+        </div>
+        <div class="proof-history">${genericNotesHtml}</div>
+      </div>
+      <button class="btn-send" type="button" style="width:100%" onclick="doCheckin()">ABRIR REGISTO DE HOJE</button>
+    `;
+  }
+
+  function renderChatExperience() {
+    const title = document.getElementById('chat-title');
+    const messages = document.getElementById('chat-messages');
+    const inputRow = document.getElementById('chat-input-row');
+
+    if (!title || !messages || !inputRow) return false;
+
+    if (activeMission && activeMission.mode === 'solo') {
+      title.textContent = 'ASSISTENTE';
+      inputRow.style.display = 'none';
+      messages.innerHTML = renderSoloAssistantPanel(activeMission, latestMissionCheckins);
+      lastMsgId = null;
+      return true;
+    }
+
+    title.textContent = 'CHAT';
+    inputRow.style.display = '';
+    return false;
+  }
+
   // Chat
   let lastMsgId = null;
   async function loadMessages() {
     if (!activeMission) return;
+    if (renderChatExperience()) return;
     try {
       const res = await fetch(`${API}/api/messages/${activeMission.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
