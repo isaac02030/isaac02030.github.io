@@ -2494,48 +2494,74 @@
     const minimum = mission.daily_minimum || '1 bloco focado';
     const source = `${focus} ${mission.title || ''}`.toLowerCase();
 
+    const buildPlan = (action, deliverable, prompt, support) => ({
+      title: 'Sessao guiada de hoje',
+      action,
+      deliverable,
+      prompt,
+      support
+    });
+
     if (source.match(/filosof/)) {
-      return {
-        title: 'Sessao guiada de hoje',
-        action: `Le uma introducao curta sobre ${focus} e fecha ${minimum} sem tentar abracar tudo.`,
-        deliverable: 'Sai da sessao com 3 ideias centrais, 1 pergunta que ficou aberta e 1 linha sobre por que isso importa.',
-        prompt: `Escreve no final: "Hoje em ${focus} eu entendi...", "Ainda fiquei na duvida sobre..." e "A ideia mais forte foi...".`
-      };
+      return buildPlan(
+        `Le uma introducao curta sobre ${focus} e fecha ${minimum} sem tentar abracar tudo de uma vez.`,
+        'Sai da sessao com 3 ideias centrais, 1 pergunta que ficou aberta e 1 linha sobre por que isso importa.',
+        `Escreve no final: "Hoje em ${focus} eu entendi...", "Ainda fiquei na duvida sobre..." e "A ideia mais forte foi...".`,
+        'Comeca por uma pergunta simples: o que este tema tenta explicar sobre a vida, o mundo ou a forma de pensar? Se encontrares um autor, segura primeiro a ideia central antes de decorar nomes.'
+      );
+    }
+
+    if (source.match(/javascript|react|node|html|css|program|codigo|web/)) {
+      return buildPlan(
+        `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e termina com um exemplo pequeno funcionando em ${focus}.`,
+        'A entrega de hoje deve ser 1 conceito entendido e 1 exemplo escrito por voce, mesmo que seja simples.',
+        'Escreve no final: o conceito estudado, o exemplo que montaste, o erro que apareceu e como o resolveste.',
+        'Nao tenta estudar tudo. Escolhe um conceito so, faz um exemplo minimo e confirma se consegues explicar com as tuas palavras o que esse codigo faz.'
+      );
+    }
+
+    if (source.match(/python/)) {
+      return buildPlan(
+        `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e monta um script curto em ${focus} que execute do inicio ao fim.`,
+        'A entrega de hoje deve ser 1 script pequeno, 1 conceito revisto e 1 erro que deixou de te travar.',
+        'Escreve no final: o que o script faz, o conceito principal e o ponto que ainda te confundiu.',
+        'Escolhe um exemplo pequeno: condicao, repeticao, funcao ou lista. Quando correr sem erro, fecha a nota com o que aprendeste.'
+      );
     }
 
     if (profile.lane === 'Codigo') {
-      return {
-        title: 'Sessao guiada de hoje',
-        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e termina com um exemplo pequeno funcionando.`,
-        deliverable: 'A entrega de hoje deve ser 1 conceito entendido e 1 exemplo escrito por voce.',
-        prompt: 'Escreve no final: o conceito estudado, o exemplo que montaste e onde ainda travaste.'
-      };
+      return buildPlan(
+        `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e termina com um exemplo pequeno funcionando.`,
+        'A entrega de hoje deve ser 1 conceito entendido e 1 exemplo escrito por voce.',
+        'Escreve no final: o conceito estudado, o exemplo que montaste e onde ainda travaste.',
+        'Escolhe um conceito menor do que a tua ambicao inicial. O objetivo de hoje nao e dominar tudo; e sair com uma prova pequena e real.'
+      );
     }
 
     if (profile.lane === 'Idioma') {
-      return {
-        title: 'Sessao guiada de hoje',
-        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e usa o bloco de hoje em frases ou respostas curtas.`,
-        deliverable: 'A entrega de hoje deve ter vocabulario novo, 3 frases ou uma resposta escrita/dita por voce.',
-        prompt: 'Escreve no final: palavras novas, uma frase que conseguiste formar e o que ainda te confunde.'
-      };
+      return buildPlan(
+        `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e usa o bloco de hoje em frases ou respostas curtas.`,
+        'A entrega de hoje deve ter vocabulario novo, 3 frases ou uma resposta escrita/dita por voce.',
+        'Escreve no final: palavras novas, uma frase que conseguiste formar e o que ainda te confunde.',
+        'Hoje vale mais montar 3 frases com vocabulario vivo do que ficar so consumindo conteudo. Le pouco, repete pouco e produz um pouco.'
+      );
     }
 
     if (profile.lane === 'Exatas' || profile.lane === 'Preparacao') {
-      return {
-        title: 'Sessao guiada de hoje',
-        action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e resolve um bloco curto sem saltar passos.`,
-        deliverable: 'A entrega de hoje deve mostrar o conceito revisto e pelo menos 2 exercicios ou questoes enfrentadas.',
-        prompt: 'Escreve no final: o topico estudado, os exercicios tentados e o erro que mais se repetiu.'
-      };
+      return buildPlan(
+        `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e resolve um bloco curto sem saltar passos.`,
+        'A entrega de hoje deve mostrar o conceito revisto e pelo menos 2 exercicios ou questoes enfrentadas.',
+        'Escreve no final: o topico estudado, os exercicios tentados e o erro que mais se repetiu.',
+        'Se travar, volta a um exemplo resolvido e explica cada passo em voz baixa ou por escrito. Em exatas, o bloqueio costuma cair quando o metodo fica visivel.'
+      );
     }
 
-    return {
-      title: 'Sessao guiada de hoje',
-      action: `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e sai da sessao com uma prova concreta do que assentou.`,
-      deliverable: 'A entrega de hoje deve mostrar o que foi estudado, o que ficou claro e qual e o proximo bloco.',
-      prompt: 'Escreve no final: o que estudaste, o que entendeste e o proximo passo de amanha.'
-    };
+    return buildPlan(
+      `Fecha ${minimum} em ${currentStep.title.toLowerCase()} e sai da sessao com uma prova concreta do que assentou.`,
+      'A entrega de hoje deve mostrar o que foi estudado, o que ficou claro e qual e o proximo bloco.',
+      'Escreve no final: o que estudaste, o que entendeste e o proximo passo de amanha.',
+      'Se ainda estiver tudo vago, estreita o foco antes de comecar. O melhor bloco de hoje e aquele que consegues fechar e explicar no fim.'
+    );
   }
 
   function renderSoloAssistantPanel(mission, checkins) {
@@ -2563,6 +2589,7 @@
           </div>
           <div class="proof-panel-copy"><strong>Hoje:</strong> ${plan.action}</div>
           <div class="proof-item"><strong>Entrega de hoje</strong><span>${plan.deliverable}</span></div>
+          <div class="proof-item"><strong>Faz assim</strong><span>${plan.support}</span></div>
           <div class="proof-item"><strong>Como escrever a nota</strong><span>${plan.prompt}</span></div>
         </div>
         <div class="proof-panel" style="margin-bottom:14px">
