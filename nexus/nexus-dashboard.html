@@ -2564,6 +2564,46 @@
     );
   }
 
+  function getStudyNoteMentorResponse(mission, note) {
+    const cleanNote = (note || '').trim();
+    if (!cleanNote) return null;
+
+    const focus = mission.study_focus || mission.title || 'o teu tema';
+    const lower = cleanNote.toLowerCase();
+    const profile = getStudyTrack(mission);
+
+    let strength = `Hoje houve registo real em ${focus}. Isso ja vale mais do que estudar no escuro.`;
+    let review = 'Amanha comeca por 5 minutos a rever a tua propria nota antes de abrir material novo.';
+    let next = `Proximo passo: fecha mais um bloco curto em ${focus} e sai de novo com uma nota concreta.`;
+
+    if (lower.match(/entendi|percebi|aprendi|compreendi|descobri/)) {
+      strength = `Bom sinal: a tua nota mostra assimilacao, nao so presenca. Houve entendimento real no bloco de ${focus}.`;
+    }
+
+    if (lower.match(/duvida|confus|trav|erro|dificil|dif[ií]cil|nao entendi|não entendi/)) {
+      review = 'Na proxima sessao, ataca primeiro o ponto que te travou. Se precisares, volta a um exemplo menor antes de avançar.';
+      next = `Proximo passo: revisa o ponto confuso em ${focus}, resolve-o em versao simples e so depois segue para conteudo novo.`;
+    }
+
+    if (profile.lane === 'Codigo') {
+      next = 'Proximo passo: pega o conceito de hoje e transforma em um exemplo pequeno que rode sem ajuda.';
+      if (lower.match(/func|array|obj|dom|css|html|react|node|script/)) {
+        review = 'Antes de abrir o proximo topico, reescreve um exemplo com as tuas palavras e muda uma parte para ver se realmente dominaste.';
+      }
+    } else if (profile.lane === 'Idioma') {
+      next = 'Proximo passo: reutiliza o vocabulario de hoje em 3 frases novas ou numa resposta curta.';
+      review = 'Revisa as palavras novas em voz alta ou por escrito. O objetivo e usar, nao so reconhecer.';
+    } else if (profile.lane === 'Exatas' || profile.lane === 'Preparacao') {
+      next = 'Proximo passo: resolve mais 2 questoes do mesmo tipo antes de misturar assuntos.';
+      review = 'Revisa o procedimento que te levou ao erro. Em exatas, o metodo vale mais do que a sensacao de entender.';
+    } else if (`${focus} ${mission.title || ''}`.toLowerCase().match(/filosof/)) {
+      next = 'Proximo passo: volta a ideia central de hoje e tenta compará-la com uma situacao real ou com uma pergunta do teu dia a dia.';
+      review = 'Revisa a tua nota e sublinha a pergunta principal. Em filosofia, a clareza da pergunta guia o resto.';
+    }
+
+    return { strength, review, next };
+  }
+
   function renderSoloAssistantPanel(mission, checkins) {
     if (!mission) return '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sem assistente disponivel.</div>';
 
@@ -2575,6 +2615,7 @@
 
     if (mission.category === 'aprendizagem') {
       const plan = getStudySoloAssistantPlan(mission);
+      const mentor = lastNotes.length ? getStudyNoteMentorResponse(mission, lastNotes[0].note) : null;
       const notesHtml = lastNotes.length
         ? lastNotes.map(item => `<div class="proof-item"><strong>Dia ${item.day}</strong><span>${item.note}</span></div>`).join('')
         : `<div class="proof-panel-copy">Ainda nao existe nota de estudo guardada. Quando fechares o bloco de hoje, o teu registo aparece aqui para te tirar da sensacao de estar perdido.</div>`;
@@ -2589,14 +2630,26 @@
           </div>
           <div class="proof-panel-copy"><strong>Hoje:</strong> ${plan.action}</div>
           <div class="proof-item"><strong>Entrega de hoje</strong><span>${plan.deliverable}</span></div>
-          <div class="proof-item"><strong>Faz assim</strong><span>${plan.support}</span></div>
-          <div class="proof-item"><strong>Como escrever a nota</strong><span>${plan.prompt}</span></div>
-        </div>
-        <div class="proof-panel" style="margin-bottom:14px">
-          <div class="proof-panel-head">
-            <div>
-              <div class="proof-panel-kicker">Registro recente</div>
-              <div class="proof-panel-title">Notas que ja ficaram no caminho</div>
+            <div class="proof-item"><strong>Faz assim</strong><span>${plan.support}</span></div>
+            <div class="proof-item"><strong>Como escrever a nota</strong><span>${plan.prompt}</span></div>
+          </div>
+          ${mentor ? `
+          <div class="proof-panel" style="margin-bottom:14px">
+            <div class="proof-panel-head">
+              <div>
+                <div class="proof-panel-kicker">Leitura da tua nota</div>
+                <div class="proof-panel-title">Resposta do assistente</div>
+              </div>
+            </div>
+            <div class="proof-item"><strong>O que ficou claro</strong><span>${mentor.strength}</span></div>
+            <div class="proof-item"><strong>O que revisar</strong><span>${mentor.review}</span></div>
+            <div class="proof-item"><strong>Amanha</strong><span>${mentor.next}</span></div>
+          </div>` : ''}
+          <div class="proof-panel" style="margin-bottom:14px">
+            <div class="proof-panel-head">
+              <div>
+                <div class="proof-panel-kicker">Registro recente</div>
+                <div class="proof-panel-title">Notas que ja ficaram no caminho</div>
             </div>
           </div>
           <div class="proof-history">${notesHtml}</div>
