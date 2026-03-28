@@ -1919,9 +1919,11 @@
         document.getElementById('bottom-grid').style.display = 'grid';
         await buildCalendar();
         loadStreak();
+        loadVertice(activeMission.id);
         loadMessages();
         checkRivalActivity();
         checkPortaAberta();
+        renderDayCommunityBanner();
         checkCommunitySuggestion();
         if (!chatInterval) {
           chatInterval = setInterval(() => { loadMessages(); checkRivalActivity(); }, 8000);
@@ -1929,6 +1931,7 @@
         } else {
           activeMission = null;
           lastStreakData = null;
+          clearTopBanners();
           document.getElementById('stat-days').textContent = 0;
           document.getElementById('stat-streak').textContent = 0;
           document.getElementById('stat-brio').textContent = 0;
@@ -1940,6 +1943,7 @@
         activeMission = null;
         lastStreakData = null;
         selectedMissionId = null;
+        clearTopBanners();
         document.getElementById('mission-switcher').innerHTML = '';
         document.getElementById('stat-days').textContent = 0;
         document.getElementById('stat-streak').textContent = 0;
@@ -1954,6 +1958,7 @@
       }
     } catch(err) {
       console.error(err);
+      clearTopBanners();
       document.getElementById('mission-switcher').innerHTML = '';
       document.getElementById('mission-area').innerHTML = `
         <div class="empty-state">
@@ -3901,6 +3906,85 @@
   // ============================================
   // SUGESTÃO DE COMUNIDADE
   // ============================================
+  function getCurrentMissionDay(mission) {
+    if (!mission || !mission.started_at) return 0;
+    const started = new Date(mission.started_at);
+    const today = new Date();
+    return Math.floor((today - started) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  function clearTopBanners() {
+    ['community-day-banner', 'vertice-bar'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
+  }
+
+  function renderDayCommunityBanner() {
+    if (!activeMission || activeMission.status !== 'active') return;
+
+    const area = document.getElementById('mission-area');
+    if (!area) return;
+
+    const dayNum = getCurrentMissionDay(activeMission);
+    const dismissed = localStorage.getItem(`nexus_day10_community_${activeMission.id}`);
+    const existing = document.getElementById('community-day-banner');
+    if (existing) existing.remove();
+
+    if (dayNum !== 10 || dismissed) return;
+
+    const completedCheckins = latestMissionCheckins.filter(item => item.completed).length;
+    const canRead = completedCheckins >= 5;
+    const categoryLabel = activeMission.category === 'fitness'
+      ? 'Fitness & Academia'
+      : activeMission.category === 'aprendizagem'
+        ? 'Aprendizagem'
+        : activeMission.category === 'habito'
+          ? 'Habitos Diarios'
+          : activeMission.category === 'criatividade'
+            ? 'Criatividade'
+            : 'a tua comunidade';
+
+    const title = canRead
+      ? `Dia 10: a comunidade de ${categoryLabel} ja abriu leitura para ti`
+      : `Dia 10: ja vale entrar na comunidade de ${categoryLabel}`;
+
+    const copy = canRead
+      ? 'Entrar continua livre. Agora ja podes ler o forum e ver as missoes internas dessa categoria. Para publicar e criar la dentro, ainda precisas concluir 1 missao nessa categoria.'
+      : `Entrar continua livre, mas o Nexus desbloqueia a leitura so com compromisso real. Hoje estas com ${completedCheckins}/5 check-ins nesta categoria.`;
+
+    const meta = canRead
+      ? 'Leitura desbloqueada. Proximo passo: concluir 1 missao para ganhar voz.'
+      : `Faltam ${Math.max(0, 5 - completedCheckins)} check-ins para desbloquear a leitura.`;
+
+    const div = document.createElement('div');
+    div.id = 'community-day-banner';
+    div.className = 'suggest-card';
+    div.innerHTML = `
+      <div class="suggest-icon">◎</div>
+      <div class="suggest-body">
+        <div class="suggest-label">Convite do dia 10</div>
+        <h4>${title}</h4>
+        <div class="suggest-copy">${copy}</div>
+        <div class="suggest-meta">${meta}</div>
+        <div class="suggest-actions">
+          <button class="btn-suggest-yes" onclick="window.location.href='nexus-communities.html'">VER COMUNIDADES →</button>
+          <button class="btn-suggest-no" onclick="dismissDayCommunityBanner()">Agora nao</button>
+        </div>
+      </div>
+    `;
+
+    area.parentNode.insertBefore(div, area);
+  }
+
+  function dismissDayCommunityBanner() {
+    if (activeMission) {
+      localStorage.setItem(`nexus_day10_community_${activeMission.id}`, 'dismissed');
+    }
+    const banner = document.getElementById('community-day-banner');
+    if (banner) banner.remove();
+  }
+
   async function checkCommunitySuggestion() {
     if (!activeMission || activeMission.status !== 'active') return;
 
@@ -4152,18 +4236,19 @@
   // ============================================
   // GRANDE IRMAO
   // ============================================
-  async function loadVertice() {
+  async function loadVertice(missionId = null) {
     try {
-      const res = await fetch(`${API}/api/vertice/message`, {
+      const targetMissionId = missionId || activeMission?.id || null;
+      const ex = document.getElementById('vertice-bar');
+      if (ex) ex.remove();
+      if (!targetMissionId) return;
+
+      const res = await fetch(`${API}/api/vertice/message?mission_id=${targetMissionId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) return;
       const data = await res.json();
       if (!data.message) return;
-
-      // Remover anterior
-      const ex = document.getElementById('vertice-bar');
-      if (ex) ex.remove();
 
       // Criar elemento
       const div = document.createElement('div');
