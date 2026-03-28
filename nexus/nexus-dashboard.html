@@ -1462,6 +1462,7 @@
 
     <!-- MISSÃO ATIVA -->
     <p class="section-label">Missão ativa</p>
+    <div id="mission-switcher"></div>
     <div id="mission-area" data-section="missions">
       <div class="empty-state">
         <h3>NENHUMA MISSÃO ATIVA</h3>
@@ -1847,9 +1848,15 @@
   }
 
   function renderMissionSelector(missions) {
-    if (!missions || missions.length <= 1) return '';
+    const host = document.getElementById('mission-switcher');
+    if (!host) return '';
 
-    return `
+    if (!missions || missions.length <= 1) {
+      host.innerHTML = '';
+      return '';
+    }
+
+    const html = `
       <div style="display:grid;gap:10px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
@@ -1869,6 +1876,8 @@
         `).join('')}
         </div>
       </div>`;
+    host.innerHTML = html;
+    return '';
   }
 
   function selectMission(missionId) {
@@ -1929,6 +1938,7 @@
         activeMission = null;
         lastStreakData = null;
         selectedMissionId = null;
+        document.getElementById('mission-switcher').innerHTML = '';
         document.getElementById('stat-days').textContent = 0;
         document.getElementById('stat-streak').textContent = 0;
         document.getElementById('stat-brio').textContent = 0;
@@ -1942,6 +1952,7 @@
       }
     } catch(err) {
       console.error(err);
+      document.getElementById('mission-switcher').innerHTML = '';
       document.getElementById('mission-area').innerHTML = `
         <div class="empty-state">
           <h3>NAO DEU PRA CARREGAR A MISSAO</h3>
