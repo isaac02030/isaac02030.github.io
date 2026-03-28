@@ -2646,6 +2646,42 @@
       return `Sobre ${focus}: ${plan.action} Se quiseres, pergunta "o que eu faco hoje?", "como escrevo a nota?" ou "o que revisar amanha?".`;
     }
 
+    if (mission.category === 'fitness') {
+      const lowerTitle = `${mission.title || ''} ${mission.description || ''}`.toLowerCase();
+      const lastProof = (checkins || [])
+        .filter(item => item.completed && item.note && item.note.trim())
+        .sort((a, b) => b.day - a.day)[0]?.note;
+      const minimum = mission.daily_minimum || '1 treino completo';
+      const windowText = mission.commitment_window || 'a janela que definiste';
+
+      if (lower.match(/hoje|agora|fa[cç]o|por onde|comec|começ/)) {
+        if (lowerTitle.match(/corrid|caminh|run|cardio/)) {
+          return `Hoje fecha ${minimum} dentro de ${windowText}. Comeca leve nos primeiros minutos, segura o ritmo principal e termina com um registo curto da distancia ou duracao.`;
+        }
+        return `Hoje fecha ${minimum} dentro de ${windowText}. Escolhe um treino que consigas realmente concluir e sai com uma prova curta do que foi feito.`;
+      }
+
+      if (lower.match(/prova|registr|regist|check/)) {
+        return 'Na prova, deixa 3 coisas: tipo de treino, duracao ou distancia, e o que realmente foi feito. O objetivo e provar, nao enfeitar.';
+      }
+
+      if (lower.match(/trav|sem vontade|pregui|cansad|desist/)) {
+        return `${mission.fallback_plan || 'Se falhar hoje, amanha volta com uma versao minima sem negociar.'} Se o dia estiver pesado, reduz o volume, mas nao deixa o treino desaparecer.`;
+      }
+
+      if (lower.match(/3 dias|tres dias|plano/)) {
+        return 'Plano de 3 dias: Dia 1 fecha o minimo completo e deixa prova curta. Dia 2 repete em versao sustentavel, sem exagerar. Dia 3 faz revisao do corpo: mantem o ritmo, ajusta o volume e protege a sequencia.';
+      }
+
+      if (lower.match(/amanh|depois|proxim/)) {
+        return lastProof
+          ? `Amanha usa a ultima prova como referencia: ${lastProof}. O foco nao e inventar moda, e repetir consistencia com um bloco que caiba no teu dia.`
+          : 'Amanha repete a logica: fecha o minimo, deixa prova curta e protege a sequencia antes de pensar em intensidade.';
+      }
+
+      return `Hoje no fitness: fecha ${minimum}, deixa prova concreta e protege a tua janela. Se quiseres, pergunta "o que eu faco hoje?", "como registro a prova?" ou "me da um plano de 3 dias".`;
+    }
+
     const proofMode = getProofModeLabel(mission.proof_mode || 'self_report');
     if (lower.match(/hoje|agora|fa[cç]o|comec|começ/)) {
       return `Hoje fecha ${mission.daily_minimum || 'o minimo diario'} em ${mission.commitment_window || 'uma janela clara'} e deixa uma prova em ${proofMode}.`;
@@ -2790,10 +2826,11 @@
             <div class="proof-panel-title">Foco na tua missao de hoje</div>
           </div>
         </div>
-        <div class="proof-panel-copy">Exemplos: "o que eu faco hoje?" ou "o que fazer se eu travar?"</div>
+        <div class="proof-panel-copy">Exemplos: "o que eu faco hoje?", "como registro a prova?" ou "me da um plano de 3 dias".</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('o que eu faco hoje?')">O que faco hoje?</button>
-          <button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('o que fazer se eu travar?')">Se eu travar?</button>
+          <button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('${mission.category === 'fitness' ? 'como registro a prova?' : 'o que fazer se eu travar?'}')">${mission.category === 'fitness' ? 'Como registro a prova?' : 'Se eu travar?'}</button>
+          ${mission.category === 'fitness' ? `<button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('me da um plano de 3 dias')">Plano de 3 dias</button>` : ''}
         </div>
         <div style="display:grid;gap:10px">
           <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual...">
