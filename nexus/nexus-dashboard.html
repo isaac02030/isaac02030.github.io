@@ -2699,12 +2699,39 @@
 
   function askSoloAssistantWith(question) {
     if (!activeMission || activeMission.mode !== 'solo') return;
-    const answer = getSoloAssistantAnswer(activeMission, question, latestMissionCheckins);
+    runSoloAssistantQuestion(question);
+  }
+
+  async function runSoloAssistantQuestion(question) {
+    if (!activeMission || activeMission.mode !== 'solo') return;
+
+    const fallbackAnswer = getSoloAssistantAnswer(activeMission, question, latestMissionCheckins);
+    let answer = fallbackAnswer;
+
+    try {
+      const res = await fetch(`${API}/api/assistant/mission`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          mission_id: activeMission.id,
+          question
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.answer) {
+        answer = data.answer;
+      }
+    } catch (err) {}
+
     latestAssistantExchange = { missionId: activeMission.id, question, answer };
     renderChatExperience();
   }
 
-  function askSoloAssistant() {
+  async function askSoloAssistant() {
     if (!activeMission || activeMission.mode !== 'solo') return;
     const input = document.getElementById('solo-assistant-question');
     if (!input) return;
@@ -2714,10 +2741,8 @@
       return;
     }
 
-    const answer = getSoloAssistantAnswer(activeMission, question, latestMissionCheckins);
-    latestAssistantExchange = { missionId: activeMission.id, question, answer };
     input.value = '';
-    renderChatExperience();
+    await runSoloAssistantQuestion(question);
   }
 
   function renderSoloAssistantPanel(mission, checkins) {
