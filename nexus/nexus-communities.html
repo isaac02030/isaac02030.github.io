@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root{--bg:#0b1018;--panel:#131a26;--panel2:#1a2232;--text:#f5f7fb;--muted:#9ca8be;--accent:#ff7a18;--accent2:#ffb347;--border:rgba(255,255,255,.08);--radius:22px}
-    *{box-sizing:border-box} body{margin:0;font-family:"Segoe UI",sans-serif;background:linear-gradient(180deg,#070a11,#0b1018);color:var(--text)}
+    *{box-sizing:border-box} body{margin:0;font-family:"Segoe UI",sans-serif;background:linear-gradient(180deg,#070a11,#0b1018);color:var(--text);overflow-x:hidden}
     .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
     .sidebar{padding:28px 20px;border-right:1px solid var(--border);background:rgba(8,12,20,.92);display:flex;flex-direction:column;gap:24px}
     .logo{font-size:30px;font-weight:900;letter-spacing:.18em}.logo em{font-style:normal;color:var(--accent)}
@@ -57,8 +57,9 @@
     .modal-wrap{position:fixed;inset:0;background:rgba(5,8,14,.76);display:none;align-items:center;justify-content:center;padding:20px}.modal-wrap.show{display:flex}.modal{width:min(560px,100%);padding:22px}
     .field{display:flex;flex-direction:column;gap:8px;margin-top:14px} label{color:var(--muted);font-size:14px}
     .toast{position:fixed;right:24px;bottom:24px;padding:14px 16px;border-radius:16px;border:1px solid var(--border);background:rgba(14,21,33,.96);opacity:0;transform:translateY(10px);transition:.2s ease;pointer-events:none}.toast.show{opacity:1;transform:translateY(0)}.toast.error{border-color:rgba(255,95,86,.35)}
+    .mobile-nav{display:none}
     @media (max-width:1040px){.layout{grid-template-columns:1fr}.detail-grid{flex-direction:column}.ranking{width:100%}.ladder{grid-template-columns:1fr}}
-    @media (max-width:640px){.main{padding:18px}.hero,.card,.detail-head,.forum,.ranking,.missions{padding:18px}.input-row,.actions{flex-direction:column}.meta{grid-template-columns:1fr}}
+    @media (max-width:640px){.main{padding:18px 18px 110px}.hero,.card,.detail-head,.forum,.ranking,.missions{padding:18px}.input-row,.actions{flex-direction:column}.meta{grid-template-columns:1fr}.mobile-nav{position:fixed;left:14px;right:14px;bottom:14px;z-index:80;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:10px;border:1px solid var(--border);border-radius:22px;background:rgba(8,12,20,.94);backdrop-filter:blur(16px);box-shadow:0 18px 40px rgba(0,0,0,.35)}.mobile-nav a{text-decoration:none;color:var(--muted);min-height:48px;border:1px solid var(--border);border-radius:16px;display:grid;place-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,.03)}.mobile-nav a.active{color:var(--text);border-color:rgba(255,122,24,.35);background:rgba(255,122,24,.1)}}
   </style>
 </head>
 <body>
@@ -125,6 +126,12 @@
       </section>
     </main>
   </div>
+  <nav class="mobile-nav" aria-label="Navegacao mobile">
+    <a href="nexus-dashboard.html">Dashboard</a>
+    <a href="nexus-dashboard.html">Missoes</a>
+    <a href="nexus-communities.html" class="active">Comunidades</a>
+    <a href="nexus-profile.html">Perfil</a>
+  </nav>
 
   <div class="modal-wrap" id="modal-overlay">
     <div class="modal">

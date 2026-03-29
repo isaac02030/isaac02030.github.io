@@ -29,7 +29,7 @@
   }
 
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
   #cur{position:fixed;width:8px;height:8px;background:var(--fire);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);}
   #cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(255,92,0,0.3);border-radius:50%;pointer-events:none!important;z-index:-1;transform:translate(-50%,-50%);transition:opacity .2s;}
 
@@ -113,6 +113,7 @@
   .class-bar-wrap{height:4px;background:rgba(240,237,230,0.08);margin-top:8px;}
   .class-bar-fill{height:100%;background:var(--fire);transition:width .6s ease;}
   .class-next{font-size:11px;color:var(--muted);margin-top:6px;text-align:right;}
+  .mobile-nav{display:none;}
 
   /* HISTÓRICO */
   .history-list{display:flex;flex-direction:column;gap:2px;background:var(--border);}
@@ -507,6 +508,10 @@
     .history-item{
       grid-template-columns:1fr;
     }
+    .main{padding:0 0 100px;}
+    .mobile-nav{position:fixed;left:14px;right:14px;bottom:14px;z-index:80;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px;border:1px solid var(--border);border-radius:22px;background:rgba(8,12,20,.94);backdrop-filter:blur(16px);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+    .mobile-nav a{text-decoration:none;color:var(--muted);min-height:48px;border:1px solid var(--border);border-radius:16px;display:grid;place-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,.03)}
+    .mobile-nav a.active{color:var(--text);border-color:rgba(255,92,0,.35);background:rgba(255,92,0,.1)}
   }
 </style>
 </head>
@@ -629,6 +634,11 @@
 
   </main>
 </div>
+<nav class="mobile-nav" aria-label="Navegacao mobile">
+  <a href="nexus-dashboard.html">Dashboard</a>
+  <a href="nexus-communities.html">Comunidades</a>
+  <a href="nexus-profile.html" class="active">Perfil</a>
+</nav>
 
 <script>
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
