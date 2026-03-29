@@ -2753,6 +2753,8 @@
 
     const fallbackAnswer = getSoloAssistantAnswer(activeMission, question, latestMissionCheckins);
     let answer = fallbackAnswer;
+    let source = 'fallback';
+    let model = null;
 
     try {
       const res = await fetch(`${API}/api/assistant/mission`, {
@@ -2770,10 +2772,12 @@
       const data = await res.json();
       if (res.ok && data.answer) {
         answer = data.answer;
+        source = data.source || 'openai';
+        model = data.model || null;
       }
     } catch (err) {}
 
-    latestAssistantExchange = { missionId: activeMission.id, question, answer };
+    latestAssistantExchange = { missionId: activeMission.id, question, answer, source, model };
     renderChatExperience();
   }
 
@@ -2860,7 +2864,8 @@
               <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
             </div>
             ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
-            <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>` : ''}
+            <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
+            <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>` : ''}
           </div>
           <div style="display:grid;gap:10px">
             <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
@@ -2913,7 +2918,8 @@
           <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
         </div>
         ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
-        <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>` : ''}
+        <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
+        <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>` : ''}
       </div>
       <button class="btn-send" type="button" style="width:100%" onclick="doCheckin()">ABRIR REGISTO DE HOJE</button>
     `;
