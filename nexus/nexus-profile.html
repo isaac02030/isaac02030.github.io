@@ -526,6 +526,10 @@
       <label>Bio</label>
       <textarea id="edit-bio" rows="3" placeholder="Conta algo sobre ti..." style="resize:none"></textarea>
     </div>
+    <div class="field">
+      <label>Foto (link)</label>
+      <input type="url" id="edit-avatar-url" placeholder="https://...">
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">CANCELAR</button>
       <button class="btn-save" onclick="saveProfile()">GUARDAR →</button>
@@ -653,7 +657,26 @@
   function openEdit() {
     document.getElementById('edit-username').value = user.username || '';
     document.getElementById('edit-bio').value = user.bio || '';
+    document.getElementById('edit-avatar-url').value = user.avatar_url || '';
     document.getElementById('modal').classList.add('open');
+  }
+
+  function renderProfileAvatar() {
+    const profileAvatar = document.getElementById('profile-avatar');
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    if (!profileAvatar || !sidebarAvatar || !user) return;
+
+    const initial = (user.username || '?').charAt(0).toUpperCase();
+    const avatarUrl = user.avatar_url || '';
+
+    if (avatarUrl) {
+      const imgMarkup = `<img src="${avatarUrl}" alt="Foto de ${user.username}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+      profileAvatar.innerHTML = imgMarkup;
+      sidebarAvatar.innerHTML = imgMarkup;
+    } else {
+      profileAvatar.textContent = initial;
+      sidebarAvatar.textContent = initial;
+    }
   }
 
   // Sistema de classes
@@ -714,6 +737,7 @@
     if (!token || !userData) { window.location.href = 'nexus-auth.html'; return; }
 
     user = JSON.parse(userData);
+
     try {
       await syncSessionUser();
     } catch (err) {
@@ -722,9 +746,7 @@
     }
 
     // Preencher dados básicos
-    const initial = user.username[0].toUpperCase();
-    document.getElementById('profile-avatar').textContent = initial;
-    document.getElementById('sidebar-avatar').textContent = initial;
+    renderProfileAvatar();
     document.getElementById('sidebar-username').textContent = user.username;
     document.getElementById('profile-name').innerHTML =
       user.username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
@@ -808,8 +830,12 @@
   async function saveProfile() {
     const username = document.getElementById('edit-username').value.trim();
     const bio      = document.getElementById('edit-bio').value.trim();
+    const avatarUrl = document.getElementById('edit-avatar-url').value.trim();
 
     if (!username) return toast('Username não pode estar vazio.', 'error');
+    if (avatarUrl && !/^https?:\/\//i.test(avatarUrl)) {
+      return toast('A foto precisa ser um link http ou https.', 'error');
+    }
 
     try {
       const res = await fetch(`${API}/api/users/profile`, {
@@ -818,7 +844,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ username, bio })
+        body: JSON.stringify({ username, bio, avatar_url: avatarUrl })
       });
 
       const data = await res.json();
@@ -838,8 +864,7 @@
         username.toUpperCase().replace(/(.*)/, '<span>$1</span>');
       document.getElementById('profile-bio').textContent = bio || 'Sem bio ainda.';
       document.getElementById('sidebar-username').textContent = username;
-      document.getElementById('sidebar-avatar').textContent = username[0].toUpperCase();
-      document.getElementById('profile-avatar').textContent = username[0].toUpperCase();
+      renderProfileAvatar();
 
       document.getElementById('modal').classList.remove('open');
       toast('Perfil atualizado! ✓');
