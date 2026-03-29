@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus | Offline</title>
+  <meta name="theme-color" content="#ff6a1a">
+  <style>
+    :root {
+      --bg: #09111a;
+      --panel: #101926;
+      --line: rgba(255,255,255,0.08);
+      --text: #f4f7fb;
+      --muted: #93a0b2;
+      --accent: #ff6a1a;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,106,26,0.18), transparent 30%),
+        linear-gradient(180deg, #08111a 0%, #0b131d 100%);
+      color: var(--text);
+    }
+
+    .card {
+      width: min(100%, 460px);
+      padding: 28px;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 7vw, 3rem);
+      line-height: 0.95;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), #ff914d);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">Nexus offline</div>
+    <h1>Sem conexão agora.</h1>
+    <p>O Nexus segura o essencial, mas esta parte precisa de internet para sincronizar a tua missão e o teu progresso.</p>
+    <button onclick="window.location.reload()">Tentar de novo</button>
+  </main>
+</body>
+</html>

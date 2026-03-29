@@ -1,13 +1,15 @@
 {
-  "name": "Nexus - O teu objetivo primeiro",
+  "name": "Nexus",
   "short_name": "Nexus",
-  "id": "/nexus/nexus-dashboard.html",
-  "description": "Define um objetivo. Encontra um rival. 30 dias de foco real.",
-  "start_url": "/nexus/nexus-dashboard.html?source=pwa",
+  "description": "Ferramenta de compromisso real para concluir metas de 30 dias.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "id": "/nexus/",
+  "start_url": "/nexus/",
   "scope": "/nexus/",
   "display": "standalone",
-  "background_color": "#0A0A08",
-  "theme_color": "#FF5C00",
+  "background_color": "#0b1118",
+  "theme_color": "#ff6a1a",
   "orientation": "portrait",
   "icons": [
     {
@@ -21,13 +23,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshot.png",
-      "sizes": "390x844",
-      "type": "image/png"
     }
   ]
 }

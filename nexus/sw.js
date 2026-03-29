@@ -1,28 +1,117 @@
-// ============================================
-// NEXUS - Service Worker
-// Cache + Push Notifications
-// ============================================
-
-const CACHE = 'nexus-v5';
-const ASSETS = [
+const STATIC_CACHE = 'nexus-static-v7';
+const PAGE_CACHE = 'nexus-pages-v7';
+const API_CACHE = 'nexus-api-v7';
+const OFFLINE_URL = '/nexus/offline.html';
+const STATIC_ASSETS = [
   '/nexus/',
   '/nexus/index.html',
   '/nexus/nexus-auth.html',
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&display=swap'
+  '/nexus/manifest.json',
+  '/nexus/nexus-logo.svg',
+  '/nexus/icon-192.png',
+  '/nexus/icon-512.png',
+  OFFLINE_URL
 ];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys
+        .filter(key => ![STATIC_CACHE, PAGE_CACHE, API_CACHE].includes(key))
+        .map(key => caches.delete(key))
+    ))
+  );
+  self.clients.claim();
+});
+
+function isApiRequest(request) {
+  return request.url.includes('railway.app') || request.url.includes('/api/');
+}
+
+function isStaticAsset(request) {
+  return ['style', 'script', 'image', 'font'].includes(request.destination);
+}
+
+async function networkFirst(request, cacheName, fallbackUrl = null) {
+  const cache = await caches.open(cacheName);
+  try {
+    const response = await fetch(request);
+    if (request.method === 'GET' && response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    if (fallbackUrl) {
+      const fallback = await caches.match(fallbackUrl);
+      if (fallback) return fallback;
+    }
+    throw error;
+  }
+}
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (request.method === 'GET' && response.ok) {
+    cache.put(request, response.clone());
+  }
+  return response;
+}
+
+self.addEventListener('fetch', event => {
+  const { request } = event;
+
+  if (request.method !== 'GET') return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, PAGE_CACHE, OFFLINE_URL));
+    return;
+  }
+
+  if (isApiRequest(request)) {
+    event.respondWith(networkFirst(request, API_CACHE));
+    return;
+  }
+
+  if (isStaticAsset(request)) {
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then(cached => cached || fetch(request))
+  );
+});
 
 self.addEventListener('push', event => {
   if (!event.data) return;
 
-  const data = event.data.json();
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (error) {
+    data = { title: 'Nexus', body: event.data.text() };
+  }
 
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
+    self.registration.showNotification(data.title || 'Nexus', {
+      body: data.body || 'Ha algo a proteger hoje.',
       icon: '/nexus/icon-192.png',
       badge: '/nexus/icon-192.png',
       data: { url: data.url || '/nexus/nexus-dashboard.html' },
-      vibrate: [200, 100, 200],
+      vibrate: [180, 80, 180],
       requireInteraction: false
     })
   );
@@ -30,68 +119,16 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const url = event.notification.data?.url || '/nexus/nexus-dashboard.html';
+  const targetUrl = event.notification.data?.url || '/nexus/nexus-dashboard.html';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes('nexus') && 'focus' in client) {
-          return client.focus();
-        }
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      const existing = clientList.find(client => client.url.includes('/nexus/'));
+      if (existing) {
+        existing.navigate(targetUrl);
+        return existing.focus();
       }
-
-      if (clients.openWindow) return clients.openWindow(url);
-    })
-  );
-});
-
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))
-    )
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', event => {
-  if (event.request.url.includes('railway.app')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // HTML always goes to the network first so deploys are reflected immediately.
-  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
-    event.respondWith(
-      fetch(event.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, clone));
-        return response;
-      }).catch(() =>
-        caches.match(event.request).then(cached => cached || caches.match('/nexus/index.html'))
-      )
-    );
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(event.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, clone));
-        return response;
-      }).catch(() => {
-        if (event.request.destination === 'document') {
-          return caches.match('/nexus/index.html');
-        }
-      });
+      return clients.openWindow(targetUrl);
     })
   );
 });
