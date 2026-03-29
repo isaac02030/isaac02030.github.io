@@ -1,11 +1,14 @@
-const STATIC_CACHE = 'nexus-static-v7';
-const PAGE_CACHE = 'nexus-pages-v7';
-const API_CACHE = 'nexus-api-v7';
+const STATIC_CACHE = 'nexus-static-v8';
+const PAGE_CACHE = 'nexus-pages-v8';
+const API_CACHE = 'nexus-api-v8';
 const OFFLINE_URL = '/nexus/offline.html';
 const STATIC_ASSETS = [
   '/nexus/',
   '/nexus/index.html',
   '/nexus/nexus-auth.html',
+  '/nexus/nexus-dashboard.html',
+  '/nexus/nexus-profile.html',
+  '/nexus/nexus-communities.html',
   '/nexus/manifest.json',
   '/nexus/nexus-logo.svg',
   '/nexus/icon-192.png',
@@ -22,11 +25,18 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys
-        .filter(key => ![STATIC_CACHE, PAGE_CACHE, API_CACHE].includes(key))
-        .map(key => caches.delete(key))
-    ))
+    (async () => {
+      if ('navigationPreload' in self.registration) {
+        await self.registration.navigationPreload.enable();
+      }
+
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter(key => ![STATIC_CACHE, PAGE_CACHE, API_CACHE].includes(key))
+          .map(key => caches.delete(key))
+      );
+    })()
   );
   self.clients.claim();
 });
@@ -76,7 +86,22 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, PAGE_CACHE, OFFLINE_URL));
+    event.respondWith((async () => {
+      const cache = await caches.open(PAGE_CACHE);
+      try {
+        const preloadResponse = await event.preloadResponse;
+        const response = preloadResponse || await fetch(request);
+        if (response.ok) {
+          cache.put(request, response.clone());
+        }
+        return response;
+      } catch (error) {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        const fallback = await caches.match(OFFLINE_URL);
+        return fallback || Response.error();
+      }
+    })());
     return;
   }
 

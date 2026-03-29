@@ -1,9 +1,13 @@
 ﻿<!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus - Comunidades</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff6a1a">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root{--bg:#0b1018;--panel:#131a26;--panel2:#1a2232;--text:#f5f7fb;--muted:#9ca8be;--accent:#ff7a18;--accent2:#ffb347;--border:rgba(255,255,255,.08);--radius:22px}
     *{box-sizing:border-box} body{margin:0;font-family:"Segoe UI",sans-serif;background:linear-gradient(180deg,#070a11,#0b1018);color:var(--text)}
@@ -316,6 +320,9 @@
     window.addEventListener('focus', () => { refreshCommunityProgress(); });
     document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshCommunityProgress(); });
     async function init(){ token=localStorage.getItem('nexus_token'); const userData=localStorage.getItem('nexus_user'); if(!token||!userData){ window.location.href='nexus-auth.html'; return; } user=JSON.parse(userData); document.getElementById('sidebar-avatar').textContent=user.username[0].toUpperCase(); document.getElementById('sidebar-username').textContent=user.username; await loadCommunities(); }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
     init();
   </script>
 </body>
