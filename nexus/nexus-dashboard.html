@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1526,6 +1526,7 @@
   let activeMission = null;
   let openMissions = [];
   let selectedMissionId = null;
+  let latestVerticeRequestId = 0;
   let lastMissionTemplateCategory = null;
   let lastStreakData = null;
   let latestMissionCheckins = [];
@@ -1790,6 +1791,9 @@
       'Onde estÃƒÂ¡s agora': 'Onde estas agora'
     };
 
+    textMap['Modo de prova'] = 'Modo de prova';
+    textMap['O que queres fechar nestes 30 dias'] = 'O que queres fechar nestes 30 dias';
+
     modal.querySelectorAll('label').forEach(label => {
       const clean = textMap[label.textContent.trim()];
       if (clean) label.textContent = clean;
@@ -1847,6 +1851,44 @@
     if (mission.mode === 'parceiro') return 'Parceiro';
     if (mission.mode === 'rival') return 'Rival';
     return mission.status;
+  }
+
+  function getSelectedMission() {
+    return openMissions.find(m => String(m.id) === String(selectedMissionId)) || null;
+  }
+
+  function getMissionNavState() {
+    if (!openMissions || openMissions.length <= 1) {
+      return { index: 0, total: openMissions.length || 0, previous: null, next: null };
+    }
+
+    const index = Math.max(0, openMissions.findIndex(m => String(m.id) === String(selectedMissionId)));
+    const previous = openMissions[(index - 1 + openMissions.length) % openMissions.length];
+    const next = openMissions[(index + 1) % openMissions.length];
+
+    return { index, total: openMissions.length, previous, next };
+  }
+
+  function renderMissionInlineNav() {
+    if (!openMissions || openMissions.length <= 1) return '';
+
+    const current = getSelectedMission();
+    const { index, total, previous, next } = getMissionNavState();
+    if (!current || !previous || !next) return '';
+
+    return `
+      <div style="display:grid;gap:10px;margin-bottom:18px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
+            <div style="font-size:13px;color:var(--muted2);margin-top:4px">${index + 1} de ${total} no foco agora</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" onclick="selectMission(${previous.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);font-weight:700">← ${previous.title}</button>
+            <button type="button" onclick="selectMission(${next.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,92,0,0.34);background:rgba(255,92,0,0.12);color:#ffd7c2;font-weight:700">${next.title} →</button>
+          </div>
+        </div>
+      </div>`;
   }
 
   function renderMissionSelector(missions) {
@@ -1971,9 +2013,11 @@
 
   // Mostrar missao em espera de match
   function renderWaiting(mission, selectorHtml = '') {
+    const inlineNav = renderMissionInlineNav();
     document.getElementById('mission-area').innerHTML = `
       ${selectorHtml}
       <div class="mission-card" style="border-color:rgba(255,92,0,0.2)">
+        ${inlineNav}
         <div class="mission-top">
           <div class="mission-title">${mission.title}</div>
           <span class="mission-mode ${mission.mode}">${mission.mode.toUpperCase()}</span>
@@ -2162,9 +2206,11 @@
         </div>
       </div>` : '';
 
+    const inlineNav = renderMissionInlineNav();
     document.getElementById('mission-area').innerHTML = `
       ${selectorHtml}
       <div class="mission-card">
+        ${inlineNav}
         <div class="mission-top">
           <div class="mission-title">${m.title}</div>
           <span class="mission-mode ${m.mode}">${m.mode.toUpperCase()}</span>
@@ -4264,6 +4310,7 @@
   async function loadVertice(missionId = null) {
     try {
       const targetMissionId = missionId || activeMission?.id || null;
+      const requestId = ++latestVerticeRequestId;
       const ex = document.getElementById('vertice-bar');
       if (ex) ex.remove();
       if (!targetMissionId) return;
@@ -4274,6 +4321,8 @@
       if (!res.ok) return;
       const data = await res.json();
       if (!data.message) return;
+      if (requestId !== latestVerticeRequestId) return;
+      if (String(targetMissionId) !== String(selectedMissionId || activeMission?.id || '')) return;
 
       // Criar elemento
       const div = document.createElement('div');

@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nexus - Entrar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6a1a">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -28,6 +32,41 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  .app-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at top left, rgba(255, 106, 26, 0.18), transparent 28%),
+      linear-gradient(180deg, #071019 0%, #0a131d 100%);
+    transition: opacity .35s ease, visibility .35s ease;
+  }
+  .app-splash.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .app-splash-inner {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .app-splash-mark {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 36px rgba(255, 106, 26, 0.28));
+  }
+  .app-splash-wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .app-splash-wordmark em { color: var(--accent); font-style: normal; }
   body {
     min-height: 100vh;
     font-family: 'Manrope', sans-serif;
@@ -384,6 +423,13 @@
 </head>
 <body>
 
+<div class="app-splash" id="app-splash">
+  <div class="app-splash-inner">
+    <img class="app-splash-mark" src="nexus-logo.svg" alt="Logo do Nexus" loading="eager">
+    <div class="app-splash-wordmark">NEX<em>U</em>S</div>
+  </div>
+</div>
+
 <div class="auth-shell">
   <section class="showcase">
     <a href="index.html" class="brand">
@@ -612,6 +658,16 @@
   if (localStorage.getItem('nexus_token')) {
     window.location.href = 'nexus-dashboard.html';
   }
+
+  window.addEventListener('load', () => {
+    const splash = document.getElementById('app-splash');
+    if (splash) {
+      setTimeout(() => splash.classList.add('hidden'), 240);
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  });
 </script>
 </body>
 </html>
