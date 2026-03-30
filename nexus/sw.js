@@ -1,6 +1,6 @@
-const STATIC_CACHE = 'nexus-static-v8';
-const PAGE_CACHE = 'nexus-pages-v8';
-const API_CACHE = 'nexus-api-v8';
+const STATIC_CACHE = 'nexus-static-v9';
+const PAGE_CACHE = 'nexus-pages-v9';
+const API_CACHE = 'nexus-api-v9';
 const OFFLINE_URL = '/nexus/offline.html';
 const STATIC_ASSETS = [
   '/nexus/',

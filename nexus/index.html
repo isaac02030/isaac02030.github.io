@@ -171,6 +171,8 @@
     color: #fff;
     box-shadow: 0 20px 42px rgba(255, 106, 26, 0.24);
   }
+  .btn-install-app { display: none; }
+  .btn-install-app.visible { display: inline-flex; }
   .btn-ghost {
     color: var(--text);
     border-color: var(--line-strong);
@@ -603,6 +605,7 @@
       <a href="#processo">Processo</a>
     </nav>
     <div class="nav-actions">
+      <button type="button" class="btn btn-ghost btn-install-app" id="btn-install-app-nav">Instalar app</button>
       <a href="nexus-auth.html" class="btn btn-ghost">Entrar</a>
       <a href="nexus-auth.html" class="btn btn-primary">Comecar</a>
     </div>
@@ -621,6 +624,7 @@
           mantiveste ou quebraste a tua palavra.
         </p>
         <div class="hero-actions">
+          <button type="button" class="btn btn-ghost btn-install-app" id="btn-install-app-hero">Instalar app</button>
           <a href="nexus-auth.html" class="btn btn-primary">Comecar a missao</a>
           <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
         </div>
@@ -808,6 +812,50 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
+  });
+</script>
+<script>
+  let deferredInstallPrompt = null;
+
+  function renderInstallButtons(visible) {
+    document.querySelectorAll('.btn-install-app').forEach(button => {
+      button.classList.toggle('visible', !!visible);
+      button.onclick = installNexusApp;
+    });
+  }
+
+  async function installNexusApp() {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (choice.outcome === 'accepted') renderInstallButtons(false);
+    deferredInstallPrompt = null;
+  }
+
+  function normalizeLandingCopy() {
+    const previewLabel = document.querySelector('.preview-top span');
+    if (previewLabel) previewLabel.textContent = 'Missao ativa';
+
+    const footerSpans = document.querySelectorAll('footer .container span');
+    if (footerSpans[0]) footerSpans[0].textContent = 'NEXUS - compromisso sem feed';
+    if (footerSpans[1]) footerSpans[1].textContent = 'Frontend no GitHub Pages - Backend no Railway';
+  }
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    renderInstallButtons(true);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    renderInstallButtons(false);
+  });
+
+  window.addEventListener('load', () => {
+    normalizeLandingCopy();
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (standalone) renderInstallButtons(false);
   });
 </script>
 </body>

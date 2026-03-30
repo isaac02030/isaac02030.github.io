@@ -536,6 +536,14 @@
 <script>
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
 
+  function normalizeAuthCopy() {
+    const topLink = document.querySelector('.top-link');
+    if (topLink) topLink.textContent = '<- Voltar ao site';
+
+    const flowSteps = document.querySelectorAll('.flow-step span:last-child');
+    if (flowSteps[2]) flowSteps[2].textContent = 'Comecas o ciclo com calendario, placar e chat';
+  }
+
   function switchTab(tab) {
     const isRegister = tab === 'register';
     document.getElementById('tab-register').classList.toggle('active', isRegister);
@@ -546,6 +554,9 @@
     document.getElementById('form-sub').innerHTML = isRegister
       ? 'Já tens conta? <a href="#" onclick="switchTab(\'login\')">Entra aqui</a>'
       : 'Ainda não tens conta? <a href="#" onclick="switchTab(\'register\')">Regista-te</a>';
+    document.getElementById('form-sub').innerHTML = isRegister
+      ? 'Ja tens conta? <a href="#" onclick="switchTab(\'login\')">Entra aqui</a>'
+      : 'Ainda nao tens conta? <a href="#" onclick="switchTab(\'register\')">Regista-te</a>';
     hideMsg();
   }
 
@@ -591,7 +602,7 @@
 
     const confirm = document.getElementById('reg-confirm').value;
     if (password !== confirm) {
-      return showMsg('As passwords não coincidem.', 'error');
+      return showMsg('As senhas nao coincidem.', 'error');
     }
 
     setLoading('btn-register', true);
@@ -613,7 +624,7 @@
         setTimeout(() => window.location.href = 'nexus-dashboard.html', 1200);
       }
     } catch (err) {
-      showMsg('Erro de ligação ao servidor.', 'error');
+      showMsg('Erro de ligacao ao servidor.', 'error');
     } finally {
       setLoading('btn-register', false);
     }
@@ -641,7 +652,7 @@
       const data = await res.json();
 
       if (!res.ok) {
-        showMsg(data.error || 'Credenciais inválidas.', 'error');
+        showMsg(data.error || 'Credenciais invalidas.', 'error');
       } else {
         localStorage.setItem('nexus_token', data.token);
         localStorage.setItem('nexus_user', JSON.stringify(data.user));
@@ -649,7 +660,7 @@
         setTimeout(() => window.location.href = 'nexus-dashboard.html', 1200);
       }
     } catch (err) {
-      showMsg('Erro de ligação ao servidor.', 'error');
+      showMsg('Erro de ligacao ao servidor.', 'error');
     } finally {
       setLoading('btn-login', false);
     }
@@ -667,6 +678,8 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
+    normalizeAuthCopy();
+    switchTab(document.getElementById('tab-register').classList.contains('active') ? 'register' : 'login');
   });
 </script>
 </body>
