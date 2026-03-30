@@ -239,6 +239,26 @@
     margin-bottom: 36px;
   }
   .top-link:hover { color: var(--text); }
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .btn-install-app {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 11px 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-install-app.visible { display: inline-flex; }
   .form-header .tag {
     color: #ffd166;
     font-size: .75rem;
@@ -471,6 +491,8 @@
   <section class="auth-panel">
     <a href="index.html" class="top-link">← Voltar ao site</a>
 
+    <button type="button" class="btn-install-app" id="btn-install-app-auth" style="margin:-12px 0 24px">Instalar app</button>
+
     <div class="form-header">
       <div class="tag">Bem-vindo ao Nexus</div>
       <h1 id="form-title">Criar conta</h1>
@@ -535,6 +557,7 @@
 
 <script>
   const API = 'https://nexus-backend-production-3f61.up.railway.app';
+  let deferredInstallPrompt = null;
 
   function normalizeAuthCopy() {
     const topLink = document.querySelector('.top-link');
@@ -542,6 +565,21 @@
 
     const flowSteps = document.querySelectorAll('.flow-step span:last-child');
     if (flowSteps[2]) flowSteps[2].textContent = 'Comecas o ciclo com calendario, placar e chat';
+  }
+
+  function renderInstallButton(visible) {
+    const button = document.getElementById('btn-install-app-auth');
+    if (!button) return;
+    button.classList.toggle('visible', !!visible);
+    button.onclick = installNexusApp;
+  }
+
+  async function installNexusApp() {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (choice.outcome === 'accepted') renderInstallButton(false);
+    deferredInstallPrompt = null;
   }
 
   function switchTab(tab) {
@@ -670,6 +708,17 @@
     window.location.href = 'nexus-dashboard.html';
   }
 
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    renderInstallButton(true);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    renderInstallButton(false);
+  });
+
   window.addEventListener('load', () => {
     const splash = document.getElementById('app-splash');
     if (splash) {
@@ -680,6 +729,8 @@
     }
     normalizeAuthCopy();
     switchTab(document.getElementById('tab-register').classList.contains('active') ? 'register' : 'login');
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (standalone) renderInstallButton(false);
   });
 </script>
 </body>
