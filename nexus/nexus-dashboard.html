@@ -1618,6 +1618,7 @@
 
     await initPwa();
     normalizeMissionModalCopy();
+    normalizeDashboardChrome();
     initMissionDraftInputs();
     ensureInstallAppButton();
     ensureNotificationPrompt();
@@ -1845,6 +1846,50 @@
     if (confirm) confirm.textContent = 'CRIAR MISSAO ->';
   }
 
+  function normalizeDashboardChrome() {
+    const navMap = {
+      'nav-dashboard': ['D', 'Dashboard'],
+      'nav-missions': ['M', 'Missoes'],
+      'nav-chat': ['C', 'Chat'],
+      'nav-communities': ['G', 'Comunidades'],
+      'nav-profile': ['P', 'Perfil'],
+      'mobile-nav-dashboard': ['D', 'Dashboard'],
+      'mobile-nav-missions': ['M', 'Missoes'],
+      'mobile-nav-chat': ['C', 'Chat'],
+      'mobile-nav-communities': ['G', 'Comun.'],
+      'mobile-nav-profile': ['P', 'Perfil']
+    };
+
+    Object.entries(navMap).forEach(([id, config]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const icon = el.querySelector('.nav-icon');
+      const label = el.querySelector('span:not(.nav-icon):not(.notif-dot)');
+      if (icon) icon.textContent = config[0];
+      if (label) label.textContent = config[1];
+    });
+
+    document.querySelectorAll('.btn-logout').forEach(btn => { btn.textContent = 'X'; });
+
+    const guideCopy = document.getElementById('mission-guide-copy');
+    if (guideCopy) guideCopy.textContent = 'Define uma missao concreta, uma regra diaria clara e uma forma de recuperacao. O objetivo aqui nao e parecer motivado. E ficar executavel.';
+
+    const guideMode = document.getElementById('mission-guide-mode');
+    if (guideMode) guideMode.textContent = 'Modo: escolhe o tipo de pressao que melhor te faz agir.';
+
+    const guideProof = document.getElementById('mission-guide-proof');
+    if (guideProof) guideProof.textContent = 'Missao forte: minimo diario, janela, motivo real e plano para o dia em que falhares.';
+
+    const fitnessGuide = document.querySelector('#fitness-proof-modal .mission-onboarding-copy');
+    if (fitnessGuide) fitnessGuide.textContent = 'Em missoes fitness, o check-in pede uma prova curta. Nao precisa ser perfeita. Precisa ser concreta.';
+
+    const noteProofTitle = document.getElementById('note-proof-title');
+    if (noteProofTitle) noteProofTitle.textContent = 'PROVA DA MISSAO';
+
+    const noteProofCopy = document.getElementById('note-proof-copy');
+    if (noteProofCopy) noteProofCopy.textContent = 'Esta missao pede uma nota curta antes do check-in.';
+  }
+
   function getMissionBadge(mission) {
     if (mission.status === 'waiting') return 'Em espera';
     if (mission.mode === 'solo') return 'Solo';
@@ -1886,6 +1931,28 @@
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button type="button" onclick="selectMission(${previous.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);font-weight:700">← ${previous.title}</button>
             <button type="button" onclick="selectMission(${next.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,92,0,0.34);background:rgba(255,92,0,0.12);color:#ffd7c2;font-weight:700">${next.title} →</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderMissionInlineNav() {
+    if (!openMissions || openMissions.length <= 1) return '';
+
+    const current = getSelectedMission();
+    const { index, total, previous, next } = getMissionNavState();
+    if (!current || !previous || !next) return '';
+
+    return `
+      <div style="display:grid;gap:10px;margin-bottom:18px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Missoes abertas</div>
+            <div style="font-size:13px;color:var(--muted2);margin-top:4px">${index + 1} de ${total} no foco agora</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" onclick="selectMission(${previous.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);font-weight:700"><- ${previous.title}</button>
+            <button type="button" onclick="selectMission(${next.id})" style="padding:10px 14px;border-radius:14px;border:1px solid rgba(255,92,0,0.34);background:rgba(255,92,0,0.12);color:#ffd7c2;font-weight:700">${next.title} -></button>
           </div>
         </div>
       </div>`;
