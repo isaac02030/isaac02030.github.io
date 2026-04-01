@@ -1236,8 +1236,43 @@
     .mission-top{flex-direction:column;}
     .stats-row{grid-template-columns:1fr;}
     .score-section{grid-template-columns:1fr;}
+    .study-roadmap-grid,
+    .solo-focus-grid{grid-template-columns:1fr;}
+    .study-roadmap,
+    .proof-panel,
+    .solo-focus{padding:18px;}
+    .study-roadmap-head p,
+    .proof-panel-copy,
+    .solo-focus p{font-size:.95rem;line-height:1.6;}
+    .study-roadmap-stat,
+    .solo-focus-grid div{padding:14px;}
+    .study-roadmap-details summary{font-size:.95rem;}
+    .study-roadmap-details[open] summary{margin-bottom:12px;}
     .mobile-tabbar{display:grid;}
   }
+
+  .study-roadmap-details{
+    margin-top:14px;
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:18px;
+    background:rgba(255,255,255,0.02);
+    padding:14px 16px;
+  }
+  .study-roadmap-details summary{
+    cursor:pointer;
+    list-style:none;
+    font-weight:700;
+    color:var(--text);
+  }
+  .study-roadmap-details summary::-webkit-details-marker{display:none;}
+  .study-roadmap-details summary::after{
+    content:'Mostrar rota completa';
+    color:var(--muted2);
+    font-size:.88rem;
+    font-weight:500;
+    margin-left:8px;
+  }
+  .study-roadmap-details[open] summary::after{content:'Esconder detalhes';}
 </style>
 </head>
 <body>
@@ -1539,6 +1574,8 @@
   let latestCreativeSupportHtml = '';
   let latestHabitSupportHtml = '';
   let latestAssistantExchange = null;
+  let soloAssistantDraft = '';
+  let soloAssistantBusy = false;
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
   let deferredInstallPrompt = null;
@@ -1565,6 +1602,15 @@
     t.textContent = msg;
     t.className = 'toast show' + (type==='error' ? ' error' : '');
     setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // Auth
@@ -2155,7 +2201,24 @@
   }
 
   function renderMissionExitHtml(mission) {
-    if (!mission || !mission.partner_id || mission.mode === 'solo') return '';
+    if (!mission) return '';
+
+    if (mission.mode === 'solo' || !mission.partner_id) {
+      return `
+        <div style="margin-top:18px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,110,90,0.24);background:rgba(255,92,0,0.08)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;color:#ffb067;margin-bottom:8px">Se precisares sair</div>
+          <p style="margin:0 0 12px;color:var(--muted);line-height:1.5">
+            Podes encerrar esta missao solo se ela ja nao fizer sentido. O teu historico fica para tras, mas ela deixa de pesar no dashboard.
+          </p>
+          <button
+            type="button"
+            onclick="abandonMission(${mission.id})"
+            style="border:1px solid rgba(255,120,100,0.34);background:rgba(255,120,100,0.12);color:#ffd5cd;padding:12px 16px;border-radius:14px;font-weight:700;letter-spacing:.03em;cursor:pointer"
+          >
+            ENCERRAR MISSAO
+          </button>
+        </div>`;
+    }
 
     const counterpart = mission.partner_name || (mission.mode === 'rival' ? 'o rival' : 'a outra pessoa');
     const modeLabel = mission.mode === 'rival' ? 'rivalidade' : 'dupla';
@@ -2177,7 +2240,12 @@
   }
 
   async function abandonMission(missionId) {
-    const confirmed = confirm('Queres mesmo sair desta missao? A outra pessoa vai continuar em solo.');
+    const mission = openMissions.find(item => String(item.id) === String(missionId));
+    const confirmed = confirm(
+      mission && (mission.mode === 'solo' || !mission.partner_id)
+        ? 'Queres mesmo encerrar esta missao solo?'
+        : 'Queres mesmo sair desta missao? A outra pessoa vai continuar em solo.'
+    );
     if (!confirmed) return;
 
     try {
@@ -2819,6 +2887,10 @@
     runSoloAssistantQuestion(question);
   }
 
+  function updateSoloAssistantDraft(value) {
+    soloAssistantDraft = value || '';
+  }
+
   async function runSoloAssistantQuestion(question) {
     if (!activeMission || activeMission.mode !== 'solo') return;
 
@@ -2826,6 +2898,9 @@
     let answer = fallbackAnswer;
     let source = 'fallback';
     let model = null;
+    let fallbackReason = null;
+    soloAssistantBusy = true;
+    renderChatExperience();
 
     try {
       const res = await fetch(`${API}/api/assistant/mission`, {
@@ -2845,15 +2920,18 @@
         answer = data.answer;
         source = data.source || 'openai';
         model = data.model || null;
+        fallbackReason = data.fallback_reason || null;
       }
     } catch (err) {}
 
-    latestAssistantExchange = { missionId: activeMission.id, question, answer, source, model };
+    latestAssistantExchange = { missionId: activeMission.id, question, answer, source, model, fallbackReason };
+    soloAssistantBusy = false;
     renderChatExperience();
   }
 
   async function askSoloAssistant() {
     if (!activeMission || activeMission.mode !== 'solo') return;
+    if (soloAssistantBusy) return;
     const input = document.getElementById('solo-assistant-question');
     if (!input) return;
     const question = input.value.trim();
@@ -2862,6 +2940,7 @@
       return;
     }
 
+    soloAssistantDraft = '';
     input.value = '';
     await runSoloAssistantQuestion(question);
   }
@@ -2931,12 +3010,13 @@
               <button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('me da um plano de 3 dias')">Plano de 3 dias</button>
             </div>
             <div style="display:grid;gap:10px">
-              <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual...">
-              <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
+              <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual..." value="${escapeHtml(soloAssistantDraft)}" oninput="updateSoloAssistantDraft(this.value)">
+              <button class="btn-send" type="button" style="width:100%;${soloAssistantBusy ? 'opacity:.7;' : ''}" onclick="askSoloAssistant()" ${soloAssistantBusy ? 'disabled' : ''}>${soloAssistantBusy ? 'A PENSAR...' : 'PERGUNTAR'}</button>
             </div>
             ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
             <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
-            <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>` : ''}
+            <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>
+            ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${exchange.fallbackReason}</span></div>` : ''}` : ''}
           </div>
           <div style="display:grid;gap:10px">
             <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
@@ -2985,12 +3065,13 @@
           ${mission.category === 'fitness' ? `<button class="btn-send" type="button" style="width:auto;padding:10px 12px" onclick="askSoloAssistantWith('me da um plano de 3 dias')">Plano de 3 dias</button>` : ''}
         </div>
         <div style="display:grid;gap:10px">
-          <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual...">
-          <button class="btn-send" type="button" style="width:100%" onclick="askSoloAssistant()">PERGUNTAR</button>
+          <input id="solo-assistant-question" class="chat-input" placeholder="Pergunta algo sobre a tua missao atual..." value="${escapeHtml(soloAssistantDraft)}" oninput="updateSoloAssistantDraft(this.value)">
+          <button class="btn-send" type="button" style="width:100%;${soloAssistantBusy ? 'opacity:.7;' : ''}" onclick="askSoloAssistant()" ${soloAssistantBusy ? 'disabled' : ''}>${soloAssistantBusy ? 'A PENSAR...' : 'PERGUNTAR'}</button>
         </div>
         ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
         <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
-        <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>` : ''}
+        <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>
+        ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${exchange.fallbackReason}</span></div>` : ''}` : ''}
       </div>
       <button class="btn-send" type="button" style="width:100%" onclick="doCheckin()">ABRIR REGISTO DE HOJE</button>
     `;
@@ -3020,6 +3101,7 @@
   let lastMsgId = null;
   async function loadMessages() {
     if (!activeMission) return;
+    if (activeMission.mode === 'solo') return;
     if (renderChatExperience()) return;
     try {
       const res = await fetch(`${API}/api/messages/${activeMission.id}`, {
@@ -3644,7 +3726,7 @@
         <div class="study-roadmap-kicker">Missao assistida</div>
         <div class="study-roadmap-head">
           <h3>Rota de estudo: ${focus}</h3>
-          <p>O Nexus nao so cobra presenca. Tambem te lembra em que trilha estas, o que fecha este bloco e qual e o proximo passo executavel.</p>
+          <p>Menos teoria solta. Mais clareza sobre o que fechar hoje.</p>
         </div>
         ${dailyDirective}
         <div class="study-roadmap-grid">
@@ -3665,17 +3747,20 @@
             <span>${nextStep}</span>
           </div>
         </div>
-        <div class="proof-panel">
-          <div class="proof-panel-head">
-            <div>
-              <div class="proof-panel-kicker">Trilha ativa</div>
-              <div class="proof-panel-title">${profile.lane} - ${track[currentIndex]?.title || 'Base'}</div>
+        <details class="study-roadmap-details">
+          <summary>Ver rota completa e notas</summary>
+          <div class="proof-panel" style="margin-top:12px">
+            <div class="proof-panel-head">
+              <div>
+                <div class="proof-panel-kicker">Trilha ativa</div>
+                <div class="proof-panel-title">${profile.lane} - ${track[currentIndex]?.title || 'Base'}</div>
+              </div>
             </div>
+            <div class="proof-panel-copy">As notas abaixo servem para nao perderes o fio do que ja assentou e do que ainda pede revisao.</div>
+            <div class="proof-history">${studyNotesHtml}</div>
           </div>
-          <div class="proof-panel-copy">As notas de estudo abaixo servem para nao perderes o fio do que ja fechaste e do que ainda precisa de revisao.</div>
-          <div class="proof-history">${studyNotesHtml}</div>
-        </div>
-        <div class="study-roadmap-steps">${stepsHtml}</div>
+          <div class="study-roadmap-steps">${stepsHtml}</div>
+        </details>
       </div>
     `;
   }
