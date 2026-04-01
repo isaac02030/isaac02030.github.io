@@ -1613,6 +1613,26 @@
       .replace(/'/g, '&#39;');
   }
 
+  function formatAssistantFallbackReason(reason = '') {
+    const raw = String(reason || '').trim();
+    if (!raw) return 'A IA real nao respondeu agora.';
+
+    const lower = raw.toLowerCase();
+    if (lower.includes('quota') || lower.includes('billing') || lower.includes('plan')) {
+      return 'A IA real ficou indisponivel porque a conta da OpenAI esta sem credito ou com o limite atual atingido.';
+    }
+    if (lower.includes('timeout')) {
+      return 'A IA real demorou demais para responder e o Nexus voltou para o modo local.';
+    }
+    if (lower.includes('api key') || lower.includes('incorrect api key') || lower.includes('invalid api key')) {
+      return 'A chave da OpenAI nao foi aceite. O Nexus voltou para o modo local.';
+    }
+    if (lower.includes('model')) {
+      return 'O modelo configurado para a IA real nao respondeu. O Nexus voltou para o modo local.';
+    }
+    return 'A IA real ficou indisponivel agora. O Nexus voltou para o modo local para nao te deixar sem resposta.';
+  }
+
   // Auth
   function logout() {
     localStorage.removeItem('nexus_token');
@@ -3016,7 +3036,7 @@
             ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
             <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
             <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>
-            ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${exchange.fallbackReason}</span></div>` : ''}` : ''}
+            ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${formatAssistantFallbackReason(exchange.fallbackReason)}</span></div>` : ''}` : ''}
           </div>
           <div style="display:grid;gap:10px">
             <button class="btn-send" type="button" style="width:100%" onclick="openNoteProofModal('study_note')">ABRIR NOTA DE ESTUDO</button>
@@ -3071,7 +3091,7 @@
         ${exchange ? `<div class="proof-item" style="margin-top:12px"><strong>Tu perguntaste</strong><span>${exchange.question}</span></div>
         <div class="proof-item"><strong>Assistente</strong><span>${exchange.answer}</span></div>
         <div class="proof-item"><strong>Origem</strong><span>${exchange.source === 'openai' ? `IA real${exchange.model ? ` (${exchange.model})` : ''}` : 'Fallback local'}</span></div>
-        ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${exchange.fallbackReason}</span></div>` : ''}` : ''}
+        ${exchange.fallbackReason ? `<div class="proof-item"><strong>IA real indisponivel</strong><span>${formatAssistantFallbackReason(exchange.fallbackReason)}</span></div>` : ''}` : ''}
       </div>
       <button class="btn-send" type="button" style="width:100%" onclick="doCheckin()">ABRIR REGISTO DE HOJE</button>
     `;
