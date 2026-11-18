@@ -1,0 +1,168 @@
+/* Começo da missão: três passos no mesmo cartão da tela de entrar. */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.topo-passo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target);
+}
+
+.passo {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text-muted);
+}
+
+.btn-voltar {
+  padding-inline: var(--space-2);
+}
+
+.escolha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.carta {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.carta input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.carta-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.carta-nome {
+  font: var(--text-label);
+}
+
+.carta-texto {
+  color: var(--text-muted);
+}
+
+.carta-marca {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  margin-left: auto;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+}
+
+.carta.escolhida {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.carta.escolhida .carta-marca {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 4px var(--surface);
+}
+
+.carta:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.previa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.previa-linha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.previa-rotulo {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.previa-texto.vazio {
+  color: var(--text-muted);
+}
+
+.nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-left: 4px solid var(--accent);
+  border-radius: 0;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nota .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--accent-standout);
+}
+
+.nota p {
+  margin: 0;
+}
+
+.btn-bloco {
+  width: 100%;
+}

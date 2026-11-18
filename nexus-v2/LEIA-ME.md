@@ -45,4 +45,22 @@ O servidor antigo está desligado. Quando houver um servidor novo, troque só es
 
 ## O que esta tela ainda não faz
 
-O link "Esqueci a senha" fica escondido porque essa rota ainda não existe. Depois de entrar ou criar conta, a tela confirma e guarda a sessão neste aparelho. As telas seguintes (o começo da missão e o Hoje) ainda não foram feitas.
+O link "Esqueci a senha" fica escondido porque essa rota ainda não existe. Depois de entrar ou criar conta, a tela olha as missões. Sem missão ativa, abre o começo (`onboarding.html`). Com missão, abre o Hoje (`hoje.html`).
+
+## Começo da missão
+
+São 3 passos na mesma página. O que a pessoa escreve fica neste aparelho (`sessionStorage`) enquanto ela volta e avança.
+
+1. Escolhe Estudo ou Academia e escreve o objetivo. O exemplo fica numa ajuda embaixo do rótulo, não dentro do campo. Nada é enviado.
+2. Escreve por que importa e o mínimo do dia. O cartão de cima tem três linhas (o objetivo, o mínimo e o porquê) e muda enquanto ela digita. Nada é enviado.
+3. O horário já vem 20:00 e ela pode mudar. Pode ativar o aviso ou pular. No iPhone, se o app não estiver na Tela de Início, aparece um recado de como instalar. "Começar a missão" cria a missão.
+
+No mock, para ver os estados do começo:
+
+- Objetivo exatamente `falha` → o servidor de teste responde erro.
+- Objetivo exatamente `lento` → o botão fica em "Criando a missão…" por 8 segundos e depois cria.
+- E-mail `com-missao@exemplo.com` → depois de entrar, cai direto no Hoje.
+- Sem internet no passo 1 ou 2: "Sem internet. Assim que a conexão voltar, tente de novo."
+- Sem internet no passo 3: "Sem internet. A missão ainda não foi criada."
+
+O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda não existe no servidor de verdade. O mock responde. Se a rota falhar, a missão continua e o horário fica gravado neste aparelho.
