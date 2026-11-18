@@ -1,6 +1,6 @@
 # Nexus v2
 
-App novo, em HTML, CSS e JavaScript puro, sem etapa de build. Esta pasta tem a base e a tela de entrar e criar conta. A pasta `nexus/` é o app antigo e não entra nesta versão.
+App novo, em HTML, CSS e JavaScript puro, sem etapa de build. Esta pasta tem a base, a tela de entrar, o começo da missão e o Hoje. A pasta `nexus/` é o app antigo e não entra nesta versão.
 
 ## Ver neste computador
 
@@ -64,3 +64,31 @@ No mock, para ver os estados do começo:
 - Sem internet no passo 3: "Sem internet. A missão ainda não foi criada."
 
 O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda não existe no servidor de verdade. O mock responde. Se a rota falhar, a missão continua e o horário fica gravado neste aparelho.
+
+## Hoje
+
+Mostra o dia da missão: o título, o mínimo, se o registro de hoje já foi feito e, no Duo, só a frase de que o par já registrou. Não há placar. A tela não chama `GET /api/checkins/:id/score`.
+
+Embaixo ficam três abas, cada uma na sua página: `hoje.html`, `missao.html` e `ajustes.html`. Só uma fica aberta. A troca entra no histórico do navegador, então o voltar do celular desfaz o passo. Cada página guarda a própria rolagem nesta sessão e, na primeira vez, abre no topo.
+
+No mock, abra o Hoje já com a sessão de teste e um estado na URL. Exemplo, com o token gravado neste aparelho:
+
+http://localhost:8080/hoje.html?cenario=nao-registrado&tema=claro
+
+Estados do `?cenario=`:
+
+- `nao-registrado` — ainda falta registrar o dia
+- `registrado` — o dia está feito e aparece a nota
+- `duo` — o par (Par Teste) já registrou hoje
+- `duo-sem` — é Duo, mas o par ainda não registrou (a tela não fala do par)
+- `esperando` — o par ainda não entrou; o Solo continua na tela
+- `vazio` — sem missão
+- `erro` — «Não foi possível abrir o dia. Tente de novo.»
+- `recuperacao` — `recovery_needed` manda para a página da recuperação
+- `sem-campo` — igual ao dia sem registro, mas a resposta não traz dia difícil
+
+O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A senha pode ser qualquer uma, menos `errada`.
+
+`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
+
+A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. O losango só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha e o losango ficam de fora. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.

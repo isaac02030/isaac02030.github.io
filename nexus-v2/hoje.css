@@ -1,0 +1,194 @@
+/* Tela Hoje. O botão de registrar fica no fluxo, sem rolagem num celular de 390 por 844. */
+
+.cartao.hoje {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: var(--space-4);
+}
+
+.hoje {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.hoje > .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.dia-numero {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.marcas {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px 0;
+  width: 100%;
+  margin: 0;
+}
+
+.marca-dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 auto;
+  border-radius: 999px;
+}
+
+.marca-dia.hoje {
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+.marca-miolo {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.marca-miolo.feito {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.marca-miolo.falta {
+  border-color: var(--text-muted);
+}
+
+.marca-miolo.futuro {
+  border-color: color-mix(in srgb, var(--border) 28%, transparent);
+}
+
+.marca-miolo.dificil {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  border-color: var(--accent);
+  background: transparent;
+  transform: rotate(45deg);
+}
+
+.marca-miolo.dificil.feito {
+  background: linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
+}
+
+.titulo-missao {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.minimo {
+  margin: 0;
+}
+
+.status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--text-label);
+}
+
+.status .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  pointer-events: none;
+}
+
+.status-pendente {
+  color: var(--text);
+}
+
+.status-pendente .icone {
+  color: var(--text-muted);
+}
+
+.status-feito {
+  color: var(--success);
+}
+
+.porque {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.linha-par {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.linha-par .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.linha-dificeis {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.linha-espera {
+  margin: 0;
+  color: var(--text);
+}
+
+.nota-hoje {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.hoje-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

@@ -10,6 +10,17 @@ function nexusUrl(caminho) {
   return base + caminho;
 }
 
+/* A tela Hoje lê ?cenario= na própria página e grava aqui.
+   O servidor de verdade ignora esse parâmetro. O mock usa para trocar o estado. */
+function caminhoComCenario(caminho) {
+  var nome = "";
+  if (typeof window !== "undefined" && typeof window.NEXUS_CENARIO === "string") {
+    nome = window.NEXUS_CENARIO;
+  }
+  if (!/^[a-z0-9-]{1,40}$/.test(nome)) return caminho;
+  return caminho + "?cenario=" + encodeURIComponent(nome);
+}
+
 async function nexusLerJson(resposta) {
   try {
     return await resposta.json();
@@ -101,7 +112,23 @@ var NexusApi = {
   },
   /* GET /api/missions devolve uma lista. Sem missão ativa, o começo abre o onboarding. */
   listarMissoes: function () {
-    return nexusPedir("/api/missions", null, { metodo: "GET", auth: true });
+    return nexusPedir(caminhoComCenario("/api/missions"), null, { metodo: "GET", auth: true });
+  },
+  /* GET /api/missions/:id devolve a missão, com partner_name.
+     Não pedimos o placar. A rota /api/checkins/:id/score não é usada. */
+  obterMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/missions/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
+  },
+  /* GET /api/checkins/:missionId devolve { progress }, com o seu avanço e o do par. */
+  progressoDaMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
+  },
+  /* GET /api/checkins/:missionId/streak devolve today_done, recovery_needed,
+     missed_yesterday e missed_days. Quando o servidor passar a mandar,
+     também vêm difficult_days, difficult_days_used e difficult_days_remaining.
+     O placar não entra nesta chamada. */
+  sequenciaDaMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/streak"), null, { metodo: "GET", auth: true });
   },
   /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
      A rota atual não lê esse campo: a coluna já nasce 30 e o fim é agora + 30 dias.

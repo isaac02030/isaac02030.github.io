@@ -20,14 +20,42 @@
    - título exatamente "falha" → 500
    - título exatamente "lento" → espera 8 segundos e cria
    - o resto cria a missão. duration_days do pedido é ignorado e fica 30,
-     como na rota de verdade.
+     como na rota de verdade. started_at nasce agora.
    Aviso:
    - GET /api/notifications/vapid-key → chave pública
    - POST /api/notifications/subscribe → grava a inscrição na memória
    Lembrete (PUT /api/users/me/reminder):
    - esta rota ainda não existe no servidor de verdade
    - aqui ela guarda { reminder_time, timezone } na memória
-   Isto não vale no servidor de verdade. São só atalhos deste arquivo. */
+
+   Hoje (a tela pede estas rotas, nunca o placar):
+   - GET /api/missions
+   - GET /api/missions/:id  (inclui partner_name)
+   - GET /api/checkins/:missionId  → { progress }
+   - GET /api/checkins/:missionId/streak
+     → streak, total, today_done, brio, consistency, recovered,
+       missed_yesterday, missed_days, recovery_needed
+   - GET /api/checkins/:id/score não existe aqui de propósito.
+
+   O servidor ainda não manda dia difícil. Quando mandar, a sequência traz
+   difficult_days (números do dia), difficult_days_used e
+   difficult_days_remaining. Cada check-in pode trazer difficult (true ou false).
+   Neste arquivo, os cenários abaixo mandam esses campos. Uma missão criada
+   pela tela não recebe. O cenário sem-campo também não.
+
+   Troque o estado com ?cenario= na URL da tela, ou entre com o e-mail:
+   - nao-registrado  (nao-registrado@exemplo.com)  dia ainda sem registro
+   - registrado      (registrado@exemplo.com)      registro feito, com nota
+   - duo             (duo@exemplo.com)             Duo, Par Teste já registrou
+   - duo-sem         (duo-sem@exemplo.com)         Duo, o par ainda não registrou
+   - esperando       (esperando@exemplo.com)       à espera do par, Solo visível
+   - vazio           (vazio@exemplo.com)           sem missão
+   - erro            (erro-hoje@exemplo.com)       falha ao abrir o dia
+   - recuperacao     (recuperacao@exemplo.com)     recovery_needed, tela 6
+   - sem-campo       (sem-campo@exemplo.com)       igual ao não registrado, sem dia difícil
+
+   Isto não vale no servidor de verdade. São só atalhos deste arquivo.
+   Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
 var http = require("http");
 var crypto = require("crypto");
@@ -35,10 +63,36 @@ var crypto = require("crypto");
 var PORTA = 3000;
 var ESPERA_LENTA_MS = 4000;
 var ESPERA_MISSAO_MS = 8000;
+var MS_DIA = 24 * 60 * 60 * 1000;
 var emailsUsados = { "repetido@exemplo.com": true };
 var nomesUsados = { repetido: true };
 var usuarios = {};
 var proximaMissao = 2;
+var proximoUsuario = 1;
+
+var CENARIO_POR_EMAIL = {
+  "nao-registrado@exemplo.com": "nao-registrado",
+  "registrado@exemplo.com": "registrado",
+  "duo@exemplo.com": "duo",
+  "duo-sem@exemplo.com": "duo-sem",
+  "esperando@exemplo.com": "esperando",
+  "vazio@exemplo.com": "vazio",
+  "erro-hoje@exemplo.com": "erro",
+  "recuperacao@exemplo.com": "recuperacao",
+  "sem-campo@exemplo.com": "sem-campo"
+};
+
+var CENARIOS = {
+  "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
+  registrado: { dia: 4, feitos: [1, 3, 4], dificeis: [1, 2], restantes: 2, nota: "Li a página combinada." },
+  duo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2, 3, 4] },
+  "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2] },
+  esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },
+  recuperacao: { dia: 4, feitos: [1], dificeis: [1, 2], restantes: 2 },
+  "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true },
+  vazio: { vazio: true },
+  erro: { erro: true }
+};
 
 function chavePublicaVapid() {
   var par = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -91,12 +145,15 @@ function lerCorpo(req) {
 function garantirUsuario(email, username) {
   if (!usuarios[email]) {
     usuarios[email] = {
+      id: proximoUsuario,
       email: email,
       username: username || "pessoa",
       missoes: [],
       lembrete: null,
-      avisos: []
+      avisos: [],
+      checkins: {}
     };
+    proximoUsuario += 1;
   }
   return usuarios[email];
 }
@@ -135,6 +192,235 @@ function autorizar(req) {
     return { status: 403, email: "", dados: { error: "Token inválido ou expirado." } };
   }
   return { status: 200, email: email, dados: {} };
+}
+
+function queryDe(req) {
+  var i = req.url.indexOf("?");
+  if (i < 0) return new URLSearchParams();
+  return new URLSearchParams(req.url.slice(i + 1));
+}
+
+function cenarioDe(req, email) {
+  var pedido = queryDe(req).get("cenario") || "";
+  if (pedido && CENARIOS[pedido]) return pedido;
+  if (CENARIO_POR_EMAIL[email]) return CENARIO_POR_EMAIL[email];
+  return "";
+}
+
+function numeroDoDia(startedAt) {
+  var inicio = new Date(startedAt);
+  if (!startedAt || isNaN(inicio.getTime())) return 1;
+  var dia = Math.floor((Date.now() - inicio.getTime()) / MS_DIA) + 1;
+  if (dia < 1) return 1;
+  return dia;
+}
+
+function calcularBrio(doneDays, todayDay, streak) {
+  var completedDays = doneDays.size;
+  var totalDays = Math.max(todayDay, 1);
+  var consistency = Math.round((completedDays / totalDays) * 100);
+  var recoveredAfterMiss = false;
+  var seenMiss = false;
+  var day;
+  for (day = 1; day <= todayDay; day++) {
+    if (doneDays.has(day)) {
+      if (seenMiss) {
+        recoveredAfterMiss = true;
+        break;
+      }
+    } else {
+      seenMiss = true;
+    }
+  }
+  var consistencyPart = Math.round(consistency * 0.6);
+  var streakPart = Math.min(streak * 6, 24);
+  var recoveryPart = completedDays === 0 ? 0 : (recoveredAfterMiss ? 16 : 8);
+  var brio = Math.min(100, consistencyPart + streakPart + recoveryPart);
+  return { brio: brio, consistency: consistency, recovered: recoveredAfterMiss };
+}
+
+function calcularRecuperacao(doneDays, todayDay) {
+  var missedYesterday = todayDay > 1 && !doneDays.has(todayDay - 1);
+  var missedDays = 0;
+  var day;
+  for (day = todayDay; day >= 1; day--) {
+    if (doneDays.has(day)) break;
+    missedDays += 1;
+  }
+  return {
+    missed_yesterday: missedYesterday,
+    missed_days: missedDays,
+    recovery_needed: missedYesterday && !doneDays.has(todayDay)
+  };
+}
+
+function sequenciaDe(doneDays, todayDay, extra) {
+  var streak = 0;
+  var d;
+  for (d = todayDay; d >= 1; d--) {
+    if (doneDays.has(d)) streak += 1;
+    else break;
+  }
+  var brio = calcularBrio(doneDays, todayDay, streak);
+  var recovery = calcularRecuperacao(doneDays, todayDay);
+  var corpo = {
+    streak: streak,
+    total: doneDays.size,
+    today_done: doneDays.has(todayDay),
+    brio: brio.brio,
+    consistency: brio.consistency,
+    recovered: brio.recovered,
+    missed_yesterday: recovery.missed_yesterday,
+    missed_days: recovery.missed_days,
+    recovery_needed: recovery.recovery_needed
+  };
+  if (extra && !extra.omitirDificeis) {
+    var diasDificeis = extra.dificeis || [];
+    corpo.difficult_days = diasDificeis;
+    corpo.difficult_days_used = diasDificeis.length;
+    if (typeof extra.restantes === "number") corpo.difficult_days_remaining = extra.restantes;
+  }
+  return corpo;
+}
+
+function novaMissao(usuario, campos) {
+  var agora = campos.started_at ? new Date(campos.started_at) : new Date();
+  var id = campos.id;
+  if (!id) {
+    id = proximaMissao;
+    proximaMissao += 1;
+  }
+  return {
+    id: id,
+    user_id: usuario.id,
+    partner_id: campos.partner_id || null,
+    title: campos.title,
+    category: campos.category,
+    description: campos.description || null,
+    daily_minimum: typeof campos.daily_minimum === "string" ? campos.daily_minimum : null,
+    commitment_window: null,
+    why_it_matters: typeof campos.why_it_matters === "string" ? campos.why_it_matters : null,
+    fallback_plan: null,
+    proof_mode: campos.proof_mode || "self_report",
+    study_focus: null,
+    study_current_stage: null,
+    study_target_outcome: null,
+    level: "iniciante",
+    mode: campos.mode || "solo",
+    match_preference: campos.match_preference || null,
+    duration_days: 30,
+    user_score: campos.user_score || 0,
+    partner_score: campos.partner_score || 0,
+    status: campos.status || "active",
+    started_at: agora.toISOString(),
+    partner_started_at: null,
+    pair_started_at: campos.pair_started_at || null,
+    ends_at: new Date(agora.getTime() + 30 * MS_DIA).toISOString(),
+    merged_into_id: null,
+    user_contact: null,
+    partner_contact: null,
+    created_at: agora.toISOString(),
+    user_name: usuario.username,
+    partner_name: campos.partner_name || null
+  };
+}
+
+function paraLista(missao) {
+  return Object.assign({}, missao, {
+    matching_enabled: false,
+    counterpart_user_id: missao.partner_id,
+    partner_mission_id: null,
+    match_started_at: missao.pair_started_at || null,
+    partner_last_checkin_day: null,
+    partner_last_checkin_at: null
+  });
+}
+
+function montarCenario(nome, usuario) {
+  var spec = CENARIOS[nome];
+  if (!spec) return null;
+  if (spec.erro) return { erro: true };
+  if (spec.vazio) return { vazio: true };
+
+  var dia = spec.dia;
+  var inicio = new Date(Date.now() - (dia - 1) * MS_DIA).toISOString();
+  var partner = null;
+  if (spec.modo === "parceiro") partner = { id: usuario.id + 1000, name: "Par Teste" };
+
+  var mission = novaMissao(usuario, {
+    id: 7,
+    title: "Ler uma página por dia",
+    category: "aprendizagem",
+    daily_minimum: "Uma página",
+    why_it_matters: "Quero ler sem traduzir",
+    proof_mode: "study_note",
+    mode: spec.modo || "solo",
+    match_preference: spec.esperando ? "parceiro" : (spec.modo === "parceiro" ? "parceiro" : null),
+    status: spec.esperando ? "waiting" : "active",
+    started_at: inicio,
+    partner_id: partner ? partner.id : null,
+    partner_name: partner ? partner.name : null,
+    user_score: spec.feitos.length,
+    partner_score: (spec.parFeitos || []).length,
+    pair_started_at: partner ? inicio : null
+  });
+
+  var progress = {};
+  progress[String(usuario.id)] = {
+    username: usuario.username,
+    checkins: spec.feitos.map(function (diaFeito) {
+      var item = {
+        day: diaFeito,
+        completed: true,
+        note: diaFeito === dia && spec.nota ? spec.nota : null
+      };
+      if (!spec.omitirDificeis && Array.isArray(spec.dificeis)) {
+        item.difficult = spec.dificeis.indexOf(diaFeito) !== -1;
+      }
+      return item;
+    })
+  };
+  if (partner) {
+    progress[String(partner.id)] = {
+      username: partner.name,
+      checkins: (spec.parFeitos || []).map(function (diaFeito) {
+        return { day: diaFeito, completed: true, note: null };
+      })
+    };
+  }
+
+  return {
+    mission: mission,
+    progress: { progress: progress },
+    streak: sequenciaDe(new Set(spec.feitos), dia, spec)
+  };
+}
+
+function acharMissao(email, id) {
+  var lista = usuarios[email].missoes;
+  for (var i = 0; i < lista.length; i++) {
+    if (String(lista[i].id) === String(id)) return lista[i];
+  }
+  return null;
+}
+
+function progressoGuardado(email, id) {
+  var usuario = usuarios[email];
+  var lista = usuario.checkins[id] || [];
+  var progress = {};
+  if (lista.length) {
+    progress[String(usuario.id)] = {
+      username: usuario.username,
+      checkins: lista.map(function (item) {
+        return {
+          day: item.day,
+          completed: item.completed === true,
+          note: item.note || null
+        };
+      })
+    };
+  }
+  return { progress: progress };
 }
 
 async function login(corpo) {
@@ -179,7 +465,7 @@ function cadastro(corpo) {
 }
 
 function listarMissoes(email) {
-  return { status: 200, dados: usuarios[email].missoes.slice() };
+  return { status: 200, dados: usuarios[email].missoes.map(paraLista) };
 }
 
 async function criarMissao(email, corpo) {
@@ -196,20 +482,15 @@ async function criarMissao(email, corpo) {
       setTimeout(resolver, ESPERA_MISSAO_MS);
     });
   }
-  var id = proximaMissao;
-  proximaMissao += 1;
-  var mission = {
-    id: id,
+  var mission = novaMissao(usuarios[email], {
     title: title,
     category: category,
     daily_minimum: typeof corpo.daily_minimum === "string" ? corpo.daily_minimum : null,
     why_it_matters: typeof corpo.why_it_matters === "string" ? corpo.why_it_matters : null,
-    mode: "solo",
-    duration_days: 30,
     proof_mode: typeof corpo.proof_mode === "string" && corpo.proof_mode ? corpo.proof_mode : "self_report",
-    status: "active",
-    level: "iniciante"
-  };
+    mode: "solo",
+    status: "active"
+  });
   usuarios[email].missoes.unshift(mission);
   return {
     status: 201,
@@ -249,19 +530,119 @@ function negar(acesso) {
   return { status: acesso.status, dados: acesso.dados };
 }
 
+function responderHoje(req, res, email) {
+  var caminho = req.url.split("?")[0];
+  var cenario = cenarioDe(req, email);
+  var pacote = cenario ? montarCenario(cenario, usuarios[email]) : null;
+
+  if (caminho === "/api/missions") {
+    if (pacote && pacote.erro) {
+      enviar(res, 500, { error: "Erro ao listar missoes." });
+      return true;
+    }
+    if (pacote && pacote.vazio) {
+      enviar(res, 200, []);
+      return true;
+    }
+    if (pacote) {
+      enviar(res, 200, [paraLista(pacote.mission)]);
+      return true;
+    }
+    var lista = listarMissoes(email);
+    enviar(res, lista.status, lista.dados);
+    return true;
+  }
+
+  var missao = caminho.match(/^\/api\/missions\/(\d+)$/);
+  if (missao) {
+    if (pacote && pacote.erro) {
+      enviar(res, 500, { error: "Erro ao obter missao." });
+      return true;
+    }
+    if (pacote && pacote.vazio) {
+      enviar(res, 404, { error: "Missao nao encontrada." });
+      return true;
+    }
+    if (pacote) {
+      if (String(pacote.mission.id) !== missao[1]) {
+        enviar(res, 404, { error: "Missao nao encontrada." });
+        return true;
+      }
+      enviar(res, 200, pacote.mission);
+      return true;
+    }
+    var achada = acharMissao(email, missao[1]);
+    if (!achada) {
+      enviar(res, 404, { error: "Missao nao encontrada." });
+      return true;
+    }
+    enviar(res, 200, achada);
+    return true;
+  }
+
+  var sequencia = caminho.match(/^\/api\/checkins\/(\d+)\/streak$/);
+  if (sequencia) {
+    if (pacote && pacote.erro) {
+      enviar(res, 500, { error: "Erro ao calcular sequência." });
+      return true;
+    }
+    if (pacote && !pacote.vazio) {
+      if (String(pacote.mission.id) !== sequencia[1]) {
+        enviar(res, 404, { error: "Missão não encontrada." });
+        return true;
+      }
+      enviar(res, 200, pacote.streak);
+      return true;
+    }
+    var missaoSeq = acharMissao(email, sequencia[1]);
+    if (!missaoSeq) {
+      enviar(res, 404, { error: "Missão não encontrada." });
+      return true;
+    }
+    var feitos = new Set();
+    (usuarios[email].checkins[sequencia[1]] || []).forEach(function (item) {
+      if (item.completed === true) feitos.add(Number(item.day));
+    });
+    enviar(res, 200, sequenciaDe(feitos, numeroDoDia(missaoSeq.started_at), null));
+    return true;
+  }
+
+  var progresso = caminho.match(/^\/api\/checkins\/(\d+)$/);
+  if (progresso) {
+    if (pacote && pacote.erro) {
+      enviar(res, 500, { error: "Erro ao obter progresso." });
+      return true;
+    }
+    if (pacote && !pacote.vazio) {
+      if (String(pacote.mission.id) !== progresso[1]) {
+        enviar(res, 404, { error: "Missão não encontrada." });
+        return true;
+      }
+      enviar(res, 200, pacote.progress);
+      return true;
+    }
+    if (!acharMissao(email, progresso[1])) {
+      enviar(res, 404, { error: "Missão não encontrada." });
+      return true;
+    }
+    enviar(res, 200, progressoGuardado(email, progresso[1]));
+    return true;
+  }
+
+  return false;
+}
+
 garantirUsuario("com-missao@exemplo.com", "pessoa");
-usuarios["com-missao@exemplo.com"].missoes.push({
+usuarios["com-missao@exemplo.com"].missoes.push(novaMissao(usuarios["com-missao@exemplo.com"], {
   id: 1,
   title: "Ler uma página por dia",
   category: "aprendizagem",
   daily_minimum: "Uma página",
   why_it_matters: "Quero ler sem traduzir",
-  mode: "solo",
-  duration_days: 30,
   proof_mode: "study_note",
-  status: "active",
-  level: "iniciante"
-});
+  mode: "solo",
+  status: "active"
+}));
 
 var servidor = http.createServer(function (req, res) {
   if (req.method === "OPTIONS") {
@@ -274,14 +655,14 @@ var servidor = http.createServer(function (req, res) {
     enviar(res, 200, { publicKey: CHAVE_PUBLICA });
     return;
   }
-  if (req.method === "GET" && url === "/api/missions") {
+  if (req.method === "GET" && (url === "/api/missions" || url.indexOf("/api/missions/") === 0 || url.indexOf("/api/checkins/") === 0)) {
     var acessoLista = autorizar(req);
     if (acessoLista.status !== 200) {
       enviar(res, acessoLista.status, acessoLista.dados);
       return;
     }
-    var lista = listarMissoes(acessoLista.email);
-    enviar(res, lista.status, lista.dados);
+    if (responderHoje(req, res, acessoLista.email)) return;
+    enviar(res, 404, { error: "Não encontrado." });
     return;
   }
   if (req.method !== "POST" && req.method !== "PUT") {
