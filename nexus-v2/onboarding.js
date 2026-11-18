@@ -8,6 +8,8 @@ var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo."
 var TEXTO_SEM_REDE_MISSAO = "Sem internet. A missão ainda não foi criada.";
 var TEXTO_FALHA_MISSAO = "Não foi possível criar a missão. Tente de novo.";
 var LIMITE_AVISO_MS = 8000;
+var HORA_PADRAO = "20:00";
+var rascunhoExistia = false;
 
 var estado = {
   passo: 1,
@@ -88,6 +90,7 @@ function lerRascunho() {
   try {
     var bruto = sessionStorage.getItem(CHAVE_RASCUNHO);
     if (!bruto) return;
+    rascunhoExistia = true;
     var dados = JSON.parse(bruto);
     if (!dados || typeof dados !== "object") return;
     var categoria = dados.category === "fitness" || dados.category === "aprendizagem" ? dados.category : "";
@@ -151,10 +154,11 @@ function aplicarRascunho() {
   document.getElementById("objetivo").value = estado.title;
   document.getElementById("porque").value = estado.why_it_matters;
   document.getElementById("minimo").value = estado.daily_minimum;
-  document.getElementById("horario").value = estado.reminder_time;
+  document.getElementById("horario").value = estado.reminder_time || (rascunhoExistia ? "" : HORA_PADRAO);
   marcarCartas();
-  atualizarPlaceholder();
+  atualizarExemplo();
   atualizarPrevia();
+  atualizarNotaIphone();
 }
 
 function marcarCartas() {
@@ -164,11 +168,34 @@ function marcarCartas() {
   });
 }
 
-function atualizarPlaceholder() {
-  var objetivo = document.getElementById("objetivo");
-  objetivo.placeholder = categoriaEscolhida() === "fitness"
-    ? "Treinar cinco vezes por semana"
-    : "Praticar inglês todos os dias";
+function atualizarExemplo() {
+  var dica = document.getElementById("objetivo-dica");
+  dica.textContent = categoriaEscolhida() === "fitness"
+    ? "Ex.: Treinar cinco vezes por semana"
+    : "Ex.: Praticar inglês todos os dias";
+}
+
+function ehIOS() {
+  var agente = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(agente)) return true;
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
+function instaladoNaTelaInicial() {
+  var modoSolto = false;
+  try {
+    modoSolto = window.matchMedia("(display-mode: standalone)").matches;
+  } catch (erro) {
+    modoSolto = false;
+  }
+  return navigator.standalone === true || modoSolto;
+}
+
+/* O recado do iPhone só aparece no iOS, e some se o app já está na Tela de Início. */
+function atualizarNotaIphone() {
+  var nota = document.getElementById("nota-iphone");
+  if (!nota) return;
+  nota.hidden = !(ehIOS() && !instaladoNaTelaInicial());
 }
 
 function preencherTrecho(el, valor) {
@@ -479,7 +506,7 @@ function iniciar() {
   document.querySelectorAll('input[name="categoria"]').forEach(function (radio) {
     radio.addEventListener("change", function () {
       marcarCartas();
-      atualizarPlaceholder();
+      atualizarExemplo();
       var grupo = document.getElementById("grupo-categoria");
       if (grupo.getAttribute("aria-invalid") === "true") {
         definirErro(grupo, document.getElementById("erro-categoria"), "");

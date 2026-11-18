@@ -90,7 +90,8 @@
 
           <div class="campo">
             <label for="objetivo">O objetivo, em uma frase</label>
-            <input id="objetivo" name="title" type="text" maxlength="255" autocomplete="off" placeholder="Praticar inglês todos os dias" aria-required="true" aria-describedby="erro-objetivo">
+            <p id="objetivo-dica" class="dica">Ex.: Praticar inglês todos os dias</p>
+            <input id="objetivo" name="title" type="text" maxlength="255" autocomplete="off" aria-required="true" aria-describedby="objetivo-dica erro-objetivo">
             <p id="erro-objetivo" class="erro-campo" hidden></p>
           </div>
 
@@ -112,7 +113,20 @@
         <form class="formulario" id="form-2" method="post" action="#passo-2" novalidate>
           <div id="alerta-2" class="alerta" role="alert" hidden></div>
 
-          <p class="previa" aria-live="polite">Em 30 dias, vou: <span id="previa-objetivo" class="vazio">…</span>. O mínimo de cada dia: <span id="previa-minimo" class="vazio">…</span>. Porque: <span id="previa-porque" class="vazio">…</span>.</p>
+          <div class="previa" aria-live="polite">
+            <p class="previa-linha">
+              <span class="previa-rotulo">Em 30 dias, vou</span>
+              <span id="previa-objetivo" class="previa-texto vazio">…</span>
+            </p>
+            <p class="previa-linha">
+              <span class="previa-rotulo">O mínimo de cada dia</span>
+              <span id="previa-minimo" class="previa-texto vazio">…</span>
+            </p>
+            <p class="previa-linha">
+              <span class="previa-rotulo">Porque</span>
+              <span id="previa-porque" class="previa-texto vazio">…</span>
+            </p>
+          </div>
 
           <div class="campo">
             <label for="porque">Por que isso importa para você?</label>
@@ -147,11 +161,16 @@
 
           <div class="campo">
             <label for="horario">Horário do lembrete</label>
-            <input id="horario" name="reminder_time" type="time" step="60" autocomplete="off" aria-describedby="erro-horario">
+            <input id="horario" name="reminder_time" type="time" lang="pt-BR" step="60" value="20:00" autocomplete="off" aria-describedby="erro-horario">
             <p id="erro-horario" class="erro-campo" role="alert" hidden></p>
           </div>
 
-          <p class="nota">No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).</p>
+          <div id="nota-iphone" class="nota" hidden>
+            <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01"/>
+            </svg>
+            <p>No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).</p>
+          </div>
 
           <div id="aviso-ok" class="alerta alerta-ok" role="status" hidden>
             <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">

@@ -51,9 +51,9 @@ O link "Esqueci a senha" fica escondido porque essa rota ainda não existe. Depo
 
 São 3 passos na mesma página. O que a pessoa escreve fica neste aparelho (`sessionStorage`) enquanto ela volta e avança.
 
-1. Escolhe Estudo ou Academia e escreve o objetivo. Nada é enviado.
-2. Escreve por que importa e o mínimo do dia. A frase de cima muda enquanto ela digita. Nada é enviado.
-3. Escolhe o horário. Pode ativar o aviso ou pular. "Começar a missão" cria a missão.
+1. Escolhe Estudo ou Academia e escreve o objetivo. O exemplo fica numa ajuda embaixo do rótulo, não dentro do campo. Nada é enviado.
+2. Escreve por que importa e o mínimo do dia. O cartão de cima tem três linhas (o objetivo, o mínimo e o porquê) e muda enquanto ela digita. Nada é enviado.
+3. O horário já vem 20:00 e ela pode mudar. Pode ativar o aviso ou pular. No iPhone, se o app não estiver na Tela de Início, aparece um recado de como instalar. "Começar a missão" cria a missão.
 
 No mock, para ver os estados do começo:
 
