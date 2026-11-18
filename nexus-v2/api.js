@@ -19,23 +19,42 @@ async function nexusLerJson(resposta) {
 }
 
 /* Envia JSON e devolve um resultado simples.
-   A senha só viaja neste pedido. Este arquivo não a guarda. */
-async function nexusPedir(caminho, corpo) {
+   A senha só viaja no login e no cadastro. Este arquivo não a guarda.
+   opcoes.metodo: GET, POST ou PUT. Sem opcoes, o pedido é POST.
+   opcoes.auth: manda o token da sessão, se existir neste aparelho. */
+async function nexusPedir(caminho, corpo, opcoes) {
+  var extras = opcoes || {};
+  var metodo = extras.metodo || "POST";
   if (!NEXUS_API_URL || navigator.onLine === false) {
     return { ok: false, semRede: true, status: 0, erro: "" };
   }
 
+  var cabecalhos = { "Accept": "application/json" };
+  if (corpo != null && metodo !== "GET" && metodo !== "HEAD") {
+    cabecalhos["Content-Type"] = "application/json";
+  }
+  if (extras.auth) {
+    var token = "";
+    try {
+      token = localStorage.getItem("nexus_v2_token") || "";
+    } catch (erroToken) {
+      token = "";
+    }
+    if (token) cabecalhos.Authorization = "Bearer " + token;
+  }
+
+  var pedido = {
+    method: metodo,
+    headers: cabecalhos,
+    cache: "no-store"
+  };
+  if (corpo != null && metodo !== "GET" && metodo !== "HEAD") {
+    pedido.body = JSON.stringify(corpo);
+  }
+
   var resposta;
   try {
-    resposta = await fetch(nexusUrl(caminho), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      cache: "no-store",
-      body: JSON.stringify(corpo)
-    });
+    resposta = await fetch(nexusUrl(caminho), pedido);
   } catch (erro) {
     return { ok: false, semRede: true, status: 0, erro: "" };
   }
@@ -46,6 +65,24 @@ async function nexusPedir(caminho, corpo) {
     return { ok: false, semRede: false, status: resposta.status, erro: erro, dados: dados };
   }
   return { ok: true, semRede: false, status: resposta.status, erro: "", dados: dados };
+}
+
+/* Rota planejada. O servidor atual não tem PUT /api/users/me/reminder.
+   Se a resposta for 404 ou outra falha, quem chamou segue e guarda o horário no aparelho. */
+function saveReminderTime(dados) {
+  var hora = dados && typeof dados.reminder_time === "string" ? dados.reminder_time : "";
+  var fuso = dados && typeof dados.timezone === "string" ? dados.timezone : "";
+  if (!fuso) {
+    try {
+      fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    } catch (erroFuso) {
+      fuso = "UTC";
+    }
+  }
+  return nexusPedir("/api/users/me/reminder", {
+    reminder_time: hora,
+    timezone: fuso
+  }, { metodo: "PUT", auth: true });
 }
 
 var NexusApi = {
@@ -61,5 +98,33 @@ var NexusApi = {
       email: dados.email,
       password: dados.password
     });
-  }
+  },
+  /* GET /api/missions devolve uma lista. Sem missão ativa, o começo abre o onboarding. */
+  listarMissoes: function () {
+    return nexusPedir("/api/missions", null, { metodo: "GET", auth: true });
+  },
+  /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
+     A rota atual não lê esse campo: a coluna já nasce 30 e o fim é agora + 30 dias.
+     Enviar 30 não muda o resultado. Não mandamos level, description, fallback_plan
+     nem commitment_window: o servidor não exige esses campos. */
+  criarMissao: function (dados) {
+    return nexusPedir("/api/missions", {
+      title: dados.title,
+      category: dados.category,
+      daily_minimum: dados.daily_minimum,
+      why_it_matters: dados.why_it_matters,
+      mode: "solo",
+      duration_days: 30,
+      proof_mode: dados.proof_mode
+    }, { metodo: "POST", auth: true });
+  },
+  chaveVapid: function () {
+    return nexusPedir("/api/notifications/vapid-key", null, { metodo: "GET" });
+  },
+  inscreverNotificacao: function (subscription) {
+    return nexusPedir("/api/notifications/subscribe", {
+      subscription: subscription
+    }, { metodo: "POST", auth: true });
+  },
+  saveReminderTime: saveReminderTime
 };
