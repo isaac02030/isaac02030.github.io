@@ -99,7 +99,7 @@ A grade dos dias tem um único nome para o leitor de tela, no formato «Dia 4 de
 
 O botão «Registrar o dia» abre `checkin.html`. É uma tela por cima do Hoje: tem Voltar e não mostra a barra de abas. O voltar do celular desfaz o passo.
 
-O pedido é `POST /api/checkins`, com `mission_id` e `note`. Não mandamos `difficult`. A nota não fica gravada neste aparelho: ela só existe no campo e some depois do envio.
+O pedido é `POST /api/checkins`, com `mission_id` e `note`. Não mandamos `difficult`. A nota fica num rascunho desta aba (`sessionStorage`), o mesmo da tela de dia difícil, e some depois de um registro feito. Não vai para `localStorage` e não fica numa fila para enviar depois.
 
 No mock, com a sessão já gravada:
 
@@ -115,4 +115,25 @@ No mock, com a sessão já gravada:
 - `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
 - `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje, se não há nota na tela: «Sem internet. Tente de novo quando a conexão voltar.»
 
-«Hoje é dia difícil» abre um marcador. A tela de ajuda (`crise.html`) também é um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.
+«Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
+
+## Dia difícil
+
+Tela por cima do check-in: tem Voltar e não mostra a barra de abas. O pedido é `POST /api/checkins` com `mission_id`, `note` e `difficult: true`. O sucesso só aparece se a resposta for 2xx e `checkin.difficult` for `true`.
+
+A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O mínimo fica em negrito, na linha de baixo, como está gravado.
+
+Se `difficult_days_remaining` é 0, ou se `difficult_days` inclui os dois dias anteriores, a tela explica e oferece «Registrar o dia normal». O mesmo vale para os 400 «Você já usou os 4 dias difíceis desta missão.» e «Não dá para ter mais de 2 dias difíceis seguidos.».
+
+No mock:
+
+- `dia-dificil.html?cenario=estudo` — formulário, com «Ainda restam 2.»
+- `dia-dificil.html?cenario=dois-seguidos` — bloqueio de 2 seguidos
+- `dia-dificil.html?cenario=quatro-usados` — os 4 já foram usados
+- `dia-dificil.html?cenario=sem-restante` — sem a frase «Ainda restam»
+- `dia-dificil.html?cenario=ignora-difficult` — o servidor não confirma o dia difícil
+- `dia-dificil.html?cenario=so-is-difficult` — a resposta traz `is_difficult` e não `difficult`
+- `dia-dificil.html?cenario=post-seguidos` e `post-quatro` — o bloqueio chega no POST
+- `?rede=off` — a nota continua no campo
+
+A tela de ajuda (`crise.html`) continua um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.

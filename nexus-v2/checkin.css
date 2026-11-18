@@ -62,6 +62,12 @@
   font: var(--text-small);
 }
 
+.bloco-limite {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
 textarea {
   width: 100%;
   min-height: 6.5rem;

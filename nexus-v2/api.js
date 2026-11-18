@@ -124,19 +124,28 @@ var NexusApi = {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
   },
   /* GET /api/checkins/:missionId/streak devolve today_done, recovery_needed,
-     missed_yesterday e missed_days. Quando o servidor passar a mandar,
-     também vêm difficult_days, difficult_days_used e difficult_days_remaining.
+     missed_yesterday e missed_days. A branch de dia difícil também manda
+     difficult_days, difficult_days_used e difficult_days_remaining.
      O placar não entra nesta chamada. */
   sequenciaDaMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/streak"), null, { metodo: "GET", auth: true });
   },
   /* POST /api/checkins. O corpo é só mission_id e note.
-     A resposta de verdade traz day, already_done, checkin e message.
-     Não mandamos difficult: isso é da tela de dia difícil. */
+     A resposta traz day, already_done, checkin e message.
+     O check-in não manda difficult. */
   registrarDia: function (id, nota) {
     return nexusPedir(caminhoComCenario("/api/checkins"), {
       mission_id: id,
       note: nota
+    }, { metodo: "POST", auth: true });
+  },
+  /* O mesmo POST, com difficult: true. O nome do campo é difficult.
+     A tela só trata como salvo um 2xx em que checkin.difficult é true. */
+  registrarDiaDificil: function (id, nota) {
+    return nexusPedir(caminhoComCenario("/api/checkins"), {
+      mission_id: id,
+      note: nota,
+      difficult: true
     }, { metodo: "POST", auth: true });
   },
   /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
