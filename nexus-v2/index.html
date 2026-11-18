@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Entrar — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    /* Aplica claro ou escuro antes da primeira pintura.
+       ?tema=claro, ?tema=escuro ou ?tema=sistema.
+       A tela de ajustes, mais tarde, pode gravar nexus_v2_tema. */
+    (function () {
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erro) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="login.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o formulário</a>
+  <main class="pagina" id="conteudo">
+    <div class="cartao">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para entrar ou criar conta.</p>
+      </noscript>
+
+      <section id="vista-entrar">
+        <header class="cabecalho">
+          <h1 class="marca" id="titulo-entrar" tabindex="-1">Nexus</h1>
+          <p class="apoio">Um caderno para cumprir o que você combinou.</p>
+        </header>
+
+        <form class="formulario" id="form-entrar" method="post" action="#entrar" novalidate>
+          <div id="alerta-entrar" class="alerta" role="alert" hidden></div>
+
+          <div class="campo">
+            <label for="entrar-email">E-mail</label>
+            <input id="entrar-email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="entrar-email-erro">
+            <p id="entrar-email-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <div class="campo campo-senha">
+            <label for="entrar-senha">Senha</label>
+            <input id="entrar-senha" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="entrar-senha-erro" data-senha="sim">
+            <button type="button" class="btn btn-texto" id="entrar-olho" aria-pressed="false" aria-controls="entrar-senha">Mostrar senha</button>
+            <p id="entrar-senha-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <!-- Escondido de propósito: ainda não existe rota para redefinir a senha. -->
+          <p class="esqueci" hidden>
+            <a href="#esqueci-a-senha">Esqueci a senha</a>
+          </p>
+
+          <button type="submit" class="btn btn-primario" id="btn-entrar" data-texto="Entrar" data-carregando="Entrando…" aria-busy="false">
+            <span class="btn-rotulo">Entrar</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="troca">
+          Ainda não tem conta?
+          <a href="#criar-conta">Criar conta</a>
+        </p>
+      </section>
+
+      <section id="vista-cadastro" hidden>
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <h1 class="titulo" id="titulo-cadastro" tabindex="-1">Criar conta</h1>
+          <p class="apoio">Leva menos de um minuto. Depois você escreve seu compromisso.</p>
+        </header>
+
+        <form class="formulario" id="form-cadastro" method="post" action="#criar-conta" novalidate>
+          <div id="alerta-cadastro" class="alerta" role="alert" hidden></div>
+
+          <div class="campo">
+            <label for="cadastro-nome">Como você quer ser chamado</label>
+            <input id="cadastro-nome" name="username" type="text" autocomplete="nickname" maxlength="50" autocapitalize="words" aria-required="true" aria-describedby="cadastro-nome-dica cadastro-nome-erro">
+            <p id="cadastro-nome-dica" class="dica">É o nome que aparece no app. Não pode ser igual ao de outra pessoa.</p>
+            <p id="cadastro-nome-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <div class="campo">
+            <label for="cadastro-email">E-mail</label>
+            <input id="cadastro-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="cadastro-email-erro">
+            <p id="cadastro-email-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <div class="campo campo-senha">
+            <label for="cadastro-senha">Senha</label>
+            <input id="cadastro-senha" name="password" type="password" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="cadastro-senha-dica cadastro-senha-erro" data-senha="sim">
+            <button type="button" class="btn btn-texto" id="cadastro-olho" aria-pressed="false" aria-controls="cadastro-senha">Mostrar senha</button>
+            <p id="cadastro-senha-dica" class="dica">Pelo menos 6 caracteres.</p>
+            <p id="cadastro-senha-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <div class="campo campo-senha">
+            <label for="cadastro-confirma">Confirmar senha</label>
+            <input id="cadastro-confirma" name="confirm" type="password" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="cadastro-confirma-erro" data-senha="sim">
+            <button type="button" class="btn btn-texto" id="cadastro-confirma-olho" aria-pressed="false" aria-controls="cadastro-confirma">Mostrar senha</button>
+            <p id="cadastro-confirma-erro" class="erro-campo" hidden></p>
+          </div>
+
+          <button type="submit" class="btn btn-primario" id="btn-criar" data-texto="Criar conta" data-carregando="Criando conta…" aria-busy="false">
+            <span class="btn-rotulo">Criar conta</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="troca">
+          Já tem conta?
+          <a href="#entrar">Entrar</a>
+        </p>
+      </section>
+    </div>
+  </main>
+  <script src="api.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
