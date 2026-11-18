@@ -1578,6 +1578,7 @@
   let soloAssistantBusy = false;
   let activeNoteProofMode = 'text_note';
   let chatInterval = null;
+  let matchInterval = null;
   let deferredInstallPrompt = null;
   let notificationsReady = false;
 
@@ -2081,6 +2082,15 @@
       const active  = missions.filter(m => m.status === 'active');
       const waiting = missions.filter(m => m.status === 'waiting');
       openMissions = [...active, ...waiting];
+      const hasPendingMatch = openMissions.some(m =>
+        m.status === 'active' && m.matching_enabled && m.match_preference && !m.partner_id
+      );
+      if (hasPendingMatch && !matchInterval) {
+        matchInterval = setInterval(checkPendingMissionMatches, 15000);
+      } else if (!hasPendingMatch && matchInterval) {
+        clearInterval(matchInterval);
+        matchInterval = null;
+      }
 
       document.getElementById('stat-missions').textContent = openMissions.length;
 
@@ -2145,6 +2155,30 @@
           <p>O Nexus nao conseguiu ler o teu estado agora. Tenta recarregar a pagina.</p>
           <button class="btn-new-mission" onclick="loadMissions()">TENTAR DE NOVO</button>
         </div>`;
+    }
+  }
+
+  async function checkPendingMissionMatches() {
+    const pending = openMissions.filter(m =>
+      m.status === 'active' && m.matching_enabled && m.match_preference && !m.partner_id
+    );
+    if (!pending.length) return;
+
+    for (const mission of pending) {
+      try {
+        const res = await fetch(`${API}/api/missions/${mission.id}/match`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.matched) {
+          toast('Encontrámos alguém compatível. O teu progresso continua intacto.');
+          await loadMissions();
+          return;
+        }
+      } catch (err) {
+        console.error('Falha ao atualizar busca de par:', err);
+      }
     }
   }
 
@@ -2289,8 +2323,20 @@
   function renderInactivePartnerHtml(mission, currentDay) {
     if (!mission || !mission.partner_id || mission.mode === 'solo') return '';
 
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const referenceAt = mission.partner_last_checkin_at || mission.partner_started_at;
+    const referenceDate = referenceAt ? new Date(referenceAt) : null;
+    const referenceStart = referenceDate
+      ? new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate())
+      : null;
+    const elapsedDays = referenceStart
+      ? Math.floor((todayStart - referenceStart) / 86400000)
+      : 0;
     const partnerLastDay = Number(mission.partner_last_checkin_day || 0);
-    const missedDays = partnerLastDay > 0 ? currentDay - partnerLastDay : currentDay - 1;
+    const missedDays = referenceStart
+      ? elapsedDays
+      : partnerLastDay > 0 ? currentDay - partnerLastDay : currentDay - 1;
 
     if (missedDays < 2) return '';
 
@@ -2374,6 +2420,7 @@
           <div class="mission-title">${m.title}</div>
           <span class="mission-mode ${m.mode}">${m.mode.toUpperCase()}</span>
         </div>
+        ${renderMatchSearchStatus(m)}
         <div class="progress-wrap">
           <div class="progress-info">
             <span>Dia ${day} de ${m.duration_days}</span>
@@ -2398,6 +2445,19 @@
           </button>
           <span class="checkin-note" id="checkin-note">A carregar...</span>
         </div>
+      </div>`;
+  }
+
+  function renderMatchSearchStatus(mission) {
+    if (!mission?.match_preference || mission.partner_id) return '';
+    const role = mission.match_preference === 'rival' ? 'rival' : 'parceiro';
+    const status = mission.matching_enabled
+      ? `O Nexus procura um ${role} da mesma categoria e nível próximo.`
+      : `A procura automática por ${role} está desligada neste beta.`;
+    return `
+      <div style="margin:12px 0 16px;padding:14px 16px;border:1px solid rgba(255,176,103,.24);border-radius:16px;background:rgba(255,176,103,.06)">
+        <div style="font-weight:800;color:#ffb067;margin-bottom:4px">A missão já começou em solo</div>
+        <div style="font-size:13px;color:var(--muted2);line-height:1.5">Continuas com os teus dias e check-ins. ${status}</div>
       </div>`;
   }
 
