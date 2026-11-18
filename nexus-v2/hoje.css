@@ -1,0 +1,142 @@
+/* Tela Hoje. O botão de registrar fica no fluxo, sem rolagem num celular de 390 por 844. */
+
+.cartao.hoje {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: var(--space-4);
+}
+
+.hoje {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.hoje > .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.dia-numero {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.marcas {
+  display: grid;
+  grid-template-columns: repeat(var(--dias, 30), minmax(0, 1fr));
+  gap: 2px;
+  width: 100%;
+  height: 14px;
+  align-items: center;
+}
+
+.marca-dia {
+  display: block;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--border) 42%, transparent);
+}
+
+.marca-dia.feito {
+  height: 8px;
+  background: var(--accent);
+}
+
+.marca-dia.dificil {
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  max-width: 100%;
+  justify-self: center;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 1px;
+  background: transparent;
+  transform: rotate(45deg);
+}
+
+.marca-dia.dificil.feito {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.titulo-missao {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.minimo {
+  margin: 0;
+}
+
+.status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--text-label);
+}
+
+.status .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.status-pendente {
+  color: var(--text);
+}
+
+.status-feito {
+  color: var(--success);
+}
+
+.linha-par,
+.linha-dificeis {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.linha-espera {
+  margin: 0;
+  color: var(--text);
+}
+
+.nota-hoje {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.hoje-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
