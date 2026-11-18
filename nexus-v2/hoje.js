@@ -9,8 +9,8 @@
 
    Com recovery_needed true, o miolo do Hoje vira a volta ao ciclo.
    A barra de abas continua. Não é página separada nem modal.
-   missed_days, nesta branch, inclui o dia de hoje quando ele está aberto.
-   A frase usa só os dias que já passaram. Sem o número, não inventamos. */
+   A frase usa missed_days_before_today quando o servidor manda.
+   Sem esse campo, cai em missed_days - 1. Zero e negativo não aparecem. */
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_USUARIO = "nexus_v2_user";
@@ -243,32 +243,42 @@ function lerRestantes(sequencia, missao) {
   return numeroRestante(missao);
 }
 
-function lerMissedDays(sequencia) {
-  if (!sequencia || typeof sequencia.missed_days !== "number") return null;
-  if (!isFinite(sequencia.missed_days) || sequencia.missed_days < 0) return null;
-  return sequencia.missed_days;
+function lerNumero(valor) {
+  if (typeof valor !== "number" || !isFinite(valor)) return null;
+  return valor;
 }
 
-/* missed_days da rota conta o vão desde hoje. Com o dia de hoje aberto,
-   o hoje entra na conta. A frase fala dos dias que já passaram.
-   Sem número utilizável: a frase de 1 dia só se missed_yesterday for true.
-   Nunca escrevemos «1 dias». */
+function lerMissedDays(sequencia) {
+  if (!sequencia) return null;
+  return lerNumero(sequencia.missed_days);
+}
+
+/* null = o campo não veio. 0 é um número de verdade e não cai no recuo. */
+function lerAntesDeHoje(sequencia) {
+  if (!sequencia || !Object.prototype.hasOwnProperty.call(sequencia, "missed_days_before_today")) return null;
+  return lerNumero(sequencia.missed_days_before_today);
+}
+
+/* Prefere missed_days_before_today. Sem o campo, missed_days - 1.
+   Menos de 1 não vira frase com número: ontem verdadeiro usa o texto de 1 dia.
+   Nunca «0», nunca negativo, nunca «1 dias». */
+function contagemDaFalta(modelo) {
+  if (!modelo) return null;
+  if (typeof modelo.missedBefore === "number" && isFinite(modelo.missedBefore)) {
+    return Math.floor(modelo.missedBefore);
+  }
+  if (typeof modelo.missedDays === "number" && isFinite(modelo.missedDays)) {
+    return Math.floor(modelo.missedDays) - 1;
+  }
+  return null;
+}
+
 function textoDaFalta(modelo) {
   var ontem = !!(modelo && modelo.missedYesterday === true);
-  var bruto = modelo ? modelo.missedDays : null;
-  if (typeof bruto !== "number" || !isFinite(bruto)) return ontem ? TEXTO_ONTEM : "";
-  var n = Math.floor(bruto);
-  if (modelo.hojeFeito !== true && n >= 1) n -= 1;
-  if (n <= 0) return ontem ? TEXTO_ONTEM : "";
+  var n = contagemDaFalta(modelo);
+  if (n === null || n < 1) return ontem ? TEXTO_ONTEM : "";
   if (n === 1) return TEXTO_ONTEM;
   return "Ficaram " + n + " dias sem registro.";
-}
-
-function comecaMaiuscula(texto) {
-  var limpo = String(texto || "").trim();
-  if (!limpo) return false;
-  var letra = limpo.charAt(0);
-  return letra !== letra.toLowerCase();
 }
 
 function seguidosBloqueiam(modelo) {
@@ -330,6 +340,7 @@ function modeloDe(missao, progresso, sequencia) {
     recuperacao: !!(sequencia && sequencia.recovery_needed === true),
     missedYesterday: !!(sequencia && sequencia.missed_yesterday === true),
     missedDays: lerMissedDays(sequencia),
+    missedBefore: lerAntesDeHoje(sequencia),
     id: missao.id,
     category: typeof missao.category === "string" ? missao.category : "",
     proof_mode: typeof missao.proof_mode === "string" ? missao.proof_mode : "",
@@ -358,6 +369,7 @@ function guardarCache(modelo) {
       recuperacao: modelo.recuperacao,
       missedYesterday: modelo.missedYesterday === true,
       missedDays: typeof modelo.missedDays === "number" ? modelo.missedDays : null,
+      missedBefore: typeof modelo.missedBefore === "number" ? modelo.missedBefore : null,
       dia: modelo.dia,
       duracao: modelo.duracao,
       titulo: modelo.titulo,
@@ -582,15 +594,11 @@ function pintarCalor(modelo) {
     return;
   }
   var intro = document.createElement("span");
+  intro.className = "calor-intro";
+  intro.textContent = "Acontece. O ciclo não acabou. O mínimo de hoje:";
   var forte = document.createElement("strong");
+  forte.className = "calor-minimo";
   forte.textContent = guardado;
-  if (comecaMaiuscula(guardado)) {
-    intro.textContent = "Acontece. O ciclo não acabou. O mínimo de hoje é";
-    intro.className = "calor-intro";
-    forte.className = "calor-minimo";
-  } else {
-    intro.textContent = "Acontece. O ciclo não acabou. O mínimo de hoje é ";
-  }
   calor.appendChild(intro);
   calor.appendChild(forte);
 }
@@ -633,6 +641,7 @@ function pintarAcoesRecuperacao(modelo, semRede) {
 
 function pintarRecuperacao(modelo, semRede) {
   marcarOrigemRecuperacao();
+  document.getElementById("dia-numero-recuperacao").textContent = "Dia " + modelo.dia + " de " + modelo.duracao;
   pintarMarcas(modelo, "marcas-recuperacao");
   var fato = document.getElementById("fato-falta");
   var frase = textoDaFalta(modelo);

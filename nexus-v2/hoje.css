@@ -82,6 +82,7 @@
 
 .marca-miolo.falta {
   border-color: var(--text-muted);
+  background: linear-gradient(var(--text-muted), var(--text-muted)) center / 6px 2px no-repeat;
 }
 
 .marca-miolo.futuro {

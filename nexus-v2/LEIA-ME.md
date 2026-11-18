@@ -91,10 +91,12 @@ Estados do `?cenario=`:
 - `recuperacao-sem-fato` — sem `missed_days` e sem `missed_yesterday`
 - `recuperacao-seguidos` — o link de dia difícil some (2 seguidos)
 - `recuperacao-sem-minimo` — sem o mínimo gravado
-- `recuperacao-minusculo` — o mínimo fica na mesma linha
+- `recuperacao-minusculo` — o mínimo em minúscula, em negrito na linha de baixo
+- `falta-antiga` — Hoje normal, com um dia antigo sem registro
+- `recuperacao-sem-antes` — sem `missed_days_before_today`
 - `sem-campo` — igual ao dia sem registro, mas a resposta não traz dia difícil
 
-Se `recovery_needed` é true, o Hoje troca o miolo e mantém a barra de abas. A grade continua no topo. O título é «Hoje ainda dá para voltar». Um dia vira «Ontem não houve registro.» Dois ou mais viram «Ficaram N dias sem registro.» «Registrar o dia» abre o check-in normal. «Hoje é dia difícil» só aparece com `difficult_days_remaining` maior que zero e sem o bloqueio de 2 seguidos. «Ver a missão» abre `missao.html`.
+Se `recovery_needed` é true, o Hoje troca o miolo e mantém a barra de abas. Em cima da grade entra «Dia N de 30», como no Hoje. A marca de falta tem um traço curto. O título é «Hoje ainda dá para voltar». A contagem usa `missed_days_before_today`. Sem esse campo, usa `missed_days - 1`. Um dia vira «Ontem não houve registro.» Dois ou mais viram «Ficaram N dias sem registro.» Zero e negativo não aparecem. «O mínimo de hoje:» fica com o mínimo em negrito na linha de baixo. «Registrar o dia» abre o check-in normal. «Hoje é dia difícil» só aparece com `difficult_days_remaining` maior que zero e sem o bloqueio de 2 seguidos. «Ver a missão» abre `missao.html`.
 
 Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz «Você voltou. O ciclo continua.» O ciclo em dia não mostra essa tela. Erro e falta de internet seguem o Hoje.
 

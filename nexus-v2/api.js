@@ -127,8 +127,9 @@ var NexusApi = {
      missed_yesterday, missed_days e recovered.
      recovered é do brio: houve um dia feito depois de uma falta anterior.
      Não quer dizer que o retorno de hoje já aconteceu.
-     missed_days conta o vão desde hoje, e inclui o dia de hoje quando
-     ele ainda não foi feito. A frase da tela tira esse dia.
+     missed_days conta o vão desde hoje e inclui o dia de hoje aberto.
+     missed_days_before_today, quando vier, já tira o hoje. Sem ele, a
+     frase usa missed_days - 1. Zero e negativo não entram na frase.
      A branch de dia difícil também manda difficult_days,
      difficult_days_used e difficult_days_remaining.
      O placar não entra nesta chamada. */
