@@ -80,6 +80,12 @@ button {
   outline-offset: 2px;
 }
 
+/* O título recebe foco para o leitor de tela, sem anel.
+   Botões, links e campos seguem com :focus-visible. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 .marca {
   margin: 0;
   font: var(--text-display);

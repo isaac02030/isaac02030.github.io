@@ -22,9 +22,10 @@ var TEXTO_ACADEMIA = "Uma frase chega (pelo menos 8 caracteres).";
 var TEXTO_INATIVA = "Esta missão não está ativa.";
 var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
-var TEXTO_SEM_REDE = "Sem internet. O registro fica para quando a conexão voltar.";
+var TEXTO_SEM_REDE = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
+var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão voltar.";
 var TEXTO_JA = "ja-registrado";
-var ESPERA_SUCESSO_MS = 250;
+var ESPERA_SUCESSO_MS = 300;
 var MS_DIA = 24 * 60 * 60 * 1000;
 
 var ERROS_NOTA_CURTA = {
@@ -238,12 +239,17 @@ function mostrarFalha(tipo, texto) {
 }
 
 function preencherForma(missao, semRede) {
-  var minimo = typeof missao.daily_minimum === "string" ? missao.daily_minimum.trim() : "";
+  var minimo = typeof missao.daily_minimum === "string" ? missao.daily_minimum : "";
   var porque = typeof missao.why_it_matters === "string" ? missao.why_it_matters.trim() : "";
-  var pergunta = document.getElementById("pergunta");
-  pergunta.textContent = minimo
-    ? "Você cumpriu o mínimo de hoje: " + minimo + "?"
-    : "Você cumpriu o mínimo de hoje?";
+  var linha = document.getElementById("minimo-hoje");
+  var valor = document.getElementById("minimo-valor");
+  if (minimo.trim()) {
+    valor.textContent = minimo;
+    linha.hidden = false;
+  } else {
+    valor.textContent = "";
+    linha.hidden = true;
+  }
   var escreveu = document.getElementById("escreveu");
   if (porque) {
     escreveu.hidden = false;
@@ -311,7 +317,7 @@ function abrirOffline() {
   }
   var missao = cacheViraMissao(cache);
   if (!missao) {
-    mostrarFalha("rede", TEXTO_SEM_REDE);
+    mostrarFalha("rede", TEXTO_SEM_REDE_SEM_NOTA);
     return;
   }
   if (cache.recuperacao) {
@@ -378,15 +384,11 @@ function validarNota() {
 }
 
 function mostrarSucesso() {
-  mostrarVista("sucesso");
+  limparNota();
   var caixa = document.getElementById("sucesso");
   caixa.classList.remove("visivel");
-  var texto = document.createElement("span");
-  texto.textContent = "Registro feito. Palavra cumprida hoje.";
-  caixa.replaceChildren(
-    icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
-    texto
-  );
+  caixa.replaceChildren();
+  mostrarVista("sucesso");
   NexusAbas.focar(document.getElementById("titulo"));
   var reduzido = false;
   try {
@@ -394,20 +396,35 @@ function mostrarSucesso() {
   } catch (erro) {
     reduzido = false;
   }
+  function anunciar() {
+    var texto = document.createElement("span");
+    texto.textContent = "Registro feito. Palavra cumprida hoje.";
+    caixa.replaceChildren(
+      icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
+      texto
+    );
+  }
   function seguir() {
     if (saindo) return;
     saindo = true;
     location.replace(destinoDepoisDoRegistro());
   }
+  function sairDepois() {
+    window.setTimeout(seguir, ESPERA_SUCESSO_MS);
+  }
   if (reduzido) {
+    anunciar();
     caixa.classList.add("visivel");
-    window.setTimeout(seguir, 0);
+    sairDepois();
     return;
   }
   window.requestAnimationFrame(function () {
-    caixa.classList.add("visivel");
+    anunciar();
+    window.requestAnimationFrame(function () {
+      caixa.classList.add("visivel");
+      sairDepois();
+    });
   });
-  window.setTimeout(seguir, ESPERA_SUCESSO_MS);
 }
 
 function tratarResposta(resultado) {
@@ -417,7 +434,6 @@ function tratarResposta(resultado) {
   }
   var dados = resultado.dados || {};
   if (resultado.ok) {
-    limparNota();
     if (respostaIndicaCrise(dados)) {
       irParaCrise();
       return;
@@ -478,6 +494,8 @@ function ligarLinks() {
   var extra = busca();
   document.getElementById("voltar").href = "hoje.html" + extra;
   document.getElementById("link-dificil").href = "dia-dificil.html" + extra;
+  /* Quando a tela 10 existir, este botão passa a dizer «Ver o resultado». */
+  document.getElementById("btn-voltar-hoje").href = "hoje.html" + extra;
 }
 
 function atualizarBarra() {

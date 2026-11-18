@@ -12,7 +12,8 @@ var CHAVE_USUARIO = "nexus_v2_user";
 var MS_DIA = 24 * 60 * 60 * 1000;
 var TEXTO_ERRO = "Não foi possível abrir o dia. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo.";
-var TEXTO_REGISTRO_OFF = "Sem internet. O registro fica para quando a conexão voltar.";
+var TEXTO_REGISTRO_OFF = "Sem internet. Tente de novo quando a conexão voltar.";
+var TEXTO_REGISTRO_OFF_NOTA = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
 var ciclo = 0;
 
 function cenarioDaPagina() {
@@ -504,7 +505,10 @@ function pintarDia(modelo, semRede) {
   }
 
   var aviso = document.getElementById("aviso-rede");
-  if (semRede && !modelo.hojeFeito) mostrarAviso(aviso, "rede", TEXTO_REGISTRO_OFF);
+  if (semRede && !modelo.hojeFeito) {
+    var temNota = typeof modelo.nota === "string" && modelo.nota.trim() !== "";
+    mostrarAviso(aviso, "rede", temNota ? TEXTO_REGISTRO_OFF_NOTA : TEXTO_REGISTRO_OFF);
+  }
   else {
     aviso.hidden = true;
     aviso.replaceChildren();

@@ -113,6 +113,6 @@ No mock, com a sessão já gravada:
 - `checkin.html?cenario=inativa` — «Esta missão não está ativa.»
 - `checkin.html?cenario=registrado` — volta para o Hoje com «Este dia já estava registrado.»
 - `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
-- `?rede=off` — não envia. «Sem internet. O registro fica para quando a conexão voltar.»
+- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje, se não há nota na tela: «Sem internet. Tente de novo quando a conexão voltar.»
 
 «Hoje é dia difícil» abre um marcador. A tela de ajuda (`crise.html`) também é um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.

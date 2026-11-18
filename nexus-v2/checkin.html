@@ -72,10 +72,16 @@
 
       <section class="vista" id="vista-bloqueio" hidden>
         <p class="apoio" id="texto-bloqueio" role="status"></p>
+        <!-- Quando a tela 10 existir, este botão passa a dizer «Ver o resultado». -->
+        <a class="btn btn-primario" id="btn-voltar-hoje" href="hoje.html">Voltar a Hoje</a>
       </section>
 
       <section class="vista" id="vista-form" hidden>
-        <p class="pergunta" id="pergunta"></p>
+        <div class="bloco-pergunta">
+          <p class="rotulo-minimo">O mínimo de hoje:</p>
+          <p class="minimo-hoje" id="minimo-hoje" hidden><strong id="minimo-valor"></strong></p>
+          <p class="pergunta" id="pergunta">Você cumpriu?</p>
+        </div>
         <p class="escreveu" id="escreveu" hidden></p>
         <form class="formulario" id="form-nota" method="post" action="checkin.html" novalidate>
           <div class="campo">
@@ -94,7 +100,7 @@
       </section>
 
       <section class="vista" id="vista-sucesso" hidden>
-        <p class="sucesso" id="sucesso" role="status">Registro feito. Palavra cumprida hoje.</p>
+        <p class="sucesso" id="sucesso" role="status" aria-live="polite" aria-atomic="true"></p>
       </section>
     </div>
   </main>
