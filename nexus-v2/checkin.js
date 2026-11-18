@@ -5,7 +5,9 @@
 
    Tela 4, a resposta da IA depois do registro, fica desligada.
    O gancho é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN. O padrão é false.
-   Não há página da IA neste passo. */
+   Não há página da IA neste passo.
+   Se o registro veio da volta ao ciclo, o aviso é
+   «Você voltou. O ciclo continua.» e a ida continua sendo o Hoje. */
 
 var NEXUS_ABRIR_TELA_IA_APOS_CHECKIN = false;
 
@@ -27,6 +29,8 @@ var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
 var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão voltar.";
 var TEXTO_JA = "ja-registrado";
+var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
+var CHAVE_ORIGEM = "nexus_v2_origem_recuperacao";
 var ESPERA_SUCESSO_MS = 300;
 var MS_DIA = 24 * 60 * 60 * 1000;
 
@@ -290,6 +294,26 @@ function destinoDepoisDoRegistro() {
   return "hoje.html" + busca();
 }
 
+function veioDaRecuperacao() {
+  try {
+    return sessionStorage.getItem(CHAVE_ORIGEM) === "1";
+  } catch (erro) {
+    return false;
+  }
+}
+
+function limparOrigemRecuperacao() {
+  try {
+    sessionStorage.removeItem(CHAVE_ORIGEM);
+  } catch (erro) {}
+}
+
+function guardarAvisoDeVolta(codigo) {
+  try {
+    sessionStorage.setItem("nexus_v2_aviso_hoje", codigo);
+  } catch (erro) {}
+}
+
 function mostrarBloqueio(texto) {
   document.getElementById("texto-bloqueio").textContent = texto;
   mostrarVista("bloqueio");
@@ -387,10 +411,6 @@ function abrirOffline() {
     mostrarFalha("rede", TEXTO_SEM_REDE_SEM_NOTA);
     return;
   }
-  if (cache.recuperacao) {
-    location.replace("recuperacao.html" + busca());
-    return;
-  }
   decidirMissao(missao, false, true);
 }
 
@@ -464,9 +484,10 @@ function mostrarSucesso() {
   } catch (erro) {
     reduzido = false;
   }
+  var daVolta = veioDaRecuperacao();
   function anunciar() {
     var texto = document.createElement("span");
-    texto.textContent = "Registro feito. Palavra cumprida hoje.";
+    texto.textContent = daVolta ? TEXTO_VOLTOU : "Registro feito. Palavra cumprida hoje.";
     caixa.replaceChildren(
       icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
       texto
@@ -475,6 +496,10 @@ function mostrarSucesso() {
   function seguir() {
     if (saindo) return;
     saindo = true;
+    if (daVolta) {
+      limparOrigemRecuperacao();
+      guardarAvisoDeVolta("voltou");
+    }
     location.replace(destinoDepoisDoRegistro());
   }
   function sairDepois() {
@@ -507,6 +532,7 @@ function tratarResposta(resultado) {
       return;
     }
     if (dados.already_done === true) {
+      limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);
       return;
     }

@@ -124,8 +124,13 @@ var NexusApi = {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
   },
   /* GET /api/checkins/:missionId/streak devolve today_done, recovery_needed,
-     missed_yesterday e missed_days. A branch de dia difícil também manda
-     difficult_days, difficult_days_used e difficult_days_remaining.
+     missed_yesterday, missed_days e recovered.
+     recovered é do brio: houve um dia feito depois de uma falta anterior.
+     Não quer dizer que o retorno de hoje já aconteceu.
+     missed_days conta o vão desde hoje, e inclui o dia de hoje quando
+     ele ainda não foi feito. A frase da tela tira esse dia.
+     A branch de dia difícil também manda difficult_days,
+     difficult_days_used e difficult_days_remaining.
      O placar não entra nesta chamada. */
   sequenciaDaMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/streak"), null, { metodo: "GET", auth: true });

@@ -2,7 +2,9 @@
    POST /api/checkins manda { mission_id, note, difficult: true }.
    O sucesso só aparece num 2xx com checkin.difficult === true.
    A nota é o rascunho da aba, o mesmo do check-in. Some só depois do registro.
-   A tela da IA continua desligada: a volta é sempre para o Hoje. */
+   A tela da IA continua desligada: a volta é sempre para o Hoje.
+   Se o registro veio da volta ao ciclo, o aviso é
+   «Você voltou. O ciclo continua.» */
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
@@ -21,6 +23,8 @@ var TEXTO_SEM_REDE = "Sem internet. Sua nota continua aqui. Tente de novo quando
 var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão voltar.";
 var TEXTO_JA = "ja-registrado";
 var TEXTO_SUCESSO = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
+var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
+var CHAVE_ORIGEM = "nexus_v2_origem_recuperacao";
 var ESPERA_SUCESSO_MS = 300;
 var MS_DIA = 24 * 60 * 60 * 1000;
 
@@ -298,6 +302,20 @@ function busca() {
   return NexusAbas.busca(["tema", "cenario", "rede"]);
 }
 
+function veioDaRecuperacao() {
+  try {
+    return sessionStorage.getItem(CHAVE_ORIGEM) === "1";
+  } catch (erro) {
+    return false;
+  }
+}
+
+function limparOrigemRecuperacao() {
+  try {
+    sessionStorage.removeItem(CHAVE_ORIGEM);
+  } catch (erro) {}
+}
+
 function irParaHoje(aviso) {
   if (saindo) return;
   saindo = true;
@@ -427,10 +445,6 @@ function abrirOffline() {
     mostrarFalha("rede", TEXTO_SEM_REDE_SEM_NOTA);
     return;
   }
-  if (cache.recuperacao) {
-    location.replace("recuperacao.html" + busca());
-    return;
-  }
   decidirMissao(missao, sequenciaDoCache(cache), true);
 }
 
@@ -503,9 +517,10 @@ function mostrarSucesso() {
   } catch (erro) {
     reduzido = false;
   }
+  var daVolta = veioDaRecuperacao();
   function anunciar() {
     var texto = document.createElement("span");
-    texto.textContent = TEXTO_SUCESSO;
+    texto.textContent = daVolta ? TEXTO_VOLTOU : TEXTO_SUCESSO;
     caixa.replaceChildren(
       icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
       texto
@@ -513,6 +528,11 @@ function mostrarSucesso() {
   }
   function seguir() {
     if (saindo) return;
+    if (daVolta) {
+      limparOrigemRecuperacao();
+      irParaHoje("voltou");
+      return;
+    }
     saindo = true;
     location.replace("hoje.html" + busca());
   }
@@ -546,6 +566,7 @@ function tratarResposta(resultado) {
       return;
     }
     if (dados.already_done === true) {
+      limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);
       return;
     }
