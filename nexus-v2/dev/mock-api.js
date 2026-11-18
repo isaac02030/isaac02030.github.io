@@ -37,11 +37,10 @@
        missed_yesterday, missed_days, recovery_needed
    - GET /api/checkins/:id/score não existe aqui de propósito.
 
-   O servidor ainda não manda dia difícil. Quando mandar, a sequência traz
-   difficult_days (números do dia), difficult_days_used e
+   A sequência manda difficult_days (números do dia), difficult_days_used e
    difficult_days_remaining. Cada check-in pode trazer difficult (true ou false).
-   Neste arquivo, os cenários abaixo mandam esses campos. Uma missão criada
-   pela tela não recebe. O cenário sem-campo também não.
+   Os cenários abaixo mandam esses campos. Uma missão criada pela tela não
+   recebe. O cenário sem-campo também não, e ignora difficult no POST.
 
    Troque o estado com ?cenario= na URL da tela, ou entre com o e-mail:
    - nao-registrado  (nao-registrado@exemplo.com)  dia ainda sem registro
@@ -53,11 +52,21 @@
    - erro            (erro-hoje@exemplo.com)       falha ao abrir o dia
    - recuperacao     (recuperacao@exemplo.com)     recovery_needed, tela 6
    - sem-campo       (sem-campo@exemplo.com)       igual ao não registrado, sem dia difícil
+   - dois-seguidos   (dois-seguidos@exemplo.com)   os 2 dias anteriores foram difíceis
+   - quatro-usados   (quatro-usados@exemplo.com)   difficult_days_remaining 0
+   - sem-restante    (sem-restante@exemplo.com)    há dia difícil, sem o campo remaining
+   - ignora-difficult (ignora-difficult@exemplo.com) o POST não confirma difficult
+   - so-is-difficult (so-is-difficult@exemplo.com) o POST grava, mas responde is_difficult
+   - post-seguidos   (post-seguidos@exemplo.com)   o POST responde o 400 de 2 seguidos
+   - post-quatro     (post-quatro@exemplo.com)     o POST responde o 400 dos 4 dias
+   - quatro-e-seguidos (quatro-e-seguidos@exemplo.com) os 4 acabaram e os 2 anteriores também
 
-   Check-in (POST /api/checkins com { mission_id, note }):
+   Check-in (POST /api/checkins com { mission_id, note } e, na tela 5, difficult: true):
    A resposta segue a rota de verdade: { checkin, day, already_done, message }.
    Não há campo de crise. Não lemos a nota para inventar um.
-   O pedido pode trazer difficult, mas esta tela não manda e aqui ele é ignorado.
+   Com difficult: true, o check-in volta com difficult: true, salvo nos cenários
+   que ignoram o campo. A rota real devolve a coluna is_difficult; o cenário
+   so-is-difficult copia isso e não manda checkin.difficult.
    - estudo            formulário de aprendizagem, dia em aberto
    - academia          (academia@exemplo.com)        categoria fitness
    - lento             o POST espera 8 segundos e registra
@@ -99,7 +108,15 @@ var CENARIO_POR_EMAIL = {
   "terminada@exemplo.com": "terminada",
   "inativa@exemplo.com": "inativa",
   "erro-registro@exemplo.com": "erro-registro",
-  "nota-servidor@exemplo.com": "nota-servidor"
+  "nota-servidor@exemplo.com": "nota-servidor",
+  "dois-seguidos@exemplo.com": "dois-seguidos",
+  "quatro-usados@exemplo.com": "quatro-usados",
+  "sem-restante@exemplo.com": "sem-restante",
+  "ignora-difficult@exemplo.com": "ignora-difficult",
+  "so-is-difficult@exemplo.com": "so-is-difficult",
+  "post-seguidos@exemplo.com": "post-seguidos",
+  "post-quatro@exemplo.com": "post-quatro",
+  "quatro-e-seguidos@exemplo.com": "quatro-e-seguidos"
 };
 
 var CENARIOS = {
@@ -109,7 +126,7 @@ var CENARIOS = {
   "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2] },
   esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },
   recuperacao: { dia: 4, feitos: [1], dificeis: [1, 2], restantes: 2 },
-  "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true },
+  "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true, ignoraDifficult: true },
   estudo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
   academia: {
     dia: 4,
@@ -128,6 +145,14 @@ var CENARIOS = {
   terminada: { dia: 31, feitos: [1, 3], dificeis: [1], restantes: 3 },
   inativa: { dia: 4, feitos: [1], dificeis: [1], restantes: 3, status: "waiting" },
   "sem-porque": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, porque: "" },
+  "dois-seguidos": { dia: 4, feitos: [1, 2, 3], dificeis: [2, 3], restantes: 2 },
+  "quatro-usados": { dia: 8, feitos: [1, 3, 5, 7], dificeis: [1, 3, 5, 7], restantes: 0 },
+  "sem-restante": { dia: 4, feitos: [1, 3], dificeis: [1] },
+  "ignora-difficult": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, ignoraDifficult: true },
+  "so-is-difficult": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, respostaColuna: true },
+  "post-seguidos": { dia: 4, feitos: [1, 3], dificeis: [1], restantes: 3, erroPost: "seguidos" },
+  "post-quatro": { dia: 5, feitos: [1, 3], dificeis: [1, 3], restantes: 2, erroPost: "quatro" },
+  "quatro-e-seguidos": { dia: 6, feitos: [1, 2, 3, 4, 5], dificeis: [2, 3, 4, 5], restantes: 0 },
   vazio: { vazio: true },
   erro: { erro: true }
 };
@@ -378,6 +403,15 @@ function paraLista(missao) {
   });
 }
 
+function sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil) {
+  if (spec.omitirDificeis || (!Array.isArray(spec.dificeis) && !acrescentouDificil)) {
+    return { omitirDificeis: true };
+  }
+  var extra = { dificeis: dificeis };
+  if (typeof restantes === "number") extra.restantes = restantes;
+  return extra;
+}
+
 function montarCenario(nome, usuario) {
   var spec = CENARIOS[nome];
   if (!spec) return null;
@@ -388,6 +422,14 @@ function montarCenario(nome, usuario) {
   var extra = registroDoCenario[usuario.email + "|" + nome];
   var feitos = spec.feitos.slice();
   if (extra && feitos.indexOf(extra.day) === -1) feitos.push(extra.day);
+  var dificeis = Array.isArray(spec.dificeis) ? spec.dificeis.slice() : [];
+  var acrescentouDificil = false;
+  if (!spec.omitirDificeis && extra && extra.difficult === true && dificeis.indexOf(extra.day) === -1) {
+    dificeis.push(extra.day);
+    acrescentouDificil = true;
+  }
+  var restantes = spec.restantes;
+  if (acrescentouDificil && typeof restantes === "number") restantes = Math.max(0, restantes - 1);
   var notaDoDia = spec.nota || null;
   if (extra && extra.note) notaDoDia = extra.note;
   var inicio = new Date(Date.now() - (dia - 1) * MS_DIA).toISOString();
@@ -422,8 +464,8 @@ function montarCenario(nome, usuario) {
         completed: true,
         note: diaFeito === dia && notaDoDia ? notaDoDia : null
       };
-      if (!spec.omitirDificeis && Array.isArray(spec.dificeis)) {
-        item.difficult = spec.dificeis.indexOf(diaFeito) !== -1;
+      if (!spec.omitirDificeis && (Array.isArray(spec.dificeis) || acrescentouDificil)) {
+        item.difficult = dificeis.indexOf(diaFeito) !== -1;
       }
       return item;
     })
@@ -440,7 +482,7 @@ function montarCenario(nome, usuario) {
   return {
     mission: mission,
     progress: { progress: progress },
-    streak: sequenciaDe(new Set(feitos), dia, spec)
+    streak: sequenciaDe(new Set(feitos), dia, sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil))
   };
 }
 
@@ -460,11 +502,13 @@ function progressoGuardado(email, id) {
     progress[String(usuario.id)] = {
       username: usuario.username,
       checkins: lista.map(function (item) {
-        return {
+        var saida = {
           day: item.day,
           completed: item.completed === true,
           note: item.note || null
         };
+        if (item.difficult === true) saida.difficult = true;
+        return saida;
       })
     };
   }
@@ -574,6 +618,46 @@ function salvarLembrete(email, corpo) {
   return { status: 200, dados: { reminder_time: hora, timezone: fuso } };
 }
 
+var MSG_LIMITE_DIFICIL = "Você já usou os 4 dias difíceis desta missão.";
+var MSG_SEGUIDOS_DIFICIL = "Não dá para ter mais de 2 dias difíceis seguidos.";
+
+function checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec) {
+  var checkin = {
+    id: 1,
+    mission_id: Number(id),
+    user_id: usuarios[email].id,
+    day_number: dia,
+    completed: true,
+    note: noteLimpa,
+    created_at: new Date().toISOString()
+  };
+  if (querDificil && spec && spec.respostaColuna) checkin.is_difficult = true;
+  else if (querDificil) checkin.difficult = true;
+  return checkin;
+}
+
+function erroDeDificil(email, id, cenario, spec, dia) {
+  var dias = [];
+  function por(n) {
+    if (!isFinite(n) || n === dia || dias.indexOf(n) !== -1) return;
+    dias.push(n);
+  }
+  if (spec && Array.isArray(spec.dificeis) && !spec.omitirDificeis) {
+    spec.dificeis.forEach(function (item) { por(Number(item)); });
+  }
+  var extra = cenario ? registroDoCenario[email + "|" + cenario] : null;
+  if (extra && extra.difficult === true) por(Number(extra.day));
+  if (!spec) {
+    var lista = usuarios[email].checkins[String(id)] || [];
+    lista.forEach(function (item) {
+      if (item.difficult === true) por(Number(item.day));
+    });
+  }
+  if (dias.length >= 4) return MSG_LIMITE_DIFICIL;
+  if (dias.indexOf(dia - 1) !== -1 && dias.indexOf(dia - 2) !== -1) return MSG_SEGUIDOS_DIFICIL;
+  return "";
+}
+
 function erroDeProva(proof, note) {
   var text = typeof note === "string" ? note.trim() : "";
   if (proof === "workout_proof" && text.length < 8) {
@@ -601,6 +685,12 @@ async function registrarCheckin(email, corpo, cenario) {
   if (spec && spec.erroPost === "prova") {
     return { status: 400, dados: { error: "Esta missao de estudo exige uma nota curta com o que estudaste hoje." } };
   }
+  if (spec && spec.erroPost === "seguidos") {
+    return { status: 400, dados: { error: MSG_SEGUIDOS_DIFICIL } };
+  }
+  if (spec && spec.erroPost === "quatro") {
+    return { status: 400, dados: { error: MSG_LIMITE_DIFICIL } };
+  }
   if (spec && spec.espera) {
     await new Promise(function (resolver) {
       setTimeout(resolver, ESPERA_MISSAO_MS);
@@ -622,6 +712,11 @@ async function registrarCheckin(email, corpo, cenario) {
   if (dia > missao.duration_days) {
     return { status: 400, dados: { error: "A missão já terminou." } };
   }
+  var querDificil = corpo && corpo.difficult === true && !(spec && spec.ignoraDifficult);
+  if (querDificil) {
+    var bloqueio = erroDeDificil(email, id, cenario, spec, dia);
+    if (bloqueio) return { status: 400, dados: { error: bloqueio } };
+  }
 
   var already = false;
   if (spec && spec.postJaFeito) already = true;
@@ -642,27 +737,20 @@ async function registrarCheckin(email, corpo, cenario) {
       if (Number(item.day) === dia) {
         item.completed = true;
         item.note = noteLimpa;
+        if (querDificil) item.difficult = true;
         achei = true;
       }
     });
-    if (!achei) guardados.push({ day: dia, completed: true, note: noteLimpa });
+    if (!achei) guardados.push({ day: dia, completed: true, note: noteLimpa, difficult: querDificil });
   }
   if (cenario) {
-    registroDoCenario[email + "|" + cenario] = { day: dia, note: noteLimpa };
+    registroDoCenario[email + "|" + cenario] = { day: dia, note: noteLimpa, difficult: querDificil };
   }
 
   return {
     status: 201,
     dados: {
-      checkin: {
-        id: 1,
-        mission_id: Number(id),
-        user_id: usuarios[email].id,
-        day_number: dia,
-        completed: true,
-        note: noteLimpa,
-        created_at: new Date().toISOString()
-      },
+      checkin: checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec),
       day: dia,
       already_done: already,
       message: already ? ("Dia " + dia + " já estava registado!") : ("Dia " + dia + " registado! 🔥")
@@ -744,10 +832,19 @@ function responderHoje(req, res, email) {
       return true;
     }
     var feitos = new Set();
+    var dificeisGuardados = [];
     (usuarios[email].checkins[sequencia[1]] || []).forEach(function (item) {
       if (item.completed === true) feitos.add(Number(item.day));
+      if (item.difficult === true) dificeisGuardados.push(Number(item.day));
     });
-    enviar(res, 200, sequenciaDe(feitos, numeroDoDia(missaoSeq.started_at), null));
+    var extraSeq = null;
+    if (dificeisGuardados.length) {
+      extraSeq = {
+        dificeis: dificeisGuardados,
+        restantes: Math.max(0, 4 - dificeisGuardados.length)
+      };
+    }
+    enviar(res, 200, sequenciaDe(feitos, numeroDoDia(missaoSeq.started_at), extraSeq));
     return true;
   }
 

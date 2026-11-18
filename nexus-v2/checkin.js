@@ -1,6 +1,7 @@
 /* Registro de hoje. Tela empilhada em cima do Hoje: o voltar do navegador desfaz o passo.
-   A nota só existe no campo. Depois do envio, o campo é limpo. Não gravamos a nota aqui.
    POST /api/checkins manda { mission_id, note }. Não manda difficult (isso é a tela 5).
+   A nota fica no rascunho desta aba, o mesmo da tela de dia difícil.
+   O rascunho some só depois de um registro feito. Não é fila de envio.
 
    Tela 4, a resposta da IA depois do registro, fica desligada.
    O gancho é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN. O padrão é false.
@@ -16,6 +17,7 @@ var NEXUS_ABRIR_TELA_IA_APOS_CHECKIN = false;
 var CAMPOS_DE_CRISE_NA_RESPOSTA = [];
 
 var CHAVE_CACHE = "nexus_v2_hoje";
+var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
 var TEXTO_VAZIO = "Antes de registrar, escreva uma nota curta do que fez.";
 var TEXTO_ESTUDO = "Uma frase chega. Diga o que praticou (pelo menos 12 caracteres).";
 var TEXTO_ACADEMIA = "Uma frase chega (pelo menos 8 caracteres).";
@@ -38,6 +40,7 @@ var ERROS_NOTA_CURTA = {
 var ciclo = 0;
 var missaoAtual = null;
 var saindo = false;
+var rascunhoFechado = false;
 
 function cenarioDaPagina() {
   try {
@@ -99,6 +102,15 @@ function mostrarVista(qual) {
   document.getElementById("conteudo").setAttribute("aria-busy", qual === "carregando" ? "true" : "false");
 }
 
+function descreverNota(campo, comErro) {
+  var ajuda = document.getElementById("nota-ajuda");
+  var ids = [];
+  if (ajuda && !ajuda.hidden && ajuda.textContent) ids.push("nota-ajuda");
+  if (comErro) ids.push("nota-erro");
+  if (ids.length) campo.setAttribute("aria-describedby", ids.join(" "));
+  else campo.removeAttribute("aria-describedby");
+}
+
 function definirErro(texto) {
   var campo = document.getElementById("nota");
   var aviso = document.getElementById("nota-erro");
@@ -107,12 +119,15 @@ function definirErro(texto) {
     aviso.hidden = false;
     aviso.textContent = texto;
     campo.setAttribute("aria-invalid", "true");
+    if (ajuda) ajuda.hidden = !ajuda.textContent || ajuda.textContent === texto;
+    descreverNota(campo, true);
   } else {
     aviso.hidden = true;
     aviso.textContent = "";
     campo.removeAttribute("aria-invalid");
+    if (ajuda) ajuda.hidden = !ajuda.textContent;
+    descreverNota(campo, false);
   }
-  if (ajuda) ajuda.hidden = !ajuda.textContent || ajuda.textContent === texto;
 }
 
 function definirCarregando(ligado) {
@@ -128,6 +143,57 @@ function definirCarregando(ligado) {
 function limparNota() {
   var campo = document.getElementById("nota");
   if (campo) campo.value = "";
+}
+
+function lerRascunho() {
+  try {
+    var bruto = sessionStorage.getItem(CHAVE_RASCUNHO);
+    if (!bruto) return null;
+    var dados = JSON.parse(bruto);
+    if (!dados || typeof dados.note !== "string") return null;
+    return dados;
+  } catch (erro) {
+    return null;
+  }
+}
+
+function guardarRascunho(id, dia, nota) {
+  try {
+    sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
+      mission_id: id,
+      day: dia,
+      note: typeof nota === "string" ? nota : ""
+    }));
+  } catch (erro) {
+    /* Sem sessionStorage, a nota continua no campo desta página. */
+  }
+}
+
+function limparRascunho() {
+  rascunhoFechado = true;
+  try {
+    sessionStorage.removeItem(CHAVE_RASCUNHO);
+  } catch (erro) {}
+}
+
+function guardarNotaDoCampo() {
+  if (rascunhoFechado || saindo) return;
+  if (!missaoAtual || missaoAtual.id == null) return;
+  var form = document.getElementById("vista-form");
+  if (!form || form.hidden) return;
+  var campo = document.getElementById("nota");
+  if (!campo) return;
+  guardarRascunho(missaoAtual.id, numeroDoDia(missaoAtual.started_at), campo.value);
+}
+
+function aplicarRascunho() {
+  if (!missaoAtual || missaoAtual.id == null) return;
+  var dados = lerRascunho();
+  if (!dados) return;
+  if (String(dados.mission_id) !== String(missaoAtual.id)) return;
+  if (Number(dados.day) !== numeroDoDia(missaoAtual.started_at)) return;
+  var campo = document.getElementById("nota");
+  if (campo) campo.value = dados.note;
 }
 
 function numeroDoDia(startedAt) {
@@ -264,6 +330,7 @@ function preencherForma(missao, semRede) {
   ajuda.hidden = !regra.ajuda;
   definirErro("");
   esconderAviso(document.getElementById("alerta"));
+  aplicarRascunho();
   if (semRede) mostrarAviso(document.getElementById("alerta"), "rede", TEXTO_SEM_REDE);
   mostrarVista("form");
   NexusAbas.focar(document.getElementById("titulo"));
@@ -384,6 +451,7 @@ function validarNota() {
 }
 
 function mostrarSucesso() {
+  limparRascunho();
   limparNota();
   var caixa = document.getElementById("sucesso");
   caixa.classList.remove("visivel");
@@ -513,7 +581,21 @@ function iniciar() {
     carregar();
   });
   document.getElementById("nota").addEventListener("input", function () {
-    if (document.getElementById("nota").getAttribute("aria-invalid") === "true") definirErro("");
+    var campo = document.getElementById("nota");
+    if (campo.getAttribute("aria-invalid") === "true") {
+      var problema = validarNota();
+      if (!problema) definirErro("");
+      else if (document.getElementById("nota-erro").textContent !== problema) definirErro(problema);
+    }
+    guardarNotaDoCampo();
+  });
+  document.getElementById("link-dificil").addEventListener("click", guardarNotaDoCampo);
+  document.getElementById("voltar").addEventListener("click", guardarNotaDoCampo);
+  window.addEventListener("pagehide", guardarNotaDoCampo);
+  window.addEventListener("pageshow", function (evento) {
+    if (!evento.persisted) return;
+    if (document.getElementById("vista-form").hidden) return;
+    aplicarRascunho();
   });
   NexusAbas.focar(document.getElementById("titulo"));
   atualizarBarra();
