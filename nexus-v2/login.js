@@ -3,11 +3,11 @@
 
 var CHAVE_TOKEN = "nexus_v2_token";
 var CHAVE_USUARIO = "nexus_v2_user";
-var TEXTO_SEM_REDE = "Sem ligação. Assim que a rede voltar, tente de novo.";
+var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo.";
 
 function problemaDoEmail(valor) {
   var texto = valor.trim();
-  if (!texto) return "Escreva o seu e-mail.";
+  if (!texto) return "Escreva seu e-mail.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto)) return "Esse e-mail não parece completo.";
   return "";
 }
@@ -26,7 +26,7 @@ function iconeAviso(tipo) {
   if (tipo === "ok") {
     traco.setAttribute("d", "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9");
   } else if (tipo === "rede") {
-    traco.setAttribute("d", "M3 8.5c5-4.5 13-4.5 18 0M6.5 12.5c3-2.6 8-2.6 11 0M10 16.5c1.2-1 2.8-1 4 0M12 19.5h.01");
+    traco.setAttribute("d", "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18");
   } else {
     traco.setAttribute("d", "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16.5h.01");
   }
@@ -83,9 +83,12 @@ function limparSenhas(form) {
 }
 
 function definirCarregando(botao, ligado) {
+  var rotulo = botao.querySelector(".btn-rotulo");
+  var spinner = botao.querySelector(".spinner");
   botao.disabled = ligado;
   botao.setAttribute("aria-busy", ligado ? "true" : "false");
-  botao.textContent = ligado ? botao.getAttribute("data-carregando") : botao.getAttribute("data-texto");
+  rotulo.textContent = ligado ? botao.getAttribute("data-carregando") : botao.getAttribute("data-texto");
+  if (spinner) spinner.hidden = !ligado;
 }
 
 function ligarOlho(botao, campo) {
@@ -198,7 +201,7 @@ async function enviarEntrar(form) {
 
   limparErros(form);
   var textoEmail = problemaDoEmail(email.value);
-  var textoSenha = senha.value.length === 0 ? "Escreva a sua senha." : "";
+  var textoSenha = senha.value.length === 0 ? "Escreva sua senha." : "";
   definirErro(email, erroEmail, textoEmail);
   definirErro(senha, erroSenha, textoSenha);
   if (textoEmail || textoSenha) {
@@ -255,7 +258,7 @@ async function enviarCadastro(form) {
   var textoNome = nome.value.trim() ? "" : "Diga como você quer ser chamado.";
   var textoEmail = problemaDoEmail(email.value);
   var textoSenha = "";
-  if (senha.value.length === 0) textoSenha = "Escreva a sua senha.";
+  if (senha.value.length === 0) textoSenha = "Escreva sua senha.";
   else if (senha.value.length < 6) textoSenha = "A senha precisa ter pelo menos 6 caracteres.";
   var textoConfirma = "";
   if (!textoSenha && senha.value !== confirma.value) textoConfirma = "As duas senhas não são iguais.";

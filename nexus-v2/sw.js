@@ -1,7 +1,7 @@
 /* Service worker simples do v2.
    Só guarda os arquivos desta pasta. Não mexe no cache do app antigo
    e não guarda pedidos da API (login e cadastro precisam da rede). */
-var CACHE = "nexus-v2-v1";
+var CACHE = "nexus-v2-v2";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -60,7 +60,7 @@ self.addEventListener("fetch", function (event) {
     return caches.match(pedido).then(function (guardado) {
       if (guardado) return guardado;
       if (pedido.mode === "navigate") return caches.match("./offline.html");
-      return new Response("", { status: 503, statusText: "Sem ligação" });
+      return new Response("", { status: 503, statusText: "Sem internet" });
     });
   }));
 });

@@ -139,6 +139,9 @@ input {
   width: 100%;
   min-height: var(--target);
   padding: var(--space-3) var(--space-4);
+  /* Borda contra o fundo do campo e contra o cartão: acima de 3:1 nos dois modos.
+     Claro #7A756C: 4,6:1 no branco, 3,6:1 no bege do campo, 4,0:1 no papel.
+     Escuro #9A948A: 5,5:1 no cartão, 5,0:1 no preenchimento, 6,1:1 no fundo. */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface-2);
@@ -176,6 +179,7 @@ input:-webkit-autofill {
 
 .btn-primario {
   width: 100%;
+  gap: var(--space-2);
   background: var(--accent);
   color: var(--accent-text);
   text-decoration: none;
@@ -183,6 +187,32 @@ input:-webkit-autofill {
 
 .btn-primario:hover {
   background: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
+
+.btn-texto {
+  border: 0;
+  background: transparent;
+  color: var(--accent-standout);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: 0 var(--space-2);
+}
+
+.spinner {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: girar 700ms linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
 }
 
 .btn-secundario {
@@ -245,5 +275,10 @@ input:-webkit-autofill {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .spinner {
+    animation: none;
+    border-color: currentColor;
   }
 }

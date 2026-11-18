@@ -1,20 +1,23 @@
 /* Tela 00: entrar e criar conta. */
 
 .pagina {
+  box-sizing: border-box;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding:
-    calc(var(--space-6) + var(--safe-top))
-    max(var(--space-4), env(safe-area-inset-right, 0px))
-    calc(var(--space-6) + var(--safe-bottom))
-    max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
 }
 
 .cartao {
   width: min(100%, 28rem);
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-shrink: 0;
   padding: var(--space-5);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -100,18 +103,4 @@
   font: var(--text-label);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-@media (max-height: 860px) {
-  .pagina {
-    align-items: flex-start;
-    padding-top: calc(var(--space-4) + var(--safe-top));
-    padding-bottom: calc(var(--space-4) + var(--safe-bottom));
-  }
-}
-
-@media (min-height: 880px) {
-  .pagina {
-    align-items: center;
-  }
 }

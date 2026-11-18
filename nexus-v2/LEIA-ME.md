@@ -27,7 +27,7 @@ No mock, para ver os estados:
 - Devagar: use o e-mail `lento@exemplo.com`.
 - Falha do servidor: use o e-mail `falha@exemplo.com`.
 - Nome já usado no cadastro: `repetido` ou `repetido@exemplo.com`.
-- Sem internet: desligue a rede no navegador, ou feche o terminal do mock, e tente de novo.
+- Sem internet: desligue a internet no navegador, ou feche o terminal do mock, e tente de novo.
 
 Esses atalhos existem só no arquivo `dev/mock-api.js`.
 

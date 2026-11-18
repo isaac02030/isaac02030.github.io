@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Sem ligação — Nexus</title>
+  <title>Sem internet — Nexus</title>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="login.css">
@@ -13,10 +13,15 @@
     <section class="cartao">
       <header class="cabecalho">
         <p class="marca">Nexus</p>
-        <h1 class="titulo">Sem ligação</h1>
+        <h1 class="titulo">Sem internet</h1>
       </header>
-      <p class="alerta alerta-rede">Sem ligação. Assim que a rede voltar, tente de novo.</p>
-      <p class="troca"><a href="./">Voltar a entrar</a></p>
+      <p class="alerta alerta-rede">
+        <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18"/>
+        </svg>
+        <span>Sem internet. Assim que a conexão voltar, tente de novo.</span>
+      </p>
+      <p class="troca"><a href="./">Voltar para entrar</a></p>
     </section>
   </main>
 </body>

@@ -5,6 +5,7 @@
 - A tela da missão respeita o estado do interruptor de emparelhamento automático informado pelo backend.
 - Commit `975d24b` enviado ao branch `codex/nexus-council-and-matching-switch`.
 - Dédalo: criada a pasta `nexus-v2/` com a base (tokens da direção A "Caderno quente", CSS base, `api.js` com a URL num só lugar) e a tela 00 de entrar e criar conta. A fonte Figtree fica no próprio app. A pasta `nexus/` não foi alterada. O link "Esqueci a senha" fica escondido. Pull request aberto a partir deste branch, sem merge.
+- Clara (Designer de UX) aprovou a tela e pediu 5 ajustes, feitos no mesmo pull request: cartão centralizado com `padding-top` e `env(safe-area-inset-top)`; texto "Sem internet" em português do Brasil e ícone de wi-fi cortado; "Mostrar senha" virou botão de texto, sem borda, com 44 px; "Entrando…" desativa o botão, usa `aria-busy` e um spinner que não gira quando a pessoa pede menos movimento; a borda dos campos já passava de 3:1 e os valores medidos foram para a descrição do PR.
 
 ## Pendente
 - As telas seguintes (onboarding e Hoje) ainda não existem. Depois de entrar, a tela só confirma e guarda a sessão neste aparelho.

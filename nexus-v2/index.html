@@ -41,7 +41,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
-  <a class="saltar" href="#conteudo">Saltar para o formulário</a>
+  <a class="saltar" href="#conteudo">Pular para o formulário</a>
   <main class="pagina" id="conteudo">
     <div class="cartao">
       <noscript>
@@ -66,7 +66,7 @@
           <div class="campo campo-senha">
             <label for="entrar-senha">Senha</label>
             <input id="entrar-senha" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="entrar-senha-erro" data-senha="sim">
-            <button type="button" class="btn btn-secundario" id="entrar-olho" aria-pressed="false" aria-controls="entrar-senha">Mostrar senha</button>
+            <button type="button" class="btn btn-texto" id="entrar-olho" aria-pressed="false" aria-controls="entrar-senha">Mostrar senha</button>
             <p id="entrar-senha-erro" class="erro-campo" hidden></p>
           </div>
 
@@ -75,7 +75,10 @@
             <a href="#esqueci-a-senha">Esqueci a senha</a>
           </p>
 
-          <button type="submit" class="btn btn-primario" id="btn-entrar" data-texto="Entrar" data-carregando="Entrando…">Entrar</button>
+          <button type="submit" class="btn btn-primario" id="btn-entrar" data-texto="Entrar" data-carregando="Entrando…" aria-busy="false">
+            <span class="btn-rotulo">Entrar</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
         </form>
 
         <p class="troca">
@@ -88,7 +91,7 @@
         <header class="cabecalho">
           <p class="marca">Nexus</p>
           <h1 class="titulo" id="titulo-cadastro" tabindex="-1">Criar conta</h1>
-          <p class="apoio">Leva menos de um minuto. Depois você escreve o seu compromisso.</p>
+          <p class="apoio">Leva menos de um minuto. Depois você escreve seu compromisso.</p>
         </header>
 
         <form class="formulario" id="form-cadastro" method="post" action="#criar-conta" novalidate>
@@ -110,7 +113,7 @@
           <div class="campo campo-senha">
             <label for="cadastro-senha">Senha</label>
             <input id="cadastro-senha" name="password" type="password" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="cadastro-senha-dica cadastro-senha-erro" data-senha="sim">
-            <button type="button" class="btn btn-secundario" id="cadastro-olho" aria-pressed="false" aria-controls="cadastro-senha">Mostrar senha</button>
+            <button type="button" class="btn btn-texto" id="cadastro-olho" aria-pressed="false" aria-controls="cadastro-senha">Mostrar senha</button>
             <p id="cadastro-senha-dica" class="dica">Pelo menos 6 caracteres.</p>
             <p id="cadastro-senha-erro" class="erro-campo" hidden></p>
           </div>
@@ -118,11 +121,14 @@
           <div class="campo campo-senha">
             <label for="cadastro-confirma">Confirmar senha</label>
             <input id="cadastro-confirma" name="confirm" type="password" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-required="true" aria-describedby="cadastro-confirma-erro" data-senha="sim">
-            <button type="button" class="btn btn-secundario" id="cadastro-confirma-olho" aria-pressed="false" aria-controls="cadastro-confirma">Mostrar senha</button>
+            <button type="button" class="btn btn-texto" id="cadastro-confirma-olho" aria-pressed="false" aria-controls="cadastro-confirma">Mostrar senha</button>
             <p id="cadastro-confirma-erro" class="erro-campo" hidden></p>
           </div>
 
-          <button type="submit" class="btn btn-primario" id="btn-criar" data-texto="Criar conta" data-carregando="Criando conta…">Criar conta</button>
+          <button type="submit" class="btn btn-primario" id="btn-criar" data-texto="Criar conta" data-carregando="Criando conta…" aria-busy="false">
+            <span class="btn-rotulo">Criar conta</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
         </form>
 
         <p class="troca">
