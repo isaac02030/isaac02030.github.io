@@ -80,6 +80,12 @@ button {
   outline-offset: 2px;
 }
 
+/* O título recebe foco para o leitor de tela, sem anel.
+   Botões, links e campos seguem com :focus-visible. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 .marca {
   margin: 0;
   font: var(--text-display);
@@ -251,6 +257,12 @@ input:-webkit-autofill {
   background: var(--surface);
   box-shadow: var(--shadow);
   overflow-wrap: break-word;
+}
+
+/* O cartão do Hoje e das telas que abrem a partir dele fica no topo, sem centralizar na vertical. */
+.cartao.cartao-topo {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .cabecalho {

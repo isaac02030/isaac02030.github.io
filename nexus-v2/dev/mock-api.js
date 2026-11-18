@@ -54,6 +54,20 @@
    - recuperacao     (recuperacao@exemplo.com)     recovery_needed, tela 6
    - sem-campo       (sem-campo@exemplo.com)       igual ao não registrado, sem dia difícil
 
+   Check-in (POST /api/checkins com { mission_id, note }):
+   A resposta segue a rota de verdade: { checkin, day, already_done, message }.
+   Não há campo de crise. Não lemos a nota para inventar um.
+   O pedido pode trazer difficult, mas esta tela não manda e aqui ele é ignorado.
+   - estudo            formulário de aprendizagem, dia em aberto
+   - academia          (academia@exemplo.com)        categoria fitness
+   - lento             o POST espera 8 segundos e registra
+   - erro-registro     (erro-registro@exemplo.com)   POST responde 500
+   - nota-servidor     (nota-servidor@exemplo.com)   POST 400 no texto europeu da prova
+   - repetido          POST responde already_done true
+   - terminada         (terminada@exemplo.com)       o dia passou de 30
+   - inativa           (inativa@exemplo.com)         a missão não está ativa
+   - sem-porque        o porquê vem vazio
+
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.
    Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
@@ -79,7 +93,13 @@ var CENARIO_POR_EMAIL = {
   "vazio@exemplo.com": "vazio",
   "erro-hoje@exemplo.com": "erro",
   "recuperacao@exemplo.com": "recuperacao",
-  "sem-campo@exemplo.com": "sem-campo"
+  "sem-campo@exemplo.com": "sem-campo",
+  "academia@exemplo.com": "academia",
+  "estudo@exemplo.com": "estudo",
+  "terminada@exemplo.com": "terminada",
+  "inativa@exemplo.com": "inativa",
+  "erro-registro@exemplo.com": "erro-registro",
+  "nota-servidor@exemplo.com": "nota-servidor"
 };
 
 var CENARIOS = {
@@ -90,9 +110,31 @@ var CENARIOS = {
   esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },
   recuperacao: { dia: 4, feitos: [1], dificeis: [1, 2], restantes: 2 },
   "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true },
+  estudo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
+  academia: {
+    dia: 4,
+    feitos: [1, 3],
+    dificeis: [1, 2],
+    restantes: 2,
+    categoria: "fitness",
+    titulo: "Treinar no horário combinado",
+    minimo: "Uma série",
+    porque: "Quero manter o combinado"
+  },
+  lento: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, espera: true },
+  "erro-registro": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, erroPost: 500 },
+  "nota-servidor": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, erroPost: "prova" },
+  repetido: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, postJaFeito: true },
+  terminada: { dia: 31, feitos: [1, 3], dificeis: [1], restantes: 3 },
+  inativa: { dia: 4, feitos: [1], dificeis: [1], restantes: 3, status: "waiting" },
+  "sem-porque": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, porque: "" },
   vazio: { vazio: true },
   erro: { erro: true }
 };
+
+/* Registro feito neste processo, por e-mail e cenário. Só para o Hoje
+   mostrar o dia cumprido depois do POST. Não é o banco de verdade. */
+var registroDoCenario = {};
 
 function chavePublicaVapid() {
   var par = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -343,24 +385,30 @@ function montarCenario(nome, usuario) {
   if (spec.vazio) return { vazio: true };
 
   var dia = spec.dia;
+  var extra = registroDoCenario[usuario.email + "|" + nome];
+  var feitos = spec.feitos.slice();
+  if (extra && feitos.indexOf(extra.day) === -1) feitos.push(extra.day);
+  var notaDoDia = spec.nota || null;
+  if (extra && extra.note) notaDoDia = extra.note;
   var inicio = new Date(Date.now() - (dia - 1) * MS_DIA).toISOString();
   var partner = null;
   if (spec.modo === "parceiro") partner = { id: usuario.id + 1000, name: "Par Teste" };
+  var categoria = spec.categoria || "aprendizagem";
 
   var mission = novaMissao(usuario, {
     id: 7,
-    title: "Ler uma página por dia",
-    category: "aprendizagem",
-    daily_minimum: "Uma página",
-    why_it_matters: "Quero ler sem traduzir",
-    proof_mode: "study_note",
+    title: spec.titulo || "Ler uma página por dia",
+    category: categoria,
+    daily_minimum: typeof spec.minimo === "string" ? spec.minimo : "Uma página",
+    why_it_matters: spec.porque === "" ? "" : (spec.porque || "Quero ler sem traduzir"),
+    proof_mode: spec.prova || (categoria === "fitness" ? "workout_proof" : "study_note"),
     mode: spec.modo || "solo",
     match_preference: spec.esperando ? "parceiro" : (spec.modo === "parceiro" ? "parceiro" : null),
-    status: spec.esperando ? "waiting" : "active",
+    status: spec.status || (spec.esperando ? "waiting" : "active"),
     started_at: inicio,
     partner_id: partner ? partner.id : null,
     partner_name: partner ? partner.name : null,
-    user_score: spec.feitos.length,
+    user_score: feitos.length,
     partner_score: (spec.parFeitos || []).length,
     pair_started_at: partner ? inicio : null
   });
@@ -368,11 +416,11 @@ function montarCenario(nome, usuario) {
   var progress = {};
   progress[String(usuario.id)] = {
     username: usuario.username,
-    checkins: spec.feitos.map(function (diaFeito) {
+    checkins: feitos.map(function (diaFeito) {
       var item = {
         day: diaFeito,
         completed: true,
-        note: diaFeito === dia && spec.nota ? spec.nota : null
+        note: diaFeito === dia && notaDoDia ? notaDoDia : null
       };
       if (!spec.omitirDificeis && Array.isArray(spec.dificeis)) {
         item.difficult = spec.dificeis.indexOf(diaFeito) !== -1;
@@ -392,7 +440,7 @@ function montarCenario(nome, usuario) {
   return {
     mission: mission,
     progress: { progress: progress },
-    streak: sequenciaDe(new Set(spec.feitos), dia, spec)
+    streak: sequenciaDe(new Set(feitos), dia, spec)
   };
 }
 
@@ -524,6 +572,102 @@ function salvarLembrete(email, corpo) {
   }
   usuarios[email].lembrete = { reminder_time: hora, timezone: fuso };
   return { status: 200, dados: { reminder_time: hora, timezone: fuso } };
+}
+
+function erroDeProva(proof, note) {
+  var text = typeof note === "string" ? note.trim() : "";
+  if (proof === "workout_proof" && text.length < 8) {
+    return "Esta missao exige uma prova curta antes do check-in.";
+  }
+  if (proof === "study_note" && text.length < 12) {
+    return "Esta missao de estudo exige uma nota curta com o que estudaste hoje.";
+  }
+  if (proof === "artifact_note" && text.length < 12) {
+    return "Esta missao exige um registo curto do que produziste hoje.";
+  }
+  if (proof === "text_note" && text.length < 8) {
+    return "Esta missao exige uma nota curta antes do check-in.";
+  }
+  return "";
+}
+
+async function registrarCheckin(email, corpo, cenario) {
+  var id = corpo && corpo.mission_id;
+  if (!id) return { status: 400, dados: { error: "mission_id é obrigatório." } };
+  var spec = cenario && CENARIOS[cenario] ? CENARIOS[cenario] : null;
+  if (spec && spec.erroPost === 500) {
+    return { status: 500, dados: { error: "Erro ao registar check-in." } };
+  }
+  if (spec && spec.erroPost === "prova") {
+    return { status: 400, dados: { error: "Esta missao de estudo exige uma nota curta com o que estudaste hoje." } };
+  }
+  if (spec && spec.espera) {
+    await new Promise(function (resolver) {
+      setTimeout(resolver, ESPERA_MISSAO_MS);
+    });
+  }
+
+  var pacote = cenario ? montarCenario(cenario, usuarios[email]) : null;
+  var missao = pacote && pacote.mission ? pacote.mission : acharMissao(email, id);
+  if (!missao || String(missao.id) !== String(id)) {
+    return { status: 404, dados: { error: "Missão não encontrada." } };
+  }
+  if (missao.status !== "active") {
+    return { status: 400, dados: { error: "Missão não está ativa." } };
+  }
+  var nota = typeof corpo.note === "string" ? corpo.note : "";
+  var prova = erroDeProva(missao.proof_mode, nota);
+  if (prova) return { status: 400, dados: { error: prova } };
+  var dia = numeroDoDia(missao.started_at);
+  if (dia > missao.duration_days) {
+    return { status: 400, dados: { error: "A missão já terminou." } };
+  }
+
+  var already = false;
+  if (spec && spec.postJaFeito) already = true;
+  else if (pacote && pacote.streak && pacote.streak.today_done) already = true;
+  else {
+    var lista = usuarios[email].checkins[String(id)] || [];
+    already = lista.some(function (item) {
+      return Number(item.day) === dia && item.completed === true;
+    });
+  }
+
+  var noteLimpa = nota.trim() ? nota.trim() : null;
+  if (!pacote) {
+    if (!usuarios[email].checkins[String(id)]) usuarios[email].checkins[String(id)] = [];
+    var guardados = usuarios[email].checkins[String(id)];
+    var achei = false;
+    guardados.forEach(function (item) {
+      if (Number(item.day) === dia) {
+        item.completed = true;
+        item.note = noteLimpa;
+        achei = true;
+      }
+    });
+    if (!achei) guardados.push({ day: dia, completed: true, note: noteLimpa });
+  }
+  if (cenario) {
+    registroDoCenario[email + "|" + cenario] = { day: dia, note: noteLimpa };
+  }
+
+  return {
+    status: 201,
+    dados: {
+      checkin: {
+        id: 1,
+        mission_id: Number(id),
+        user_id: usuarios[email].id,
+        day_number: dia,
+        completed: true,
+        note: noteLimpa,
+        created_at: new Date().toISOString()
+      },
+      day: dia,
+      already_done: already,
+      message: already ? ("Dia " + dia + " já estava registado!") : ("Dia " + dia + " registado! 🔥")
+    }
+  };
 }
 
 function negar(acesso) {
@@ -678,6 +822,10 @@ var servidor = http.createServer(function (req, res) {
     if (url === "/api/missions" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);
       return criarMissao(acesso.email, corpo);
+    }
+    if (url === "/api/checkins" && req.method === "POST") {
+      if (acesso.status !== 200) return negar(acesso);
+      return registrarCheckin(acesso.email, corpo, cenarioDe(req, acesso.email));
     }
     if (url === "/api/notifications/subscribe" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Check-in — Nexus</title>
+  <title>Registro de hoje — Nexus</title>
   <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
   <meta name="color-scheme" content="light dark">
   <meta name="mobile-web-app-capable" content="yes">
@@ -36,29 +36,76 @@
       if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
     })();
   </script>
-  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
-  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="checkin.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
-  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
-  <main class="pagina pagina-com-abas" id="conteudo">
-    <section class="cartao">
-      <header class="cabecalho">
-        <p class="marca">Nexus</p>
-        <h1 class="titulo" id="titulo" tabindex="-1">Check-in vem a seguir</h1>
-      </header>
-    </section>
+  <a class="saltar" href="#conteudo">Pular para o registro</a>
+  <main class="pagina" id="conteudo">
+    <div class="cartao cartao-topo checkin">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para registrar o dia.</p>
+      </noscript>
+
+      <a class="btn btn-texto btn-voltar" id="voltar" href="hoje.html">Voltar</a>
+      <h1 class="titulo" id="titulo" tabindex="-1">Registro de hoje</h1>
+
+      <section class="vista" id="vista-carregando" aria-live="polite">
+        <p class="carregando">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Abrindo o dia…</span>
+        </p>
+      </section>
+
+      <section class="vista" id="vista-erro" hidden>
+        <div id="alerta-erro" class="alerta" role="alert"></div>
+        <button type="button" class="btn btn-primario" id="btn-tentar">Tentar de novo</button>
+      </section>
+
+      <section class="vista" id="vista-bloqueio" hidden>
+        <p class="apoio" id="texto-bloqueio" role="status"></p>
+        <!-- Quando a tela 10 existir, este botão passa a dizer «Ver o resultado». -->
+        <a class="btn btn-primario" id="btn-voltar-hoje" href="hoje.html">Voltar a Hoje</a>
+      </section>
+
+      <section class="vista" id="vista-form" hidden>
+        <div class="bloco-pergunta">
+          <p class="rotulo-minimo">O mínimo de hoje:</p>
+          <p class="minimo-hoje" id="minimo-hoje" hidden><strong id="minimo-valor"></strong></p>
+          <p class="pergunta" id="pergunta">Você cumpriu?</p>
+        </div>
+        <p class="escreveu" id="escreveu" hidden></p>
+        <form class="formulario" id="form-nota" method="post" action="checkin.html" novalidate>
+          <div class="campo">
+            <label for="nota">Escreva uma nota curta do que fez.</label>
+            <textarea id="nota" name="note" rows="3" autocomplete="off" autocapitalize="sentences" aria-required="true" aria-describedby="nota-ajuda nota-erro"></textarea>
+            <p id="nota-ajuda" class="dica"></p>
+            <p id="nota-erro" class="erro-campo" role="alert" hidden></p>
+          </div>
+          <div id="alerta" class="alerta" role="alert" hidden></div>
+          <button type="submit" class="btn btn-primario" id="btn-registrar" data-texto="Registrar o dia" data-carregando="Registrando…" aria-busy="false">
+            <span class="btn-rotulo">Registrar o dia</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+        <a class="btn btn-texto link-dificil" id="link-dificil" href="dia-dificil.html">Hoje é dia difícil</a>
+      </section>
+
+      <section class="vista" id="vista-sucesso" hidden>
+        <p class="sucesso" id="sucesso" role="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
+    </div>
   </main>
-  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="api.js"></script>
   <script src="abas.js"></script>
-  <script>
-    NexusAbas.iniciar("hoje");
-  </script>
+  <script src="checkin.js"></script>
 </body>
 </html>

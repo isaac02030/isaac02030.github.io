@@ -130,6 +130,15 @@ var NexusApi = {
   sequenciaDaMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/streak"), null, { metodo: "GET", auth: true });
   },
+  /* POST /api/checkins. O corpo é só mission_id e note.
+     A resposta de verdade traz day, already_done, checkin e message.
+     Não mandamos difficult: isso é da tela de dia difícil. */
+  registrarDia: function (id, nota) {
+    return nexusPedir(caminhoComCenario("/api/checkins"), {
+      mission_id: id,
+      note: nota
+    }, { metodo: "POST", auth: true });
+  },
   /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
      A rota atual não lê esse campo: a coluna já nasce 30 e o fim é agora + 30 dias.
      Enviar 30 não muda o resultado. Não mandamos level, description, fallback_plan

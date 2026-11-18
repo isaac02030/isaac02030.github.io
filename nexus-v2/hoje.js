@@ -12,7 +12,8 @@ var CHAVE_USUARIO = "nexus_v2_user";
 var MS_DIA = 24 * 60 * 60 * 1000;
 var TEXTO_ERRO = "Não foi possível abrir o dia. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo.";
-var TEXTO_REGISTRO_OFF = "Sem internet. O registro fica para quando a conexão voltar.";
+var TEXTO_REGISTRO_OFF = "Sem internet. Tente de novo quando a conexão voltar.";
+var TEXTO_REGISTRO_OFF_NOTA = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
 var ciclo = 0;
 
 function cenarioDaPagina() {
@@ -257,6 +258,9 @@ function modeloDe(missao, progresso, sequencia) {
   var mostrarPar = modoDuo(missao) && nomePar && parFezHoje(progresso, nomePar, dia);
   return {
     recuperacao: !!(sequencia && sequencia.recovery_needed),
+    id: missao.id,
+    category: typeof missao.category === "string" ? missao.category : "",
+    proof_mode: typeof missao.proof_mode === "string" ? missao.proof_mode : "",
     dia: dia,
     duracao: duracao,
     titulo: typeof missao.title === "string" ? missao.title : "",
@@ -276,6 +280,9 @@ function guardarCache(modelo) {
   try {
     localStorage.setItem(CHAVE_CACHE, JSON.stringify({
       versao: 1,
+      id: modelo.id,
+      category: modelo.category || "",
+      proof_mode: modelo.proof_mode || "",
       recuperacao: modelo.recuperacao,
       dia: modelo.dia,
       duracao: modelo.duracao,
@@ -307,16 +314,41 @@ function lerCache() {
   }
 }
 
-function contarFeitos(feitos, duracao) {
-  var vistos = {};
-  var n = 0;
-  (feitos || []).forEach(function (dia) {
-    if (dia >= 1 && dia <= duracao && !vistos[dia]) {
-      vistos[dia] = true;
-      n += 1;
-    }
+function palavraDeContagem(n, um, outros) {
+  return n + " " + (n === 1 ? um : outros);
+}
+
+/* Cada dia entra uma vez: difícil, senão cumprido, senão falta.
+   Falta é só dia passado. Hoje sem registro e o futuro ficam de fora da conta. */
+function rotuloDasMarcas(modelo) {
+  var duracao = modelo.duracao;
+  var hoje = modelo.dia;
+  var feitos = {};
+  var dificeis = {};
+  var temDificeis = Array.isArray(modelo.dificeis);
+  (modelo.feitos || []).forEach(function (dia) {
+    if (dia >= 1 && dia <= duracao) feitos[dia] = true;
   });
-  return n;
+  if (temDificeis) {
+    modelo.dificeis.forEach(function (dia) {
+      if (dia >= 1 && dia <= duracao) dificeis[dia] = true;
+    });
+  }
+  var nCumprido = 0;
+  var nDificil = 0;
+  var nFalta = 0;
+  var dia;
+  for (dia = 1; dia <= duracao; dia++) {
+    var dificil = temDificeis && !!dificeis[dia];
+    var feito = !!feitos[dia];
+    if (dificil) nDificil += 1;
+    else if (feito) nCumprido += 1;
+    else if (dia < hoje) nFalta += 1;
+  }
+  return "Dia " + hoje + " de " + duracao + ": "
+    + palavraDeContagem(nCumprido, "cumprido", "cumpridos") + ", "
+    + palavraDeContagem(nDificil, "difícil", "difíceis") + ", "
+    + palavraDeContagem(nFalta, "falta", "faltas");
 }
 
 function pintarMarcas(modelo) {
@@ -330,7 +362,9 @@ function pintarMarcas(modelo) {
   if (temDificeis) {
     modelo.dificeis.forEach(function (dia) { dificeis[dia] = true; });
   }
-  caixa.setAttribute("aria-label", contarFeitos(modelo.feitos, duracao) + " de " + duracao + " dias registrados");
+  caixa.setAttribute("role", "img");
+  caixa.setAttribute("aria-label", rotuloDasMarcas(modelo));
+  caixa.removeAttribute("tabindex");
   caixa.replaceChildren();
   for (var dia = 1; dia <= duracao; dia++) {
     var marca = document.createElement("span");
@@ -402,7 +436,30 @@ function pintarAcao(modelo, semRede) {
   acoes.appendChild(link);
 }
 
+function lerAvisoDeVolta() {
+  try {
+    var codigo = sessionStorage.getItem("nexus_v2_aviso_hoje") || "";
+    if (codigo) sessionStorage.removeItem("nexus_v2_aviso_hoje");
+    return codigo;
+  } catch (erro) {
+    return "";
+  }
+}
+
+function pintarAvisoDeVolta() {
+  var aviso = document.getElementById("aviso-volta");
+  if (!aviso) return;
+  if (lerAvisoDeVolta() === "ja-registrado") {
+    aviso.hidden = false;
+    aviso.textContent = "Este dia já estava registrado.";
+    return;
+  }
+  aviso.hidden = true;
+  aviso.textContent = "";
+}
+
 function pintarDia(modelo, semRede) {
+  pintarAvisoDeVolta();
   document.getElementById("dia-numero").textContent = "Dia " + modelo.dia + " de " + modelo.duracao;
   document.getElementById("titulo-missao").textContent = modelo.titulo;
   var minimo = document.getElementById("minimo");
@@ -448,7 +505,10 @@ function pintarDia(modelo, semRede) {
   }
 
   var aviso = document.getElementById("aviso-rede");
-  if (semRede && !modelo.hojeFeito) mostrarAviso(aviso, "rede", TEXTO_REGISTRO_OFF);
+  if (semRede && !modelo.hojeFeito) {
+    var temNota = typeof modelo.nota === "string" && modelo.nota.trim() !== "";
+    mostrarAviso(aviso, "rede", temNota ? TEXTO_REGISTRO_OFF_NOTA : TEXTO_REGISTRO_OFF);
+  }
   else {
     aviso.hidden = true;
     aviso.replaceChildren();
