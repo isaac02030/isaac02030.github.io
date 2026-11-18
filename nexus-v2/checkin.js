@@ -102,6 +102,15 @@ function mostrarVista(qual) {
   document.getElementById("conteudo").setAttribute("aria-busy", qual === "carregando" ? "true" : "false");
 }
 
+function descreverNota(campo, comErro) {
+  var ajuda = document.getElementById("nota-ajuda");
+  var ids = [];
+  if (ajuda && !ajuda.hidden && ajuda.textContent) ids.push("nota-ajuda");
+  if (comErro) ids.push("nota-erro");
+  if (ids.length) campo.setAttribute("aria-describedby", ids.join(" "));
+  else campo.removeAttribute("aria-describedby");
+}
+
 function definirErro(texto) {
   var campo = document.getElementById("nota");
   var aviso = document.getElementById("nota-erro");
@@ -110,12 +119,15 @@ function definirErro(texto) {
     aviso.hidden = false;
     aviso.textContent = texto;
     campo.setAttribute("aria-invalid", "true");
+    if (ajuda) ajuda.hidden = !ajuda.textContent || ajuda.textContent === texto;
+    descreverNota(campo, true);
   } else {
     aviso.hidden = true;
     aviso.textContent = "";
     campo.removeAttribute("aria-invalid");
+    if (ajuda) ajuda.hidden = !ajuda.textContent;
+    descreverNota(campo, false);
   }
-  if (ajuda) ajuda.hidden = !ajuda.textContent || ajuda.textContent === texto;
 }
 
 function definirCarregando(ligado) {
@@ -569,7 +581,12 @@ function iniciar() {
     carregar();
   });
   document.getElementById("nota").addEventListener("input", function () {
-    if (document.getElementById("nota").getAttribute("aria-invalid") === "true") definirErro("");
+    var campo = document.getElementById("nota");
+    if (campo.getAttribute("aria-invalid") === "true") {
+      var problema = validarNota();
+      if (!problema) definirErro("");
+      else if (document.getElementById("nota-erro").textContent !== problema) definirErro(problema);
+    }
     guardarNotaDoCampo();
   });
   document.getElementById("link-dificil").addEventListener("click", guardarNotaDoCampo);

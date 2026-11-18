@@ -139,6 +139,21 @@
   color: var(--success);
 }
 
+.status-losango {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.status-losango .marca-miolo.dificil {
+  width: 14px;
+  height: 14px;
+}
+
 .porque {
   margin: 0;
   color: var(--text-muted);

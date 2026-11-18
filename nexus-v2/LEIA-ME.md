@@ -121,7 +121,7 @@ No mock, com a sessão já gravada:
 
 Tela por cima do check-in: tem Voltar e não mostra a barra de abas. O pedido é `POST /api/checkins` com `mission_id`, `note` e `difficult: true`. O sucesso só aparece se a resposta for 2xx e `checkin.difficult` for `true`.
 
-A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O mínimo fica em negrito, na linha de baixo, como está gravado.
+A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O rótulo é «O mínimo de hoje continua valendo:» e o mínimo fica em negrito, na linha de baixo, como está gravado. No Hoje, se o check-in de hoje é difícil, o estado diz «Dia difícil registrado. O mínimo valeu.» com o mesmo losango da grade.
 
 Se `difficult_days_remaining` é 0, ou se `difficult_days` inclui os dois dias anteriores, a tela explica e oferece «Registrar o dia normal». O mesmo vale para os 400 «Você já usou os 4 dias difíceis desta missão.» e «Não dá para ter mais de 2 dias difíceis seguidos.».
 

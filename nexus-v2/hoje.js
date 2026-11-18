@@ -385,11 +385,38 @@ function pintarMarcas(modelo) {
   }
 }
 
-function pintarStatus(hojeFeito) {
+function hojeEhDificil(modelo) {
+  if (!modelo || !Array.isArray(modelo.dificeis)) return false;
+  var dia = Number(modelo.dia);
+  var i;
+  for (i = 0; i < modelo.dificeis.length; i++) {
+    if (Number(modelo.dificeis[i]) === dia) return true;
+  }
+  return false;
+}
+
+function losangoDoDia() {
+  var caixa = document.createElement("span");
+  caixa.className = "status-losango";
+  caixa.setAttribute("aria-hidden", "true");
+  var miolo = document.createElement("span");
+  miolo.className = "marca-miolo dificil feito";
+  miolo.setAttribute("aria-hidden", "true");
+  caixa.appendChild(miolo);
+  return caixa;
+}
+
+function pintarStatus(modelo) {
   var el = document.getElementById("status");
   var texto = document.createElement("span");
+  var hojeFeito = !!(modelo && modelo.hojeFeito);
   if (hojeFeito) {
     el.className = "status status-feito";
+    if (hojeEhDificil(modelo)) {
+      texto.textContent = "Dia difícil registrado. O mínimo valeu.";
+      el.replaceChildren(losangoDoDia(), texto);
+      return;
+    }
     texto.textContent = "Registro feito. Palavra cumprida hoje.";
     el.replaceChildren(
       icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
@@ -479,7 +506,7 @@ function pintarDia(modelo, semRede) {
     porque.textContent = "";
   }
   pintarMarcas(modelo);
-  pintarStatus(modelo.hojeFeito);
+  pintarStatus(modelo);
 
   var par = document.getElementById("linha-par");
   par.replaceChildren();
