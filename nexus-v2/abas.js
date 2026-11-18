@@ -54,6 +54,8 @@ function iconeDaAba(caminho) {
   return svg;
 }
 
+/* Cada aba é um link para a página dela. O clique empilha no histórico.
+   Não usamos location.replace para trocar de aba. */
 function montarAbas(ativa) {
   var nav = document.getElementById("abas");
   if (!nav) return;
@@ -71,12 +73,106 @@ function montarAbas(ativa) {
     if (aba.id === ativa) link.setAttribute("aria-current", "page");
     nav.appendChild(link);
   });
+  ligarRolagem();
+}
+
+var CHAVE_ROLAGEM = "nexus_v2_rolagem_";
+var rolagemPronta = false;
+var rolagemTimer = 0;
+var rolagemTravada = false;
+
+function nomeDaPagina() {
+  var nome = "pagina";
+  try {
+    nome = (location.pathname.split("/").pop() || "hoje.html").toLowerCase();
+  } catch (erro) {
+    nome = "pagina";
+  }
+  if (!/^[a-z0-9.-]+$/.test(nome)) nome = "pagina";
+  return nome;
+}
+
+function lerRolagem() {
+  try {
+    var bruto = sessionStorage.getItem(CHAVE_ROLAGEM + nomeDaPagina());
+    if (bruto == null || bruto === "") return null;
+    var y = Number(bruto);
+    if (!isFinite(y) || y < 0) return null;
+    return y;
+  } catch (erro) {
+    return null;
+  }
+}
+
+function guardarRolagem() {
+  if (!rolagemPronta || rolagemTravada) return;
+  var y = window.scrollY || window.pageYOffset || 0;
+  var guardado = lerRolagem();
+  var maximo = 0;
+  try {
+    maximo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  } catch (erro) {
+    maximo = 0;
+  }
+  if (guardado != null && y + 1 < guardado && maximo + 1 < guardado) return;
+  try {
+    sessionStorage.setItem(CHAVE_ROLAGEM + nomeDaPagina(), String(y));
+  } catch (erro) {}
+}
+
+function restaurarRolagem() {
+  var y = lerRolagem();
+  if (y == null) return;
+  rolagemTravada = true;
+  window.scrollTo(0, y);
+  window.requestAnimationFrame(function () {
+    rolagemTravada = false;
+  });
+}
+
+function ligarRolagem() {
+  if (window.__nexusRolagem) return;
+  window.__nexusRolagem = true;
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.addEventListener("scroll", function () {
+    if (rolagemTimer) return;
+    rolagemTimer = window.setTimeout(function () {
+      rolagemTimer = 0;
+      guardarRolagem();
+    }, 80);
+  }, { passive: true });
+  window.addEventListener("pagehide", guardarRolagem);
+  window.addEventListener("pageshow", function (evento) {
+    if (!evento.persisted) return;
+    restaurarRolagem();
+  });
+  window.addEventListener("DOMContentLoaded", restaurarRolagem);
+}
+
+/* Primeira visita desta página na sessão: não há valor, fica no topo.
+   Ao voltar pela barra, o valor desta página é restaurado. */
+function concluirRolagem() {
+  ligarRolagem();
+  rolagemPronta = true;
+  restaurarRolagem();
+  window.requestAnimationFrame(function () {
+    restaurarRolagem();
+  });
+}
+
+function focarSemRolar(el) {
+  if (!el) return;
+  try {
+    el.focus({ preventScroll: true });
+  } catch (erro) {
+    el.focus();
+  }
 }
 
 function iniciarAba(ativa) {
   montarAbas(ativa);
-  var titulo = document.querySelector("main h1");
-  if (titulo) titulo.focus();
+  concluirRolagem();
+  focarSemRolar(document.querySelector("main h1"));
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});
   }
@@ -85,5 +181,7 @@ function iniciarAba(ativa) {
 var NexusAbas = {
   montar: montarAbas,
   iniciar: iniciarAba,
-  busca: buscaDasAbas
+  busca: buscaDasAbas,
+  concluirRolagem: concluirRolagem,
+  focar: focarSemRolar
 };

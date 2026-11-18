@@ -46,40 +46,59 @@
 
 .marcas {
   display: grid;
-  grid-template-columns: repeat(var(--dias, 30), minmax(0, 1fr));
-  gap: 2px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px 0;
   width: 100%;
-  height: 14px;
-  align-items: center;
+  margin: 0;
 }
 
 .marca-dia {
-  display: block;
-  height: 2px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--border) 42%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 auto;
+  border-radius: 999px;
 }
 
-.marca-dia.feito {
-  height: 8px;
+.marca-dia.hoje {
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+.marca-miolo {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.marca-miolo.feito {
+  border-color: var(--accent);
   background: var(--accent);
 }
 
-.marca-dia.dificil {
-  box-sizing: border-box;
-  width: 6px;
-  height: 6px;
-  max-width: 100%;
-  justify-self: center;
-  border: 1.5px solid var(--text-muted);
+.marca-miolo.falta {
+  border-color: var(--text-muted);
+}
+
+.marca-miolo.futuro {
+  border-color: color-mix(in srgb, var(--border) 28%, transparent);
+}
+
+.marca-miolo.dificil {
+  width: 10px;
+  height: 10px;
   border-radius: 1px;
+  border-color: var(--accent);
   background: transparent;
   transform: rotate(45deg);
 }
 
-.marca-dia.dificil.feito {
-  border-color: var(--accent);
-  background: var(--accent);
+.marca-miolo.dificil.feito {
+  background: linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
 }
 
 .titulo-missao {
@@ -105,17 +124,50 @@
   height: 24px;
   flex: 0 0 auto;
   margin-top: 1px;
+  pointer-events: none;
 }
 
 .status-pendente {
   color: var(--text);
 }
 
+.status-pendente .icone {
+  color: var(--text-muted);
+}
+
 .status-feito {
   color: var(--success);
 }
 
-.linha-par,
+.porque {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.linha-par {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.linha-par .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
 .linha-dificeis {
   margin: 0;
   color: var(--text-muted);

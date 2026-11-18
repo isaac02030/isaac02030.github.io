@@ -2,8 +2,10 @@
    O dia X sai de started_at e duration_days, do mesmo jeito que o servidor:
    floor((agora - started_at) / 1 dia) + 1.
    Não chama GET /api/checkins/:id/score.
-   Dia difícil: só se a resposta trouxer difficult_days ou difficult_days_remaining.
-   O servidor de verdade ainda não manda esses campos. O mock manda, nos cenários. */
+   Dia difícil, quando a sequência mandar:
+   difficult_days (números do dia), difficult_days_remaining, difficult_days_used,
+   e difficult (sim ou não) em cada check-in.
+   Sem esses campos, a linha e o losango somem. Não mostramos 0 nem um valor vazio. */
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_USUARIO = "nexus_v2_user";
@@ -69,7 +71,8 @@ function mostrarVista(qual) {
 function mostrarFalha(tipo, texto) {
   mostrarVista("erro");
   mostrarAviso(document.getElementById("alerta-erro"), tipo, texto);
-  document.getElementById("titulo-hoje").focus();
+  NexusAbas.focar(document.getElementById("titulo-hoje"));
+  NexusAbas.concluirRolagem();
 }
 
 function numeroDoDia(startedAt) {
@@ -184,26 +187,37 @@ function numerosDe(lista) {
   return dias;
 }
 
-/* Não inventa dia difícil. Se o campo não veio, devolve null. */
+/* Sem o campo, devolve null. Não completa com 0. */
 function lerDiasDificeis(sequencia, missao, meus) {
-  if (sequencia && Array.isArray(sequencia.difficult_days)) return numerosDe(sequencia.difficult_days);
-  if (missao && Array.isArray(missao.difficult_days)) return numerosDe(missao.difficult_days);
-  var dosCheckins = [];
+  var veio = false;
+  var dias = [];
+  if (sequencia && Array.isArray(sequencia.difficult_days)) {
+    veio = true;
+    dias = numerosDe(sequencia.difficult_days);
+  } else if (missao && Array.isArray(missao.difficult_days)) {
+    veio = true;
+    dias = numerosDe(missao.difficult_days);
+  }
   meus.forEach(function (item) {
-    if (item.difficult) dosCheckins.push(item.day);
+    if (item.difficult === true) {
+      veio = true;
+      if (dias.indexOf(item.day) === -1) dias.push(item.day);
+    }
   });
-  if (dosCheckins.length) return dosCheckins;
-  return null;
+  return veio ? dias : null;
+}
+
+function numeroRestante(fonte) {
+  if (!fonte || typeof fonte.difficult_days_remaining !== "number") return null;
+  if (!isFinite(fonte.difficult_days_remaining)) return null;
+  if (fonte.difficult_days_remaining <= 0) return null;
+  return fonte.difficult_days_remaining;
 }
 
 function lerRestantes(sequencia, missao) {
-  if (sequencia && typeof sequencia.difficult_days_remaining === "number" && isFinite(sequencia.difficult_days_remaining)) {
-    return sequencia.difficult_days_remaining;
-  }
-  if (missao && typeof missao.difficult_days_remaining === "number" && isFinite(missao.difficult_days_remaining)) {
-    return missao.difficult_days_remaining;
-  }
-  return null;
+  var daSequencia = numeroRestante(sequencia);
+  if (daSequencia !== null) return daSequencia;
+  return numeroRestante(missao);
 }
 
 function notaDeHoje(meus, dia) {
@@ -247,6 +261,7 @@ function modeloDe(missao, progresso, sequencia) {
     duracao: duracao,
     titulo: typeof missao.title === "string" ? missao.title : "",
     minimo: typeof missao.daily_minimum === "string" ? missao.daily_minimum : "",
+    porque: typeof missao.why_it_matters === "string" ? missao.why_it_matters.trim() : "",
     hojeFeito: hojeFeito,
     nota: hojeFeito ? notaDeHoje(meus, dia) : "",
     feitos: diasFeitos(meus, dia, hojeFeito),
@@ -266,6 +281,7 @@ function guardarCache(modelo) {
       duracao: modelo.duracao,
       titulo: modelo.titulo,
       minimo: modelo.minimo,
+      porque: modelo.porque || "",
       hojeFeito: modelo.hojeFeito,
       nota: modelo.nota,
       feitos: modelo.feitos,
@@ -306,21 +322,31 @@ function contarFeitos(feitos, duracao) {
 function pintarMarcas(modelo) {
   var caixa = document.getElementById("marcas");
   var duracao = modelo.duracao;
+  var hoje = modelo.dia;
   var feitos = {};
   var dificeis = {};
+  var temDificeis = Array.isArray(modelo.dificeis);
   (modelo.feitos || []).forEach(function (dia) { feitos[dia] = true; });
-  if (Array.isArray(modelo.dificeis)) {
+  if (temDificeis) {
     modelo.dificeis.forEach(function (dia) { dificeis[dia] = true; });
   }
-  caixa.style.setProperty("--dias", String(duracao));
   caixa.setAttribute("aria-label", contarFeitos(modelo.feitos, duracao) + " de " + duracao + " dias registrados");
   caixa.replaceChildren();
   for (var dia = 1; dia <= duracao; dia++) {
     var marca = document.createElement("span");
     marca.className = "marca-dia";
     marca.setAttribute("aria-hidden", "true");
-    if (feitos[dia]) marca.classList.add("feito");
-    if (modelo.dificeis && dificeis[dia]) marca.classList.add("dificil");
+    var miolo = document.createElement("span");
+    miolo.className = "marca-miolo";
+    miolo.setAttribute("aria-hidden", "true");
+    var feito = !!feitos[dia];
+    var dificil = temDificeis && !!dificeis[dia];
+    if (dificil) miolo.classList.add("dificil");
+    if (feito) miolo.classList.add("feito");
+    else if (!dificil && dia < hoje) miolo.classList.add("falta");
+    else if (!dificil) miolo.classList.add("futuro");
+    if (dia === hoje) marca.classList.add("hoje");
+    marca.appendChild(miolo);
     caixa.appendChild(marca);
   }
 }
@@ -340,7 +366,7 @@ function pintarStatus(hojeFeito) {
   el.className = "status status-pendente";
   texto.textContent = "Ainda não registrou o dia.";
   el.replaceChildren(
-    icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"),
+    icone("M12 8v5l2.5 1.5M12 20.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z"),
     texto
   );
 }
@@ -387,22 +413,33 @@ function pintarDia(modelo, semRede) {
     minimo.hidden = true;
     minimo.textContent = "";
   }
+  var porque = document.getElementById("porque");
+  if (modelo.porque) {
+    porque.hidden = false;
+    porque.textContent = "Porque: " + modelo.porque;
+  } else {
+    porque.hidden = true;
+    porque.textContent = "";
+  }
   pintarMarcas(modelo);
   pintarStatus(modelo.hojeFeito);
 
   var par = document.getElementById("linha-par");
+  par.replaceChildren();
   if (modelo.parNome) {
     par.hidden = false;
-    par.textContent = modelo.parNome + " já registrou o dia de hoje.";
+    var frase = document.createElement("span");
+    frase.textContent = modelo.parNome + " já registrou o dia de hoje.";
+    par.appendChild(icone("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 20a7 7 0 0 1 14 0"));
+    par.appendChild(frase);
   } else {
     par.hidden = true;
-    par.textContent = "";
   }
 
   document.getElementById("linha-espera").hidden = !modelo.esperando;
 
   var dificeis = document.getElementById("linha-dificeis");
-  if (typeof modelo.restantes === "number" && isFinite(modelo.restantes) && modelo.restantes >= 0) {
+  if (typeof modelo.restantes === "number" && modelo.restantes > 0) {
     dificeis.hidden = false;
     dificeis.textContent = "Dias difíceis: restam " + modelo.restantes + " de 4.";
   } else {
@@ -419,7 +456,8 @@ function pintarDia(modelo, semRede) {
 
   pintarAcao(modelo, semRede);
   mostrarVista("dia");
-  document.getElementById("titulo-hoje").focus();
+  NexusAbas.focar(document.getElementById("titulo-hoje"));
+  NexusAbas.concluirRolagem();
 }
 
 function abrirModelo(modelo, semRede) {
@@ -466,7 +504,8 @@ async function carregar() {
   if (!resumo) {
     mostrarVista("vazia");
     document.getElementById("btn-comecar").href = "onboarding.html" + NexusAbas.busca(["tema"]);
-    document.getElementById("titulo-hoje").focus();
+    NexusAbas.focar(document.getElementById("titulo-hoje"));
+    NexusAbas.concluirRolagem();
     return;
   }
 
@@ -504,7 +543,7 @@ function iniciar() {
   document.getElementById("btn-tentar").addEventListener("click", function () {
     carregar();
   });
-  document.getElementById("titulo-hoje").focus();
+  NexusAbas.focar(document.getElementById("titulo-hoje"));
   atualizarBarra();
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", atualizarBarra);
   if ("serviceWorker" in navigator) {

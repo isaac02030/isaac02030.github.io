@@ -37,10 +37,11 @@
        missed_yesterday, missed_days, recovery_needed
    - GET /api/checkins/:id/score não existe aqui de propósito.
 
-   O servidor de verdade não manda dia difícil. Neste arquivo, os cenários
-   abaixo acrescentam difficult_days (números do dia) e
-   difficult_days_remaining na resposta da sequência. Uma missão criada
-   pela tela não recebe esses campos.
+   O servidor ainda não manda dia difícil. Quando mandar, a sequência traz
+   difficult_days (números do dia), difficult_days_used e
+   difficult_days_remaining. Cada check-in pode trazer difficult (true ou false).
+   Neste arquivo, os cenários abaixo mandam esses campos. Uma missão criada
+   pela tela não recebe. O cenário sem-campo também não.
 
    Troque o estado com ?cenario= na URL da tela, ou entre com o e-mail:
    - nao-registrado  (nao-registrado@exemplo.com)  dia ainda sem registro
@@ -82,12 +83,12 @@ var CENARIO_POR_EMAIL = {
 };
 
 var CENARIOS = {
-  "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [2], restantes: 3 },
-  registrado: { dia: 4, feitos: [1, 3, 4], dificeis: [2], restantes: 3, nota: "Li a página combinada." },
-  duo: { dia: 4, feitos: [1, 3], dificeis: [2], restantes: 3, modo: "parceiro", parFeitos: [1, 2, 3, 4] },
-  "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [2], restantes: 3, modo: "parceiro", parFeitos: [1, 2] },
-  esperando: { dia: 4, feitos: [1, 3], dificeis: [2], restantes: 3, esperando: true },
-  recuperacao: { dia: 4, feitos: [1], dificeis: [2], restantes: 3 },
+  "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
+  registrado: { dia: 4, feitos: [1, 3, 4], dificeis: [1, 2], restantes: 2, nota: "Li a página combinada." },
+  duo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2, 3, 4] },
+  "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2] },
+  esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },
+  recuperacao: { dia: 4, feitos: [1], dificeis: [1, 2], restantes: 2 },
   "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true },
   vazio: { vazio: true },
   erro: { erro: true }
@@ -274,8 +275,10 @@ function sequenciaDe(doneDays, todayDay, extra) {
     recovery_needed: recovery.recovery_needed
   };
   if (extra && !extra.omitirDificeis) {
-    corpo.difficult_days = extra.dificeis || [];
-    corpo.difficult_days_remaining = typeof extra.restantes === "number" ? extra.restantes : 4;
+    var diasDificeis = extra.dificeis || [];
+    corpo.difficult_days = diasDificeis;
+    corpo.difficult_days_used = diasDificeis.length;
+    if (typeof extra.restantes === "number") corpo.difficult_days_remaining = extra.restantes;
   }
   return corpo;
 }
@@ -366,11 +369,15 @@ function montarCenario(nome, usuario) {
   progress[String(usuario.id)] = {
     username: usuario.username,
     checkins: spec.feitos.map(function (diaFeito) {
-      return {
+      var item = {
         day: diaFeito,
         completed: true,
         note: diaFeito === dia && spec.nota ? spec.nota : null
       };
+      if (!spec.omitirDificeis && Array.isArray(spec.dificeis)) {
+        item.difficult = spec.dificeis.indexOf(diaFeito) !== -1;
+      }
+      return item;
     })
   };
   if (partner) {

@@ -124,7 +124,9 @@ var NexusApi = {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
   },
   /* GET /api/checkins/:missionId/streak devolve today_done, recovery_needed,
-     missed_yesterday e missed_days. O placar não entra nesta chamada. */
+     missed_yesterday e missed_days. Quando o servidor passar a mandar,
+     também vêm difficult_days, difficult_days_used e difficult_days_remaining.
+     O placar não entra nesta chamada. */
   sequenciaDaMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/streak"), null, { metodo: "GET", auth: true });
   },
