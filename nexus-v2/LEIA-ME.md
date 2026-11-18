@@ -92,3 +92,27 @@ O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A s
 `?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
 
 A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. O losango só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha e o losango ficam de fora. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.
+
+A grade dos dias tem um único nome para o leitor de tela, no formato «Dia 4 de 30: 1 cumprido, 2 difíceis, 0 faltas». Os números saem das marcas. Cada dia entra numa conta só. As marcas em si ficam escondidas do leitor e não recebem foco.
+
+## Registro de hoje
+
+O botão «Registrar o dia» abre `checkin.html`. É uma tela por cima do Hoje: tem Voltar e não mostra a barra de abas. O voltar do celular desfaz o passo.
+
+O pedido é `POST /api/checkins`, com `mission_id` e `note`. Não mandamos `difficult`. A nota não fica gravada neste aparelho: ela só existe no campo e some depois do envio.
+
+No mock, com a sessão já gravada:
+
+- `checkin.html?cenario=estudo` — estudo, nota vazia
+- `checkin.html?cenario=academia` — academia
+- `checkin.html?cenario=lento` — o botão fica em «Registrando…» por 8 segundos
+- `checkin.html?cenario=erro-registro` — «Não foi possível registrar agora. Tente de novo.»
+- `checkin.html?cenario=nota-servidor` — o servidor de teste recusa a nota; a tela mostra a regra em português do Brasil
+- `checkin.html?cenario=repetido` — o servidor diz que o dia já estava feito
+- `checkin.html?cenario=terminada` — «A missão já terminou.»
+- `checkin.html?cenario=inativa` — «Esta missão não está ativa.»
+- `checkin.html?cenario=registrado` — volta para o Hoje com «Este dia já estava registrado.»
+- `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
+- `?rede=off` — não envia. «Sem internet. O registro fica para quando a conexão voltar.»
+
+«Hoje é dia difícil» abre um marcador. A tela de ajuda (`crise.html`) também é um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.

@@ -253,6 +253,12 @@ input:-webkit-autofill {
   overflow-wrap: break-word;
 }
 
+/* O cartão do Hoje e das telas que abrem a partir dele fica no topo, sem centralizar na vertical. */
+.cartao.cartao-topo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .cabecalho {
   display: flex;
   flex-direction: column;
