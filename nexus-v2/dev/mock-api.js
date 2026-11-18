@@ -34,7 +34,7 @@
    - GET /api/checkins/:missionId  → { progress }
    - GET /api/checkins/:missionId/streak
      → streak, total, today_done, brio, consistency, recovered,
-       missed_yesterday, missed_days, recovery_needed
+       missed_yesterday, missed_days, missed_days_before_today, recovery_needed
    - GET /api/checkins/:id/score não existe aqui de propósito.
 
    A sequência manda difficult_days (números do dia), difficult_days_used e
@@ -50,7 +50,19 @@
    - esperando       (esperando@exemplo.com)       à espera do par, Solo visível
    - vazio           (vazio@exemplo.com)           sem missão
    - erro            (erro-hoje@exemplo.com)       falha ao abrir o dia
-   - recuperacao     (recuperacao@exemplo.com)     recovery_needed, tela 6
+   - recuperacao     (recuperacao@exemplo.com)     ontem sem registro, dentro do Hoje
+   - falta-1         (falta-1@exemplo.com)         igual à recuperação: 1 dia
+   - falta-3         (falta-3@exemplo.com)         3 dias sem registro
+   - recuperacao-zero (recuperacao-zero@exemplo.com) restantes 0, sem o link difícil
+   - recuperacao-sem-numero                        sem missed_days e sem dia difícil
+   - recuperacao-sem-fato                          sem missed_days e sem missed_yesterday
+   - recuperacao-seguidos                          2 seguidos forçados, o link some
+   - recuperacao-sem-minimo                        sem o mínimo gravado
+   - recuperacao-minusculo                         mínimo em minúscula, na linha de baixo
+   - falta-antiga        (falta-antiga@exemplo.com) Hoje normal, com um dia antigo sem registro
+   - recuperacao-sem-antes                         sem missed_days_before_today, cai em missed_days - 1
+   - recuperacao-contagem-zero                     antes de hoje é 0; a frase não mostra 0
+   - recuperacao-contagem-some                     antes de hoje é 0 e ontem houve registro; a frase some
    - sem-campo       (sem-campo@exemplo.com)       igual ao não registrado, sem dia difícil
    - dois-seguidos   (dois-seguidos@exemplo.com)   os 2 dias anteriores foram difíceis
    - quatro-usados   (quatro-usados@exemplo.com)   difficult_days_remaining 0
@@ -102,6 +114,10 @@ var CENARIO_POR_EMAIL = {
   "vazio@exemplo.com": "vazio",
   "erro-hoje@exemplo.com": "erro",
   "recuperacao@exemplo.com": "recuperacao",
+  "falta-1@exemplo.com": "falta-1",
+  "falta-3@exemplo.com": "falta-3",
+  "recuperacao-zero@exemplo.com": "recuperacao-zero",
+  "falta-antiga@exemplo.com": "falta-antiga",
   "sem-campo@exemplo.com": "sem-campo",
   "academia@exemplo.com": "academia",
   "estudo@exemplo.com": "estudo",
@@ -125,7 +141,70 @@ var CENARIOS = {
   duo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2, 3, 4] },
   "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2] },
   esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },
-  recuperacao: { dia: 4, feitos: [1], dificeis: [1, 2], restantes: 2 },
+  recuperacao: { dia: 4, feitos: [1, 2], dificeis: [2], restantes: 3 },
+  "falta-1": { dia: 4, feitos: [1, 2], dificeis: [2], restantes: 3 },
+  "falta-3": { dia: 6, feitos: [1, 2], dificeis: [2], restantes: 3 },
+  "recuperacao-zero": { dia: 8, feitos: [1, 2, 3, 4, 5, 6], dificeis: [1, 3, 5, 6], restantes: 0 },
+  "recuperacao-sem-numero": { dia: 4, feitos: [1, 2], omitirDificeis: true, omitirMissedDays: true },
+  "recuperacao-sem-fato": { dia: 4, feitos: [1, 2], dificeis: [2], restantes: 3, omitirMissedDays: true, omitirAntes: true, omitirOntem: true },
+  "recuperacao-seguidos": {
+    dia: 4,
+    feitos: [1],
+    dificeis: [1],
+    restantes: 3,
+    forcarSequencia: {
+      recovery_needed: true,
+      missed_yesterday: true,
+      missed_days: 2,
+      today_done: false,
+      difficult_days: [2, 3],
+      difficult_days_used: 2,
+      difficult_days_remaining: 2
+    }
+  },
+  "recuperacao-sem-minimo": { dia: 4, feitos: [1, 2], dificeis: [2], restantes: 3, minimo: "" },
+  "recuperacao-minusculo": { dia: 4, feitos: [1, 2], dificeis: [2], restantes: 3, minimo: "uma página" },
+  "falta-antiga": { dia: 5, feitos: [1, 2, 4], dificeis: [1], restantes: 3 },
+  "recuperacao-sem-antes": { dia: 6, feitos: [1, 2], dificeis: [2], restantes: 3, omitirAntes: true },
+  "recuperacao-contagem-zero": {
+    dia: 4,
+    feitos: [1, 2],
+    dificeis: [2],
+    restantes: 3,
+    forcarSequencia: {
+      recovery_needed: true,
+      missed_yesterday: true,
+      missed_days: 1,
+      missed_days_before_today: 0,
+      today_done: false
+    }
+  },
+  "recuperacao-contagem-some": {
+    dia: 4,
+    feitos: [1, 2, 3],
+    dificeis: [2],
+    restantes: 3,
+    forcarSequencia: {
+      recovery_needed: true,
+      missed_yesterday: false,
+      missed_days: 0,
+      missed_days_before_today: 0,
+      today_done: false
+    }
+  },
+  "recuperacao-negativo": {
+    dia: 4,
+    feitos: [1, 2, 3],
+    dificeis: [2],
+    restantes: 3,
+    forcarSequencia: {
+      recovery_needed: true,
+      missed_yesterday: false,
+      missed_days: 0,
+      missed_days_before_today: -1,
+      today_done: false
+    }
+  },
   "sem-campo": { dia: 4, feitos: [1, 3], omitirDificeis: true, ignoraDifficult: true },
   estudo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
   academia: {
@@ -314,9 +393,12 @@ function calcularRecuperacao(doneDays, todayDay) {
     if (doneDays.has(day)) break;
     missedDays += 1;
   }
+  var antes = 0;
+  if (!doneDays.has(todayDay)) antes = Math.max(0, missedDays - 1);
   return {
     missed_yesterday: missedYesterday,
     missed_days: missedDays,
+    missed_days_before_today: antes,
     recovery_needed: missedYesterday && !doneDays.has(todayDay)
   };
 }
@@ -339,6 +421,7 @@ function sequenciaDe(doneDays, todayDay, extra) {
     recovered: brio.recovered,
     missed_yesterday: recovery.missed_yesterday,
     missed_days: recovery.missed_days,
+    missed_days_before_today: recovery.missed_days_before_today,
     recovery_needed: recovery.recovery_needed
   };
   if (extra && !extra.omitirDificeis) {
@@ -482,8 +565,20 @@ function montarCenario(nome, usuario) {
   return {
     mission: mission,
     progress: { progress: progress },
-    streak: sequenciaDe(new Set(feitos), dia, sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil))
+    streak: ajustarSequencia(sequenciaDe(new Set(feitos), dia, sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil)), spec)
   };
+}
+
+function ajustarSequencia(streak, spec) {
+  if (spec.omitirMissedDays) delete streak.missed_days;
+  if (spec.omitirAntes) delete streak.missed_days_before_today;
+  if (spec.omitirOntem) delete streak.missed_yesterday;
+  if (spec.forcarSequencia) {
+    Object.keys(spec.forcarSequencia).forEach(function (chave) {
+      streak[chave] = spec.forcarSequencia[chave];
+    });
+  }
+  return streak;
 }
 
 function acharMissao(email, id) {

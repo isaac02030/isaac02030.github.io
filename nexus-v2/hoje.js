@@ -5,10 +5,18 @@
    Dia difícil, quando a sequência mandar:
    difficult_days (números do dia), difficult_days_remaining, difficult_days_used,
    e difficult (sim ou não) em cada check-in.
-   Sem esses campos, a linha e o losango somem. Não mostramos 0 nem um valor vazio. */
+   Sem esses campos, a linha e o losango somem. Não mostramos 0 nem um valor vazio.
+
+   Com recovery_needed true, o miolo do Hoje vira a volta ao ciclo.
+   A barra de abas continua. Não é página separada nem modal.
+   A frase usa missed_days_before_today quando o servidor manda.
+   Sem esse campo, cai em missed_days - 1. Zero e negativo não aparecem. */
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_USUARIO = "nexus_v2_user";
+var CHAVE_ORIGEM = "nexus_v2_origem_recuperacao";
+var TEXTO_ONTEM = "Ontem não houve registro.";
+var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
 var MS_DIA = 24 * 60 * 60 * 1000;
 var TEXTO_ERRO = "Não foi possível abrir o dia. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo.";
@@ -66,7 +74,21 @@ function mostrarVista(qual) {
   document.getElementById("vista-erro").hidden = qual !== "erro";
   document.getElementById("vista-vazia").hidden = qual !== "vazia";
   document.getElementById("vista-dia").hidden = qual !== "dia";
+  document.getElementById("vista-recuperacao").hidden = qual !== "recuperacao";
+  document.getElementById("titulo-hoje").hidden = qual === "recuperacao";
   document.getElementById("conteudo").setAttribute("aria-busy", qual === "carregando" ? "true" : "false");
+}
+
+function marcarOrigemRecuperacao() {
+  try {
+    sessionStorage.setItem(CHAVE_ORIGEM, "1");
+  } catch (erro) {}
+}
+
+function limparOrigemRecuperacao() {
+  try {
+    sessionStorage.removeItem(CHAVE_ORIGEM);
+  } catch (erro) {}
 }
 
 function mostrarFalha(tipo, texto) {
@@ -221,6 +243,64 @@ function lerRestantes(sequencia, missao) {
   return numeroRestante(missao);
 }
 
+function lerNumero(valor) {
+  if (typeof valor !== "number" || !isFinite(valor)) return null;
+  return valor;
+}
+
+function lerMissedDays(sequencia) {
+  if (!sequencia) return null;
+  return lerNumero(sequencia.missed_days);
+}
+
+/* null = o campo não veio. 0 é um número de verdade e não cai no recuo. */
+function lerAntesDeHoje(sequencia) {
+  if (!sequencia || !Object.prototype.hasOwnProperty.call(sequencia, "missed_days_before_today")) return null;
+  return lerNumero(sequencia.missed_days_before_today);
+}
+
+/* Prefere missed_days_before_today. Sem o campo, missed_days - 1.
+   Menos de 1 não vira frase com número: ontem verdadeiro usa o texto de 1 dia.
+   Nunca «0», nunca negativo, nunca «1 dias». */
+function contagemDaFalta(modelo) {
+  if (!modelo) return null;
+  if (typeof modelo.missedBefore === "number" && isFinite(modelo.missedBefore)) {
+    return Math.floor(modelo.missedBefore);
+  }
+  if (typeof modelo.missedDays === "number" && isFinite(modelo.missedDays)) {
+    return Math.floor(modelo.missedDays) - 1;
+  }
+  return null;
+}
+
+function textoDaFalta(modelo) {
+  var ontem = !!(modelo && modelo.missedYesterday === true);
+  var n = contagemDaFalta(modelo);
+  if (n === null || n < 1) return ontem ? TEXTO_ONTEM : "";
+  if (n === 1) return TEXTO_ONTEM;
+  return "Ficaram " + n + " dias sem registro.";
+}
+
+function seguidosBloqueiam(modelo) {
+  if (!modelo || !Array.isArray(modelo.dificeis)) return null;
+  var dia = Number(modelo.dia);
+  if (!isFinite(dia)) return null;
+  var ontem = false;
+  var anteontem = false;
+  modelo.dificeis.forEach(function (item) {
+    var n = Number(item);
+    if (n === dia - 1) ontem = true;
+    if (n === dia - 2) anteontem = true;
+  });
+  return ontem && anteontem;
+}
+
+function podeDiaDificil(modelo) {
+  if (!modelo || typeof modelo.restantes !== "number" || modelo.restantes <= 0) return false;
+  if (!Array.isArray(modelo.dificeis)) return false;
+  return seguidosBloqueiam(modelo) === false;
+}
+
 function notaDeHoje(meus, dia) {
   for (var i = 0; i < meus.length; i++) {
     if (meus[i].day === dia && meus[i].completed && meus[i].note) return meus[i].note;
@@ -257,7 +337,10 @@ function modeloDe(missao, progresso, sequencia) {
   var nomePar = typeof missao.partner_name === "string" ? missao.partner_name.trim() : "";
   var mostrarPar = modoDuo(missao) && nomePar && parFezHoje(progresso, nomePar, dia);
   return {
-    recuperacao: !!(sequencia && sequencia.recovery_needed),
+    recuperacao: !!(sequencia && sequencia.recovery_needed === true),
+    missedYesterday: !!(sequencia && sequencia.missed_yesterday === true),
+    missedDays: lerMissedDays(sequencia),
+    missedBefore: lerAntesDeHoje(sequencia),
     id: missao.id,
     category: typeof missao.category === "string" ? missao.category : "",
     proof_mode: typeof missao.proof_mode === "string" ? missao.proof_mode : "",
@@ -284,6 +367,9 @@ function guardarCache(modelo) {
       category: modelo.category || "",
       proof_mode: modelo.proof_mode || "",
       recuperacao: modelo.recuperacao,
+      missedYesterday: modelo.missedYesterday === true,
+      missedDays: typeof modelo.missedDays === "number" ? modelo.missedDays : null,
+      missedBefore: typeof modelo.missedBefore === "number" ? modelo.missedBefore : null,
       dia: modelo.dia,
       duracao: modelo.duracao,
       titulo: modelo.titulo,
@@ -351,8 +437,9 @@ function rotuloDasMarcas(modelo) {
     + palavraDeContagem(nFalta, "falta", "faltas");
 }
 
-function pintarMarcas(modelo) {
-  var caixa = document.getElementById("marcas");
+function pintarMarcas(modelo, destino) {
+  var caixa = destino ? document.getElementById(destino) : document.getElementById("marcas");
+  if (!caixa) return;
   var duracao = modelo.duracao;
   var hoje = modelo.dia;
   var feitos = {};
@@ -476,13 +563,108 @@ function lerAvisoDeVolta() {
 function pintarAvisoDeVolta() {
   var aviso = document.getElementById("aviso-volta");
   if (!aviso) return;
-  if (lerAvisoDeVolta() === "ja-registrado") {
+  var codigo = lerAvisoDeVolta();
+  if (codigo === "ja-registrado") {
     aviso.hidden = false;
+    aviso.className = "alerta";
     aviso.textContent = "Este dia já estava registrado.";
     return;
   }
+  if (codigo === "voltou") {
+    aviso.hidden = false;
+    aviso.className = "alerta alerta-ok";
+    aviso.textContent = TEXTO_VOLTOU;
+    return;
+  }
   aviso.hidden = true;
+  aviso.className = "alerta";
   aviso.textContent = "";
+}
+
+function buscaDaTela() {
+  return NexusAbas.busca(["tema", "cenario", "rede"]);
+}
+
+function pintarCalor(modelo) {
+  var calor = document.getElementById("calor");
+  var guardado = modelo && typeof modelo.minimo === "string" ? modelo.minimo : "";
+  calor.replaceChildren();
+  if (!guardado.trim()) {
+    calor.textContent = "Acontece. O ciclo não acabou.";
+    return;
+  }
+  var intro = document.createElement("span");
+  intro.className = "calor-intro";
+  intro.textContent = "Acontece. O ciclo não acabou. O mínimo de hoje:";
+  var forte = document.createElement("strong");
+  forte.className = "calor-minimo";
+  forte.textContent = guardado;
+  calor.appendChild(intro);
+  calor.appendChild(forte);
+}
+
+function pintarAcoesRecuperacao(modelo, semRede) {
+  var acoes = document.getElementById("acoes-recuperacao");
+  var extra = buscaDaTela();
+  acoes.replaceChildren();
+  if (semRede && !modelo.hojeFeito) {
+    var botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "btn btn-primario";
+    botao.id = "btn-registrar";
+    botao.textContent = "Registrar o dia";
+    botao.setAttribute("aria-describedby", "aviso-rede-recuperacao");
+    acoes.appendChild(botao);
+  } else {
+    var link = document.createElement("a");
+    link.className = "btn btn-primario";
+    link.id = "btn-registrar";
+    link.href = "checkin.html" + extra;
+    link.textContent = "Registrar o dia";
+    acoes.appendChild(link);
+  }
+  if (podeDiaDificil(modelo)) {
+    var dificil = document.createElement("a");
+    dificil.className = "btn btn-texto link-dificil";
+    dificil.id = "link-dificil";
+    dificil.href = "dia-dificil.html" + extra;
+    dificil.textContent = "Hoje é dia difícil";
+    acoes.appendChild(dificil);
+  }
+  var missao = document.createElement("a");
+  missao.className = "btn btn-texto link-missao";
+  missao.id = "link-missao";
+  missao.href = "missao.html" + extra;
+  missao.textContent = "Ver a missão";
+  acoes.appendChild(missao);
+}
+
+function pintarRecuperacao(modelo, semRede) {
+  marcarOrigemRecuperacao();
+  document.getElementById("dia-numero-recuperacao").textContent = "Dia " + modelo.dia + " de " + modelo.duracao;
+  pintarMarcas(modelo, "marcas-recuperacao");
+  var fato = document.getElementById("fato-falta");
+  var frase = textoDaFalta(modelo);
+  if (frase) {
+    fato.hidden = false;
+    fato.textContent = frase;
+  } else {
+    fato.hidden = true;
+    fato.textContent = "";
+  }
+  pintarCalor(modelo);
+  var aviso = document.getElementById("aviso-rede-recuperacao");
+  if (semRede && !modelo.hojeFeito) {
+    var temNota = typeof modelo.nota === "string" && modelo.nota.trim() !== "";
+    mostrarAviso(aviso, "rede", temNota ? TEXTO_REGISTRO_OFF_NOTA : TEXTO_REGISTRO_OFF);
+  } else {
+    aviso.hidden = true;
+    aviso.replaceChildren();
+  }
+  pintarAcoesRecuperacao(modelo, semRede);
+  mostrarVista("recuperacao");
+  NexusAbas.focar(document.getElementById("titulo-recuperacao"));
+  NexusAbas.concluirRolagem();
 }
 
 function pintarDia(modelo, semRede) {
@@ -549,9 +731,10 @@ function pintarDia(modelo, semRede) {
 
 function abrirModelo(modelo, semRede) {
   if (modelo.recuperacao) {
-    location.replace("recuperacao.html" + NexusAbas.busca(["tema", "cenario"]));
+    pintarRecuperacao(modelo, semRede);
     return;
   }
+  limparOrigemRecuperacao();
   pintarDia(modelo, semRede);
 }
 
