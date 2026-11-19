@@ -99,9 +99,12 @@ function normalizar(checkins) {
     if (!item) return;
     var dia = Number(item.day);
     if (!isFinite(dia)) return;
+    var temDificil = item.difficult === true || item.difficult === false || item.is_difficult === true || item.is_difficult === false;
     saida.push({
       day: dia,
-      completed: item.completed === true
+      completed: item.completed === true,
+      difficult: item.difficult === true || item.is_difficult === true,
+      temDificil: temDificil
     });
   });
   return saida;
@@ -131,18 +134,28 @@ function checkinsMeus(missao, progresso) {
   return [];
 }
 
-/* Cada dia completed entra uma vez, só dentro do ciclo. */
-function contarRegistrados(meus, duracao) {
+/* Cada dia completed entra uma vez, só dentro do ciclo.
+   dificeis fica null quando o servidor não manda o campo. */
+function resumirDias(meus, duracao) {
   var vistos = {};
-  var n = 0;
+  var dias = [];
+  var dificeis = [];
+  var temDificil = false;
   (meus || []).forEach(function (item) {
-    if (!item || item.completed !== true) return;
+    if (!item) return;
+    if (item.temDificil) temDificil = true;
+    if (item.completed !== true) return;
     var dia = Number(item.day);
     if (!isFinite(dia) || dia < 1 || dia > duracao || vistos[dia]) return;
     vistos[dia] = true;
-    n += 1;
+    dias.push(dia);
+    if (item.difficult === true) dificeis.push(dia);
   });
-  return n;
+  return {
+    dias: dias,
+    dificeis: temDificil ? dificeis : null,
+    registrados: dias.length
+  };
 }
 
 function escolherAtiva(lista) {
@@ -221,12 +234,14 @@ function textoDoFato(n, duracao) {
 function guardarCache(modelo) {
   try {
     localStorage.setItem(CHAVE_CACHE, JSON.stringify({
-      versao: 1,
+      versao: 2,
       id: modelo.id,
       status: modelo.status,
       dia: modelo.dia,
       duracao: modelo.duracao,
-      registrados: modelo.registrados
+      registrados: modelo.registrados,
+      dias: modelo.dias,
+      dificeis: modelo.dificeis
     }));
   } catch (erro) {}
 }
@@ -236,7 +251,7 @@ function lerCacheProprio() {
     var bruto = localStorage.getItem(CHAVE_CACHE);
     if (!bruto) return null;
     var dados = JSON.parse(bruto);
-    if (!dados || dados.versao !== 1 || typeof dados.registrados !== "number") return null;
+    if (!dados || dados.versao !== 2 || typeof dados.registrados !== "number" || !Array.isArray(dados.dias)) return null;
     return dados;
   } catch (erro) {
     return null;
@@ -251,15 +266,23 @@ function lerCacheDoHoje() {
     if (!dados || dados.versao !== 1 || !Array.isArray(dados.feitos)) return null;
     var duracao = Number(dados.duracao);
     if (!isFinite(duracao) || duracao < 1) duracao = 30;
+    var resumo = resumirDias(dados.feitos.map(function (dia) {
+      return { day: dia, completed: true, difficult: false, temDificil: Array.isArray(dados.dificeis) };
+    }), duracao);
+    if (Array.isArray(dados.dificeis)) {
+      resumo.dificeis = dados.dificeis.filter(function (dia) {
+        return resumo.dias.indexOf(dia) !== -1;
+      });
+    }
     return {
-      versao: 1,
+      versao: 2,
       id: dados.id,
       status: typeof dados.status === "string" ? dados.status : "",
       dia: dados.dia,
       duracao: duracao,
-      registrados: contarRegistrados(dados.feitos.map(function (dia) {
-        return { day: dia, completed: true };
-      }), duracao)
+      registrados: resumo.registrados,
+      dias: resumo.dias,
+      dificeis: resumo.dificeis
     };
   } catch (erro) {
     return null;
@@ -270,8 +293,46 @@ function lerCache() {
   return lerCacheProprio() || lerCacheDoHoje();
 }
 
+/* A mesma grade do Hoje: feito preenchido, falta com o traço.
+   Um nome só, para o leitor. As marcas não recebem foco. */
+function pintarGrade(modelo) {
+  var caixa = document.getElementById("marcas");
+  if (!caixa) return;
+  var duracao = modelo.duracao;
+  var feitos = {};
+  var dificeis = {};
+  var temDificeis = Array.isArray(modelo.dificeis);
+  (modelo.dias || []).forEach(function (dia) { feitos[dia] = true; });
+  if (temDificeis) {
+    modelo.dificeis.forEach(function (dia) {
+      if (dia >= 1 && dia <= duracao) dificeis[dia] = true;
+    });
+  }
+  caixa.className = "marcas";
+  caixa.setAttribute("role", "img");
+  caixa.setAttribute("aria-label", modelo.registrados + " de " + duracao + " dias registrados");
+  caixa.removeAttribute("tabindex");
+  caixa.replaceChildren();
+  for (var dia = 1; dia <= duracao; dia++) {
+    var marca = document.createElement("span");
+    marca.className = "marca-dia";
+    marca.setAttribute("aria-hidden", "true");
+    var miolo = document.createElement("span");
+    miolo.className = "marca-miolo";
+    miolo.setAttribute("aria-hidden", "true");
+    var feito = !!feitos[dia];
+    var dificil = temDificeis && !!dificeis[dia];
+    if (dificil) miolo.classList.add("dificil");
+    if (feito) miolo.classList.add("feito");
+    else if (!dificil) miolo.classList.add("falta");
+    marca.appendChild(miolo);
+    caixa.appendChild(marca);
+  }
+}
+
 function pintarFim(modelo) {
   modeloAtual = modelo;
+  pintarGrade(modelo);
   document.getElementById("fato").textContent = textoDoFato(modelo.registrados, modelo.duracao);
   document.getElementById("ritmo").textContent = modelo.registrados >= modelo.duracao ? TEXTO_CUMPRIU : TEXTO_FALHAS;
   esconderAviso(document.getElementById("aviso-continuar"));
@@ -284,26 +345,24 @@ function pintarFim(modelo) {
 
 function definirCarregando(ativo) {
   var botao = document.getElementById("btn-continuar");
-  var sair = document.getElementById("btn-encerrar");
   var form = document.getElementById("vista-fim");
   if (ativo) {
     form.dataset.ocupado = "sim";
     botao.disabled = true;
-    sair.disabled = true;
     botao.textContent = TEXTO_ABRINDO;
     botao.setAttribute("aria-busy", "true");
     return;
   }
   form.dataset.ocupado = "";
   botao.disabled = false;
-  sair.disabled = false;
   botao.textContent = TEXTO_CONTINUAR;
   botao.removeAttribute("aria-busy");
 }
 
-/* Sem rota de encerrar no api.js. O abandon do servidor antigo é outra ação
-   e não entra aqui. Só saímos para o Hoje, sem dizer que a missão fechou. */
-function encerrar() {
+/* Sem rota de encerrar. «Agora não» só volta ao Hoje.
+   TODO: quando existir a rota de encerrar, voltar o rótulo para
+   «Encerrar esta missão» e pedir confirmação de uma frase, como em Sair da conta. */
+function agoraNao() {
   try {
     sessionStorage.setItem(CHAVE_ADIAR_FIM, "1");
   } catch (erro) {}
@@ -313,7 +372,7 @@ function encerrar() {
 async function continuar() {
   var vista = document.getElementById("vista-fim");
   var aviso = document.getElementById("aviso-continuar");
-  if (!modeloAtual || vista.dataset.ocupado === "sim") return;
+  if (!modeloAtual || vista.dataset.ocupado === "sim" || document.getElementById("btn-continuar").disabled) return;
   if (semRedeAgora()) {
     mostrarAviso(aviso, "rede", TEXTO_SEM_REDE);
     NexusAbas.focar(aviso);
@@ -321,7 +380,6 @@ async function continuar() {
   }
   var saiu = false;
   definirCarregando(true);
-  esconderAviso(aviso);
   try {
     var resultado = await NexusApi.estenderMissao(modeloAtual.id);
     if (!resultado || !resultado.ok) {
@@ -345,12 +403,15 @@ function modeloDe(missao, progresso) {
   var duracao = duracaoDe(missao);
   var dia = numeroDoDia(missao.started_at);
   var status = typeof missao.status === "string" ? missao.status : "";
+  var resumo = resumirDias(checkinsMeus(missao, progresso), duracao);
   return {
     id: missao.id,
     status: status,
     dia: dia,
     duracao: duracao,
-    registrados: contarRegistrados(checkinsMeus(missao, progresso), duracao)
+    registrados: resumo.registrados,
+    dias: resumo.dias,
+    dificeis: resumo.dificeis
   };
 }
 
@@ -434,7 +495,7 @@ function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
   document.getElementById("btn-tentar").addEventListener("click", carregar);
   document.getElementById("btn-continuar").addEventListener("click", continuar);
-  document.getElementById("btn-encerrar").addEventListener("click", encerrar);
+  document.getElementById("btn-agora").addEventListener("click", agoraNao);
   atualizarBarra();
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", atualizarBarra);
   if ("serviceWorker" in navigator) {

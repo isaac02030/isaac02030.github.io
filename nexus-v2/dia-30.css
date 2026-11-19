@@ -50,8 +50,9 @@
 
 .ritmo {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text);
   font: var(--text-body);
+  font-weight: 600;
 }
 
 .dia-30 .alerta {

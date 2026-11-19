@@ -169,17 +169,17 @@ No mock, só a partir de uma página local:
 
 «Conta» abre «Sair da conta?». A frase diz que a sessão e os rascunhos deste aparelho são apagados, e que a missão continua salva na conta. «Cancelar» é o botão preenchido e recebe o foco. «Sair» é o contorno. Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). A missão, os dias e a sequência ficam no servidor. O tema fica. Em seguida abre a tela de entrar.
 
-A tela lê sem internet: os arquivos entram no cache `nexus-v2-v18`.
+A tela lê sem internet: os arquivos entram no cache `nexus-v2-v19`.
 
 ## Dia 30
 
-Quando o dia passou de `duration_days`, ou quando o status da missão é `completed`, o Hoje abre `dia-30.html`. Antes disso, essa tela volta para o Hoje. O número de dias sai dos check-ins `completed` desta pessoa, do mesmo jeito que o Hoje conta. Não há placar e não há Porta Aberta.
+Quando o dia passou de `duration_days`, ou quando o status da missão é `completed`, o Hoje abre `dia-30.html`. Antes disso, essa tela volta para o Hoje. É uma tela de fechamento: não tem a barra de abas. Ao abrir, o foco vai para o título. O número de dias sai dos check-ins `completed` desta pessoa, do mesmo jeito que o Hoje conta. Não há placar e não há Porta Aberta.
 
-O título é «Os 30 dias chegaram ao fim». Se o número bate com a duração, a frase é «Palavra cumprida neste ciclo.» Se faltou dia, «Houve falhas, e você chegou ao fim mesmo assim.»
+Entre o título e o fato fica a mesma grade do Hoje, só para leitura. O nome único para o leitor é «N de 30 dias registrados». O dia sem registro usa o traço da falta. A frase logo abaixo do fato usa a cor do texto, peso 600 e o tamanho do corpo. Se o número bate com a duração, a frase é «Palavra cumprida neste ciclo.» Se faltou dia, «Houve falhas, e você chegou ao fim mesmo assim.»
 
-«Continuar mais 36 dias» chama `POST /api/missions/:id/extend` com `{ days: 36 }`. Essa rota ainda não existe no servidor de verdade. O mock só responde em `localhost`, `127.0.0.1` ou `[::1]`. Fora disso, ou se a resposta falhar, a tela diz «Não foi possível abrir os próximos 36 dias. Tente de novo.» e não segue. Sem internet: «Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.»
+«Continuar mais 36 dias» chama `POST /api/missions/:id/extend` com `{ days: 36 }`. O botão fica desabilitado enquanto o pedido não volta, para um toque duplo não abrir duas vezes. Essa rota ainda não existe no servidor de verdade. O mock só responde em `localhost`, `127.0.0.1` ou `[::1]`. Fora disso, ou se a resposta falhar, a tela diz «Não foi possível abrir os próximos 36 dias. Tente de novo.» e não segue. Sem internet: «Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.» Os dois avisos são um alerta. O texto fica na tela se a pessoa tocar de novo antes da resposta.
 
-«Encerrar esta missão» não chama o servidor. Não há rota de fim de ciclo no `api.js`. O botão só volta para o Hoje. A missão continua como estava.
+«Agora não» não chama o servidor. Não há rota de fim de ciclo no `api.js`. O botão só volta para o Hoje. A missão continua como estava. Quando essa rota existir, o rótulo volta a ser «Encerrar esta missão», com uma frase de confirmação, como em Sair da conta.
 
 No mock, com a sessão já gravada:
 

@@ -42,6 +42,7 @@
   <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="hoje.css">
   <link rel="stylesheet" href="dia-30.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -69,12 +70,14 @@
 
       <section class="vista" id="vista-fim" hidden>
         <h1 class="titulo" id="titulo" tabindex="-1">Os 30 dias chegaram ao fim</h1>
+        <div class="marcas" id="marcas" role="img"></div>
         <p class="fato" id="fato"></p>
         <p class="ritmo" id="ritmo"></p>
-        <div id="aviso-continuar" class="alerta" hidden></div>
+        <div id="aviso-continuar" class="alerta" role="alert" hidden></div>
         <div class="acoes">
           <button type="button" class="btn btn-primario" id="btn-continuar">Continuar mais 36 dias</button>
-          <button type="button" class="btn btn-secundario" id="btn-encerrar">Encerrar esta missão</button>
+          <!-- TODO: quando existir a rota de encerrar, voltar o rótulo para «Encerrar esta missão» e pedir confirmação de uma frase, como em Sair da conta. -->
+          <button type="button" class="btn btn-secundario" id="btn-agora">Agora não</button>
         </div>
       </section>
     </div>

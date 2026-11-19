@@ -15,6 +15,8 @@ function ler(nome) {
 }
 
 var dia = ler("dia-30.js");
+var htmlDia = ler("dia-30.html");
+var cssDia = ler("dia-30.css");
 var api = ler("api.js");
 var mockSrc = ler(path.join("dev", "mock-api.js"));
 var sw = ler("sw.js");
@@ -33,14 +35,34 @@ if (dia.indexOf("Sem internet. O ciclo já terminou; continuar fica para quando 
   falhas.push("falta o aviso sem internet");
 }
 if (dia.indexOf('sessionStorage.setItem(CHAVE_ADIAR_FIM, "1")') === -1) {
-  falhas.push("encerrar não só volta para o Hoje");
+  falhas.push("Agora não não volta para o Hoje");
+}
+if (htmlDia.indexOf(">Agora não<") === -1) falhas.push("falta o botão Agora não");
+if (htmlDia.indexOf(">Encerrar esta missão<") !== -1) falhas.push("o botão ainda diz que encerra a missão");
+if (htmlDia.indexOf("TODO") === -1 || htmlDia.indexOf("Encerrar esta missão") === -1 || htmlDia.indexOf("Sair da conta") === -1) {
+  falhas.push("falta o TODO para quando existir a rota de encerrar");
+}
+if (htmlDia.indexOf('id="marcas"') === -1 || htmlDia.indexOf('href="hoje.css"') === -1) {
+  falhas.push("a grade não reaproveita a do Hoje");
+}
+if (htmlDia.indexOf('role="alert"') === -1) falhas.push("o aviso de continuar não nasce como alert");
+if (dia.indexOf('setAttribute("role", "alert")') === -1) falhas.push("os erros não usam role alert");
+var continuar = dia.slice(dia.indexOf("async function continuar"), dia.indexOf("function modeloDe"));
+if (continuar.indexOf("esconderAviso") !== -1) falhas.push("o erro some ao tocar de novo antes da resposta");
+if (continuar.indexOf("definirCarregando(true)") === -1 || dia.indexOf("botao.disabled = true") === -1) {
+  falhas.push("Continuar mais 36 dias não fica desabilitado enquanto envia");
+}
+if (continuar.indexOf('ocupado === "sim"') === -1) falhas.push("um segundo toque ainda pode enviar");
+var ritmo = cssDia.slice(cssDia.indexOf(".ritmo"), cssDia.indexOf("}", cssDia.indexOf(".ritmo")));
+if (ritmo.indexOf("var(--text)") === -1 || ritmo.indexOf("600") === -1 || ritmo.indexOf("--text-muted") !== -1) {
+  falhas.push("a frase de resultado não está em texto com peso 600");
 }
 if (api.indexOf('"/extend"') === -1 && api.indexOf("\"/extend\"") === -1) {
   falhas.push("api.js não chama POST /api/missions/:id/extend");
 }
 if (api.indexOf("days: 36") === -1) falhas.push("o corpo não manda days: 36");
 if (api.indexOf("/continue-solo") !== -1) falhas.push("api.js reutiliza continue-solo");
-if (sw.indexOf('CACHE = "nexus-v2-v18"') === -1) falhas.push("o cache não está em nexus-v2-v18");
+if (sw.indexOf('CACHE = "nexus-v2-v19"') === -1) falhas.push("o cache não está em nexus-v2-v19");
 if (sw.indexOf("./dia-30.html") === -1 || sw.indexOf("./dia-30.css") === -1 || sw.indexOf("./dia-30.js") === -1) {
   falhas.push("o cache não inclui a tela do fim");
 }
