@@ -3,13 +3,13 @@
    A nota fica no rascunho desta aba, o mesmo da tela de dia difícil.
    O rascunho some só depois de um registro feito. Não é fila de envio.
 
-   Tela 4, a resposta da IA depois do registro, fica desligada.
-   O gancho é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN. O padrão é false.
-   Não há página da IA neste passo.
+   Tela 4, a resposta do Grande Irmão, fica desligada.
+   A flag é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN, em abas.js. O padrão é false.
+   ?ia=1 liga nesta URL, sem mudar a flag.
+   Com a flag ligada, o registro feito abre grande-irmao.html e a tela não fecha sozinha.
+   Sem isso, a ida continua sendo o Hoje.
    Se o registro veio da volta ao ciclo, o aviso é
-   «Você voltou. O ciclo continua.» e a ida continua sendo o Hoje. */
-
-var NEXUS_ABRIR_TELA_IA_APOS_CHECKIN = false;
+   «Você voltou. O ciclo continua.» */
 
 /* Na branch codex/nexus-council-and-matching-switch (commit ae348817),
    POST /api/checkins responde { checkin, day, already_done, message }.
@@ -31,7 +31,9 @@ var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão vol
 var TEXTO_JA = "ja-registrado";
 var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
 var CHAVE_ORIGEM = "nexus_v2_origem_recuperacao";
+var CHAVE_PASSO = "nexus_v2_passo_grande_irmao";
 var ESPERA_SUCESSO_MS = 300;
+var voltaPelaSequencia = false;
 var MS_DIA = 24 * 60 * 60 * 1000;
 
 var ERROS_NOTA_CURTA = {
@@ -267,7 +269,27 @@ function respostaIndicaCrise(dados) {
 }
 
 function busca() {
+  return NexusAbas.busca(["tema", "cenario", "rede", "ia"]);
+}
+
+function buscaHoje() {
   return NexusAbas.busca(["tema", "cenario", "rede"]);
+}
+
+function sequenciaIndicaVolta(sequencia) {
+  if (!sequencia || typeof sequencia !== "object") return false;
+  if (!Object.prototype.hasOwnProperty.call(sequencia, "missed_days_before_today")) return false;
+  var n = sequencia.missed_days_before_today;
+  return typeof n === "number" && isFinite(n) && n > 0;
+}
+
+function guardarPassoGrandeIrmao(tipo, recuperacao) {
+  try {
+    sessionStorage.setItem(CHAVE_PASSO, JSON.stringify({
+      tipo: tipo === "dificil" ? "dificil" : "checkin",
+      recuperacao: recuperacao === true
+    }));
+  } catch (erro) {}
 }
 
 function irParaHoje(aviso) {
@@ -280,7 +302,7 @@ function irParaHoje(aviso) {
       /* Sem sessionStorage, o Hoje abre mesmo assim. */
     }
   }
-  location.replace("hoje.html" + busca());
+  location.replace("hoje.html" + buscaHoje());
 }
 
 function irParaCrise() {
@@ -290,8 +312,8 @@ function irParaCrise() {
 }
 
 function destinoDepoisDoRegistro() {
-  if (NEXUS_ABRIR_TELA_IA_APOS_CHECKIN) return "ia.html" + busca();
-  return "hoje.html" + busca();
+  if (NexusAbas.abrirTelaIa()) return "grande-irmao.html" + busca();
+  return "hoje.html" + buscaHoje();
 }
 
 function veioDaRecuperacao() {
@@ -416,6 +438,7 @@ function abrirOffline() {
 
 async function carregar() {
   var meu = ++ciclo;
+  voltaPelaSequencia = false;
   mostrarVista("carregando");
   if (semRedeAgora()) {
     abrirOffline();
@@ -454,6 +477,7 @@ async function carregar() {
     return;
   }
   var sequencia = respostas[1].dados || {};
+  voltaPelaSequencia = sequenciaIndicaVolta(sequencia);
   decidirMissao(missao, sequencia.today_done === true, false);
 }
 
@@ -485,9 +509,11 @@ function mostrarSucesso() {
     reduzido = false;
   }
   var daVolta = veioDaRecuperacao();
+  var fraseVolta = daVolta || voltaPelaSequencia;
+  var anunciarVolta = NexusAbas.abrirTelaIa() ? fraseVolta : daVolta;
   function anunciar() {
     var texto = document.createElement("span");
-    texto.textContent = daVolta ? TEXTO_VOLTOU : "Registro feito. Palavra cumprida hoje.";
+    texto.textContent = anunciarVolta ? TEXTO_VOLTOU : "Registro feito. Palavra cumprida hoje.";
     caixa.replaceChildren(
       icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
       texto
@@ -500,6 +526,7 @@ function mostrarSucesso() {
       limparOrigemRecuperacao();
       guardarAvisoDeVolta("voltou");
     }
+    if (NexusAbas.abrirTelaIa()) guardarPassoGrandeIrmao("checkin", fraseVolta);
     location.replace(destinoDepoisDoRegistro());
   }
   function sairDepois() {
@@ -586,10 +613,10 @@ async function enviar(evento) {
 
 function ligarLinks() {
   var extra = busca();
-  document.getElementById("voltar").href = "hoje.html" + extra;
+  document.getElementById("voltar").href = "hoje.html" + buscaHoje();
   document.getElementById("link-dificil").href = "dia-dificil.html" + extra;
   /* Quando a tela 10 existir, este botão passa a dizer «Ver o resultado». */
-  document.getElementById("btn-voltar-hoje").href = "hoje.html" + extra;
+  document.getElementById("btn-voltar-hoje").href = "hoje.html" + buscaHoje();
 }
 
 function atualizarBarra() {
