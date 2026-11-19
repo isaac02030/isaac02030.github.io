@@ -213,7 +213,7 @@ function numeroDoDia(startedAt) {
 function duracaoDe(missao) {
   var n = Number(missao && missao.duration_days);
   if (!isFinite(n) || n < 1) return 30;
-  return Math.min(Math.floor(n), 60);
+  return Math.min(Math.floor(n), 96);
 }
 
 function escolherMissao(lista) {

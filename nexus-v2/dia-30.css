@@ -1,0 +1,91 @@
+/* Tela 10, o fim dos 30 dias. Cartão no topo, em 390 por 844, sem rolagem. */
+
+.dia-30 {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: var(--space-5);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.dia-30 .titulo {
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.dia-30 .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.fato {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.ritmo {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+  font-weight: 600;
+}
+
+.dia-30 .alerta {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.dia-30 .btn {
+  width: 100%;
+  min-height: var(--target);
+}
+
+.dia-30 .btn-primario {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.dia-30 .btn-secundario {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.dia-30 .btn-primario:focus-visible,
+.dia-30 .btn-secundario:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

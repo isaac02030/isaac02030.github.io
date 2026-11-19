@@ -109,7 +109,42 @@ function numeroDoDia(startedAt) {
 function duracaoDe(missao) {
   var n = Number(missao && missao.duration_days);
   if (!isFinite(n) || n < 1) return 30;
-  return Math.min(Math.floor(n), 60);
+  /* 96 cabe o ciclo de 30 e mais 36, sem cortar o número que o servidor gravou. */
+  return Math.min(Math.floor(n), 96);
+}
+
+/* O mesmo critério da tela do fim: dia depois da duração, ou status completed. */
+function fimDoCiclo(status, dia, duracao) {
+  if (status === "completed") return true;
+  var d = Number(dia);
+  var n = Number(duracao);
+  if (!isFinite(d) || !isFinite(n)) return false;
+  return d > n;
+}
+
+var CHAVE_ADIAR_FIM = "nexus_v2_adiar_fim";
+
+function consumirAdiamentoDoFim() {
+  try {
+    if (sessionStorage.getItem(CHAVE_ADIAR_FIM) === "1") {
+      sessionStorage.removeItem(CHAVE_ADIAR_FIM);
+      return true;
+    }
+  } catch (erro) {}
+  return false;
+}
+
+function irParaOFim() {
+  location.replace("dia-30.html" + NexusAbas.busca(["tema", "cenario", "rede", "ia"]));
+}
+
+function primeiraConcluida(lista) {
+  if (!Array.isArray(lista)) return null;
+  var i;
+  for (i = 0; i < lista.length; i++) {
+    if (lista[i] && lista[i].status === "completed") return lista[i];
+  }
+  return null;
 }
 
 function nomeLocal() {
@@ -355,7 +390,8 @@ function modeloDe(missao, progresso, sequencia) {
     dificeis: lerDiasDificeis(sequencia, missao, meus),
     restantes: lerRestantes(sequencia, missao),
     parNome: mostrarPar ? nomePar : "",
-    esperando: esperandoPar(missao)
+    esperando: esperandoPar(missao),
+    status: typeof missao.status === "string" ? missao.status : ""
   };
 }
 
@@ -381,7 +417,8 @@ function guardarCache(modelo) {
       dificeis: modelo.dificeis,
       restantes: modelo.restantes,
       parNome: modelo.parNome,
-      esperando: modelo.esperando
+      esperando: modelo.esperando,
+      status: modelo.status || ""
     }));
   } catch (erro) {
     /* Sem espaço neste aparelho, o dia segue na tela e não fica guardado. */
@@ -744,6 +781,10 @@ function abrirOffline() {
     mostrarFalha("rede", TEXTO_SEM_REDE);
     return;
   }
+  if (fimDoCiclo(guardado.status, guardado.dia, guardado.duracao) && !consumirAdiamentoDoFim()) {
+    irParaOFim();
+    return;
+  }
   abrirModelo(guardado, true);
 }
 
@@ -772,6 +813,10 @@ async function carregar() {
 
   var resumo = escolherMissao(lista.dados);
   if (!resumo) {
+    if (primeiraConcluida(lista.dados) && !consumirAdiamentoDoFim()) {
+      irParaOFim();
+      return;
+    }
     mostrarVista("vazia");
     document.getElementById("btn-comecar").href = "onboarding.html" + NexusAbas.busca(["tema"]);
     NexusAbas.focar(document.getElementById("titulo-hoje"));
@@ -797,6 +842,10 @@ async function carregar() {
   }
   var modelo = modeloDe(missao, respostas[1].dados, respostas[2].dados);
   guardarCache(modelo);
+  if (fimDoCiclo(modelo.status, modelo.dia, modelo.duracao) && !consumirAdiamentoDoFim()) {
+    irParaOFim();
+    return;
+  }
   abrirModelo(modelo, false);
 }
 
