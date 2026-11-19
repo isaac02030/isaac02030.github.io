@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Missão — Nexus</title>
+  <title>Sua missão — Nexus</title>
   <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
   <meta name="color-scheme" content="light dark">
   <meta name="mobile-web-app-capable" content="yes">
@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="missao.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -48,18 +49,91 @@
 <body>
   <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
   <main class="pagina pagina-com-abas" id="conteudo">
-    <section class="cartao cartao-topo">
-      <header class="cabecalho">
-        <p class="marca">Nexus</p>
-        <h1 class="titulo" id="titulo" tabindex="-1">Missão</h1>
-        <p class="apoio">Esta tela chega em breve.</p>
-      </header>
-    </section>
+    <div class="cartao cartao-topo missao">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir a missão.</p>
+      </noscript>
+
+      <p class="sobretitulo" id="sobretitulo" tabindex="-1">Sua missão</p>
+
+      <section class="vista" id="vista-carregando" aria-live="polite">
+        <p class="carregando">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Abrindo a missão…</span>
+        </p>
+      </section>
+
+      <section class="vista" id="vista-erro" hidden>
+        <div id="alerta-erro" class="alerta" role="alert"></div>
+        <button type="button" class="btn btn-primario" id="btn-tentar">Tentar de novo</button>
+      </section>
+
+      <section class="vista" id="vista-vazia" hidden>
+        <p class="apoio">Ainda não há missões. Que tal começar a primeira?</p>
+        <a class="btn btn-primario" id="btn-comecar" href="onboarding.html">Começar uma missão</a>
+      </section>
+
+      <section class="vista" id="vista-encerrada" hidden>
+        <p class="resultado" id="texto-encerrada"></p>
+      </section>
+
+      <section class="vista" id="vista-missao" hidden>
+        <div class="cabeca">
+          <h1 class="titulo" id="titulo" tabindex="-1"></h1>
+          <p class="modo" id="modo"></p>
+        </div>
+        <p class="dia-numero" id="dia-numero" hidden></p>
+        <p class="minimo" id="minimo" hidden></p>
+        <p class="porque" id="porque" hidden></p>
+        <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
+
+        <section class="placar" id="placar" aria-label="Placar" hidden>
+          <ul class="placar-lista" id="placar-lista"></ul>
+        </section>
+        <div id="aviso-placar" class="alerta alerta-rede" role="status" hidden></div>
+
+        <div class="convites" id="convites">
+          <button type="button" class="btn btn-secundario" id="btn-duo">Convidar para Duo</button>
+          <button type="button" class="btn btn-secundario" id="btn-rival">Convidar para Rival</button>
+          <p class="aviso-vivo" id="aviso-convite" aria-live="polite" aria-atomic="true"></p>
+        </div>
+
+        <div class="bloco-link" id="bloco-link" hidden>
+          <label class="rotulo-link" for="campo-link">Link do convite</label>
+          <textarea id="campo-link" readonly rows="2" spellcheck="false" autocomplete="off" aria-describedby="apoio-link"></textarea>
+          <button type="button" class="btn btn-secundario" id="btn-copiar">Copiar link</button>
+          <p class="apoio" id="apoio-link">Quem abrir o link entra nesta missão com você. Não há pareamento automático.</p>
+          <p class="aviso-vivo" id="aviso-copia" aria-live="polite" aria-atomic="true"></p>
+        </div>
+
+        <div class="fim" id="fim">
+          <button type="button" class="btn btn-texto abandonar" id="btn-abandonar">Abandonar missão</button>
+          <div class="confirma" id="confirma" role="region" aria-labelledby="texto-abandono" hidden>
+            <p class="texto-abandono" id="texto-abandono" tabindex="-1"></p>
+            <h2 class="pergunta" id="pergunta-abandono" tabindex="-1" aria-live="polite" hidden>Abandonar mesmo?</h2>
+            <button type="button" class="btn btn-secundario" id="btn-continuar">Continuar</button>
+            <button type="button" class="btn btn-neutro" id="btn-confirmar" hidden>
+              <span class="spinner" aria-hidden="true" hidden></span>
+              <span class="btn-rotulo">Sim, abandonar</span>
+            </button>
+            <button type="button" class="btn btn-secundario" id="btn-cancelar">Cancelar</button>
+            <p class="aviso-vivo" id="aviso-abandono" aria-live="polite" aria-atomic="true"></p>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
   <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="api.js"></script>
   <script src="abas.js"></script>
   <script>
-    NexusAbas.iniciar("missao");
+    (function () {
+      var host = location.hostname;
+      if (host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1") {
+        document.write('<script src="dev/convite-exemplo.js"><\/script>');
+      }
+    })();
   </script>
+  <script src="missao.js"></script>
 </body>
 </html>
