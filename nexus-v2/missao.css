@@ -14,6 +14,27 @@
   gap: var(--space-3);
 }
 
+.sobretitulo {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+
+.missao .titulo {
+  margin: 0;
+  flex: 1 1 12rem;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
 .missao .titulo::after {
   content: "";
   display: block;
@@ -41,11 +62,14 @@
 
 .modo {
   margin: 0;
-  font: var(--text-title);
+  flex: 0 0 auto;
+  font: var(--text-small);
   color: var(--text);
 }
 
-.objetivo,
+.dia-numero,
+.minimo,
+.porque,
 .frase-solo,
 .resultado,
 .texto-abandono {
@@ -53,13 +77,22 @@
   color: var(--text);
 }
 
-.objetivo {
+.dia-numero {
+  font: var(--text-label);
+}
+
+.porque {
   color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.4;
 }
 
 .placar {
   margin: 0;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -79,7 +112,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: var(--target);
+  margin: 0;
 }
 
 .placar-nome {
@@ -149,11 +182,28 @@
   margin-top: calc(var(--space-7) + var(--space-4));
 }
 
-.abandonar,
-.cancelar {
+/* Com o placar visível, o vão debaixo do cartão não fica o mesmo dos botões. */
+#placar:not([hidden]) ~ .fim {
+  margin-top: var(--space-4);
+}
+
+.pergunta {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+/* Texto pequeno (14px, peso 500). Medido contra o cartão --surface.
+   Claro #5C574F sobre #FFFFFF: 7,16:1.
+   Escuro #B0AAA0 sobre #221F1B: 7,11:1. */
+.abandonar {
   align-self: flex-start;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: 0 var(--space-2);
   color: var(--text-muted);
-  font-weight: 500;
+  font: var(--text-small);
+  text-decoration-thickness: 1px;
 }
 
 .btn-neutro {

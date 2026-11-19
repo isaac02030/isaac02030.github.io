@@ -54,7 +54,7 @@
         <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir a missão.</p>
       </noscript>
 
-      <h1 class="titulo" id="titulo" tabindex="-1">Sua missão</h1>
+      <p class="sobretitulo" id="sobretitulo" tabindex="-1">Sua missão</p>
 
       <section class="vista" id="vista-carregando" aria-live="polite">
         <p class="carregando">
@@ -78,8 +78,13 @@
       </section>
 
       <section class="vista" id="vista-missao" hidden>
-        <h2 class="modo" id="modo"></h2>
-        <p class="objetivo" id="objetivo" hidden></p>
+        <div class="cabeca">
+          <h1 class="titulo" id="titulo" tabindex="-1"></h1>
+          <p class="modo" id="modo"></p>
+        </div>
+        <p class="dia-numero" id="dia-numero" hidden></p>
+        <p class="minimo" id="minimo" hidden></p>
+        <p class="porque" id="porque" hidden></p>
         <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
 
         <section class="placar" id="placar" aria-label="Placar" hidden>
@@ -105,12 +110,13 @@
           <button type="button" class="btn btn-texto abandonar" id="btn-abandonar">Abandonar missão</button>
           <div class="confirma" id="confirma" role="region" aria-labelledby="texto-abandono" hidden>
             <p class="texto-abandono" id="texto-abandono" tabindex="-1"></p>
-            <button type="button" class="btn btn-secundario" id="btn-entendi">Entendi</button>
+            <h2 class="pergunta" id="pergunta-abandono" tabindex="-1" aria-live="polite" hidden>Abandonar mesmo?</h2>
+            <button type="button" class="btn btn-secundario" id="btn-continuar">Continuar</button>
             <button type="button" class="btn btn-neutro" id="btn-confirmar" hidden>
               <span class="spinner" aria-hidden="true" hidden></span>
-              <span class="btn-rotulo">Abandonar missão</span>
+              <span class="btn-rotulo">Sim, abandonar</span>
             </button>
-            <button type="button" class="btn btn-texto cancelar" id="btn-cancelar">Cancelar</button>
+            <button type="button" class="btn btn-secundario" id="btn-cancelar">Cancelar</button>
             <p class="aviso-vivo" id="aviso-abandono" aria-live="polite" aria-atomic="true"></p>
           </div>
         </div>

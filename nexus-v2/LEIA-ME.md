@@ -176,15 +176,15 @@ Nas frases fixas, a linha da IA e o link não aparecem. Crise, quando houver sin
 
 ## Missão
 
-A aba Missão mostra o modo atual, com a mesma paleta em Solo, Duo e Rival. O título da página é «Sua missão». O modo é um rótulo: «Solo», «Duo, esperando o par», «Duo com [nome]» ou «Rival com [nome]».
+A aba Missão mostra a missão atual. «Sua missão» fica pequeno, em cima. O título grande é o objetivo (`title`). Ao lado, o modo é um rótulo pequeno, na mesma cor: «Solo», «Duo, esperando o par», «Duo com [nome]» ou «Rival com [nome]». Embaixo, quando o servidor manda o campo: «Dia N de D» (`started_at` e `duration_days`), o mínimo (`daily_minimum`) e «Porque:» (`why_it_matters`). Sem o campo, a linha some. Não há coluna chamada `porque`.
 
-O placar só aparece no Rival ativo. A tela pede `GET /api/checkins/:id/score`. No Duo não há placar. Os dias vêm de `scores`, contados pelos check-ins. `my_streak` não entra no placar.
+O placar só aparece no Rival ativo. A primeira linha é «Você». A outra é o nome do par. Os dias saem de `scores`, no formato «3 dias» ou «1 dia». `my_streak` não entra no placar.
 
 «Convidar para Duo» e «Convidar para Rival» não criam missão e não entram na fila. A rota de convite por link ainda não existe. A flag `NEXUS_CONVITE_POR_LINK` em `missao.js` fica false. Ao tocar, a tela diz «O convite por link ainda não está disponível.» Sem internet, diz que o convite não pode ser criado. Não mostra erro técnico.
 
 `?cenario=link-fake` só mostra um link em `localhost` ou `127.0.0.1`. O endereço fica em `dev/convite-exemplo.js`. A checagem é `node nexus-v2/dev/checar-convite-exemplo.js`. Em outro host, a página não carrega esse arquivo.
 
-«Abandonar missão» fica no fim da página, longe de «Copiar link». São dois passos. O pedido `POST /api/missions/:id/abandon` só sai no segundo. No Solo, a missão termina e o registro para. Com par, você sai e a outra pessoa continua em Solo na mesma missão. A tela não chama `continue-solo`. Se falhar ou estiver sem internet, a missão continua na tela.
+«Abandonar missão» fica no fim da página, longe dos botões de cima. O primeiro passo diz o que acontece e o botão é «Continuar». O segundo pergunta «Abandonar mesmo?» e o botão é «Sim, abandonar». «Cancelar» fica nos dois. O pedido `POST /api/missions/:id/abandon` só sai no segundo. No Solo, a missão termina e a pessoa não registra mais os dias dela. Com par, quem sai é removido e a outra pessoa continua em Solo. A tela não chama `continue-solo`. Se falhar ou estiver sem internet, a missão continua na tela.
 
 No mock, com a sessão já gravada:
 

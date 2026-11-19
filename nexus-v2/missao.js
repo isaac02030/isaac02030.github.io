@@ -20,8 +20,9 @@ var TEXTO_PLACAR_ERRO = "Não foi possível abrir o placar agora.";
 var TEXTO_COPIA_ERRO = "Não foi possível copiar. Selecione o link e copie à mão.";
 var TEXTO_ABANDONO_OFF = "Sem internet. A missão continua. Tente de novo quando a conexão voltar.";
 var TEXTO_ABANDONO_ERRO = "Não foi possível abandonar agora. A missão continua.";
-var TEXTO_SOLO_FIM = "Esta missão termina. O registro do dia para.";
+var TEXTO_SOLO_FIM = "Se abandonar, esta missão termina e você não registra mais os dias dela.";
 var TEXTO_SOLO_FEITO = "A missão foi encerrada. O registro do dia parou.";
+var MS_DIA = 24 * 60 * 60 * 1000;
 var ciclo = 0;
 var modeloAtual = null;
 var abandonando = false;
@@ -96,6 +97,7 @@ function modeloBase(missao) {
   else if (temPar) tituloModo = "Duo com " + nomePar;
   else if (aguardando) tituloModo = "Duo, esperando o par";
   var ativa = status === "active" || status === "";
+  var quando = diaDaMissao(missao);
   return {
     id: missao.id,
     titulo: texto(missao.title),
@@ -108,11 +110,36 @@ function modeloBase(missao) {
     fraseSolo: aguardando && ativa,
     rival: temPar && modo === "rival" && ativa,
     temPar: temPar,
+    dia: quando ? quando.dia : null,
+    duracao: quando ? quando.duracao : null,
+    minimo: campoTexto(missao, "daily_minimum"),
+    porque: campoTexto(missao, "why_it_matters"),
     linhas: null,
     avisoPlacar: "",
     mostrarConvite: !temPar,
     link: ""
   };
+}
+
+/* Dia N de D só existe com started_at e duration_days de verdade.
+   Sem um dos dois, a linha some. Não completamos com 1 nem com 30. */
+function diaDaMissao(missao) {
+  if (!missao || typeof missao.started_at !== "string" || !missao.started_at) return null;
+  if (!Object.prototype.hasOwnProperty.call(missao, "duration_days")) return null;
+  if (missao.duration_days == null || missao.duration_days === "") return null;
+  var inicio = new Date(missao.started_at);
+  if (isNaN(inicio.getTime())) return null;
+  var duracao = Number(missao.duration_days);
+  if (!isFinite(duracao) || duracao < 1) return null;
+  var dia = Math.floor((Date.now() - inicio.getTime()) / MS_DIA) + 1;
+  if (dia < 1) return null;
+  return { dia: dia, duracao: Math.floor(duracao) };
+}
+
+function campoTexto(missao, chave) {
+  if (!missao || !Object.prototype.hasOwnProperty.call(missao, chave)) return "";
+  if (typeof missao[chave] !== "string") return "";
+  return missao[chave].trim();
 }
 
 function linkFalso() {
@@ -167,8 +194,8 @@ function linhasDoPlacar(dados, meuNome, nomePar) {
   var par = lerDias(dados.scores, nomePar);
   if (meu == null || par == null) return null;
   return [
-    { nome: meuNome, dias: meu },
-    { nome: nomePar, dias: par }
+    { eu: true, dias: meu },
+    { eu: false, nome: nomePar, dias: par }
   ];
 }
 
@@ -189,18 +216,23 @@ function escolherMissao(lista) {
   return null;
 }
 
+function diasDaLinha(item) {
+  var dias = item ? Number(item.dias) : NaN;
+  if (!isFinite(dias) || dias < 0) return null;
+  return Math.floor(dias);
+}
+
 function sanitizarLinhas(lista) {
   if (!Array.isArray(lista) || lista.length !== 2) return null;
-  var saida = [];
-  for (var i = 0; i < lista.length; i++) {
-    var item = lista[i];
-    var nome = item && typeof item.nome === "string" ? item.nome.trim() : "";
-    var dias = item ? Number(item.dias) : NaN;
-    if (!nome || !isFinite(dias) || dias < 0) return null;
-    saida.push({ nome: nome, dias: Math.floor(dias) });
-  }
-  if (saida[0].nome === saida[1].nome) return null;
-  return saida;
+  var da = diasDaLinha(lista[0]);
+  var db = diasDaLinha(lista[1]);
+  if (da == null || db == null) return null;
+  var nomePar = lista[1] && typeof lista[1].nome === "string" ? lista[1].nome.trim() : "";
+  if (!nomePar) return null;
+  return [
+    { eu: true, dias: da },
+    { eu: false, nome: nomePar, dias: db }
+  ];
 }
 
 function linkSeguro(valor) {
@@ -216,7 +248,7 @@ function guardarCache(modelo) {
   var link = cenarioDaPagina() === "link-fake" ? "" : linkSeguro(modelo.link);
   try {
     localStorage.setItem(CHAVE_CACHE, JSON.stringify({
-      versao: 1,
+      versao: 2,
       id: modelo.id,
       titulo: modelo.titulo || "",
       modo: modelo.modo || "solo",
@@ -228,6 +260,10 @@ function guardarCache(modelo) {
       fraseSolo: modelo.fraseSolo === true,
       rival: modelo.rival === true,
       temPar: modelo.temPar === true,
+      dia: typeof modelo.dia === "number" ? modelo.dia : null,
+      duracao: typeof modelo.duracao === "number" ? modelo.duracao : null,
+      minimo: modelo.minimo || "",
+      porque: modelo.porque || "",
       mostrarConvite: modelo.mostrarConvite === true,
       linhas: modelo.linhas || null,
       link: link
@@ -240,7 +276,7 @@ function lerCache() {
     var bruto = localStorage.getItem(CHAVE_CACHE);
     if (!bruto) return null;
     var dados = JSON.parse(bruto);
-    if (!dados || dados.versao !== 1 || dados.id == null) return null;
+    if (!dados || (dados.versao !== 1 && dados.versao !== 2) || dados.id == null) return null;
     dados.linhas = sanitizarLinhas(dados.linhas);
     dados.link = linkSeguro(dados.link);
     dados.avisoPlacar = "";
@@ -296,14 +332,14 @@ function mostrarVista(qual) {
 function mostrarFalha(tipo, textoFalha) {
   mostrarVista("erro");
   mostrarAviso(document.getElementById("alerta-erro"), tipo, textoFalha);
-  NexusAbas.focar(document.getElementById("titulo"));
+  NexusAbas.focar(document.getElementById("sobretitulo"));
   NexusAbas.concluirRolagem();
 }
 
 function mostrarVazia() {
   mostrarVista("vazia");
   document.getElementById("btn-comecar").href = "onboarding.html" + NexusAbas.busca(["tema"]);
-  NexusAbas.focar(document.getElementById("titulo"));
+  NexusAbas.focar(document.getElementById("sobretitulo"));
   NexusAbas.concluirRolagem();
 }
 
@@ -315,7 +351,7 @@ function pintarPlacar(linhas) {
     item.className = "placar-linha";
     var nome = document.createElement("span");
     nome.className = "placar-nome";
-    nome.textContent = linha.nome;
+    nome.textContent = linha.eu ? "Você" : linha.nome;
     var dias = document.createElement("span");
     dias.className = "placar-dias";
     dias.textContent = textoDias(linha.dias);
@@ -325,16 +361,32 @@ function pintarPlacar(linhas) {
   });
 }
 
-function pintar(modelo) {
-  document.getElementById("modo").textContent = modelo.tituloModo || "Solo";
-  var objetivo = document.getElementById("objetivo");
-  if (modelo.titulo) {
-    objetivo.hidden = false;
-    objetivo.textContent = modelo.titulo;
-  } else {
-    objetivo.hidden = true;
-    objetivo.textContent = "";
+function mostrarLinha(id, valor) {
+  var el = document.getElementById(id);
+  if (valor) {
+    el.hidden = false;
+    el.textContent = valor;
+    return;
   }
+  el.hidden = true;
+  el.textContent = "";
+}
+
+function pintar(modelo) {
+  var titulo = document.getElementById("titulo");
+  if (modelo.titulo) {
+    titulo.hidden = false;
+    titulo.textContent = modelo.titulo;
+    document.title = modelo.titulo + " — Nexus";
+  } else {
+    titulo.hidden = true;
+    titulo.textContent = "";
+    document.title = "Sua missão — Nexus";
+  }
+  document.getElementById("modo").textContent = modelo.tituloModo || "Solo";
+  mostrarLinha("dia-numero", modelo.dia && modelo.duracao ? "Dia " + modelo.dia + " de " + modelo.duracao : "");
+  mostrarLinha("minimo", modelo.minimo ? "O mínimo de hoje: " + modelo.minimo : "");
+  mostrarLinha("porque", modelo.porque ? "Porque: " + modelo.porque : "");
   document.getElementById("frase-solo").hidden = modelo.fraseSolo !== true;
 
   var placar = document.getElementById("placar");
@@ -378,7 +430,8 @@ function abrirModelo(modelo) {
   fecharConfirmacao();
   pintar(modelo);
   mostrarVista("missao");
-  NexusAbas.focar(document.getElementById("titulo"));
+  var titulo = document.getElementById("titulo");
+  NexusAbas.focar(titulo && !titulo.hidden ? titulo : document.getElementById("sobretitulo"));
   NexusAbas.concluirRolagem();
 }
 
@@ -397,16 +450,19 @@ function abrirOffline() {
 
 function textoAbandono(modelo) {
   if (modelo && modelo.temPar && modelo.nomePar) {
-    return "Você sai desta missão. O seu registro do dia para. " + modelo.nomePar + " continua em Solo, na mesma missão.";
+    return "Se você sair, é removido da missão e " + modelo.nomePar + " continua em Solo.";
   }
   return TEXTO_SOLO_FIM;
 }
 
 function fecharConfirmacao() {
-  document.getElementById("confirma").hidden = true;
+  var confirma = document.getElementById("confirma");
+  confirma.hidden = true;
+  confirma.setAttribute("aria-labelledby", "texto-abandono");
   document.getElementById("btn-abandonar").hidden = false;
   document.getElementById("aviso-abandono").textContent = "";
-  document.getElementById("btn-entendi").hidden = false;
+  document.getElementById("pergunta-abandono").hidden = true;
+  document.getElementById("btn-continuar").hidden = false;
   document.getElementById("btn-confirmar").hidden = true;
   definirConfirmando(false);
 }
@@ -416,17 +472,23 @@ function abrirConfirmacao() {
   abandonoCancelado = false;
   document.getElementById("texto-abandono").textContent = textoAbandono(modeloAtual);
   document.getElementById("aviso-abandono").textContent = "";
-  document.getElementById("btn-entendi").hidden = false;
+  document.getElementById("pergunta-abandono").hidden = true;
+  document.getElementById("btn-continuar").hidden = false;
   document.getElementById("btn-confirmar").hidden = true;
   document.getElementById("btn-abandonar").hidden = true;
-  document.getElementById("confirma").hidden = false;
+  var confirma = document.getElementById("confirma");
+  confirma.setAttribute("aria-labelledby", "texto-abandono");
+  confirma.hidden = false;
   document.getElementById("texto-abandono").focus();
 }
 
 function avancarConfirmacao() {
-  document.getElementById("btn-entendi").hidden = true;
+  var pergunta = document.getElementById("pergunta-abandono");
+  document.getElementById("btn-continuar").hidden = true;
   document.getElementById("btn-confirmar").hidden = false;
-  document.getElementById("btn-confirmar").focus();
+  pergunta.hidden = false;
+  document.getElementById("confirma").setAttribute("aria-labelledby", "pergunta-abandono");
+  pergunta.focus();
 }
 
 function definirConfirmando(ligado) {
@@ -435,7 +497,7 @@ function definirConfirmando(ligado) {
   var spinner = botao.querySelector(".spinner");
   botao.disabled = ligado;
   botao.setAttribute("aria-busy", ligado ? "true" : "false");
-  if (rotulo) rotulo.textContent = ligado ? "Abandonando…" : "Abandonar missão";
+  if (rotulo) rotulo.textContent = ligado ? "Abandonando…" : "Sim, abandonar";
   if (spinner) spinner.hidden = !ligado;
 }
 
@@ -449,7 +511,8 @@ function mostrarEncerrada(temPar, nome) {
   document.getElementById("texto-encerrada").textContent = frase;
   mostrarVista("encerrada");
   modeloAtual = null;
-  NexusAbas.focar(document.getElementById("titulo"));
+  document.title = "Sua missão — Nexus";
+  NexusAbas.focar(document.getElementById("sobretitulo"));
 }
 
 function confirmarAbandono() {
@@ -614,7 +677,7 @@ function iniciar() {
   document.getElementById("btn-rival").addEventListener("click", function () { aoConvidar("rival"); });
   document.getElementById("btn-copiar").addEventListener("click", aoCopiar);
   document.getElementById("btn-abandonar").addEventListener("click", abrirConfirmacao);
-  document.getElementById("btn-entendi").addEventListener("click", avancarConfirmacao);
+  document.getElementById("btn-continuar").addEventListener("click", avancarConfirmacao);
   document.getElementById("btn-confirmar").addEventListener("click", confirmarAbandono);
   document.getElementById("btn-cancelar").addEventListener("click", function () {
     abandonoCancelado = true;
@@ -622,7 +685,7 @@ function iniciar() {
     var botao = document.getElementById("btn-abandonar");
     if (!botao.hidden) botao.focus();
   });
-  NexusAbas.focar(document.getElementById("titulo"));
+  NexusAbas.focar(document.getElementById("sobretitulo"));
   atualizarBarra();
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", atualizarBarra);
   if ("serviceWorker" in navigator) {
