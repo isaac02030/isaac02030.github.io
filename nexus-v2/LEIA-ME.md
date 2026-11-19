@@ -98,7 +98,7 @@ Estados do `?cenario=`:
 
 Se `recovery_needed` é true, o Hoje troca o miolo e mantém a barra de abas. Em cima da grade entra «Dia N de 30», como no Hoje. A marca de falta tem um traço curto. O título é «Hoje ainda dá para voltar». A contagem usa `missed_days_before_today`. Sem esse campo, usa `missed_days - 1`. Um dia vira «Ontem não houve registro.» Dois ou mais viram «Ficaram N dias sem registro.» Zero e negativo não aparecem. «O mínimo de hoje:» fica com o mínimo em negrito na linha de baixo. «Registrar o dia» abre o check-in normal. «Hoje é dia difícil» só aparece com `difficult_days_remaining` maior que zero e sem o bloqueio de 2 seguidos. «Ver a missão» abre `missao.html`.
 
-Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz «Você voltou. O ciclo continua.» O ciclo em dia não mostra essa tela. Erro e falta de internet seguem o Hoje.
+Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz «Você voltou. O ciclo continua.» O ciclo em dia não mostra essa tela. Erro e falta de internet seguem o Hoje. Com `?ia=1`, esse registro abre a resposta do Grande Irmão em vez do Hoje. Sem o parâmetro, a volta continua sendo o Hoje.
 
 O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A senha pode ser qualquer uma, menos `errada`.
 
@@ -130,6 +130,8 @@ No mock, com a sessão já gravada:
 
 «Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
 
+`?ia=1` liga a ida para a resposta do Grande Irmão só em `localhost` ou `127.0.0.1`. Em outro host, o parâmetro não muda o caminho: o sucesso continua indo para o Hoje. A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false.
+
 ## Dia difícil
 
 Tela por cima do check-in: tem Voltar e não mostra a barra de abas. O pedido é `POST /api/checkins` com `mission_id`, `note` e `difficult: true`. O sucesso só aparece se a resposta for 2xx e `checkin.difficult` for `true`.
@@ -150,3 +152,25 @@ No mock:
 - `?rede=off` — a nota continua no campo
 
 A tela de ajuda (`crise.html`) continua um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.
+
+## Resposta do Grande Irmão
+
+Cartão simples, sem avatar e sem balão. O título é «O Grande Irmão». A frase é um parágrafo curto. O botão «Voltar a Hoje» fica visível sem rolar. O voltar do celular faz a mesma coisa. A tela não fecha sozinha e não abre sozinha: só depois de um check-in ou de um dia difícil, com a flag ligada.
+
+A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false em `abas.js`. Desenvolvimento é só o host `localhost` ou `127.0.0.1`. Nesse host, `?ia=1` no check-in ou no dia difícil abre esta tela. Em qualquer outro host, `?ia=1` não faz nada: o registro volta para o Hoje e a frase continua fixa.
+
+Não há pedido a uma rota de IA. A frase sai dos mesmos dados do Hoje: o check-in de hoje com `difficult`, e a volta quando `missed_days_before_today` é maior que zero ou quando o check-in veio da recuperação. A volta ganha do dia cumprido e também do dia difícil. Se os dois acontecem juntos, a frase é «Você voltou. O ciclo continua.»
+
+Sem internet ou com erro, a frase fixa continua. Não aparece erro técnico.
+
+No mock, com a sessão já gravada:
+
+- `grande-irmao.html?cenario=cumpriu` — «Registro feito. O mínimo de hoje estava escrito, e você cumpriu.»
+- `grande-irmao.html?cenario=dificil` — «Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.»
+- `grande-irmao.html?cenario=volta` — «Você voltou. O ciclo continua.»
+- `grande-irmao.html?cenario=offline` — a frase do dia cumprido, sem erro técnico
+- `grande-irmao.html?cenario=ia-exemplo` — só em `localhost` ou `127.0.0.1`. O texto de exemplo fica em `dev/ia-exemplo.js`, que a página não carrega em outro host. A linha «Isso é uma IA. Ela acompanha a missão, não substitui gente de verdade.» usa o tamanho do texto e a cor do texto. O link «Quero continuar esta conversa» alinha à esquerda, com o mesmo recuo do cartão, e tem pelo menos 44px de altura. Fora do desenvolvimento, esse cenário não abre o estado de IA.
+- `?tema=escuro` — o mesmo cartão no escuro
+
+Nas frases fixas, a linha da IA e o link não aparecem. Crise, quando houver sinal, vai para a tela 9 e a IA para. Esta tela não detecta crise.
+

@@ -1,0 +1,47 @@
+/* Resposta do Grande Irmão. Cartão simples, no topo, sem avatar e sem balão.
+   Em 390x844 o botão principal cabe sem rolar. */
+
+.grande-irmao {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.grande-irmao .titulo {
+  color: var(--accent-standout);
+}
+
+.grande-irmao .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent-standout);
+}
+
+.texto-resposta {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.apoio-ia {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.grande-irmao .continuar {
+  align-self: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--target);
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}

@@ -545,7 +545,7 @@ function pintarAcao(modelo, semRede) {
   var link = document.createElement("a");
   link.className = "btn btn-primario";
   link.id = "btn-registrar";
-  link.href = "checkin.html" + NexusAbas.busca(["tema", "cenario"]);
+  link.href = "checkin.html" + NexusAbas.busca(["tema", "cenario", "ia"]);
   link.textContent = "Registrar o dia";
   acoes.appendChild(link);
 }
@@ -582,7 +582,7 @@ function pintarAvisoDeVolta() {
 }
 
 function buscaDaTela() {
-  return NexusAbas.busca(["tema", "cenario", "rede"]);
+  return NexusAbas.busca(["tema", "cenario", "rede", "ia"]);
 }
 
 function pintarCalor(modelo) {

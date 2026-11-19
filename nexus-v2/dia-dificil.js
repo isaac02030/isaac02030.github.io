@@ -2,7 +2,10 @@
    POST /api/checkins manda { mission_id, note, difficult: true }.
    O sucesso só aparece num 2xx com checkin.difficult === true.
    A nota é o rascunho da aba, o mesmo do check-in. Some só depois do registro.
-   A tela da IA continua desligada: a volta é sempre para o Hoje.
+   Tela 4 fica desligada. A flag é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN, em abas.js.
+   O padrão é false. ?ia=1 liga nesta URL só em localhost ou 127.0.0.1.
+   Com a flag ligada, o registro feito abre grande-irmao.html e a tela não fecha sozinha.
+   Sem isso, a volta continua sendo o Hoje.
    Se o registro veio da volta ao ciclo, o aviso é
    «Você voltou. O ciclo continua.» */
 
@@ -25,7 +28,9 @@ var TEXTO_JA = "ja-registrado";
 var TEXTO_SUCESSO = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
 var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
 var CHAVE_ORIGEM = "nexus_v2_origem_recuperacao";
+var CHAVE_PASSO = "nexus_v2_passo_grande_irmao";
 var ESPERA_SUCESSO_MS = 300;
+var voltaPelaSequencia = false;
 var MS_DIA = 24 * 60 * 60 * 1000;
 
 var ERROS_NOTA_CURTA = {
@@ -299,7 +304,32 @@ function sequenciaDoCache(cache) {
 }
 
 function busca() {
+  return NexusAbas.busca(["tema", "cenario", "rede", "ia"]);
+}
+
+function buscaHoje() {
   return NexusAbas.busca(["tema", "cenario", "rede"]);
+}
+
+function sequenciaIndicaVolta(sequencia) {
+  if (!sequencia || typeof sequencia !== "object") return false;
+  if (!Object.prototype.hasOwnProperty.call(sequencia, "missed_days_before_today")) return false;
+  var n = sequencia.missed_days_before_today;
+  return typeof n === "number" && isFinite(n) && n > 0;
+}
+
+function guardarPassoGrandeIrmao(tipo, recuperacao) {
+  try {
+    sessionStorage.setItem(CHAVE_PASSO, JSON.stringify({
+      tipo: tipo === "dificil" ? "dificil" : "checkin",
+      recuperacao: recuperacao === true
+    }));
+  } catch (erro) {}
+}
+
+function destinoDepoisDoRegistro() {
+  if (NexusAbas.abrirTelaIa()) return "grande-irmao.html" + busca();
+  return "hoje.html" + buscaHoje();
 }
 
 function veioDaRecuperacao() {
@@ -316,6 +346,12 @@ function limparOrigemRecuperacao() {
   } catch (erro) {}
 }
 
+function guardarAvisoDeVolta(codigo) {
+  try {
+    sessionStorage.setItem("nexus_v2_aviso_hoje", codigo);
+  } catch (erro) {}
+}
+
 function irParaHoje(aviso) {
   if (saindo) return;
   saindo = true;
@@ -326,7 +362,7 @@ function irParaHoje(aviso) {
       /* Sem sessionStorage, o Hoje abre mesmo assim. */
     }
   }
-  location.replace("hoje.html" + busca());
+  location.replace("hoje.html" + buscaHoje());
 }
 
 function irParaCrise() {
@@ -450,6 +486,7 @@ function abrirOffline() {
 
 async function carregar() {
   var meu = ++ciclo;
+  voltaPelaSequencia = false;
   mostrarVista("carregando");
   if (semRedeAgora()) {
     abrirOffline();
@@ -487,7 +524,9 @@ async function carregar() {
     mostrarFalha("falha", TEXTO_FALHA);
     return;
   }
-  decidirMissao(missao, respostas[1].dados || {}, false);
+  var sequencia = respostas[1].dados || {};
+  voltaPelaSequencia = sequenciaIndicaVolta(sequencia);
+  decidirMissao(missao, sequencia, false);
 }
 
 function notaEscrita() {
@@ -518,9 +557,11 @@ function mostrarSucesso() {
     reduzido = false;
   }
   var daVolta = veioDaRecuperacao();
+  var fraseVolta = daVolta || voltaPelaSequencia;
+  var anunciarVolta = NexusAbas.abrirTelaIa() ? fraseVolta : daVolta;
   function anunciar() {
     var texto = document.createElement("span");
-    texto.textContent = daVolta ? TEXTO_VOLTOU : TEXTO_SUCESSO;
+    texto.textContent = anunciarVolta ? TEXTO_VOLTOU : TEXTO_SUCESSO;
     caixa.replaceChildren(
       icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
       texto
@@ -528,13 +569,13 @@ function mostrarSucesso() {
   }
   function seguir() {
     if (saindo) return;
+    saindo = true;
     if (daVolta) {
       limparOrigemRecuperacao();
-      irParaHoje("voltou");
-      return;
+      guardarAvisoDeVolta("voltou");
     }
-    saindo = true;
-    location.replace("hoje.html" + busca());
+    if (NexusAbas.abrirTelaIa()) guardarPassoGrandeIrmao("dificil", fraseVolta);
+    location.replace(destinoDepoisDoRegistro());
   }
   function sairDepois() {
     window.setTimeout(seguir, ESPERA_SUCESSO_MS);
@@ -636,7 +677,7 @@ function ligarLinks() {
   var extra = busca();
   document.getElementById("voltar").href = "checkin.html" + extra;
   document.getElementById("btn-dia-normal").href = "checkin.html" + extra;
-  document.getElementById("btn-voltar-hoje").href = "hoje.html" + extra;
+  document.getElementById("btn-voltar-hoje").href = "hoje.html" + buscaHoje();
 }
 
 function atualizarBarra() {

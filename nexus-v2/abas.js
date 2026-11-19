@@ -29,7 +29,8 @@ function buscaDasAbas(chaves) {
     return "";
   }
   var manter = new URLSearchParams();
-  var lista = chaves || ["tema", "cenario", "rede"];
+  /* ia só existe no teste da tela 4. Sem o parâmetro, a busca fica igual. */
+  var lista = chaves || ["tema", "cenario", "rede", "ia"];
   lista.forEach(function (chave) {
     var valor = params.get(chave);
     if (valor) manter.set(chave, valor);
@@ -178,10 +179,39 @@ function iniciarAba(ativa) {
   }
 }
 
+/* Tela 4, a resposta do Grande Irmão, fica desligada.
+   false: o check-in e o dia difícil voltam para o Hoje.
+   true: os dois abrem grande-irmao.html.
+   Desenvolvimento é só localhost ou 127.0.0.1.
+   ?ia=1 liga a tela só nesse host. Em qualquer outro, o parâmetro não faz nada. */
+var NEXUS_ABRIR_TELA_IA_APOS_CHECKIN = false;
+
+function emDesenvolvimento() {
+  var host = "";
+  try {
+    host = String(location.hostname || "");
+  } catch (erro) {
+    host = "";
+  }
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
+}
+
+function abrirTelaIaDepoisDoCheckin() {
+  if (NEXUS_ABRIR_TELA_IA_APOS_CHECKIN === true) return true;
+  if (!emDesenvolvimento()) return false;
+  try {
+    return new URLSearchParams(location.search).get("ia") === "1";
+  } catch (erro) {
+    return false;
+  }
+}
+
 var NexusAbas = {
   montar: montarAbas,
   iniciar: iniciarAba,
   busca: buscaDasAbas,
   concluirRolagem: concluirRolagem,
-  focar: focarSemRolar
+  focar: focarSemRolar,
+  emDev: emDesenvolvimento,
+  abrirTelaIa: abrirTelaIaDepoisDoCheckin
 };
