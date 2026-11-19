@@ -1,6 +1,6 @@
 # Nexus v2
 
-App novo, em HTML, CSS e JavaScript puro, sem etapa de build. Esta pasta tem a base e a tela de entrar e criar conta. A pasta `nexus/` é o app antigo e não entra nesta versão.
+App novo, em HTML, CSS e JavaScript puro, sem etapa de build. Esta pasta tem a base, a tela de entrar, o começo da missão e o Hoje. A pasta `nexus/` é o app antigo e não entra nesta versão.
 
 ## Ver neste computador
 
@@ -45,4 +45,108 @@ O servidor antigo está desligado. Quando houver um servidor novo, troque só es
 
 ## O que esta tela ainda não faz
 
-O link "Esqueci a senha" fica escondido porque essa rota ainda não existe. Depois de entrar ou criar conta, a tela confirma e guarda a sessão neste aparelho. As telas seguintes (o começo da missão e o Hoje) ainda não foram feitas.
+O link "Esqueci a senha" fica escondido porque essa rota ainda não existe. Depois de entrar ou criar conta, a tela olha as missões. Sem missão ativa, abre o começo (`onboarding.html`). Com missão, abre o Hoje (`hoje.html`).
+
+## Começo da missão
+
+São 3 passos na mesma página. O que a pessoa escreve fica neste aparelho (`sessionStorage`) enquanto ela volta e avança.
+
+1. Escolhe Estudo ou Academia e escreve o objetivo. O exemplo fica numa ajuda embaixo do rótulo, não dentro do campo. Nada é enviado.
+2. Escreve por que importa e o mínimo do dia. O cartão de cima tem três linhas (o objetivo, o mínimo e o porquê) e muda enquanto ela digita. Nada é enviado.
+3. O horário já vem 20:00 e ela pode mudar. Pode ativar o aviso ou pular. No iPhone, se o app não estiver na Tela de Início, aparece um recado de como instalar. "Começar a missão" cria a missão.
+
+No mock, para ver os estados do começo:
+
+- Objetivo exatamente `falha` → o servidor de teste responde erro.
+- Objetivo exatamente `lento` → o botão fica em "Criando a missão…" por 8 segundos e depois cria.
+- E-mail `com-missao@exemplo.com` → depois de entrar, cai direto no Hoje.
+- Sem internet no passo 1 ou 2: "Sem internet. Assim que a conexão voltar, tente de novo."
+- Sem internet no passo 3: "Sem internet. A missão ainda não foi criada."
+
+O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda não existe no servidor de verdade. O mock responde. Se a rota falhar, a missão continua e o horário fica gravado neste aparelho.
+
+## Hoje
+
+Mostra o dia da missão: o título, o mínimo, se o registro de hoje já foi feito e, no Duo, só a frase de que o par já registrou. Não há placar. A tela não chama `GET /api/checkins/:id/score`.
+
+Embaixo ficam três abas, cada uma na sua página: `hoje.html`, `missao.html` e `ajustes.html`. Só uma fica aberta. A troca entra no histórico do navegador, então o voltar do celular desfaz o passo. Cada página guarda a própria rolagem nesta sessão e, na primeira vez, abre no topo.
+
+No mock, abra o Hoje já com a sessão de teste e um estado na URL. Exemplo, com o token gravado neste aparelho:
+
+http://localhost:8080/hoje.html?cenario=nao-registrado&tema=claro
+
+Estados do `?cenario=`:
+
+- `nao-registrado` — ainda falta registrar o dia
+- `registrado` — o dia está feito e aparece a nota
+- `duo` — o par (Par Teste) já registrou hoje
+- `duo-sem` — é Duo, mas o par ainda não registrou (a tela não fala do par)
+- `esperando` — o par ainda não entrou; o Solo continua na tela
+- `vazio` — sem missão
+- `erro` — «Não foi possível abrir o dia. Tente de novo.»
+- `falta-1` e `recuperacao` — ontem sem registro, na própria tela Hoje
+- `falta-3` — três dias sem registro
+- `recuperacao-zero` — os dias difíceis acabaram; o link some
+- `recuperacao-sem-numero` — sem `missed_days` e sem dia difícil
+- `recuperacao-sem-fato` — sem `missed_days` e sem `missed_yesterday`
+- `recuperacao-seguidos` — o link de dia difícil some (2 seguidos)
+- `recuperacao-sem-minimo` — sem o mínimo gravado
+- `recuperacao-minusculo` — o mínimo em minúscula, em negrito na linha de baixo
+- `falta-antiga` — Hoje normal, com um dia antigo sem registro
+- `recuperacao-sem-antes` — sem `missed_days_before_today`
+- `sem-campo` — igual ao dia sem registro, mas a resposta não traz dia difícil
+
+Se `recovery_needed` é true, o Hoje troca o miolo e mantém a barra de abas. Em cima da grade entra «Dia N de 30», como no Hoje. A marca de falta tem um traço curto. O título é «Hoje ainda dá para voltar». A contagem usa `missed_days_before_today`. Sem esse campo, usa `missed_days - 1`. Um dia vira «Ontem não houve registro.» Dois ou mais viram «Ficaram N dias sem registro.» Zero e negativo não aparecem. «O mínimo de hoje:» fica com o mínimo em negrito na linha de baixo. «Registrar o dia» abre o check-in normal. «Hoje é dia difícil» só aparece com `difficult_days_remaining` maior que zero e sem o bloqueio de 2 seguidos. «Ver a missão» abre `missao.html`.
+
+Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz «Você voltou. O ciclo continua.» O ciclo em dia não mostra essa tela. Erro e falta de internet seguem o Hoje.
+
+O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A senha pode ser qualquer uma, menos `errada`.
+
+`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
+
+A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. O losango só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha e o losango ficam de fora. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.
+
+A grade dos dias tem um único nome para o leitor de tela, no formato «Dia 4 de 30: 1 cumprido, 2 difíceis, 0 faltas». Os números saem das marcas. Cada dia entra numa conta só. As marcas em si ficam escondidas do leitor e não recebem foco.
+
+## Registro de hoje
+
+O botão «Registrar o dia» abre `checkin.html`. É uma tela por cima do Hoje: tem Voltar e não mostra a barra de abas. O voltar do celular desfaz o passo.
+
+O pedido é `POST /api/checkins`, com `mission_id` e `note`. Não mandamos `difficult`. A nota fica num rascunho desta aba (`sessionStorage`), o mesmo da tela de dia difícil, e some depois de um registro feito. Não vai para `localStorage` e não fica numa fila para enviar depois.
+
+No mock, com a sessão já gravada:
+
+- `checkin.html?cenario=estudo` — estudo, nota vazia
+- `checkin.html?cenario=academia` — academia
+- `checkin.html?cenario=lento` — o botão fica em «Registrando…» por 8 segundos
+- `checkin.html?cenario=erro-registro` — «Não foi possível registrar agora. Tente de novo.»
+- `checkin.html?cenario=nota-servidor` — o servidor de teste recusa a nota; a tela mostra a regra em português do Brasil
+- `checkin.html?cenario=repetido` — o servidor diz que o dia já estava feito
+- `checkin.html?cenario=terminada` — «A missão já terminou.»
+- `checkin.html?cenario=inativa` — «Esta missão não está ativa.»
+- `checkin.html?cenario=registrado` — volta para o Hoje com «Este dia já estava registrado.»
+- `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
+- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje, se não há nota na tela: «Sem internet. Tente de novo quando a conexão voltar.»
+
+«Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
+
+## Dia difícil
+
+Tela por cima do check-in: tem Voltar e não mostra a barra de abas. O pedido é `POST /api/checkins` com `mission_id`, `note` e `difficult: true`. O sucesso só aparece se a resposta for 2xx e `checkin.difficult` for `true`.
+
+A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O rótulo é «O mínimo de hoje continua valendo:» e o mínimo fica em negrito, na linha de baixo, como está gravado. No Hoje, se o check-in de hoje é difícil, o estado diz «Dia difícil registrado. O mínimo valeu.» com o mesmo losango da grade.
+
+Se `difficult_days_remaining` é 0, ou se `difficult_days` inclui os dois dias anteriores, a tela explica e oferece «Registrar o dia normal». O mesmo vale para os 400 «Você já usou os 4 dias difíceis desta missão.» e «Não dá para ter mais de 2 dias difíceis seguidos.».
+
+No mock:
+
+- `dia-dificil.html?cenario=estudo` — formulário, com «Ainda restam 2.»
+- `dia-dificil.html?cenario=dois-seguidos` — bloqueio de 2 seguidos
+- `dia-dificil.html?cenario=quatro-usados` — os 4 já foram usados
+- `dia-dificil.html?cenario=sem-restante` — sem a frase «Ainda restam»
+- `dia-dificil.html?cenario=ignora-difficult` — o servidor não confirma o dia difícil
+- `dia-dificil.html?cenario=so-is-difficult` — a resposta traz `is_difficult` e não `difficult`
+- `dia-dificil.html?cenario=post-seguidos` e `post-quatro` — o bloqueio chega no POST
+- `?rede=off` — a nota continua no campo
+
+A tela de ajuda (`crise.html`) continua um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.

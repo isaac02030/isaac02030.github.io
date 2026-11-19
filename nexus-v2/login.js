@@ -130,6 +130,28 @@ function guardarSessao(dados) {
   }
 }
 
+function temMissaoAtiva(dados) {
+  var lista = Array.isArray(dados) ? dados : [];
+  for (var i = 0; i < lista.length; i++) {
+    var status = lista[i] && typeof lista[i].status === "string" ? lista[i].status : "";
+    if (status === "active" || status === "waiting") return true;
+  }
+  return false;
+}
+
+/* Sem missão ativa, o começo. Com missão, o Hoje. */
+async function seguirDepoisDaSessao(alerta) {
+  var lista = await NexusApi.listarMissoes();
+  if (!lista.ok) {
+    if (lista.semRede) mostrarAviso(alerta, "rede", TEXTO_SEM_REDE);
+    else mostrarAviso(alerta, "falha", "Não foi possível ver sua missão agora. Tente de novo em instantes.");
+    return false;
+  }
+  var destino = temMissaoAtiva(lista.dados) ? "hoje.html" : "onboarding.html";
+  location.href = destino + location.search;
+  return true;
+}
+
 function mensagemDaApi(modo, resultado) {
   if (resultado.semRede) {
     return { onde: "topo", tipo: "rede", texto: TEXTO_SEM_REDE };
@@ -218,6 +240,7 @@ async function enviarEntrar(form) {
 
   form.dataset.ocupado = "sim";
   definirCarregando(botao, true);
+  var indo = false;
   try {
     var resultado = await NexusApi.entrar(email.value.trim(), senha.value);
     if (!resultado.ok) {
@@ -230,14 +253,17 @@ async function enviarEntrar(form) {
       }
       return;
     }
-    guardarSessao(resultado.dados);
+    if (!guardarSessao(resultado.dados)) {
+      mostrarAviso(alerta, "falha", "Não foi possível guardar a sessão neste aparelho.");
+      return;
+    }
     limparSenhas(form);
-    /* As telas de onboarding e Hoje ainda não existem.
-       Quando existirem: sem missão ativa, ir ao onboarding; com missão, ir a Hoje. */
-    mostrarAviso(alerta, "ok", "Você entrou. As próximas telas ainda estão sendo feitas.");
+    indo = await seguirDepoisDaSessao(alerta);
   } finally {
-    form.dataset.ocupado = "";
-    definirCarregando(botao, false);
+    if (!indo) {
+      form.dataset.ocupado = "";
+      definirCarregando(botao, false);
+    }
   }
 }
 
@@ -283,6 +309,7 @@ async function enviarCadastro(form) {
 
   form.dataset.ocupado = "sim";
   definirCarregando(botao, true);
+  var indo = false;
   try {
     var resultado = await NexusApi.cadastrar({
       username: nome.value.trim(),
@@ -299,12 +326,17 @@ async function enviarCadastro(form) {
       }
       return;
     }
-    guardarSessao(resultado.dados);
+    if (!guardarSessao(resultado.dados)) {
+      mostrarAviso(alerta, "falha", "Não foi possível guardar a sessão neste aparelho.");
+      return;
+    }
     limparSenhas(form);
-    mostrarAviso(alerta, "ok", "Conta criada. As próximas telas ainda estão sendo feitas.");
+    indo = await seguirDepoisDaSessao(alerta);
   } finally {
-    form.dataset.ocupado = "";
-    definirCarregando(botao, false);
+    if (!indo) {
+      form.dataset.ocupado = "";
+      definirCarregando(botao, false);
+    }
   }
 }
 

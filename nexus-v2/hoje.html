@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hoje — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="hoje.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o dia</a>
+  <main class="pagina pagina-com-abas" id="conteudo">
+    <div class="cartao hoje">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir o dia.</p>
+      </noscript>
+
+      <h1 class="titulo" id="titulo-hoje" tabindex="-1">Hoje</h1>
+
+      <section class="vista" id="vista-carregando" aria-live="polite">
+        <p class="carregando">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Abrindo o dia…</span>
+        </p>
+      </section>
+
+      <section class="vista" id="vista-erro" hidden>
+        <div id="alerta-erro" class="alerta" role="alert"></div>
+        <button type="button" class="btn btn-primario" id="btn-tentar">Tentar de novo</button>
+      </section>
+
+      <section class="vista" id="vista-vazia" hidden>
+        <p class="apoio">Ainda não há missões. Que tal começar a primeira?</p>
+        <a class="btn btn-primario" id="btn-comecar" href="onboarding.html">Começar uma missão</a>
+      </section>
+
+      <section class="vista" id="vista-dia" hidden>
+        <div id="aviso-volta" class="alerta" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        <p class="dia-numero" id="dia-numero"></p>
+        <div class="marcas" id="marcas" role="img"></div>
+        <h2 class="titulo-missao" id="titulo-missao"></h2>
+        <p class="minimo" id="minimo"></p>
+        <p class="porque" id="porque" hidden></p>
+        <p class="status" id="status"></p>
+        <p class="linha-par" id="linha-par" hidden></p>
+        <p class="linha-espera" id="linha-espera" hidden>Você já pode cumprir o dia em Solo. O par entra quando aceitar o convite.</p>
+        <p class="linha-dificeis" id="linha-dificeis" hidden></p>
+        <div id="aviso-rede" class="alerta alerta-rede" role="status" hidden></div>
+        <div class="hoje-acoes" id="acoes"></div>
+      </section>
+
+      <section class="vista" id="vista-recuperacao" aria-labelledby="titulo-recuperacao" hidden>
+        <p class="dia-numero" id="dia-numero-recuperacao"></p>
+        <div class="marcas" id="marcas-recuperacao" role="img"></div>
+        <h1 class="titulo" id="titulo-recuperacao" tabindex="-1">Hoje ainda dá para voltar</h1>
+        <p class="fato-falta" id="fato-falta" hidden></p>
+        <p class="calor" id="calor"></p>
+        <div id="aviso-rede-recuperacao" class="alerta alerta-rede" role="status" hidden></div>
+        <div class="recuperacao-acoes" id="acoes-recuperacao"></div>
+      </section>
+    </div>
+  </main>
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="hoje.js"></script>
+</body>
+</html>

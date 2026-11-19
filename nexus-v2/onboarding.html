@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>O que você quer cumprir? — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    /* Mesma regra da tela de entrar: ?tema=claro, ?tema=escuro ou ?tema=sistema. */
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="onboarding.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o passo</a>
+  <main class="pagina" id="conteudo">
+    <div class="cartao">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para começar a missão.</p>
+      </noscript>
+
+      <section id="passo-1" aria-labelledby="titulo-1">
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <div class="topo-passo">
+            <p class="passo" id="passo-indicador-1"><span class="sr-only">Passo </span>1 de 3</p>
+          </div>
+          <h1 class="titulo" id="titulo-1" tabindex="-1" aria-describedby="passo-indicador-1">O que você quer cumprir?</h1>
+          <p class="apoio" id="apoio-1">Escolha o caminho destes 30 dias.</p>
+        </header>
+
+        <form class="formulario" id="form-1" method="post" action="#passo-1" novalidate>
+          <div id="alerta-1" class="alerta" role="alert" hidden></div>
+
+          <fieldset class="escolha" id="grupo-categoria" aria-labelledby="apoio-1" aria-describedby="erro-categoria">
+            <label class="carta">
+              <input type="radio" name="categoria" value="aprendizagem">
+              <span class="carta-corpo">
+                <span class="carta-nome">Estudo</span>
+                <span class="carta-texto">Inglês ou outra matéria. Um pouco, todos os dias.</span>
+              </span>
+              <span class="carta-marca" aria-hidden="true"></span>
+            </label>
+            <label class="carta">
+              <input type="radio" name="categoria" value="fitness">
+              <span class="carta-corpo">
+                <span class="carta-nome">Academia</span>
+                <span class="carta-texto">O treino que você combinou com você mesmo.</span>
+              </span>
+              <span class="carta-marca" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+          <p id="erro-categoria" class="erro-campo" hidden></p>
+
+          <div class="campo">
+            <label for="objetivo">O objetivo, em uma frase</label>
+            <p id="objetivo-dica" class="dica">Ex.: Praticar inglês todos os dias</p>
+            <input id="objetivo" name="title" type="text" maxlength="255" autocomplete="off" aria-required="true" aria-describedby="objetivo-dica erro-objetivo">
+            <p id="erro-objetivo" class="erro-campo" hidden></p>
+          </div>
+
+          <button type="submit" class="btn btn-primario">Continuar</button>
+        </form>
+      </section>
+
+      <section id="passo-2" aria-labelledby="titulo-2" hidden>
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <div class="topo-passo">
+            <button type="button" class="btn btn-texto btn-voltar" data-voltar="1">Voltar</button>
+            <p class="passo" id="passo-indicador-2"><span class="sr-only">Passo </span>2 de 3</p>
+          </div>
+          <h1 class="titulo" id="titulo-2" tabindex="-1" aria-describedby="passo-indicador-2">O seu contrato</h1>
+          <p class="apoio">Isso fica escrito. O check-in e o Grande Irmão usam estas palavras.</p>
+        </header>
+
+        <form class="formulario" id="form-2" method="post" action="#passo-2" novalidate>
+          <div id="alerta-2" class="alerta" role="alert" hidden></div>
+
+          <div class="previa" aria-live="polite">
+            <p class="previa-linha">
+              <span class="previa-rotulo">Em 30 dias, vou</span>
+              <span id="previa-objetivo" class="previa-texto vazio">…</span>
+            </p>
+            <p class="previa-linha">
+              <span class="previa-rotulo">O mínimo de cada dia</span>
+              <span id="previa-minimo" class="previa-texto vazio">…</span>
+            </p>
+            <p class="previa-linha">
+              <span class="previa-rotulo">Porque</span>
+              <span id="previa-porque" class="previa-texto vazio">…</span>
+            </p>
+          </div>
+
+          <div class="campo">
+            <label for="porque">Por que isso importa para você?</label>
+            <input id="porque" name="why_it_matters" type="text" maxlength="2000" autocomplete="off" aria-required="true" aria-describedby="erro-porque">
+            <p id="erro-porque" class="erro-campo" hidden></p>
+          </div>
+
+          <div class="campo">
+            <label for="minimo">Qual é o mínimo de cada dia?</label>
+            <input id="minimo" name="daily_minimum" type="text" maxlength="120" autocomplete="off" aria-required="true" aria-describedby="minimo-dica erro-minimo">
+            <p id="minimo-dica" class="dica">Precisa ser pequeno o bastante para um dia difícil, cerca de 5 minutos ou o equivalente.</p>
+            <p id="erro-minimo" class="erro-campo" hidden></p>
+          </div>
+
+          <button type="submit" class="btn btn-primario">Continuar</button>
+        </form>
+      </section>
+
+      <section id="passo-3" aria-labelledby="titulo-3" hidden>
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <div class="topo-passo">
+            <button type="button" class="btn btn-texto btn-voltar" data-voltar="2">Voltar</button>
+            <p class="passo" id="passo-indicador-3"><span class="sr-only">Passo </span>3 de 3</p>
+          </div>
+          <h1 class="titulo" id="titulo-3" tabindex="-1" aria-describedby="passo-indicador-3">Quando te lembramos?</h1>
+          <p class="apoio">Um toque no horário que você escolher.</p>
+        </header>
+
+        <form class="formulario" id="form-3" method="post" action="#passo-3" novalidate>
+          <div id="alerta-3" class="alerta" role="alert" hidden></div>
+
+          <div class="campo">
+            <label for="horario">Horário do lembrete</label>
+            <input id="horario" name="reminder_time" type="time" lang="pt-BR" step="60" value="20:00" autocomplete="off" aria-describedby="erro-horario">
+            <p id="erro-horario" class="erro-campo" role="alert" hidden></p>
+          </div>
+
+          <div id="nota-iphone" class="nota" hidden>
+            <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01"/>
+            </svg>
+            <p>No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).</p>
+          </div>
+
+          <div id="aviso-ok" class="alerta alerta-ok" role="status" hidden>
+            <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"/>
+            </svg>
+            <p>Aviso ativado. Você já pode começar a missão.</p>
+          </div>
+          <p id="aviso-recusado" class="dica" hidden></p>
+          <button type="button" class="btn btn-secundario btn-bloco" id="btn-aviso">Ativar o aviso</button>
+
+          <button type="submit" class="btn btn-primario" id="btn-comecar" data-texto="Começar a missão" data-carregando="Criando a missão…" aria-busy="false">
+            <span class="btn-rotulo">Começar a missão</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script src="api.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>

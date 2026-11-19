@@ -1,0 +1,48 @@
+/* Barra de baixo, a partir da tela Hoje.
+   A aba ativa muda de cor e de peso. Cor sozinha não basta. */
+
+.pagina.pagina-com-abas {
+  padding-bottom: calc(4.75rem + var(--safe-bottom));
+}
+
+.abas {
+  position: fixed;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  padding-bottom: var(--safe-bottom);
+}
+
+.aba {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+}
+
+.aba[aria-current="page"] {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.icone-aba {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}

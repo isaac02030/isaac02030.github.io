@@ -80,6 +80,12 @@ button {
   outline-offset: 2px;
 }
 
+/* O título recebe foco para o leitor de tela, sem anel.
+   Botões, links e campos seguem com :focus-visible. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 .marca {
   margin: 0;
   font: var(--text-display);
@@ -225,6 +231,52 @@ input:-webkit-autofill {
 .btn:disabled {
   opacity: 1;
   cursor: wait;
+}
+
+.pagina {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+}
+
+.cartao {
+  width: min(100%, 28rem);
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-shrink: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow-wrap: break-word;
+}
+
+/* O cartão do Hoje e das telas que abrem a partir dele fica no topo, sem centralizar na vertical. */
+.cartao.cartao-topo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .alerta {
