@@ -47,9 +47,10 @@
   flex: 0 0 auto;
 }
 
-/* Ajuda em Ajustes. Fica no HTML, sempre visível, sem rede e sem IA. */
+/* Ajuda em Ajustes, no topo do cartão. Fica no HTML, sem rede e sem IA. */
 .link-ajuda {
   justify-content: flex-start;
+  align-self: flex-start;
   min-height: var(--target);
   margin: 0;
   text-align: left;

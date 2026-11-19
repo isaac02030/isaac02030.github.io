@@ -1,12 +1,17 @@
-/* Tela 9. Texto fixo, sem rede e sem IA.
-   Cartão no topo, sem barra de abas. O telefone é o alvo de toque. */
+/* Tela 9. Texto fixo, sem rede, sem IA e sem animação.
+   Cada contato é uma linha: nome à esquerda, botão à direita. */
 
 .crise {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.crise .btn,
+.crise .btn-ligar {
+  transition: none;
 }
 
 .crise .titulo::after {
@@ -19,18 +24,30 @@
   background: var(--accent);
 }
 
-.chamada,
 .linha-missao {
   margin: 0;
   color: var(--text);
   font: var(--text-body);
 }
 
-.pais-bloco {
+.aviso-saude {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-small);
+}
+
+.paises {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-3);
+}
+
+.pais-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
 }
 
 .pais {
@@ -44,19 +61,26 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
 }
 
 .contato {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-1);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   margin: 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.contato-texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .contato-nome,
@@ -65,8 +89,9 @@
 }
 
 .contato-nome {
-  font: var(--text-label);
   color: var(--text);
+  font: var(--text-label);
+  overflow-wrap: anywhere;
 }
 
 .contato-nota {
@@ -74,22 +99,43 @@
   font: var(--text-small);
 }
 
-.contato-ligar,
-.contato-externo {
+.contato-acoes {
   display: flex;
-  align-items: center;
-  align-self: stretch;
-  box-sizing: border-box;
-  min-height: var(--target);
-  padding: var(--space-2) 0;
-  color: var(--accent-standout);
-  font: var(--text-label);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  overflow-wrap: anywhere;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  flex: 0 0 auto;
 }
 
-.contato-ligar:hover,
-.contato-externo:hover {
-  color: color-mix(in srgb, var(--accent-standout) 82%, var(--text));
+.btn-ligar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.icone-ligar {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
