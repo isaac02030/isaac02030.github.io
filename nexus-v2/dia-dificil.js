@@ -678,6 +678,8 @@ function ligarLinks() {
   document.getElementById("voltar").href = "checkin.html" + extra;
   document.getElementById("btn-dia-normal").href = "checkin.html" + extra;
   document.getElementById("btn-voltar-hoje").href = "hoje.html" + buscaHoje();
+  var ajuda = document.getElementById("link-ajuda");
+  if (ajuda) ajuda.href = "crise.html" + extra;
 }
 
 function atualizarBarra() {
@@ -705,6 +707,8 @@ function iniciar() {
   });
   document.getElementById("voltar").addEventListener("click", guardarNotaDoCampo);
   document.getElementById("btn-dia-normal").addEventListener("click", guardarNotaDoCampo);
+  var linkAjuda = document.getElementById("link-ajuda");
+  if (linkAjuda) linkAjuda.addEventListener("click", guardarNotaDoCampo);
   window.addEventListener("pagehide", guardarNotaDoCampo);
   window.addEventListener("pageshow", function (evento) {
     if (!evento.persisted) return;

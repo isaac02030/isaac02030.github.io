@@ -1,0 +1,166 @@
+/* Tela 9. Texto fixo, sem rede, sem IA e sem animação.
+   A maioria dos contatos é uma linha: nome à esquerda, botão à direita.
+   SNS 24 e SOS Voz Amiga empilham: o nome ocupa a linha inteira
+   e os botões ficam embaixo, para não parecerem do contato anterior. */
+
+.crise {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.crise .btn,
+.crise .btn-ligar {
+  transition: none;
+}
+
+.crise .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.linha-missao {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.aviso-saude {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-small);
+}
+
+.paises {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.pais-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.pais {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.contatos {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.contato {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.contato:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.contato-empilhado {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.contato-empilhado .contato-texto,
+.contato-empilhado .contato-acoes {
+  width: 100%;
+}
+
+.contato-empilhado .contato-acoes {
+  align-items: flex-start;
+}
+
+.contato-texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contato-nome,
+.contato-nota {
+  margin: 0;
+}
+
+.contato-nome {
+  color: var(--text);
+  font: var(--text-label);
+  overflow-wrap: anywhere;
+}
+
+.contato-nota {
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.contato-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+}
+
+.btn-ligar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.icone-ligar {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}

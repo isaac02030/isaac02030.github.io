@@ -151,7 +151,7 @@ No mock:
 - `dia-dificil.html?cenario=post-seguidos` e `post-quatro` — o bloqueio chega no POST
 - `?rede=off` — a nota continua no campo
 
-A tela de ajuda (`crise.html`) continua um marcador: o servidor ainda não manda sinal de crise no check-in, e esta tela não tenta adivinhar pela nota.
+A tela de ajuda (`crise.html`) tem o título «Você não está sozinho nisso» e a frase «Esta tela não guarda nada sobre você.» O texto é fixo: não usa IA, não lê a nota e não chama a rede. O servidor ainda não manda sinal de crise no check-in. Sem JavaScript, Portugal vem primeiro. Se o idioma do aparelho começa com `pt-BR`, o Brasil sobe. Não há geolocalização. A tela abre pelo endereço direto, pelo link no topo de Ajustes ou pelo link no rodapé do dia difícil. «Voltar à missão» abre `missao.html`. Não entra na barra de abas.
 
 ## Resposta do Grande Irmão
 

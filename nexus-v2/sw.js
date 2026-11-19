@@ -27,6 +27,7 @@ var ARQUIVOS = [
   "./grande-irmao.css",
   "./grande-irmao.js",
   "./crise.html",
+  "./crise.css",
   "./recuperacao.html",
   "./tokens.css",
   "./base.css",
