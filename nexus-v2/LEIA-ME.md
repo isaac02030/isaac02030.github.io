@@ -169,7 +169,26 @@ No mock, só a partir de uma página local:
 
 «Conta» abre «Sair da conta?». A frase diz que a sessão e os rascunhos deste aparelho são apagados, e que a missão continua salva na conta. «Cancelar» é o botão preenchido e recebe o foco. «Sair» é o contorno. Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). A missão, os dias e a sequência ficam no servidor. O tema fica. Em seguida abre a tela de entrar.
 
-A tela lê sem internet: os arquivos entram no cache `nexus-v2-v17`.
+A tela lê sem internet: os arquivos entram no cache `nexus-v2-v18`.
+
+## Dia 30
+
+Quando o dia passou de `duration_days`, ou quando o status da missão é `completed`, o Hoje abre `dia-30.html`. Antes disso, essa tela volta para o Hoje. O número de dias sai dos check-ins `completed` desta pessoa, do mesmo jeito que o Hoje conta. Não há placar e não há Porta Aberta.
+
+O título é «Os 30 dias chegaram ao fim». Se o número bate com a duração, a frase é «Palavra cumprida neste ciclo.» Se faltou dia, «Houve falhas, e você chegou ao fim mesmo assim.»
+
+«Continuar mais 36 dias» chama `POST /api/missions/:id/extend` com `{ days: 36 }`. Essa rota ainda não existe no servidor de verdade. O mock só responde em `localhost`, `127.0.0.1` ou `[::1]`. Fora disso, ou se a resposta falhar, a tela diz «Não foi possível abrir os próximos 36 dias. Tente de novo.» e não segue. Sem internet: «Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.»
+
+«Encerrar esta missão» não chama o servidor. Não há rota de fim de ciclo no `api.js`. O botão só volta para o Hoje. A missão continua como estava.
+
+No mock, com a sessão já gravada:
+
+- `dia-30.html?cenario=fim-30` — 30 de 30, «Palavra cumprida neste ciclo.»
+- `dia-30.html?cenario=fim-27` — 27 de 30, «Houve falhas, e você chegou ao fim mesmo assim.»
+- `dia-30.html?cenario=fim-status` — status `completed` ainda no dia 12
+- `dia-30.html?cenario=extend-erro` — o continuar responde erro
+- `dia-30.html?cenario=nao-registrado` — ainda não é o fim; volta para o Hoje
+- `?rede=off` — não envia o continuar
 
 ## Resposta do Grande Irmão
 
