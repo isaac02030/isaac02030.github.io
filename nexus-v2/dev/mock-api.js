@@ -35,7 +35,12 @@
    - GET /api/checkins/:missionId/streak
      → streak, total, today_done, brio, consistency, recovered,
        missed_yesterday, missed_days, missed_days_before_today, recovery_needed
-   - GET /api/checkins/:id/score não existe aqui de propósito.
+   - GET /api/checkins/:id/score espelha o servidor: { mission_id, mode, scores,
+     leader, my_streak }. scores usa o username como chave. Sem par, a chave
+     "null" existe, como na rota de verdade. A tela Missão só lê isso no Rival.
+   - POST /api/missions/:id/abandon segue a rota de verdade.
+     Solo ativo encerra. Com par, a outra pessoa continua em solo.
+     Missão que não está ativa responde 404.
 
    A sequência manda difficult_days (números do dia), difficult_days_used e
    difficult_days_remaining. Cada check-in pode trazer difficult (true ou false).
@@ -64,6 +69,12 @@
    - recuperacao-contagem-zero                     antes de hoje é 0; a frase não mostra 0
    - recuperacao-contagem-some                     antes de hoje é 0 e ontem houve registro; a frase some
    - sem-campo       (sem-campo@exemplo.com)       igual ao não registrado, sem dia difícil
+   - solo            (solo@exemplo.com)            Solo, sem par
+   - duo-esperando   (duo-esperando@exemplo.com)   Duo à espera, o dia conta
+   - duo-com-par     (duo-com-par@exemplo.com)     Duo com Ana, nome de exemplo
+   - rival-placar    (rival-placar@exemplo.com)    Rival com Ana, dias de exemplo
+   - convite-indisponivel                          Solo, o convite por link avisa
+   - link-fake       (link-fake@exemplo.com)       a página só mostra o link em localhost
    - dois-seguidos   (dois-seguidos@exemplo.com)   os 2 dias anteriores foram difíceis
    - quatro-usados   (quatro-usados@exemplo.com)   difficult_days_remaining 0
    - sem-restante    (sem-restante@exemplo.com)    há dia difícil, sem o campo remaining
@@ -131,6 +142,12 @@ var CENARIO_POR_EMAIL = {
   "recuperacao-zero@exemplo.com": "recuperacao-zero",
   "falta-antiga@exemplo.com": "falta-antiga",
   "sem-campo@exemplo.com": "sem-campo",
+  "solo@exemplo.com": "solo",
+  "duo-esperando@exemplo.com": "duo-esperando",
+  "duo-com-par@exemplo.com": "duo-com-par",
+  "rival-placar@exemplo.com": "rival-placar",
+  "convite-indisponivel@exemplo.com": "convite-indisponivel",
+  "link-fake@exemplo.com": "link-fake",
   "academia@exemplo.com": "academia",
   "estudo@exemplo.com": "estudo",
   "terminada@exemplo.com": "terminada",
@@ -244,6 +261,29 @@ var CENARIOS = {
   "post-seguidos": { dia: 4, feitos: [1, 3], dificeis: [1], restantes: 3, erroPost: "seguidos" },
   "post-quatro": { dia: 5, feitos: [1, 3], dificeis: [1, 3], restantes: 2, erroPost: "quatro" },
   "quatro-e-seguidos": { dia: 6, feitos: [1, 2, 3, 4, 5], dificeis: [2, 3, 4, 5], restantes: 0 },
+  /* Ana é um nome de exemplo. Não é uma pessoa real. Os dias também são fictícios. */
+  solo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
+  "duo-esperando": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, aguardando: "duo" },
+  "duo-com-par": {
+    dia: 4,
+    feitos: [1, 3],
+    dificeis: [1, 2],
+    restantes: 2,
+    modo: "parceiro",
+    parNome: "Ana",
+    parFeitos: [1, 2]
+  },
+  "rival-placar": {
+    dia: 6,
+    feitos: [1, 3, 5],
+    dificeis: [1],
+    restantes: 3,
+    modo: "rival",
+    parNome: "Ana",
+    parFeitos: [1, 2, 3, 4, 6]
+  },
+  "convite-indisponivel": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
+  "link-fake": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, aguardando: "duo" },
   vazio: { vazio: true },
   erro: { erro: true }
 };
@@ -529,7 +569,9 @@ function montarCenario(nome, usuario) {
   if (extra && extra.note) notaDoDia = extra.note;
   var inicio = new Date(Date.now() - (dia - 1) * MS_DIA).toISOString();
   var partner = null;
-  if (spec.modo === "parceiro") partner = { id: usuario.id + 1000, name: "Par Teste" };
+  if (spec.modo === "parceiro" || spec.modo === "rival") {
+    partner = { id: usuario.id + 1000, name: spec.parNome || "Par Teste" };
+  }
   var categoria = spec.categoria || "aprendizagem";
 
   var mission = novaMissao(usuario, {
@@ -540,7 +582,9 @@ function montarCenario(nome, usuario) {
     why_it_matters: spec.porque === "" ? "" : (spec.porque || "Quero ler sem traduzir"),
     proof_mode: spec.prova || (categoria === "fitness" ? "workout_proof" : "study_note"),
     mode: spec.modo || "solo",
-    match_preference: spec.esperando ? "parceiro" : (spec.modo === "parceiro" ? "parceiro" : null),
+    match_preference: spec.esperando || spec.aguardando === "duo"
+      ? "parceiro"
+      : (spec.modo === "parceiro" ? "parceiro" : (spec.modo === "rival" ? "rival" : null)),
     status: spec.status || (spec.esperando ? "waiting" : "active"),
     started_at: inicio,
     partner_id: partner ? partner.id : null,
@@ -549,6 +593,7 @@ function montarCenario(nome, usuario) {
     partner_score: (spec.parFeitos || []).length,
     pair_started_at: partner ? inicio : null
   });
+  if (spec.aguardando) mission.pending_invite = spec.aguardando;
 
   var progress = {};
   progress[String(usuario.id)] = {
@@ -865,6 +910,98 @@ async function registrarCheckin(email, corpo, cenario) {
   };
 }
 
+function contarFeitos(checkins) {
+  var n = 0;
+  (checkins || []).forEach(function (item) {
+    if (item && item.completed === true) n += 1;
+  });
+  return n;
+}
+
+function grupoDoProgresso(progresso, id) {
+  if (!progresso || !progresso.progress || id == null) return null;
+  return progresso.progress[String(id)] || null;
+}
+
+function diasDoGrupo(progresso, id) {
+  var grupo = grupoDoProgresso(progresso, id);
+  if (!grupo) return 0;
+  return contarFeitos(grupo.checkins);
+}
+
+function sequenciaAtual(checkins, dia) {
+  var feitos = {};
+  (checkins || []).forEach(function (item) {
+    if (item && item.completed === true) feitos[item.day] = true;
+  });
+  var streak = 0;
+  var d;
+  for (d = dia; d >= 1; d--) {
+    if (feitos[d]) streak += 1;
+    else break;
+  }
+  return streak;
+}
+
+/* A mesma forma da rota de verdade. A chave null vira a string "null". */
+function corpoDoPlacar(missao, progresso, email) {
+  var usuario = usuarios[email];
+  var diasDono = diasDoGrupo(progresso, missao.user_id);
+  var diasPar = missao.partner_id ? diasDoGrupo(progresso, missao.partner_id) : 0;
+  var scores = {};
+  scores[missao.user_name == null ? "null" : String(missao.user_name)] = diasDono;
+  scores[missao.partner_name == null ? "null" : String(missao.partner_name)] = diasPar;
+  var meus = grupoDoProgresso(progresso, usuario.id);
+  var leader = "Empate!";
+  if (diasDono > diasPar) leader = missao.user_name;
+  else if (diasPar > diasDono) leader = missao.partner_name;
+  return {
+    mission_id: missao.id,
+    mode: missao.mode,
+    scores: scores,
+    leader: leader,
+    my_streak: sequenciaAtual(meus && meus.checkins, numeroDoDia(missao.started_at))
+  };
+}
+
+function abandonarMissaoMock(email, id, cenario) {
+  var pacote = cenario ? montarCenario(cenario, usuarios[email]) : null;
+  var missao = null;
+  if (pacote && pacote.mission && String(pacote.mission.id) === String(id)) missao = pacote.mission;
+  else if (!pacote || pacote.vazio || pacote.erro) missao = acharMissao(email, id);
+  if (pacote && pacote.mission && String(pacote.mission.id) !== String(id)) missao = null;
+  if (!missao || String(missao.id) !== String(id) || missao.status !== "active") {
+    return { status: 404, dados: { error: "Missao ativa nao encontrada." } };
+  }
+  var usuario = usuarios[email];
+  var temPar = missao.partner_id && missao.mode !== "solo";
+  if (!temPar) {
+    if (missao.user_id !== usuario.id) {
+      return { status: 403, dados: { error: "Nao autorizado para encerrar esta missao." } };
+    }
+    missao.status = "abandoned";
+    missao.ends_at = new Date().toISOString();
+    return { status: 200, dados: { success: true, message: "Missao solo encerrada." } };
+  }
+  if (missao.partner_id === usuario.id) {
+    missao.partner_id = null;
+    missao.partner_name = null;
+    missao.mode = "solo";
+  } else if (missao.user_id === usuario.id) {
+    missao.user_id = missao.partner_id;
+    missao.user_name = missao.partner_name;
+    missao.partner_id = null;
+    missao.partner_name = null;
+    missao.mode = "solo";
+  } else {
+    return { status: 403, dados: { error: "Nao autorizado para encerrar esta missao." } };
+  }
+  return {
+    status: 200,
+    dados: { success: true, message: "Saíste da missão. A outra pessoa continua em solo." }
+  };
+}
+
 function negar(acesso) {
   return { status: acesso.status, dados: acesso.dados };
 }
@@ -955,6 +1092,22 @@ function responderHoje(req, res, email) {
     return true;
   }
 
+  var placar = caminho.match(/^\/api\/checkins\/(\d+)\/score$/);
+  if (placar) {
+    if (pacote && pacote.erro) {
+      enviar(res, 500, { error: "Erro ao obter placar." });
+      return true;
+    }
+    var missaoPlacar = pacote && pacote.mission ? pacote.mission : acharMissao(email, placar[1]);
+    if (!missaoPlacar || String(missaoPlacar.id) !== placar[1]) {
+      enviar(res, 404, { error: "Missão não encontrada." });
+      return true;
+    }
+    var progressoPlacar = pacote && pacote.progress ? pacote.progress : progressoGuardado(email, placar[1]);
+    enviar(res, 200, corpoDoPlacar(missaoPlacar, progressoPlacar, email));
+    return true;
+  }
+
   var progresso = caminho.match(/^\/api\/checkins\/(\d+)$/);
   if (progresso) {
     if (pacote && pacote.erro) {
@@ -1026,6 +1179,11 @@ var servidor = http.createServer(function (req, res) {
     if (url === "/api/missions" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);
       return criarMissao(acesso.email, corpo);
+    }
+    var abandono = url.match(/^\/api\/missions\/(\d+)\/abandon$/);
+    if (abandono && req.method === "POST") {
+      if (acesso.status !== 200) return negar(acesso);
+      return abandonarMissaoMock(acesso.email, abandono[1], cenarioDe(req, acesso.email));
     }
     if (url === "/api/checkins" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);

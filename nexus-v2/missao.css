@@ -1,0 +1,235 @@
+/* Tela Missão. Solo, Duo e Rival usam a mesma paleta.
+   O modo é um rótulo, sem cor própria. */
+
+.cartao.missao {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: var(--space-4);
+}
+
+.missao {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.sobretitulo {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.missao .titulo {
+  margin: 0;
+  flex: 0 1 auto;
+  max-width: 100%;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.missao .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* Cápsula do modo. A cor é --text em Solo, Duo e Rival. */
+.modo {
+  margin: 0;
+  flex: 0 0 auto;
+  padding: 2px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font: var(--text-small);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dia-numero,
+.minimo,
+.porque,
+.frase-solo,
+.resultado,
+.texto-abandono {
+  margin: 0;
+  color: var(--text);
+}
+
+.dia-numero {
+  font: var(--text-label);
+}
+
+.porque {
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.placar {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.placar-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placar-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.placar-nome {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.placar-dias {
+  font: var(--text-body);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.convites,
+.bloco-link,
+.confirma {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.convites .btn,
+.bloco-link .btn,
+.confirma .btn-secundario,
+.confirma .btn-neutro {
+  width: 100%;
+}
+
+.rotulo-link {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+#campo-link {
+  display: block;
+  width: 100%;
+  min-height: var(--target);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  resize: none;
+  field-sizing: content;
+}
+
+.aviso-vivo {
+  margin: 0;
+  color: var(--text);
+}
+
+.aviso-vivo:empty {
+  margin: 0;
+  line-height: 0;
+}
+
+.fim {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: calc(var(--space-7) + var(--space-4));
+}
+
+/* Com o placar visível, o vão debaixo do cartão não fica o mesmo dos botões. */
+#placar:not([hidden]) ~ .fim {
+  margin-top: var(--space-4);
+}
+
+.pergunta {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+/* Texto pequeno (14px, peso 500). Medido contra o cartão --surface.
+   Claro #5C574F sobre #FFFFFF: 7,16:1.
+   Escuro #B0AAA0 sobre #221F1B: 7,11:1. */
+.abandonar {
+  align-self: flex-start;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: 0 var(--space-2);
+  color: var(--text-muted);
+  font: var(--text-small);
+  text-decoration-thickness: 1px;
+}
+
+.btn-neutro {
+  gap: var(--space-2);
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.btn-neutro:hover {
+  background: color-mix(in srgb, var(--text) 88%, var(--bg));
+}
+
+.confirma {
+  align-self: stretch;
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
