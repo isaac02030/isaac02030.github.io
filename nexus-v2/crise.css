@@ -1,5 +1,7 @@
 /* Tela 9. Texto fixo, sem rede, sem IA e sem animação.
-   Cada contato é uma linha: nome à esquerda, botão à direita. */
+   A maioria dos contatos é uma linha: nome à esquerda, botão à direita.
+   SNS 24 e SOS Voz Amiga empilham: o nome ocupa a linha inteira
+   e os botões ficam embaixo, para não parecerem do contato anterior. */
 
 .crise {
   display: flex;
@@ -61,7 +63,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-2);
+  gap: 0;
   margin: 0;
   padding: 0;
 }
@@ -73,6 +75,29 @@
   justify-content: space-between;
   gap: var(--space-3);
   margin: 0;
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.contato:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.contato-empilhado {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.contato-empilhado .contato-texto,
+.contato-empilhado .contato-acoes {
+  width: 100%;
+}
+
+.contato-empilhado .contato-acoes {
+  align-items: flex-start;
 }
 
 .contato-texto {
