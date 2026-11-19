@@ -176,7 +176,7 @@ Nas frases fixas, a linha da IA e o link não aparecem. Crise, quando houver sin
 
 ## Missão
 
-A aba Missão mostra a missão atual. «Sua missão» fica pequeno, em cima. O título grande é o objetivo (`title`). Ao lado, o modo é um rótulo pequeno, na mesma cor: «Solo», «Duo, esperando o par», «Duo com [nome]» ou «Rival com [nome]». Embaixo, quando o servidor manda o campo: «Dia N de D» (`started_at` e `duration_days`), o mínimo (`daily_minimum`) e «Porque:» (`why_it_matters`). Sem o campo, a linha some. Não há coluna chamada `porque`.
+A aba Missão mostra a missão atual. «Sua missão» fica pequeno, em cima. O título grande é o objetivo (`title`). Ao lado do título, o modo é uma cápsula, na mesma cor: «Solo», «Duo, esperando o par», «Duo com [nome]» ou «Rival com [nome]». Embaixo, quando o servidor manda o campo: «Dia N de D» (`started_at` e `duration_days`), o mínimo (`daily_minimum`) e «Porque:» (`why_it_matters`). Sem o campo, a linha some. Não há coluna chamada `porque`.
 
 O placar só aparece no Rival ativo. A primeira linha é «Você». A outra é o nome do par. Os dias saem de `scores`, no formato «3 dias» ou «1 dia». `my_streak` não entra no placar.
 
