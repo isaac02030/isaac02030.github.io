@@ -1,0 +1,97 @@
+/* Tela Ajustes. Sem a cor de alarme: o sair e o erro usam texto, borda e destaque. */
+
+.ajustes.cartao {
+  padding: var(--space-4);
+}
+
+.ajustes .cabecalho {
+  margin-bottom: var(--space-4);
+}
+
+.ajustes .bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.ajustes .bloco + .bloco {
+  margin-top: var(--space-4);
+}
+
+.bloco-titulo {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.bloco-titulo label {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.aviso-campo {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-small);
+}
+
+.ajustes input[aria-invalid="true"] {
+  border-color: var(--border);
+}
+
+.nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-left: 4px solid var(--accent);
+  border-radius: 0;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nota .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--accent-standout);
+}
+
+.nota p {
+  margin: 0;
+}
+
+.btn-bloco {
+  width: 100%;
+}
+
+.confirma {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.pergunta {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.confirma-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.confirma-botoes .btn {
+  flex: 1 1 calc(50% - var(--space-3));
+  width: auto;
+  min-width: var(--target);
+  min-height: var(--target);
+}

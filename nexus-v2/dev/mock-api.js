@@ -27,6 +27,8 @@
    Lembrete (PUT /api/users/me/reminder):
    - esta rota ainda não existe no servidor de verdade
    - aqui ela guarda { reminder_time, timezone } na memória
+   - ?cenario=lembrete-erro → 500, não guarda
+   - ?cenario=lembrete-lento → espera 8 segundos e guarda
 
    Hoje (a tela pede estas rotas, nunca o placar):
    - GET /api/missions
@@ -356,6 +358,12 @@ function queryDe(req) {
   var i = req.url.indexOf("?");
   if (i < 0) return new URLSearchParams();
   return new URLSearchParams(req.url.slice(i + 1));
+}
+
+function nomeDoCenario(req) {
+  var pedido = queryDe(req).get("cenario") || "";
+  if (!/^[a-z0-9-]{1,40}$/.test(pedido)) return "";
+  return pedido;
 }
 
 function cenarioDe(req, email) {
@@ -715,7 +723,15 @@ function inscrever(email, corpo) {
   return { status: 200, dados: { success: true, message: "Notificacoes ativadas." } };
 }
 
-function salvarLembrete(email, corpo) {
+async function salvarLembrete(email, corpo, cenario) {
+  if (cenario === "lembrete-erro") {
+    return { status: 500, dados: { error: "Não foi possível salvar o horário." } };
+  }
+  if (cenario === "lembrete-lento") {
+    await new Promise(function (resolver) {
+      setTimeout(resolver, ESPERA_MISSAO_MS);
+    });
+  }
   var hora = typeof corpo.reminder_time === "string" ? corpo.reminder_time : "";
   var fuso = typeof corpo.timezone === "string" ? corpo.timezone.trim() : "";
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(hora) || !fuso) {
@@ -1037,7 +1053,7 @@ var servidor = http.createServer(function (req, res) {
     }
     if (url === "/api/users/me/reminder" && req.method === "PUT") {
       if (acesso.status !== 200) return negar(acesso);
-      return salvarLembrete(acesso.email, corpo);
+      return salvarLembrete(acesso.email, corpo, nomeDoCenario(req));
     }
     return { status: 404, dados: { error: "Não encontrado." } };
   }).then(function (resultado) {

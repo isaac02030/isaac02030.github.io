@@ -63,7 +63,7 @@ No mock, para ver os estados do começo:
 - Sem internet no passo 1 ou 2: "Sem internet. Assim que a conexão voltar, tente de novo."
 - Sem internet no passo 3: "Sem internet. A missão ainda não foi criada."
 
-O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda não existe no servidor de verdade. O mock responde. Se a rota falhar, a missão continua e o horário fica gravado neste aparelho.
+O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda não existe no servidor de verdade. O mock responde. Se a rota falhar, a missão continua e o horário fica gravado neste aparelho. A tela Ajustes usa a mesma chamada. Lá, se a rota falhar, o horário não é trocado e a tela pede para tentar de novo.
 
 ## Hoje
 
@@ -152,6 +152,24 @@ No mock:
 - `?rede=off` — a nota continua no campo
 
 A tela de ajuda (`crise.html`) tem o título «Você não está sozinho nisso» e a frase «Esta tela não guarda nada sobre você.» O texto é fixo: não usa IA, não lê a nota e não chama a rede. O servidor ainda não manda sinal de crise no check-in. Sem JavaScript, Portugal vem primeiro. Se o idioma do aparelho começa com `pt-BR`, o Brasil sobe. Não há geolocalização. A tela abre pelo endereço direto, pelo link no topo de Ajustes ou pelo link no rodapé do dia difícil. «Voltar à missão» abre `missao.html`. Não entra na barra de abas.
+
+## Ajustes
+
+O link «Precisa de ajuda agora?» fica no topo, acima da marca. Depois vêm o horário do lembrete, o recado de instalar no iPhone e «Sair da conta». Não há interruptor do Grande Irmão nem a tela do que ele sabe. Isso fica só num comentário TODO.
+
+O campo do horário é o mesmo do passo 3 do começo, já em 20:00. Uma linha explica: o lembrete principal toca nesse horário, e os outros dois do dia só tocam se ainda não houve check-in. «Salvar» chama `PUT /api/users/me/reminder` com o horário e o fuso, a mesma função do começo. Essa rota ainda não existe no servidor de verdade. O mock responde. Se ele aceitar, aparece «Horário salvo.» e o horário fica neste aparelho. Sem internet, ou com `?rede=off`, aparece «Não foi possível salvar agora. Tente de novo quando houver rede.» O horário guardado não muda.
+
+No mock:
+
+- `ajustes.html?cenario=lembrete-erro` — o salvar responde erro
+- `ajustes.html?cenario=lembrete-lento` — o botão fica em «Salvando…» por 8 segundos
+- `?rede=off` — não envia
+
+O recado do iPhone usa o mesmo texto do começo. Ele some só se o app já está na Tela de Início.
+
+«Sair da conta» pergunta «Sair da conta?» com «Sair» e «Cancelar». Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, como a saída antiga, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). O tema fica. Em seguida abre a tela de entrar. «Cancelar» volta ao botão.
+
+A tela lê sem internet: os arquivos entram no cache `nexus-v2-v16`.
 
 ## Resposta do Grande Irmão
 
