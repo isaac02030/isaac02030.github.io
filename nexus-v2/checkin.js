@@ -5,7 +5,7 @@
 
    Tela 4, a resposta do Grande Irmão, fica desligada.
    A flag é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN, em abas.js. O padrão é false.
-   ?ia=1 liga nesta URL, sem mudar a flag.
+   ?ia=1 liga nesta URL só em localhost ou 127.0.0.1. Em outro host, não faz nada.
    Com a flag ligada, o registro feito abre grande-irmao.html e a tela não fecha sozinha.
    Sem isso, a ida continua sendo o Hoje.
    Se o registro veio da volta ao ciclo, o aviso é

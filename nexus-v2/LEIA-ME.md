@@ -130,7 +130,7 @@ No mock, com a sessão já gravada:
 
 «Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
 
-`?ia=1` liga a ida para a resposta do Grande Irmão depois de um registro feito. Sem esse parâmetro, o sucesso continua indo para o Hoje. A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false.
+`?ia=1` liga a ida para a resposta do Grande Irmão só em `localhost` ou `127.0.0.1`. Em outro host, o parâmetro não muda o caminho: o sucesso continua indo para o Hoje. A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false.
 
 ## Dia difícil
 
@@ -157,7 +157,7 @@ A tela de ajuda (`crise.html`) continua um marcador: o servidor ainda não manda
 
 Cartão simples, sem avatar e sem balão. O título é «O Grande Irmão». A frase é um parágrafo curto. O botão «Voltar a Hoje» fica visível sem rolar. O voltar do celular faz a mesma coisa. A tela não fecha sozinha e não abre sozinha: só depois de um check-in ou de um dia difícil, com a flag ligada.
 
-A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false em `abas.js`. Para o teste, use `?ia=1` no check-in ou no dia difícil.
+A flag `NEXUS_ABRIR_TELA_IA_APOS_CHECKIN` fica false em `abas.js`. Desenvolvimento é só o host `localhost` ou `127.0.0.1`. Nesse host, `?ia=1` no check-in ou no dia difícil abre esta tela. Em qualquer outro host, `?ia=1` não faz nada: o registro volta para o Hoje e a frase continua fixa.
 
 Não há pedido a uma rota de IA. A frase sai dos mesmos dados do Hoje: o check-in de hoje com `difficult`, e a volta quando `missed_days_before_today` é maior que zero ou quando o check-in veio da recuperação. A volta ganha do dia cumprido e também do dia difícil. Se os dois acontecem juntos, a frase é «Você voltou. O ciclo continua.»
 
@@ -169,7 +169,7 @@ No mock, com a sessão já gravada:
 - `grande-irmao.html?cenario=dificil` — «Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.»
 - `grande-irmao.html?cenario=volta` — «Você voltou. O ciclo continua.»
 - `grande-irmao.html?cenario=offline` — a frase do dia cumprido, sem erro técnico
-- `grande-irmao.html?cenario=ia-exemplo` — «EXEMPLO — texto de IA fictício.», a linha «Isso é uma IA. Ela acompanha a missão, não substitui gente de verdade.» e o link «Quero continuar esta conversa», que ainda não abre conversa
+- `grande-irmao.html?cenario=ia-exemplo` — só em `localhost` ou `127.0.0.1`. O texto de exemplo fica em `dev/ia-exemplo.js`, que a página não carrega em outro host. A linha «Isso é uma IA. Ela acompanha a missão, não substitui gente de verdade.» usa o tamanho do texto e a cor do texto. O link «Quero continuar esta conversa» alinha à esquerda, com o mesmo recuo do cartão, e tem pelo menos 44px de altura. Fora do desenvolvimento, esse cenário não abre o estado de IA.
 - `?tema=escuro` — o mesmo cartão no escuro
 
 Nas frases fixas, a linha da IA e o link não aparecem. Crise, quando houver sinal, vai para a tela 9 e a IA para. Esta tela não detecta crise.

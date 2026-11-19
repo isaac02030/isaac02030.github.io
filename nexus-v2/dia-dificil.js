@@ -3,7 +3,7 @@
    O sucesso só aparece num 2xx com checkin.difficult === true.
    A nota é o rascunho da aba, o mesmo do check-in. Some só depois do registro.
    Tela 4 fica desligada. A flag é NEXUS_ABRIR_TELA_IA_APOS_CHECKIN, em abas.js.
-   O padrão é false. ?ia=1 liga nesta URL.
+   O padrão é false. ?ia=1 liga nesta URL só em localhost ou 127.0.0.1.
    Com a flag ligada, o registro feito abre grande-irmao.html e a tela não fecha sozinha.
    Sem isso, a volta continua sendo o Hoje.
    Se o registro veio da volta ao ciclo, o aviso é

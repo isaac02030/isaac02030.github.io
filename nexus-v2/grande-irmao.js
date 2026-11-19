@@ -1,6 +1,7 @@
 /* Resposta do Grande Irmão. Só abre depois de um check-in ou de um dia difícil,
-   e só quando a flag NEXUS_ABRIR_TELA_IA_APOS_CHECKIN está true ou a URL tem ?ia=1.
-   A flag continua false. Sem isso, o registro volta para o Hoje.
+   e só quando a flag NEXUS_ABRIR_TELA_IA_APOS_CHECKIN está true,
+   ou quando ?ia=1 está na URL e o host é localhost ou 127.0.0.1.
+   A flag continua false. Em outro host, ?ia=1 não faz nada.
 
    Não há rota de IA. Não chamar GET /api/vertice/message nem POST /api/assistant/mission.
    A frase é fixa. O caminho render({ source: "fixed"|"ai", text, canContinue })
@@ -15,7 +16,6 @@
 var FRASE_CUMPRIU = "Registro feito. O mínimo de hoje estava escrito, e você cumpriu.";
 var FRASE_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
 var FRASE_VOLTA = "Você voltou. O ciclo continua.";
-var TEXTO_IA_EXEMPLO = "EXEMPLO — texto de IA fictício.";
 var CHAVE_PASSO = "nexus_v2_passo_grande_irmao";
 var CHAVE_USUARIO = "nexus_v2_user";
 var MS_DIA = 24 * 60 * 60 * 1000;
@@ -70,9 +70,10 @@ function limparPasso() {
 
 function podeAbrir() {
   var nome = cenarioDaPagina();
-  if (nome === "cumpriu" || nome === "dificil" || nome === "dia-dificil" || nome === "volta" || nome === "offline" || nome === "ia-exemplo") {
+  if (nome === "cumpriu" || nome === "dificil" || nome === "dia-dificil" || nome === "volta" || nome === "offline") {
     return true;
   }
+  if (nome === "ia-exemplo" && NexusAbas.emDev()) return true;
   if (redeOff()) return true;
   return !!lerPasso();
 }
@@ -84,8 +85,8 @@ function fixo(texto) {
 /* Os mocks da URL não pedem rede e não pedem IA. */
 function mockDaUrl() {
   var nome = cenarioDaPagina();
-  if (nome === "ia-exemplo") {
-    return { source: "ai", text: TEXTO_IA_EXEMPLO, canContinue: true };
+  if (nome === "ia-exemplo" && NexusAbas.emDev() && window.NexusDevIa && typeof NexusDevIa.exemplo === "function") {
+    return NexusDevIa.exemplo();
   }
   if (nome === "volta") return fixo(FRASE_VOLTA);
   if (nome === "dificil" || nome === "dia-dificil") return fixo(FRASE_DIFICIL);

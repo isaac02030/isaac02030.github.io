@@ -91,13 +91,14 @@
 
    Resposta do Grande Irmão (a página resolve, sem rota de IA):
    A flag NEXUS_ABRIR_TELA_IA_APOS_CHECKIN continua false.
-   ?ia=1 no check-in ou no dia difícil manda o sucesso para grande-irmao.html.
+   ?ia=1 no check-in ou no dia difícil manda o sucesso para grande-irmao.html
+   só se o host for localhost ou 127.0.0.1. Em outro host, ?ia=1 não faz nada.
    Estes cenários são da página, não deste servidor:
    - cumpriu       frase fixa do dia cumprido
    - dificil       frase fixa do dia difícil (dia-dificil é o mesmo)
    - volta         frase fixa da volta ao ciclo
    - offline       frase fixa, sem erro técnico
-   - ia-exemplo    texto marcado «EXEMPLO — texto de IA fictício», com a linha de apoio
+   - ia-exemplo    só em localhost/127.0.0.1; o texto fica em dev/ia-exemplo.js
    Não existe GET /api/vertice/message nem POST /api/assistant/mission.
 
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.

@@ -31,12 +31,17 @@
 
 .apoio-ia {
   margin: 0;
-  color: var(--text-muted);
-  font: var(--text-small);
+  color: var(--text);
+  font: var(--text-body);
 }
 
-.continuar {
-  align-self: flex-start;
+.grande-irmao .continuar {
+  align-self: stretch;
   justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--target);
+  margin: 0;
+  padding: 0;
   text-align: left;
 }

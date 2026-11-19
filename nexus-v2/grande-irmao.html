@@ -42,15 +42,17 @@
       } catch (erroBusca) {
         params = new URLSearchParams();
       }
+      var host = location.hostname;
+      var emDev = host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
       var cenario = params.get("cenario") || "";
       var mocks = {
         cumpriu: true,
         dificil: true,
         "dia-dificil": true,
         volta: true,
-        offline: true,
-        "ia-exemplo": true
+        offline: true
       };
+      if (emDev) mocks["ia-exemplo"] = true;
       var passo = false;
       try {
         var bruto = sessionStorage.getItem("nexus_v2_passo_grande_irmao");
@@ -98,6 +100,14 @@
   </main>
   <script src="api.js"></script>
   <script src="abas.js"></script>
+  <script>
+    (function () {
+      var host = location.hostname;
+      if (host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1") {
+        document.write('<script src="dev/ia-exemplo.js"><\/script>');
+      }
+    })();
+  </script>
   <script src="grande-irmao.js"></script>
 </body>
 </html>
