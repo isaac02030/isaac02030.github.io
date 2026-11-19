@@ -36,11 +36,14 @@
       if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
     })();
   </script>
-  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="ajustes.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -48,22 +51,63 @@
 <body>
   <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
   <main class="pagina pagina-com-abas" id="conteudo">
-    <section class="cartao cartao-topo">
+    <div class="cartao cartao-topo ajustes">
       <header class="cabecalho">
         <!-- Link permanente, no topo. O texto está no HTML: não depende de IA nem de rede. -->
         <a class="btn btn-texto link-ajuda" id="link-ajuda" href="crise.html">Precisa de ajuda agora?</a>
-        <p class="marca">Nexus</p>
+        <noscript>
+          <p class="alerta alerta-rede">O Nexus precisa de JavaScript para mudar os ajustes.</p>
+        </noscript>
         <h1 class="titulo" id="titulo" tabindex="-1">Ajustes</h1>
-        <p class="apoio">Esta tela chega em breve.</p>
       </header>
-    </section>
+
+      <!-- // TODO: interruptor do Grande Irmão e a tela "O que o Grande Irmão sabe de você". -->
+
+      <section class="bloco" aria-labelledby="titulo-lembrete">
+        <form class="formulario" id="form-lembrete" method="post" action="#lembrete" novalidate>
+          <div class="campo">
+            <h2 class="bloco-titulo" id="titulo-lembrete">
+              <label for="horario">Horário do lembrete</label>
+            </h2>
+            <input id="horario" name="reminder_time" type="time" lang="pt-BR" step="60" value="20:00" autocomplete="off" aria-describedby="lembrete-explicacao erro-horario">
+            <p id="lembrete-explicacao" class="dica">O lembrete principal toca neste horário, e os outros dois do dia só tocam se você ainda não fez o check-in.</p>
+            <p id="erro-horario" class="aviso-campo" role="alert" hidden></p>
+          </div>
+          <div id="aviso-lembrete" class="alerta" role="status" hidden></div>
+          <button type="submit" class="btn btn-primario" id="btn-salvar" data-texto="Salvar" data-carregando="Salvando…" aria-busy="false">
+            <span class="btn-rotulo">Salvar</span>
+            <span class="spinner" hidden aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <section class="bloco" id="bloco-iphone" aria-labelledby="titulo-iphone" hidden>
+        <h2 class="bloco-titulo" id="titulo-iphone">No iPhone</h2>
+        <div class="nota" id="nota-iphone">
+          <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01"/>
+          </svg>
+          <p>No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).</p>
+        </div>
+      </section>
+
+      <section class="bloco" aria-labelledby="titulo-sair">
+        <h2 class="bloco-titulo" id="titulo-sair">Conta</h2>
+        <button type="button" class="btn btn-secundario btn-bloco" id="btn-pedir-saida" aria-expanded="false" aria-controls="confirma-sair">Sair da conta</button>
+        <div id="confirma-sair" class="confirma" role="alertdialog" aria-labelledby="pergunta-sair" aria-describedby="explica-sair" aria-live="assertive" hidden>
+          <p class="pergunta" id="pergunta-sair">Sair da conta?</p>
+          <p class="explica-sair" id="explica-sair">Ao sair, a sessão e os rascunhos deste aparelho são apagados. Sua missão continua salva na sua conta.</p>
+          <div class="confirma-botoes">
+            <button type="button" class="btn btn-primario" id="btn-cancelar">Cancelar</button>
+            <button type="button" class="btn btn-secundario" id="btn-sair">Sair</button>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
   <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="api.js"></script>
   <script src="abas.js"></script>
-  <script>
-    NexusAbas.iniciar("ajustes");
-    var linkAjuda = document.getElementById("link-ajuda");
-    if (linkAjuda) linkAjuda.href = "crise.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
-  </script>
+  <script src="ajustes.js"></script>
 </body>
 </html>

@@ -78,8 +78,11 @@ async function nexusPedir(caminho, corpo, opcoes) {
   return { ok: true, semRede: false, status: resposta.status, erro: "", dados: dados };
 }
 
-/* Rota planejada. O servidor atual não tem PUT /api/users/me/reminder.
-   Se a resposta for 404 ou outra falha, quem chamou segue e guarda o horário no aparelho. */
+/* Rota planejada. O servidor de verdade ainda não tem PUT /api/users/me/reminder.
+   O começo da missão e Ajustes usam esta mesma chamada.
+   O mock só aceita a chamada se a página estiver em localhost, 127.0.0.1 ou [::1].
+   Se a resposta for 404 ou outra falha, o começo segue e guarda o horário no aparelho.
+   Ajustes, fora do desenvolvimento, não chama esta função: mostra o erro e não grava. */
 function saveReminderTime(dados) {
   var hora = dados && typeof dados.reminder_time === "string" ? dados.reminder_time : "";
   var fuso = dados && typeof dados.timezone === "string" ? dados.timezone : "";
@@ -90,7 +93,7 @@ function saveReminderTime(dados) {
       fuso = "UTC";
     }
   }
-  return nexusPedir("/api/users/me/reminder", {
+  return nexusPedir(caminhoComCenario("/api/users/me/reminder"), {
     reminder_time: hora,
     timezone: fuso
   }, { metodo: "PUT", auth: true });
