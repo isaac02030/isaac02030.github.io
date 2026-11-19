@@ -1,0 +1,177 @@
+/* Tela Missão. Solo, Duo e Rival usam a mesma paleta.
+   O modo é um rótulo, sem cor própria. */
+
+.cartao.missao {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: var(--space-4);
+}
+
+.missao {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.missao .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.modo {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.objetivo,
+.frase-solo,
+.resultado,
+.texto-abandono {
+  margin: 0;
+  color: var(--text);
+}
+
+.objetivo {
+  color: var(--text-muted);
+}
+
+.placar {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.placar-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placar-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--target);
+}
+
+.placar-nome {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.placar-dias {
+  font: var(--text-body);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.convites,
+.bloco-link,
+.confirma {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.convites .btn,
+.bloco-link .btn,
+.confirma .btn-secundario,
+.confirma .btn-neutro {
+  width: 100%;
+}
+
+.rotulo-link {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+#campo-link {
+  display: block;
+  width: 100%;
+  min-height: var(--target);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  resize: none;
+  field-sizing: content;
+}
+
+.aviso-vivo {
+  margin: 0;
+  color: var(--text);
+}
+
+.aviso-vivo:empty {
+  margin: 0;
+  line-height: 0;
+}
+
+.fim {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: calc(var(--space-7) + var(--space-4));
+}
+
+.abandonar,
+.cancelar {
+  align-self: flex-start;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.btn-neutro {
+  gap: var(--space-2);
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.btn-neutro:hover {
+  background: color-mix(in srgb, var(--text) 88%, var(--bg));
+}
+
+.confirma {
+  align-self: stretch;
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}

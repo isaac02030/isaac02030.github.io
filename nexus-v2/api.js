@@ -114,10 +114,29 @@ var NexusApi = {
   listarMissoes: function () {
     return nexusPedir(caminhoComCenario("/api/missions"), null, { metodo: "GET", auth: true });
   },
-  /* GET /api/missions/:id devolve a missão, com partner_name.
-     Não pedimos o placar. A rota /api/checkins/:id/score não é usada. */
+  /* GET /api/missions/:id devolve a missão.
+     user_name é quem criou. partner_name é o par, ou null.
+     O placar não vem neste pedido. */
   obterMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/missions/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
+  },
+  /* GET /api/checkins/:missionId/score
+     Forma no servidor: { mission_id, mode, scores, leader, my_streak }.
+     scores é um mapa. A chave é o username de quem criou e o do par.
+     O valor é a contagem de check-ins feitos, não my_streak.
+     Se partner_name é null, a chave vira a string "null".
+     leader é um username ou "Empate!".
+     A tela Missão só usa isso no Rival ativo, e só os dois nomes e os dias. */
+  placarDaMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/score"), null, { metodo: "GET", auth: true });
+  },
+  /* POST /api/missions/:id/abandon
+     Solo, ou sem par: a missão fica abandoned e o registro para.
+     Com par e modo parceiro ou rival: quem sai é removido e a outra
+     pessoa continua na mesma missão, em solo. Não chama continue-solo.
+     O corpo vai vazio. O servidor não lê o corpo. */
+  abandonarMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/missions/" + encodeURIComponent(id) + "/abandon"), null, { metodo: "POST", auth: true });
   },
   /* GET /api/checkins/:missionId devolve { progress }, com o seu avanço e o do par. */
   progressoDaMissao: function (id) {

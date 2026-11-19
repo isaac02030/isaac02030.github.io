@@ -174,3 +174,27 @@ No mock, com a sessão já gravada:
 
 Nas frases fixas, a linha da IA e o link não aparecem. Crise, quando houver sinal, vai para a tela 9 e a IA para. Esta tela não detecta crise.
 
+## Missão
+
+A aba Missão mostra o modo atual, com a mesma paleta em Solo, Duo e Rival. O título da página é «Sua missão». O modo é um rótulo: «Solo», «Duo, esperando o par», «Duo com [nome]» ou «Rival com [nome]».
+
+O placar só aparece no Rival ativo. A tela pede `GET /api/checkins/:id/score`. No Duo não há placar. Os dias vêm de `scores`, contados pelos check-ins. `my_streak` não entra no placar.
+
+«Convidar para Duo» e «Convidar para Rival» não criam missão e não entram na fila. A rota de convite por link ainda não existe. A flag `NEXUS_CONVITE_POR_LINK` em `missao.js` fica false. Ao tocar, a tela diz «O convite por link ainda não está disponível.» Sem internet, diz que o convite não pode ser criado. Não mostra erro técnico.
+
+`?cenario=link-fake` só mostra um link em `localhost` ou `127.0.0.1`. O endereço fica em `dev/convite-exemplo.js`. A checagem é `node nexus-v2/dev/checar-convite-exemplo.js`. Em outro host, a página não carrega esse arquivo.
+
+«Abandonar missão» fica no fim da página, longe de «Copiar link». São dois passos. O pedido `POST /api/missions/:id/abandon` só sai no segundo. No Solo, a missão termina e o registro para. Com par, você sai e a outra pessoa continua em Solo na mesma missão. A tela não chama `continue-solo`. Se falhar ou estiver sem internet, a missão continua na tela.
+
+No mock, com a sessão já gravada:
+
+- `missao.html?cenario=solo`
+- `missao.html?cenario=duo-esperando`
+- `missao.html?cenario=duo-com-par` — o nome Ana é exemplo
+- `missao.html?cenario=rival-placar` — Ana e os dias são exemplo
+- `missao.html?cenario=convite-indisponivel`
+- `missao.html?cenario=link-fake` só em localhost ou 127.0.0.1
+- `missao.html?cenario=offline` ou `?rede=off` — o placar, se houver, é o último guardado neste aparelho
+
+Ana não é uma pessoa real. O nome da conta no mock continua `pessoa`.
+
