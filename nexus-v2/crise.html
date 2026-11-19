@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Ajuda — Nexus</title>
+  <title>Você não está sozinho nisso — Nexus</title>
   <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
   <meta name="color-scheme" content="light dark">
   <meta name="mobile-web-app-capable" content="yes">
@@ -36,31 +36,147 @@
       if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
     })();
   </script>
-  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
-  <link rel="stylesheet" href="checkin.css">
+  <link rel="stylesheet" href="crise.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
   <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
-  <!-- Desenho pendente. Texto calmo provisório, sem detector nesta tela. -->
   <main class="pagina" id="conteudo">
-    <section class="cartao cartao-topo checkin">
-      <a class="btn btn-texto btn-voltar" id="voltar" href="hoje.html">Voltar para o Hoje</a>
-      <h1 class="titulo" id="titulo" tabindex="-1">Ajuda</h1>
-      <p class="pergunta">Se você precisa de ajuda, ela está disponível.</p>
-      <p class="dica">Esta tela ainda está em desenho.</p>
-    </section>
+    <article class="cartao cartao-topo crise">
+      <h1 class="titulo" id="titulo" tabindex="-1">Você não está sozinho nisso</h1>
+      <p class="linha-missao">Esta tela não guarda nada sobre você.</p>
+      <p class="aviso-saude">O Nexus não é um serviço de saúde. Se estiver em risco de vida agora, ligue para a emergência.</p>
+
+      <!-- Confira os números antes de cada lançamento.
+           Conferidos em 19/11/2026 pela lista do projeto. Conferir de novo antes de cada lançamento.
+           Esta frase não aparece para quem usa o app.
+           Páginas oficiais:
+           112, 1411 e SNS 24: https://www.sns24.gov.pt/
+           SAMU 192: https://www.gov.br/saude/pt-br/composicao/saes/samu-192
+           CVV 188: https://cvv.org.br/ligue-188/
+           CVV chat: https://cvv.org.br/chat/
+           SOS Voz Amiga: https://www.sosvozamiga.org/contactos
+           Não incluir um quarto número do SOS Voz Amiga.
+           Texto visível como na lista. O tel: só muda o que o telefone disca:
+           112 e 1411 são códigos curtos, sem +351.
+           808 24 24 24, 213 544 545, 912 802 669 e 963 524 660 levam +351.
+           192 e 188 são códigos curtos do Brasil e ficam sem +55.
+           A emergência (112 e 192) fica no topo de cada país.
+           Sem JS, Portugal vem primeiro. Com JS, pt-BR coloca o Brasil primeiro. -->
+      <svg class="sprite" aria-hidden="true">
+        <symbol id="icone-telefone" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </symbol>
+      </svg>
+      <div class="paises" id="paises">
+        <section class="pais-bloco" id="bloco-portugal" aria-labelledby="pais-portugal">
+          <h2 class="pais" id="pais-portugal">Portugal</h2>
+          <ul class="contatos">
+            <li class="contato">
+              <div class="contato-texto">
+                <p class="contato-nome">Emergência (risco de vida)</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:112" aria-label="Ligar para Emergência, 112"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>112</span></a>
+              </div>
+            </li>
+            <li class="contato">
+              <div class="contato-texto">
+                <p class="contato-nome">Linha Nacional de Prevenção do Suicídio</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:1411" aria-label="Ligar para a Linha Nacional de Prevenção do Suicídio, 1411"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>1411</span></a>
+              </div>
+            </li>
+            <li class="contato contato-empilhado">
+              <div class="contato-texto">
+                <p class="contato-nome">SNS 24, aconselhamento psicológico</p>
+                <p class="contato-nota">opção 4, 24h, psicólogos clínicos</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:+351808242424" aria-label="Ligar para o SNS 24, 808 24 24 24"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>808 24 24 24</span></a>
+              </div>
+            </li>
+            <li class="contato contato-empilhado">
+              <div class="contato-texto">
+                <p class="contato-nome">SOS Voz Amiga</p>
+                <p class="contato-nota">todos os dias das 15h30 às 00h30</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:+351213544545" aria-label="Ligar para o SOS Voz Amiga, 213 544 545"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>213 544 545</span></a>
+                <a class="btn-ligar" href="tel:+351912802669" aria-label="Ligar para o SOS Voz Amiga, 912 802 669"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>912 802 669</span></a>
+                <a class="btn-ligar" href="tel:+351963524660" aria-label="Ligar para o SOS Voz Amiga, 963 524 660"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>963 524 660</span></a>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section class="pais-bloco" id="bloco-brasil" aria-labelledby="pais-brasil">
+          <h2 class="pais" id="pais-brasil">Brasil</h2>
+          <ul class="contatos">
+            <li class="contato">
+              <div class="contato-texto">
+                <p class="contato-nome">Emergência SAMU</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:192" aria-label="Ligar para o SAMU, 192"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>192</span></a>
+              </div>
+            </li>
+            <li class="contato">
+              <div class="contato-texto">
+                <p class="contato-nome">CVV</p>
+                <p class="contato-nota">ligação gratuita, 24h</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="tel:188" aria-label="Ligar para o CVV, 188"><svg class="icone-ligar" aria-hidden="true"><use href="#icone-telefone"></use></svg><span>188</span></a>
+              </div>
+            </li>
+            <li class="contato">
+              <div class="contato-texto">
+                <p class="contato-nome">CVV chat</p>
+                <p class="contato-nota">seg a sex 8h às 0h, sáb 13h às 0h, dom 15h às 0h</p>
+              </div>
+              <div class="contato-acoes">
+                <a class="btn-ligar" href="https://cvv.org.br/chat/" target="_blank" rel="noopener">Abrir</a>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <a class="btn btn-primario" id="voltar-missao" href="missao.html">Voltar à missão</a>
+    </article>
   </main>
   <script src="abas.js"></script>
   <script>
-    document.getElementById("voltar").href = "hoje.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
+    (function () {
+      var idioma = "";
+      try {
+        idioma = String(navigator.language || "").toLowerCase();
+      } catch (erro) {
+        idioma = "";
+      }
+      if (idioma.indexOf("pt-br") === 0) {
+        var paises = document.getElementById("paises");
+        var brasil = document.getElementById("bloco-brasil");
+        if (paises && brasil) paises.insertBefore(brasil, paises.firstChild);
+      }
+    })();
+    var voltar = document.getElementById("voltar-missao");
+    if (voltar) voltar.href = "missao.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
     NexusAbas.focar(document.getElementById("titulo"));
     NexusAbas.concluirRolagem();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
   </script>
 </body>
 </html>
