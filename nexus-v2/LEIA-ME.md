@@ -155,21 +155,21 @@ A tela de ajuda (`crise.html`) tem o título «Você não está sozinho nisso» 
 
 ## Ajustes
 
-O link «Precisa de ajuda agora?» fica no topo, acima da marca. Depois vêm o horário do lembrete, o recado de instalar no iPhone e «Sair da conta». Não há interruptor do Grande Irmão nem a tela do que ele sabe. Isso fica só num comentário TODO.
+O link «Precisa de ajuda agora?» fica no topo. O título é só «Ajustes», como o «Hoje». Depois vêm o horário do lembrete, o recado de instalar no iPhone (só no iPhone ou iPad, se o app ainda não está na Tela de Início) e o bloco «Conta». Não há interruptor do Grande Irmão nem a tela do que ele sabe. Isso fica só num comentário TODO.
 
-O campo do horário é o mesmo do passo 3 do começo, já em 20:00. Uma linha explica: o lembrete principal toca nesse horário, e os outros dois do dia só tocam se ainda não houve check-in. «Salvar» chama `PUT /api/users/me/reminder` com o horário e o fuso, a mesma função do começo. Essa rota ainda não existe no servidor de verdade. O mock responde. Se ele aceitar, aparece «Horário salvo.» e o horário fica neste aparelho. Sem internet, ou com `?rede=off`, aparece «Não foi possível salvar agora. Tente de novo quando houver rede.» O horário guardado não muda.
+O campo do horário é o mesmo do passo 3 do começo, já em 20:00. Uma linha explica: o lembrete principal toca nesse horário, e os outros dois do dia só tocam se ainda não houve check-in. «Salvar» chama `PUT /api/users/me/reminder` com o horário e o fuso, a mesma função do começo. Essa rota ainda não existe no servidor de verdade. O mock só responde se a página estiver em `localhost`, `127.0.0.1` ou `[::1]`. Fora disso, a tela mostra o erro e não diz que salvou. O horário guardado neste aparelho não muda, e o número digitado continua no campo. «Horário salvo.» só aparece no desenvolvimento, quando o mock aceita. Isso só pode ir para o ar quando a rota existir no servidor.
 
-No mock:
+Sem internet, ou com `?rede=off`, aparece «Não foi possível salvar agora. Tente de novo quando houver rede.» Esse aviso é um alerta para o leitor de tela.
+
+No mock, só a partir de uma página local:
 
 - `ajustes.html?cenario=lembrete-erro` — o salvar responde erro
 - `ajustes.html?cenario=lembrete-lento` — o botão fica em «Salvando…» por 8 segundos
 - `?rede=off` — não envia
 
-O recado do iPhone usa o mesmo texto do começo. Ele some só se o app já está na Tela de Início.
+«Conta» abre «Sair da conta?». A frase diz que a sessão e os rascunhos deste aparelho são apagados, e que a missão continua salva na conta. «Cancelar» é o botão preenchido e recebe o foco. «Sair» é o contorno. Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). A missão, os dias e a sequência ficam no servidor. O tema fica. Em seguida abre a tela de entrar.
 
-«Sair da conta» pergunta «Sair da conta?» com «Sair» e «Cancelar». Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, como a saída antiga, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). O tema fica. Em seguida abre a tela de entrar. «Cancelar» volta ao botão.
-
-A tela lê sem internet: os arquivos entram no cache `nexus-v2-v16`.
+A tela lê sem internet: os arquivos entram no cache `nexus-v2-v17`.
 
 ## Resposta do Grande Irmão
 

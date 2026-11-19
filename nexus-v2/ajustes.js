@@ -79,7 +79,10 @@ function icone(tipo) {
 function mostrarAviso(el, tipo, texto) {
   var paragrafo = document.createElement("p");
   paragrafo.textContent = texto;
+  var erro = tipo !== "ok";
   el.className = "alerta" + (tipo === "ok" ? " alerta-ok" : " alerta-rede");
+  el.setAttribute("role", erro ? "alert" : "status");
+  el.setAttribute("aria-live", erro ? "assertive" : "polite");
   el.replaceChildren(icone(tipo), paragrafo);
   el.hidden = false;
 }
@@ -151,12 +154,20 @@ function instaladoNaTelaInicial() {
   return navigator.standalone === true || modoSolto;
 }
 
+/* iPhone, iPad e iPadOS (que se apresenta como Mac com toque). */
+function ehIOS() {
+  var agente = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(agente)) return true;
+  var plataforma = navigator.platform || "";
+  return plataforma === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
 /* O texto é o mesmo do passo 3 do começo.
-   Some só quando o Nexus já está na Tela de Início. */
+   Só aparece no iPhone ou iPad, e some se o app já está na Tela de Início. */
 function atualizarNotaIphone() {
   var bloco = document.getElementById("bloco-iphone");
   if (!bloco) return;
-  bloco.hidden = instaladoNaTelaInicial();
+  bloco.hidden = !(ehIOS() && !instaladoNaTelaInicial());
 }
 
 async function salvarHorario(evento) {
@@ -176,6 +187,15 @@ async function salvarHorario(evento) {
   }
   if (semRedeAgora()) {
     mostrarAviso(aviso, "rede", TEXTO_OFF);
+    evitarCorte();
+    return;
+  }
+  /* A rota ainda não existe no servidor de verdade.
+     Fora de localhost, 127.0.0.1 e [::1], não chamamos o mock
+     e não dizemos que o horário foi salvo. O valor guardado fica como está.
+     O número digitado continua no campo. */
+  if (!NexusAbas.emDev()) {
+    mostrarAviso(aviso, "falha", TEXTO_FALHA);
     evitarCorte();
     return;
   }
@@ -238,7 +258,7 @@ function pedirSaida() {
   botao.setAttribute("aria-expanded", "true");
   box.hidden = false;
   evitarCorte();
-  focar(document.getElementById("pergunta-sair"));
+  focar(document.getElementById("btn-cancelar"));
 }
 
 function cancelarSaida() {

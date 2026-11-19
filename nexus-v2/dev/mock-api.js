@@ -26,6 +26,8 @@
    - POST /api/notifications/subscribe → grava a inscrição na memória
    Lembrete (PUT /api/users/me/reminder):
    - esta rota ainda não existe no servidor de verdade
+   - só responde se a origem for localhost, 127.0.0.1 ou [::1]
+   - fora disso, devolve 404 e não guarda nada
    - aqui ela guarda { reminder_time, timezone } na memória
    - ?cenario=lembrete-erro → 500, não guarda
    - ?cenario=lembrete-lento → espera 8 segundos e guarda
@@ -110,6 +112,9 @@ var http = require("http");
 var crypto = require("crypto");
 
 var PORTA = 3000;
+if (/^[0-9]+$/.test(String(process.env.NEXUS_MOCK_PORTA || ""))) {
+  PORTA = Number(process.env.NEXUS_MOCK_PORTA);
+}
 var ESPERA_LENTA_MS = 4000;
 var ESPERA_MISSAO_MS = 8000;
 var MS_DIA = 24 * 60 * 60 * 1000;
@@ -364,6 +369,25 @@ function nomeDoCenario(req) {
   var pedido = queryDe(req).get("cenario") || "";
   if (!/^[a-z0-9-]{1,40}$/.test(pedido)) return "";
   return pedido;
+}
+
+/* O lembrete falso só existe no desenvolvimento, como o exemplo da tela 4.
+   Uma página publicada não pode receber «horário salvo» deste processo. */
+function hostDoPedido(req) {
+  var origem = "";
+  if (req.headers && typeof req.headers.origin === "string") origem = req.headers.origin;
+  if (!origem && req.headers && typeof req.headers.referer === "string") origem = req.headers.referer;
+  if (!origem) return "";
+  try {
+    return new URL(origem).hostname;
+  } catch (erro) {
+    return "";
+  }
+}
+
+function pedidoDeDesenvolvimento(req) {
+  var host = hostDoPedido(req);
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
 }
 
 function cenarioDe(req, email) {
@@ -1052,6 +1076,9 @@ var servidor = http.createServer(function (req, res) {
       return inscrever(acesso.email, corpo);
     }
     if (url === "/api/users/me/reminder" && req.method === "PUT") {
+      if (!pedidoDeDesenvolvimento(req)) {
+        return { status: 404, dados: { error: "Não encontrado." } };
+      }
       if (acesso.status !== 200) return negar(acesso);
       return salvarLembrete(acesso.email, corpo, nomeDoCenario(req));
     }

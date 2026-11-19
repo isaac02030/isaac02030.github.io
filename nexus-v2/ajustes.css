@@ -79,7 +79,14 @@
 
 .pergunta {
   margin: 0;
-  font: var(--text-label);
+  font: var(--text-body);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.explica-sair {
+  margin: 0;
+  font: var(--text-body);
   color: var(--text);
 }
 

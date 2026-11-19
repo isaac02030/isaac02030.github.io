@@ -58,7 +58,6 @@
         <noscript>
           <p class="alerta alerta-rede">O Nexus precisa de JavaScript para mudar os ajustes.</p>
         </noscript>
-        <p class="marca">Nexus</p>
         <h1 class="titulo" id="titulo" tabindex="-1">Ajustes</h1>
       </header>
 
@@ -82,7 +81,7 @@
         </form>
       </section>
 
-      <section class="bloco" id="bloco-iphone" aria-labelledby="titulo-iphone">
+      <section class="bloco" id="bloco-iphone" aria-labelledby="titulo-iphone" hidden>
         <h2 class="bloco-titulo" id="titulo-iphone">No iPhone</h2>
         <div class="nota" id="nota-iphone">
           <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
@@ -93,13 +92,14 @@
       </section>
 
       <section class="bloco" aria-labelledby="titulo-sair">
-        <h2 class="bloco-titulo" id="titulo-sair">Sair da conta</h2>
+        <h2 class="bloco-titulo" id="titulo-sair">Conta</h2>
         <button type="button" class="btn btn-secundario btn-bloco" id="btn-pedir-saida" aria-expanded="false" aria-controls="confirma-sair">Sair da conta</button>
-        <div id="confirma-sair" class="confirma" hidden>
-          <p class="pergunta" id="pergunta-sair" tabindex="-1">Sair da conta?</p>
+        <div id="confirma-sair" class="confirma" role="alertdialog" aria-labelledby="pergunta-sair" aria-describedby="explica-sair" aria-live="assertive" hidden>
+          <p class="pergunta" id="pergunta-sair">Sair da conta?</p>
+          <p class="explica-sair" id="explica-sair">Ao sair, a sessão e os rascunhos deste aparelho são apagados. Sua missão continua salva na sua conta.</p>
           <div class="confirma-botoes">
-            <button type="button" class="btn btn-primario" id="btn-sair">Sair</button>
-            <button type="button" class="btn btn-secundario" id="btn-cancelar">Cancelar</button>
+            <button type="button" class="btn btn-primario" id="btn-cancelar">Cancelar</button>
+            <button type="button" class="btn btn-secundario" id="btn-sair">Sair</button>
           </div>
         </div>
       </section>
