@@ -53,6 +53,8 @@
         <p class="marca">Nexus</p>
         <h1 class="titulo" id="titulo" tabindex="-1">Ajustes</h1>
         <p class="apoio">Esta tela chega em breve.</p>
+        <!-- Link permanente. O texto está no HTML: não depende de IA nem de rede. -->
+        <a class="btn btn-texto link-ajuda" id="link-ajuda" href="crise.html">Precisa de ajuda agora?</a>
       </header>
     </section>
   </main>
@@ -60,6 +62,8 @@
   <script src="abas.js"></script>
   <script>
     NexusAbas.iniciar("ajustes");
+    var linkAjuda = document.getElementById("link-ajuda");
+    if (linkAjuda) linkAjuda.href = "crise.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
   </script>
 </body>
 </html>

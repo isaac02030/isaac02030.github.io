@@ -1,0 +1,95 @@
+/* Tela 9. Texto fixo, sem rede e sem IA.
+   Cartão no topo, sem barra de abas. O telefone é o alvo de toque. */
+
+.crise {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.crise .titulo::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+.chamada,
+.linha-missao {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.pais-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.pais {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.contatos {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.contato {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.contato-nome,
+.contato-nota {
+  margin: 0;
+}
+
+.contato-nome {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.contato-nota {
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.contato-ligar,
+.contato-externo {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  box-sizing: border-box;
+  min-height: var(--target);
+  padding: var(--space-2) 0;
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.contato-ligar:hover,
+.contato-externo:hover {
+  color: color-mix(in srgb, var(--accent-standout) 82%, var(--text));
+}
