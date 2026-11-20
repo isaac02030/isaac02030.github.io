@@ -199,5 +199,14 @@ var NexusApi = {
       subscription: subscription
     }, { metodo: "POST", auth: true });
   },
-  saveReminderTime: saveReminderTime
+  saveReminderTime: saveReminderTime,
+  /* Rota planejada. O servidor de verdade ainda não tem POST /api/missions/:id/extend.
+     O corpo é { days: 36 }. Não reutiliza continue-solo.
+     O mock só aceita se a página estiver em localhost, 127.0.0.1 ou [::1].
+     Se a resposta não for sucesso, a tela do fim mostra o erro e não segue. */
+  estenderMissao: function (id) {
+    return nexusPedir(caminhoComCenario("/api/missions/" + encodeURIComponent(id) + "/extend"), {
+      days: 36
+    }, { metodo: "POST", auth: true });
+  }
 };

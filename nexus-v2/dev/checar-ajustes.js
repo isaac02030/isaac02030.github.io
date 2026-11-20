@@ -96,7 +96,7 @@ if (api.indexOf("caminhoComCenario(\"/api/users/me/reminder\")") === -1) {
   falhas.push("o lembrete não repassa o cenário ao mock");
 }
 
-if (sw.indexOf('CACHE = "nexus-v2-v17"') === -1) falhas.push("o cache não está em nexus-v2-v17");
+if (sw.indexOf('CACHE = "nexus-v2-v19"') === -1) falhas.push("o cache não está em nexus-v2-v19");
 if (sw.indexOf("./ajustes.css") === -1 || sw.indexOf("./ajustes.js") === -1) {
   falhas.push("o cache não inclui os arquivos novos de Ajustes");
 }

@@ -31,6 +31,13 @@
    - aqui ela guarda { reminder_time, timezone } na memória
    - ?cenario=lembrete-erro → 500, não guarda
    - ?cenario=lembrete-lento → espera 8 segundos e guarda
+   Estender (POST /api/missions/:id/extend com { days: 36 }):
+   - esta rota ainda não existe no servidor de verdade
+   - não é continue-solo
+   - só responde se a origem for localhost, 127.0.0.1 ou [::1]
+   - fora disso, devolve 404 e não muda a duração
+   - aqui soma 36 a duration_days. Se o status era completed, volta a active
+   - ?cenario=extend-erro → 500, não muda a duração
 
    Hoje (a tela pede estas rotas, nunca o placar):
    - GET /api/missions
@@ -101,6 +108,10 @@
    - nota-servidor     (nota-servidor@exemplo.com)   POST 400 no texto europeu da prova
    - repetido          POST responde already_done true
    - terminada         (terminada@exemplo.com)       o dia passou de 30
+   - fim-30            (fim-30@exemplo.com)          dia 31, 30 check-ins
+   - fim-27            (fim-27@exemplo.com)          dia 31, 27 check-ins
+   - fim-status        (fim-status@exemplo.com)      status completed no dia 12
+   - extend-erro       (extend-erro@exemplo.com)     o POST /extend responde 500
    - inativa           (inativa@exemplo.com)         a missão não está ativa
    - sem-porque        o porquê vem vazio
 
@@ -158,6 +169,10 @@ var CENARIO_POR_EMAIL = {
   "academia@exemplo.com": "academia",
   "estudo@exemplo.com": "estudo",
   "terminada@exemplo.com": "terminada",
+  "fim-30@exemplo.com": "fim-30",
+  "fim-27@exemplo.com": "fim-27",
+  "fim-status@exemplo.com": "fim-status",
+  "extend-erro@exemplo.com": "extend-erro",
   "inativa@exemplo.com": "inativa",
   "erro-registro@exemplo.com": "erro-registro",
   "nota-servidor@exemplo.com": "nota-servidor",
@@ -170,6 +185,17 @@ var CENARIO_POR_EMAIL = {
   "post-quatro@exemplo.com": "post-quatro",
   "quatro-e-seguidos@exemplo.com": "quatro-e-seguidos"
 };
+
+function faixaDeDias(ate, pular) {
+  var lista = [];
+  var fora = {};
+  var dia;
+  (pular || []).forEach(function (n) { fora[n] = true; });
+  for (dia = 1; dia <= ate; dia++) {
+    if (!fora[dia]) lista.push(dia);
+  }
+  return lista;
+}
 
 var CENARIOS = {
   "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
@@ -258,6 +284,10 @@ var CENARIOS = {
   "nota-servidor": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, erroPost: "prova" },
   repetido: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, postJaFeito: true },
   terminada: { dia: 31, feitos: [1, 3], dificeis: [1], restantes: 3 },
+  "fim-30": { dia: 31, feitos: faixaDeDias(30), dificeis: [], restantes: 4, omitirDificeis: true },
+  "fim-27": { dia: 31, feitos: faixaDeDias(30, [8, 16, 24]), dificeis: [], restantes: 4, omitirDificeis: true },
+  "fim-status": { dia: 12, feitos: faixaDeDias(10), status: "completed", dificeis: [], restantes: 4, omitirDificeis: true },
+  "extend-erro": { dia: 31, feitos: faixaDeDias(30), dificeis: [], restantes: 4, omitirDificeis: true, erroExtend: true },
   inativa: { dia: 4, feitos: [1], dificeis: [1], restantes: 3, status: "waiting" },
   "sem-porque": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, porque: "" },
   "dois-seguidos": { dia: 4, feitos: [1, 2, 3], dificeis: [2, 3], restantes: 2 },
@@ -298,6 +328,8 @@ var CENARIOS = {
 /* Registro feito neste processo, por e-mail e cenário. Só para o Hoje
    mostrar o dia cumprido depois do POST. Não é o banco de verdade. */
 var registroDoCenario = {};
+/* Dias somados por POST /extend neste processo. Não é o banco de verdade. */
+var extensoes = {};
 
 function chavePublicaVapid() {
   var par = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -626,6 +658,15 @@ function montarCenario(nome, usuario) {
     pair_started_at: partner ? inicio : null
   });
   if (spec.aguardando) mission.pending_invite = spec.aguardando;
+  var extraDias = extensoes[usuario.email + "|" + nome] || 0;
+  if (extraDias > 0) {
+    mission.duration_days += extraDias;
+    var inicioMs = new Date(mission.started_at).getTime();
+    if (!isNaN(inicioMs)) {
+      mission.ends_at = new Date(inicioMs + mission.duration_days * MS_DIA).toISOString();
+    }
+    if (mission.status === "completed") mission.status = "active";
+  }
 
   var progress = {};
   progress[String(usuario.id)] = {
@@ -1042,6 +1083,33 @@ function abandonarMissaoMock(email, id, cenario) {
   };
 }
 
+function estenderMissao(email, id, corpo, cenario) {
+  if (!corpo || Number(corpo.days) !== 36) {
+    return { status: 400, dados: { error: "Dias inválidos." } };
+  }
+  if (cenario === "extend-erro") {
+    return { status: 500, dados: { error: "Não foi possível abrir os próximos 36 dias." } };
+  }
+  var spec = cenario && CENARIOS[cenario] ? CENARIOS[cenario] : null;
+  var pacote = spec ? montarCenario(cenario, usuarios[email]) : null;
+  var missao = pacote && pacote.mission ? pacote.mission : acharMissao(email, id);
+  if (!missao || String(missao.id) !== String(id)) {
+    return { status: 404, dados: { error: "Missão não encontrada." } };
+  }
+  if (!pacote) {
+    missao.duration_days = Number(missao.duration_days) + 36;
+    var inicioMs = new Date(missao.started_at).getTime();
+    if (!isNaN(inicioMs)) {
+      missao.ends_at = new Date(inicioMs + missao.duration_days * MS_DIA).toISOString();
+    }
+    if (missao.status === "completed") missao.status = "active";
+    return { status: 200, dados: { mission: missao, days: 36 } };
+  }
+  extensoes[email + "|" + cenario] = (extensoes[email + "|" + cenario] || 0) + 36;
+  var deNovo = montarCenario(cenario, usuarios[email]);
+  return { status: 200, dados: { mission: deNovo.mission, days: 36 } };
+}
+
 function negar(acesso) {
   return { status: acesso.status, dados: acesso.dados };
 }
@@ -1239,6 +1307,14 @@ var servidor = http.createServer(function (req, res) {
       }
       if (acesso.status !== 200) return negar(acesso);
       return salvarLembrete(acesso.email, corpo, nomeDoCenario(req));
+    }
+    var estender = url.match(/^\/api\/missions\/(\d+)\/extend$/);
+    if (estender && req.method === "POST") {
+      if (!pedidoDeDesenvolvimento(req)) {
+        return { status: 404, dados: { error: "Não encontrado." } };
+      }
+      if (acesso.status !== 200) return negar(acesso);
+      return estenderMissao(acesso.email, estender[1], corpo, cenarioDe(req, acesso.email));
     }
     return { status: 404, dados: { error: "Não encontrado." } };
   }).then(function (resultado) {
