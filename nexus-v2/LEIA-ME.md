@@ -77,7 +77,7 @@ Estados:
 - Feito: «Registro feito. Palavra cumprida hoje.» com o check, na cor de sucesso. O botão vira o secundário «Ver a nota de hoje», que mostra e esconde a nota. Sem nota, não há botão.
 - Dia difícil registrado: «Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.» com uma meia-lua. Sem vermelho.
 - Carregando: só o texto «Abrindo o dia…». Nada gira.
-- Sem internet: faixa no topo, «Sem internet. Mostrando o que o aparelho guardou.» Ao tocar em «Registrar o dia»: «Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.» Nada é enviado, guardado ou posto numa fila.
+- Sem internet: faixa no topo, «Sem internet. Mostrando o que o aparelho guardou.» Ao tocar em «Registrar o dia»: «O registro não foi enviado. Tente de novo quando a conexão voltar.» (a faixa já diz que não há internet) Nada é enviado, guardado ou posto numa fila.
 - Erro: «Não foi possível abrir o dia. Tente de novo.» e o botão «Tentar de novo».
 - Vazio: «Ainda não há missões. Que tal começar a primeira?» e «Começar uma missão».
 - Recuperação: a Tela 6, logo abaixo.
@@ -120,7 +120,7 @@ Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz 
 
 O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A senha pode ser qualquer uma, menos `errada`.
 
-`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet, com a faixa no topo. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
+`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet, com a faixa no topo. No Hoje, o parâmetro só vale em `localhost`, `127.0.0.1` ou `[::1]`. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
 
 A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. A marca de dia difícil só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha fica de fora e a régua não marca dia difícil. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.
 
@@ -144,7 +144,7 @@ No mock, com a sessão já gravada:
 - `checkin.html?cenario=inativa` — «Esta missão não está ativa.»
 - `checkin.html?cenario=registrado` — volta para o Hoje com «Este dia já estava registrado.»
 - `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
-- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje: «Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.»
+- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje, a faixa diz «Sem internet» e o alerta diz «O registro não foi enviado. Tente de novo quando a conexão voltar.»
 
 «Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
 

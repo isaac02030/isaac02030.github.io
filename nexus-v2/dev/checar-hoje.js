@@ -46,7 +46,7 @@ fs.readdirSync(raiz).forEach(function (nome) {
   if (antigo) falhas.push(nome + " ainda aponta " + antigo[0]);
 });
 
-/* Papel: a cor fica numa linha só (--papel). #EEF1EC aprovado pelo Isaac em 20/11/2026. */
+/* Papel: a cor fica numa linha só (--papel). #EEF1EC aprovado pelo dono do projeto em 20/11/2026. */
 var papeis = tokens.match(/--papel:\s*#[0-9A-Fa-f]{6};/g) || [];
 if (papeis.length !== 1 || papeis[0].indexOf("#EEF1EC") === -1) falhas.push("--papel precisa existir uma vez, com #EEF1EC");
 if (/--bg:\s*#(F4EFE6|EEF1EC)/i.test(tokens)) falhas.push("o --bg claro precisa usar var(--papel), não a cor solta");
@@ -77,7 +77,7 @@ if (!/id="estado" aria-live="polite"/.test(html)) falhas.push("o estado precisa 
   "Registro feito. Palavra cumprida hoje.",
   "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.",
   "Sem internet. Mostrando o que o aparelho guardou.",
-  "Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.",
+  "O registro não foi enviado. Tente de novo quando a conexão voltar.",
   "Não foi possível abrir o dia. Tente de novo.",
   "Ver a nota de hoje",
   " já registrou o dia de hoje."
@@ -107,11 +107,22 @@ if (!/\.acao-fixa \.btn\s*\{[^}]*min-height:\s*48px/.test(css)) falhas.push("o b
 if (!/\.acao-fixa\s*\{[^}]*bottom:\s*calc\(var\(--altura-abas\) \+ var\(--safe-bottom\)\)/.test(css)) {
   falhas.push("o botão não está colado acima das abas");
 }
-if (!/\.aba\s*\{[^}]*height:\s*56px/.test(abas)) falhas.push("as abas não têm 56px");
+if (!/\.aba\s*\{[^}]*min-height:\s*56px/.test(abas)) falhas.push("as abas não têm 56px");
+if (!/\.aba\s*\{[^}]*min-height:\s*56px/.test(abas) || /\.aba\s*\{[^}]*[^-]height:\s*56px/.test(abas)) falhas.push("a aba não pode ter altura fixa: o texto a 200% estoura");
 if (!/max\(var\(--space-5\)/.test(css)) falhas.push("a margem lateral não é 24px");
 var dificil = css.slice(css.indexOf(".estado-dificil"), css.indexOf("}", css.indexOf(".estado-dificil")));
 if (dificil.indexOf("--danger") !== -1) falhas.push("o dia difícil não pode usar --danger");
 if (/@keyframes|animation:/.test(css)) falhas.push("o Hoje não deve ter animação");
+
+/* Revisão da Clara e do Argos no PR 15. */
+if (!/--surface-2:\s*#E3E8E1;[\s\S]*--surface-2:\s*#E3E8E1;/.test(tokens) || /#EBE4D8/i.test(tokens)) falhas.push("--surface-2 claro precisa ser #E3E8E1 nos dois blocos");
+if (!/\.cartao-missao\s*\{[^}]*box-shadow:\s*none/.test(css) || tokens.indexOf("--borda-cartao: #C5CDC6;") === -1) falhas.push("o cartão da missão no claro tem borda #C5CDC6 e sem sombra");
+if (!/\.regua-dia\.falta::after\s*\{[^}]*width:\s*8px/.test(css) || !/\.regua-dia\.falta\s*\{[^}]*border-color:\s*var\(--text-muted\)/.test(css)) falhas.push("o dia perdido precisa do traço de 8px e da borda --text-muted");
+if (js.indexOf('"Sem internet. O registro') !== -1) falhas.push("o alerta repete «Sem internet» da faixa");
+var trechoRede = js.slice(js.indexOf("function semRedeAgora"), js.indexOf("function icone"));
+if (trechoRede.indexOf("hostDeDesenvolvimento()") === -1 || js.indexOf('host === "[::1]"') === -1) falhas.push("?rede=off precisa ficar só em localhost, 127.0.0.1 e [::1]");
+var abasJs = ler("abas.js");
+if (abasJs.indexOf("M12 15.5a3.5 3.5 0 1 0 0-7") !== -1) falhas.push("o ícone de Ajustes ainda é o sol");
 
 /* Marcas de página gerada por IA (skill frontend-design): nada disso no Hoje. */
 var textoTela = html + js;

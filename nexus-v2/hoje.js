@@ -23,7 +23,8 @@ var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo."
 /* Guia v2.1: a faixa diz o que a tela mostra; o toque em Registrar diz que nada foi enviado.
    Não há fila: o registro não fica guardado para depois. */
 var TEXTO_FAIXA_REDE = "Sem internet. Mostrando o que o aparelho guardou.";
-var TEXTO_REGISTRO_OFF = "Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.";
+/* A faixa já diz «Sem internet»; o alerta não repete. */
+var TEXTO_REGISTRO_OFF = "O registro não foi enviado. Tente de novo quando a conexão voltar.";
 var TEXTO_PENDENTE = "Ainda não registrou o dia.";
 var TEXTO_FEITO = "Registro feito. Palavra cumprida hoje.";
 var TEXTO_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
@@ -38,12 +39,21 @@ function cenarioDaPagina() {
   }
 }
 
+/* ?rede=off é atalho de teste: só vale em localhost, 127.0.0.1 ou [::1], como os mocks.
+   No site publicado, só a falta de rede de verdade mostra o dia guardado. */
+function hostDeDesenvolvimento() {
+  var host = location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
+}
+
 function semRedeAgora() {
   var rede = "";
-  try {
-    rede = new URLSearchParams(location.search).get("rede") || "";
-  } catch (erro) {
-    rede = "";
+  if (hostDeDesenvolvimento()) {
+    try {
+      rede = new URLSearchParams(location.search).get("rede") || "";
+    } catch (erro) {
+      rede = "";
+    }
   }
   return rede === "off" || navigator.onLine === false;
 }

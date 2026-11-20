@@ -24,8 +24,10 @@ body:has(.tela-hoje) {
   padding-top: calc(var(--space-5) + var(--safe-top));
   padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
   padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
-  /* Espaço para a barra de abas e para o botão fixo acima dela. */
-  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + 48px + var(--space-6) + var(--space-4));
+  /* Espaço para a barra de abas e para o botão fixo acima dela.
+     O botão cresce com o texto: 12 + 1,3rem + 12 + bordas, nunca menos de 48px. */
+  --altura-botao: max(48px, calc(26px + 1.3rem));
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--altura-botao) + var(--space-5) + var(--space-4));
   overflow-wrap: break-word;
 }
 
@@ -152,11 +154,16 @@ body:has(.tela-hoje) {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 6px;
+  width: 8px;
   height: 2px;
-  margin: -1px 0 0 -3px;
+  margin: -1px 0 0 -4px;
   border-radius: 1px;
   background: var(--text-muted);
+}
+
+/* Dia perdido: contorno mais escuro que o dos dias futuros, além do traço. */
+.regua-dia.falta {
+  border-color: var(--text-muted);
 }
 
 .regua-dia.hoje {
@@ -173,10 +180,11 @@ body:has(.tela-hoje) {
   gap: var(--space-4);
   margin: 0;
   padding: var(--space-4) var(--space-4) var(--space-5);
-  border: 1px solid var(--border);
+  /* Revisão da Clara: borda clara e sem sombra no claro; no escuro, a borda de sempre. */
+  border: 1px solid var(--borda-cartao, var(--border));
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .titulo-missao {
