@@ -67,7 +67,24 @@ O horário do lembrete vai para `PUT /api/users/me/reminder`. Essa rota ainda n�
 
 ## Hoje
 
-Mostra o dia da missão: o título, o mínimo, se o registro de hoje já foi feito e, no Duo, só a frase de que o par já registrou. Não há placar. A tela não chama `GET /api/checkins/:id/score`.
+Segue a especificação da tela Hoje do guia visual v2.1 da Clara. De cima para baixo: o título «Hoje» (grande, recebe o foco ao abrir), «Dia X de 30» e a régua de marcas, o cartão da missão (título e «O mínimo de hoje:», com o mínimo grande sobre uma linha de pauta), o estado do dia, a linha do par no Duo e o botão principal colado acima das abas. A margem lateral é 24px. Não há placar. A tela não chama `GET /api/checkins/:id/score`. A linha «Porque:» fica só na aba Missão.
+
+A régua tem 15 marcas por linha, de 16px, com vão de 6px. Feito: quadrado cheio. Dia difícil: quadrado cheio com um ponto no meio. Ainda por fazer: só o contorno. Dia que passou sem registro: contorno com um traço curto, como no Dia 30. Hoje: contorno duplo. A régua fica escondida do leitor de tela. O mesmo fato vai em texto escondido ao lado de «Dia X de 30», por exemplo «1 cumprido, 2 difíceis, 0 faltas».
+
+Estados:
+
+- Não feito: «Ainda não registrou o dia.» com um círculo vazio. Botão «Registrar o dia».
+- Feito: «Registro feito. Palavra cumprida hoje.» com o check, na cor de sucesso. O botão vira o secundário «Ver a nota de hoje», que mostra e esconde a nota. Sem nota, não há botão.
+- Dia difícil registrado: «Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.» com uma meia-lua. Sem vermelho.
+- Carregando: só o texto «Abrindo o dia…». Nada gira.
+- Sem internet: faixa no topo, «Sem internet. Mostrando o que o aparelho guardou.» Ao tocar em «Registrar o dia»: «Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.» Nada é enviado, guardado ou posto numa fila.
+- Erro: «Não foi possível abrir o dia. Tente de novo.» e o botão «Tentar de novo».
+- Vazio: «Ainda não há missões. Que tal começar a primeira?» e «Começar uma missão».
+- Recuperação: a Tela 6, logo abaixo.
+
+As abas têm 56px de altura. A fonte é a Figtree variável, servida pela pasta `fonts/` (licença SIL OFL 1.1 em `fonts/OFL.txt`). A cor do papel claro fica só no token `--papel` de `tokens.css`.
+
+Checagem: `node nexus-v2/dev/checar-hoje.js`.
 
 Embaixo ficam três abas, cada uma na sua página: `hoje.html`, `missao.html` e `ajustes.html`. Só uma fica aberta. A troca entra no histórico do navegador, então o voltar do celular desfaz o passo. Cada página guarda a própria rolagem nesta sessão e, na primeira vez, abre no topo.
 
@@ -78,7 +95,8 @@ http://localhost:8080/hoje.html?cenario=nao-registrado&tema=claro
 Estados do `?cenario=`:
 
 - `nao-registrado` — ainda falta registrar o dia
-- `registrado` — o dia está feito e aparece a nota
+- `registrado` — o dia está feito; «Ver a nota de hoje» mostra a nota
+- `dificil-hoje` — o dia de hoje foi registrado como difícil
 - `duo` — o par (Par Teste) já registrou hoje
 - `duo-sem` — é Duo, mas o par ainda não registrou (a tela não fala do par)
 - `esperando` — o par ainda não entrou; o Solo continua na tela
@@ -102,9 +120,9 @@ Depois de um registro feito a partir dessa tela, normal ou difícil, o Hoje diz 
 
 O mesmo vale entrando com o e-mail do estado, por exemplo `duo@exemplo.com`. A senha pode ser qualquer uma, menos `errada`.
 
-`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
+`?rede=off` mostra o último dia guardado neste aparelho, como se não houvesse internet, com a faixa no topo. Sem um dia guardado, a tela avisa para tentar de novo quando a conexão voltar.
 
-A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. O losango só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha e o losango ficam de fora. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.
+A linha «Dias difíceis: restam N de 4.» só aparece quando a sequência traz `difficult_days_remaining` maior que zero. A marca de dia difícil só aparece com `difficult_days` ou com `difficult: true` no check-in. Sem esses campos, a linha fica de fora e a régua não marca dia difícil. O mock manda `difficult_days`, `difficult_days_used` e `difficult_days_remaining` nos cenários. `sem-campo` e uma missão recém-criada não mandam.
 
 A grade dos dias tem um único nome para o leitor de tela, no formato «Dia 4 de 30: 1 cumprido, 2 difíceis, 0 faltas». Os números saem das marcas. Cada dia entra numa conta só. As marcas em si ficam escondidas do leitor e não recebem foco.
 
@@ -126,7 +144,7 @@ No mock, com a sessão já gravada:
 - `checkin.html?cenario=inativa` — «Esta missão não está ativa.»
 - `checkin.html?cenario=registrado` — volta para o Hoje com «Este dia já estava registrado.»
 - `checkin.html?cenario=sem-porque` — esconde a linha «Você escreveu»
-- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje, se não há nota na tela: «Sem internet. Tente de novo quando a conexão voltar.»
+- `?rede=off` — não envia e não guarda a nota para depois. «Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.» No Hoje: «Sem internet. O registro não foi enviado. Tente de novo quando a conexão voltar.»
 
 «Hoje é dia difícil» abre `dia-dificil.html` com a nota que já estava no campo. Voltar ao check-in devolve a mesma nota.
 
@@ -136,7 +154,7 @@ No mock, com a sessão já gravada:
 
 Tela por cima do check-in: tem Voltar e não mostra a barra de abas. O pedido é `POST /api/checkins` com `mission_id`, `note` e `difficult: true`. O sucesso só aparece se a resposta for 2xx e `checkin.difficult` for `true`.
 
-A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O rótulo é «O mínimo de hoje continua valendo:» e o mínimo fica em negrito, na linha de baixo, como está gravado. No Hoje, se o check-in de hoje é difícil, o estado diz «Dia difícil registrado. O mínimo valeu.» com o mesmo losango da grade.
+A frase «Ainda restam N.» só entra quando a sequência manda `difficult_days_remaining`. O rótulo é «O mínimo de hoje continua valendo:» e o mínimo fica em negrito, na linha de baixo, como está gravado. No Hoje, se o check-in de hoje é difícil, o estado diz «Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.» com uma meia-lua.
 
 Se `difficult_days_remaining` é 0, ou se `difficult_days` inclui os dois dias anteriores, a tela explica e oferece «Registrar o dia normal». O mesmo vale para os 400 «Você já usou os 4 dias difíceis desta missão.» e «Não dá para ter mais de 2 dias difíceis seguidos.».
 
@@ -169,7 +187,7 @@ No mock, só a partir de uma página local:
 
 «Conta» abre «Sair da conta?». A frase diz que a sessão e os rascunhos deste aparelho são apagados, e que a missão continua salva na conta. «Cancelar» é o botão preenchido e recebe o foco. «Sair» é o contorno. Os dois têm pelo menos 44px. Não usam a cor de alarme. «Sair» apaga o token e o usuário deste aparelho, e também os rascunhos desta aba (a nota do dia, o começo da missão e o dia guardado). A missão, os dias e a sequência ficam no servidor. O tema fica. Em seguida abre a tela de entrar.
 
-A tela lê sem internet: os arquivos entram no cache `nexus-v2-v19`.
+A tela lê sem internet: os arquivos entram no cache `nexus-v2-v20`.
 
 ## Dia 30
 

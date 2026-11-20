@@ -1,27 +1,336 @@
-/* Tela Hoje. O botão de registrar fica no fluxo, sem rolagem num celular de 390 por 844. */
+/* Tela Hoje (guia visual v2.1 da Clara).
+   Uma ideia: o que eu faço hoje e já fiz?
+   De cima para baixo: título, «Dia X de 30» e régua, cartão da missão,
+   estado, linha do par e o botão colado acima das abas. */
 
-.cartao.hoje {
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: var(--space-4);
-}
+/* ---------- Página ---------- */
 
-.hoje {
+.tela-hoje {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-top: calc(var(--space-5) + var(--safe-top));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  /* Espaço para a barra de abas e para o botão fixo acima dela. */
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + 48px + var(--space-6) + var(--space-4));
+  overflow-wrap: break-word;
 }
 
-.hoje .titulo::after {
-  content: "";
-  display: block;
-  width: 2rem;
-  height: 3px;
-  margin-top: var(--space-2);
-  border-radius: var(--radius-pill);
+/* Com a faixa de sem internet, o conteúdo desce a altura dela. */
+.tela-hoje.com-faixa {
+  padding-top: calc(var(--space-5) + var(--safe-top) + 3rem);
+}
+
+.hoje-titulo {
+  margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.tela-hoje .vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.carregando-texto,
+.vazio-texto {
+  margin: 0;
+  font: var(--text-body);
+}
+
+.carregando-texto {
+  color: var(--text-muted);
+}
+
+.vazio-texto {
+  color: var(--text);
+}
+
+.btn-grande {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* ---------- Faixa de sem internet (topo) ---------- */
+
+.faixa-rede {
+  position: fixed;
+  z-index: 6;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: calc(var(--target) + var(--safe-top));
+  margin: 0;
+  padding: calc(var(--space-2) + var(--safe-top)) var(--space-5) var(--space-2);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font: var(--text-small);
+}
+
+.faixa-rede .icone {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.faixa-rede p {
+  margin: 0;
+}
+
+/* ---------- Dia X de 30 e a régua de 30 marcas ---------- */
+
+.dia-numero {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+/* 2 linhas de 15. Cada marca tem 16px e vão de 6px.
+   Feito: quadrado cheio. Dia difícil: cheio com ponto no meio.
+   Ainda por fazer: só contorno. Dia passado sem registro: contorno com traço.
+   Hoje: contorno duplo. A régua é aria-hidden; o texto do dia diz o mesmo. */
+.regua {
+  display: grid;
+  grid-template-columns: repeat(15, 16px);
+  gap: 6px;
+  justify-content: start;
+  margin: 0;
+  padding: 4px;
+}
+
+.regua-dia {
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+}
+
+.regua-dia.feito,
+.regua-dia.dificil {
+  border-color: var(--accent);
   background: var(--accent);
 }
+
+/* Ponto em contraste com o acento: branco no claro, escuro no escuro. */
+.regua-dia.dificil::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--accent-text);
+}
+
+.regua-dia.falta::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 2px;
+  margin: -1px 0 0 -3px;
+  border-radius: 1px;
+  background: var(--text-muted);
+}
+
+.regua-dia.hoje {
+  border-color: var(--accent);
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Cartão da missão ---------- */
+
+.cartao-missao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.titulo-missao {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.rotulo-minimo {
+  margin: 0 0 var(--space-1);
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* A frase mais importante: o mínimo escrito sobre a pauta do caderno.
+   Cada linha do texto tem a sua linha de 1px embaixo, mesmo quando quebra. */
+.minimo {
+  margin: 0;
+  font: var(--text-title);
+  line-height: 2.25rem;
+  color: var(--text);
+  background-image: linear-gradient(to bottom, transparent calc(2.25rem - 1px), var(--border) calc(2.25rem - 1px));
+  background-size: 100% 2.25rem;
+}
+
+/* ---------- Estado do dia ---------- */
+
+.estado {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.estado:empty {
+  display: none;
+}
+
+.estado .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.estado-pendente .icone {
+  color: var(--text-muted);
+}
+
+.estado-feito {
+  color: var(--success);
+}
+
+/* Dia difícil: sem vermelho, sem tom de falha. Texto na cor normal, ícone no acento. */
+.estado-dificil .icone {
+  color: var(--accent);
+}
+
+.linha-par {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.linha-par .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.linha-espera {
+  margin: 0;
+  color: var(--text);
+}
+
+.linha-dificeis {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.nota-hoje {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ---------- Botão colado acima das abas ---------- */
+
+.acao-fixa {
+  position: fixed;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--altura-abas) + var(--safe-bottom));
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) max(var(--space-5), env(safe-area-inset-right, 0px)) var(--space-3) max(var(--space-5), env(safe-area-inset-left, 0px));
+  background: var(--bg);
+}
+
+.acao-fixa:empty {
+  display: none;
+}
+
+.acao-fixa .btn {
+  width: min(100%, 30rem - 2 * var(--space-5));
+  min-height: 48px;
+}
+
+/* ---------- Recuperação (Tela 6, dentro do Hoje) ---------- */
+
+.fato-falta,
+.calor {
+  margin: 0;
+  color: var(--text);
+  font: var(--text-body);
+}
+
+.calor-intro,
+.calor-minimo {
+  display: block;
+}
+
+.calor-minimo {
+  margin-top: var(--space-2);
+}
+
+.calor strong {
+  font-weight: 700;
+}
+
+.recuperacao-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.recuperacao-acoes .btn-primario {
+  min-height: 48px;
+}
+
+.recuperacao-acoes .link-dificil,
+.recuperacao-acoes .link-missao {
+  align-self: center;
+}
+
+/* ---------- Grade antiga, usada pela tela do Dia 30 ----------
+   O Dia 30 carrega este arquivo e usa .marcas, .marca-dia e .marca-miolo.
+   Fica igual até a Clara pedir a régua nova lá também. */
 
 .vista {
   display: flex;
@@ -36,12 +345,6 @@
   gap: var(--space-3);
   margin: 0;
   color: var(--text-muted);
-}
-
-.dia-numero {
-  margin: 0;
-  font: var(--text-label);
-  color: var(--text);
 }
 
 .marcas {
@@ -100,143 +403,4 @@
 
 .marca-miolo.dificil.feito {
   background: linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
-}
-
-.titulo-missao {
-  margin: 0;
-  font: var(--text-title);
-  color: var(--text);
-}
-
-.minimo {
-  margin: 0;
-}
-
-.status {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin: 0;
-  font: var(--text-label);
-}
-
-.status .icone {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  margin-top: 1px;
-  pointer-events: none;
-}
-
-.status-pendente {
-  color: var(--text);
-}
-
-.status-pendente .icone {
-  color: var(--text-muted);
-}
-
-.status-feito {
-  color: var(--success);
-}
-
-.status-losango {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-
-.status-losango .marca-miolo.dificil {
-  width: 14px;
-  height: 14px;
-}
-
-.porque {
-  margin: 0;
-  color: var(--text-muted);
-  font-family: var(--font);
-  font-size: 0.875rem;
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1.4;
-}
-
-.linha-par {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
-  color: var(--text);
-  font: var(--text-body);
-}
-
-.linha-par .icone {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-
-.linha-dificeis {
-  margin: 0;
-  color: var(--text-muted);
-  font: var(--text-small);
-}
-
-.linha-espera {
-  margin: 0;
-  color: var(--text);
-}
-
-.nota-hoje {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-left: 4px solid var(--accent);
-  background: var(--surface-2);
-  color: var(--text);
-}
-
-.hoje-acoes {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.fato-falta,
-.calor {
-  margin: 0;
-  color: var(--text);
-  font: var(--text-body);
-}
-
-.calor-intro,
-.calor-minimo {
-  display: block;
-}
-
-.calor-minimo {
-  margin-top: var(--space-2);
-}
-
-.calor strong {
-  font-weight: 700;
-}
-
-.recuperacao-acoes {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-1);
-}
-
-.recuperacao-acoes .link-dificil,
-.recuperacao-acoes .link-missao {
-  align-self: center;
 }

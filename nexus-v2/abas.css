@@ -1,5 +1,11 @@
 /* Barra de baixo, a partir da tela Hoje.
-   A aba ativa muda de cor e de peso. Cor sozinha não basta. */
+   A aba ativa muda de cor e de peso. Cor sozinha não basta.
+   Cada aba tem 56px de altura (guia v2.1). --altura-abas soma a borda de cima,
+   para o botão do Hoje ficar colado logo acima da barra. */
+
+:root {
+  --altura-abas: 57px;
+}
 
 .pagina.pagina-com-abas {
   padding-bottom: calc(4.75rem + var(--safe-bottom));
@@ -25,8 +31,8 @@
   justify-content: center;
   gap: 2px;
   min-width: var(--target);
-  min-height: var(--target);
-  padding: var(--space-2);
+  height: 56px;
+  padding: 6px var(--space-2);
   color: var(--text-muted);
   font-family: var(--font);
   font-size: 0.875rem;
