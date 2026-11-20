@@ -46,12 +46,10 @@ fs.readdirSync(raiz).forEach(function (nome) {
   if (antigo) falhas.push(nome + " ainda aponta " + antigo[0]);
 });
 
-/* Papel: a cor fica numa linha só (--papel) e continua #F4EFE6 até o sim do Isaac. */
+/* Papel: a cor fica numa linha só (--papel). #EEF1EC aprovado pelo Isaac em 20/11/2026. */
 var papeis = tokens.match(/--papel:\s*#[0-9A-Fa-f]{6};/g) || [];
-if (papeis.length !== 1 || papeis[0].indexOf("#F4EFE6") === -1) falhas.push("--papel precisa existir uma vez, com #F4EFE6");
-if ((tokens.match(/#F4EFE6/g) || []).length !== 1 + (tokens.match(/--text:\s*#F4EFE6/g) || []).length) {
-  falhas.push("#F4EFE6 aparece como fundo fora de --papel");
-}
+if (papeis.length !== 1 || papeis[0].indexOf("#EEF1EC") === -1) falhas.push("--papel precisa existir uma vez, com #EEF1EC");
+if (/--bg:\s*#(F4EFE6|EEF1EC)/i.test(tokens)) falhas.push("o --bg claro precisa usar var(--papel), não a cor solta");
 
 /* Hierarquia e textos da spec. */
 var ordem = ['id="titulo-hoje"', 'id="dia-numero"', 'id="regua"', 'class="cartao-missao"', 'id="titulo-missao"', "O mínimo de hoje:", 'id="minimo"', 'id="estado"', 'id="linha-par"', 'id="acoes"'];
@@ -114,6 +112,17 @@ if (!/max\(var\(--space-5\)/.test(css)) falhas.push("a margem lateral não é 24
 var dificil = css.slice(css.indexOf(".estado-dificil"), css.indexOf("}", css.indexOf(".estado-dificil")));
 if (dificil.indexOf("--danger") !== -1) falhas.push("o dia difícil não pode usar --danger");
 if (/@keyframes|animation:/.test(css)) falhas.push("o Hoje não deve ter animação");
+
+/* Marcas de página gerada por IA (skill frontend-design): nada disso no Hoje. */
+var textoTela = html + js;
+if (/text-transform:\s*uppercase/.test(css)) falhas.push("rótulo em caixa alta");
+if (/ · /.test(textoTela)) falhas.push("texto com pontinhos «A · B · C»");
+if (/→/.test(textoTela)) falhas.push("seta «→» em botão ou link");
+if (/border-left:\s*[0-9]+px solid var\(--accent\)/.test(css.slice(0, css.indexOf("Grade antiga")))) {
+  falhas.push("caixa com barra colorida à esquerda");
+}
+if (/(radial|linear)-gradient\([^)]*var\(--accent/.test(css.slice(0, css.indexOf("Grade antiga")))) falhas.push("gradiente decorativo no acento");
+if (css.indexOf("body:has(.tela-hoje)") === -1) falhas.push("as linhas de fundo voltaram ao Hoje");
 
 if (falhas.length) {
   console.error(falhas.join("\n"));

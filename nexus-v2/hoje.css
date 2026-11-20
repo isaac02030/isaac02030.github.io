@@ -5,6 +5,13 @@
 
 /* ---------- Página ---------- */
 
+/* No Hoje, o papel fica liso. As linhas de caderno do fundo (base.css) passavam
+   por trás do texto sem alinhar com nada. A pauta fica só onde tem função:
+   embaixo do mínimo e da nota. */
+body:has(.tela-hoje) {
+  background-image: none;
+}
+
 .tela-hoje {
   display: flex;
   flex-direction: column;
@@ -258,13 +265,14 @@
   font: var(--text-small);
 }
 
+/* A nota é o que a pessoa escreveu: vai na mesma pauta do mínimo, sem caixa. */
 .nota-hoje {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-left: 4px solid var(--accent);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--surface);
+  font: var(--text-body);
+  line-height: 2rem;
   color: var(--text);
+  background-image: linear-gradient(to bottom, transparent calc(2rem - 1px), var(--border) calc(2rem - 1px));
+  background-size: 100% 2rem;
 }
 
 /* ---------- Botão colado acima das abas ---------- */

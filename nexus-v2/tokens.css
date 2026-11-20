@@ -1,6 +1,6 @@
 /* Direção A, "Caderno quente". Não há pedido ao Google Fonts.
    A cor do papel claro fica numa linha só: --papel. O --bg claro usa esse valor.
-   A troca para #EEF1EC (proposta da Clara) espera o sim do Isaac.
+   #EEF1EC: papel frio, aprovado pelo Isaac em 20/11/2026 (antes #F4EFE6).
 
    Uma fonte variável (pesos 400 a 700), subconjunto latino.
    Origem: pacote @fontsource-variable/figtree 5.3.0, que copia o Google Fonts.
@@ -52,7 +52,7 @@
   --target: 44px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --papel: #F4EFE6;
+  --papel: #EEF1EC;
   --bg: var(--papel);
   --surface: #FFFFFF;
   --surface-2: #EBE4D8;
