@@ -1,7 +1,7 @@
 /* Service worker simples do v2.
    Só guarda os arquivos desta pasta. Não mexe no cache do app antigo
    e não guarda pedidos da API (login, cadastro e missão precisam da rede). */
-var CACHE = "nexus-v2-v22";
+var CACHE = "nexus-v2-v23";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -86,6 +86,12 @@ self.addEventListener("fetch", function (event) {
   }).catch(function () {
     return caches.match(pedido).then(function (guardado) {
       if (guardado) return guardado;
+      /* A tela de crise abre sem internet mesmo com ?tema= ou ?cenario= na URL. */
+      if (pedido.mode === "navigate" && /\/crise\.html$/.test(url.pathname)) {
+        return caches.match("./crise.html").then(function (crise) {
+          return crise || caches.match("./offline.html");
+        });
+      }
       if (pedido.mode === "navigate") return caches.match("./offline.html");
       return new Response("", { status: 503, statusText: "Sem internet" });
     });

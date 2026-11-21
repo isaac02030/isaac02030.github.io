@@ -58,7 +58,7 @@ var sw = ler("sw.js");
 
 /* ---------- Cache ---------- */
 if (sw.indexOf('"./nota-limite.js"') === -1) falhas.push("sw.js não guarda nota-limite.js");
-if (sw.indexOf('CACHE = "nexus-v2-v22"') === -1) falhas.push("o cache não está em nexus-v2-v22");
+if (sw.indexOf('CACHE = "nexus-v2-v23"') === -1) falhas.push("o cache não está em nexus-v2-v22");
 
 /* ---------- CSS discreto ---------- */
 var base = ler("base.css");
