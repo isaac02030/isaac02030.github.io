@@ -34,7 +34,7 @@ var TEXTO = [
   "Brasil",
   "Emergência SAMU", "192",
   "CVV", "ligação gratuita, 24h", "188",
-  "CVV chat", "seg a sex 8h às 0h, sáb 13h às 0h, dom 15h às 0h", "Abrir",
+  "CVV chat", "seg a sex, das 8h à meia-noite; sáb, das 13h à meia-noite; dom, das 15h à meia-noite", "Abrir o chat do CVV",
   "Voltar à missão"
 ];
 
@@ -94,7 +94,7 @@ function conferir(html, cssBruto, sw) {
     falhas.push("o texto da tela mudou (posição " + i + "): esperado «" + TEXTO[i] + "», veio «" + visto[i] + "»");
   }
   if (JSON.stringify(links(html)) !== JSON.stringify(LINKS)) falhas.push("um número, link ou rótulo de leitor de tela mudou");
-  if (!/target="_blank" rel="noopener">Abrir<\/a>/.test(html)) falhas.push("o chat do CVV perdeu target/rel");
+  if (!/target="_blank" rel="noopener">Abrir o chat do CVV<\/a>/.test(html)) falhas.push("o chat do CVV perdeu target/rel");
   if (html.indexOf("Conferidos em 19/11/2026") === -1) falhas.push("sumiu a data de conferência dos números");
   ["https://www.sns24.gov.pt/", "https://cvv.org.br/ligue-188/", "https://www.sosvozamiga.org/contactos"].forEach(function (fonte) {
     if (html.indexOf(fonte) === -1) falhas.push("sumiu a fonte " + fonte);
@@ -121,7 +121,7 @@ function conferir(html, cssBruto, sw) {
 
   /* ---------- Cache ---------- */
   if (sw.indexOf('"./crise.html"') === -1 || sw.indexOf('"./crise.css"') === -1) falhas.push("a tela de crise saiu do cache (precisa abrir sem internet)");
-  if (sw.indexOf('CACHE = "nexus-v2-v23"') === -1) falhas.push("o cache não está em nexus-v2-v23");
+  if (sw.indexOf('CACHE = "nexus-v2-v24"') === -1) falhas.push("o cache não está em nexus-v2-v24");
 
   /* ---------- 3. Abre sem login e sem internet ---------- */
   if (/location\.(replace|assign)\(|location\.href\s*=/.test(semComentarios(html))) falhas.push("a tela de crise não pode mandar ninguém para outra página ao abrir (precisa abrir sem login)");
