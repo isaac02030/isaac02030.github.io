@@ -4,9 +4,11 @@
       do projeto e de nova conferência nas fontes oficiais.
    2. Visual calmo: papel liso, sem cartão nem sombra, sem animação ou
       transição, sem cor de alarme, sem marcas de página gerada por IA.
-   3. Casos negados: sem login a tela volta para a entrada; a checagem
-      reprova uma cópia com um número trocado, um contato a menos e uma
-      animação a mais (prova de que ela pega a mudança).
+   3. A ajuda abre SEM login (ou com a sessão vencida) e sem internet:
+      nada manda para a entrada; «Voltar à missão» leva à entrada quem não
+      está logado; o service worker serve crise.html offline mesmo com ?tema=.
+   4. Casos negados: a checagem reprova cópias com um número trocado, um
+      contato a menos, uma animação a mais e a volta da exigência de login.
    Rode na raiz do repositório: node nexus-v2/dev/checar-crise.js */
 
 var fs = require("fs");
@@ -121,10 +123,14 @@ function conferir(html, cssBruto, sw) {
   if (sw.indexOf('"./crise.html"') === -1 || sw.indexOf('"./crise.css"') === -1) falhas.push("a tela de crise saiu do cache (precisa abrir sem internet)");
   if (sw.indexOf('CACHE = "nexus-v2-v23"') === -1) falhas.push("o cache não está em nexus-v2-v23");
 
-  /* ---------- 3. Sem login, volta para a entrada ---------- */
-  if (!/if \(!localStorage\.getItem\("nexus_v2_token"\)\) \{\s*location\.replace\("\.\/" \+ location\.search\);/.test(html)) {
-    falhas.push("sem login a tela não volta para a entrada");
-  }
+  /* ---------- 3. Abre sem login e sem internet ---------- */
+  if (/location\.(replace|assign)\(|location\.href\s*=/.test(semComentarios(html))) falhas.push("a tela de crise não pode mandar ninguém para outra página ao abrir (precisa abrir sem login)");
+  if (!/voltar\.href = \(logado \? "missao\.html" : "\.\/"\)/.test(html)) falhas.push("sem login, «Voltar à missão» precisa levar à entrada");
+  if (!/\/crise\\\.html\$\/\.test\(url\.pathname\)[\s\S]*caches\.match\("\.\/crise\.html"\)/.test(sw)) falhas.push("o service worker não serve a crise offline quando a URL tem ?tema=");
+
+  /* Todos os contatos com o mesmo desenho; número sem estourar a tela. */
+  if (!/\.contato \{[^}]*flex-direction: column;/.test(css)) falhas.push("os contatos não estão todos com o mesmo alinhamento");
+  if (/\.btn-ligar \{[^}]*white-space: nowrap/.test(css)) falhas.push("o número com nowrap estoura em 320 px a 200%");
   return falhas;
 }
 
@@ -141,10 +147,14 @@ var erradas = [
   ["texto de ajuda mudado", html.replace("ligue para a emergência", "ligue já para a emergência"), css],
   ["animação a mais", html, css + "\n.btn-ligar { animation: pulsar 1s infinite; }"],
   ["cor de alarme", html, css + "\n.pais { color: var(--danger); }"],
-  ["cartão com sombra", html, css + "\n.crise { box-shadow: var(--shadow); }"]
+  ["cartão com sombra", html, css + "\n.crise { box-shadow: var(--shadow); }"],
+  ["exige login de novo", html.replace("(function () {\n      var tema", "(function () {\n      if (!localStorage.getItem(\"nexus_v2_token\")) { location.replace(\"./\"); return; }\n      var tema"), css]
 ];
 erradas.forEach(function (caso) {
-  if (caso[1] === html && caso[2] === css) return;
+  if (caso[1] === html && caso[2] === css) {
+    falhas.push("a cópia errada não mudou nada (ajuste a checagem): " + caso[0]);
+    return;
+  }
   if (!conferir(caso[1], caso[2], sw).length) falhas.push("caso negado não reprovou: " + caso[0]);
 });
 

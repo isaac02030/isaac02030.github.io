@@ -11,16 +11,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Nexus">
   <script>
+    /* A ajuda abre para qualquer pessoa, com ou sem login (ou com a sessão
+       vencida): a tela só mostra números públicos e não guarda nada.
+       Aqui só se escolhe o tema. */
     (function () {
-      try {
-        if (!localStorage.getItem("nexus_v2_token")) {
-          location.replace("./" + location.search);
-          return;
-        }
-      } catch (erro) {
-        location.replace("./");
-        return;
-      }
       var tema = "";
       try {
         var pedido = new URLSearchParams(location.search).get("tema");
@@ -170,7 +164,14 @@
       }
     })();
     var voltar = document.getElementById("voltar-missao");
-    if (voltar) voltar.href = "missao.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
+    var logado = false;
+    try {
+      logado = !!localStorage.getItem("nexus_v2_token");
+    } catch (erroLogin) {
+      logado = false;
+    }
+    /* A missão pede login: quem não está logado volta para a entrada. */
+    if (voltar) voltar.href = (logado ? "missao.html" : "./") + NexusAbas.busca(["tema", "cenario", "rede"]);
     NexusAbas.focar(document.getElementById("titulo"));
     NexusAbas.concluirRolagem();
     if ("serviceWorker" in navigator) {

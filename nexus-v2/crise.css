@@ -4,9 +4,10 @@
    sem cor de alarme: nada de --danger, vermelho ou destaque que pressiona.
    O aviso de saúde fica em tamanho de corpo (checklist C da Clara).
    Números em --text-title (guia v2.1, Tela 9), cada um num botão de 44 px.
-   A maioria dos contatos é uma linha: nome à esquerda, botão à direita.
-   SNS 24 e SOS Voz Amiga empilham: o nome ocupa a linha inteira
-   e os botões ficam embaixo, para não parecerem do contato anterior. */
+   Todos os contatos têm o mesmo desenho: nome e horário em cima, ocupando
+   a linha inteira, e o botão (ou os botões) embaixo, alinhados à esquerda.
+   Assim os números compridos (SNS 24, SOS Voz Amiga) ficam iguais aos curtos
+   e nada aperta em 320 px nem com o texto a 200%. */
 
 body:has(.tela-crise) {
   background-image: none;
@@ -93,10 +94,9 @@ body:has(.tela-crise) {
 
 .contato {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
   margin: 0;
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
@@ -107,25 +107,7 @@ body:has(.tela-crise) {
   border-top: 0;
 }
 
-.contato-empilhado {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-}
-
-.contato-empilhado .contato-texto,
-.contato-empilhado .contato-acoes {
-  width: 100%;
-}
-
-.contato-empilhado .contato-acoes {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
 .contato-texto {
-  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -151,10 +133,11 @@ body:has(.tela-crise) {
 
 .contato-acoes {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--space-2);
-  flex: 0 0 auto;
+  min-width: 0;
 }
 
 /* Botão de ligar: contorno fino, sem preenchimento nem sombra.
@@ -175,9 +158,18 @@ body:has(.tela-crise) {
   font: var(--text-title);
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
-  text-align: center;
+  text-align: start;
   text-decoration: none;
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+/* O número nunca se parte: cresce com o texto do sistema, mas para em 9vw.
+   Em 320 px com texto a 200%, «808 24 24 24» fica numa linha (~29 px).
+   Só se nem isso couber, quebra num espaço em vez de estourar a tela. */
+.btn-ligar span {
+  font-size: min(1.375rem, 9vw);
 }
 
 .btn-ligar:hover {
