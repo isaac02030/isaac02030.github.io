@@ -119,8 +119,8 @@ textarea {
   align-items: flex-start;
   gap: var(--space-2);
   margin: 0;
-  color: var(--success);
-  font: var(--text-label);
+  color: var(--text);
+  font: var(--text-title);
   opacity: 0;
   transition: opacity var(--dur) var(--ease);
 }
@@ -130,10 +130,11 @@ textarea {
 }
 
 .sucesso .icone {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   margin-top: 1px;
+  color: var(--success);
 }
 
 /* ---------- Ajuda no rodapé: discreta, no HTML, sem rede ---------- */

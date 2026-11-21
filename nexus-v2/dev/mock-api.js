@@ -93,13 +93,16 @@
    - ignora-difficult (ignora-difficult@exemplo.com) o POST não confirma difficult
    - so-is-difficult (so-is-difficult@exemplo.com) o POST grava, mas responde is_difficult
    - post-seguidos   (post-seguidos@exemplo.com)   o POST responde o 400 de 2 seguidos
+   - post-crise      (post-crise@exemplo.com)      o POST grava sem a nota e responde crisis: true,
+                                                    como o filtro do servidor. O mock não lê a nota:
+                                                    o sinal vem só do cenário.
    - post-quatro     (post-quatro@exemplo.com)     o POST responde o 400 dos 4 dias
    - quatro-e-seguidos (quatro-e-seguidos@exemplo.com) os 4 acabaram e os 2 anteriores também
 
    Check-in (POST /api/checkins com { mission_id, note } e, na tela 5,
    difficult: true e minimum_done: true; sem minimum_done, 400 como no servidor):
    A resposta segue a rota de verdade: { checkin, day, already_done, message }.
-   Não há campo de crise. Não lemos a nota para inventar um.
+   Campo de crise só no cenário post-crise. Não lemos a nota para inventar um.
    Com difficult: true, o check-in volta com difficult: true, salvo nos cenários
    que ignoram o campo. A rota real devolve a coluna is_difficult; o cenário
    so-is-difficult copia isso e não manda checkin.difficult.
@@ -184,6 +187,7 @@ var CENARIO_POR_EMAIL = {
   "ignora-difficult@exemplo.com": "ignora-difficult",
   "so-is-difficult@exemplo.com": "so-is-difficult",
   "post-seguidos@exemplo.com": "post-seguidos",
+  "post-crise@exemplo.com": "post-crise",
   "post-quatro@exemplo.com": "post-quatro",
   "quatro-e-seguidos@exemplo.com": "quatro-e-seguidos"
 };
@@ -299,6 +303,7 @@ var CENARIOS = {
   "ignora-difficult": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, ignoraDifficult: true },
   "so-is-difficult": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, respostaColuna: true },
   "post-seguidos": { dia: 4, feitos: [1, 3], dificeis: [1], restantes: 3, erroPost: "seguidos" },
+  "post-crise": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, crisePost: true },
   "post-quatro": { dia: 5, feitos: [1, 3], dificeis: [1, 3], restantes: 2, erroPost: "quatro" },
   "quatro-e-seguidos": { dia: 6, feitos: [1, 2, 3, 4, 5], dificeis: [2, 3, 4, 5], restantes: 0 },
   /* Ana é um nome de exemplo. Não é uma pessoa real. Os dias também são fictícios. */
@@ -949,7 +954,9 @@ async function registrarCheckin(email, corpo, cenario) {
   if (pedeDificil && corpo.minimum_done !== true) {
     return { status: 400, dados: { error: MSG_MINIMO_DIFICIL } };
   }
-  var prova = pedeDificil ? null : erroDeProva(missao.proof_mode, nota);
+  var crise = !!(spec && spec.crisePost);
+  /* Como no servidor: com crise, a prova escrita não é exigida. */
+  var prova = (pedeDificil || crise) ? null : erroDeProva(missao.proof_mode, nota);
   if (prova) return { status: 400, dados: { error: prova } };
   var dia = numeroDoDia(missao.started_at);
   if (dia > missao.duration_days) {
@@ -971,7 +978,8 @@ async function registrarCheckin(email, corpo, cenario) {
     });
   }
 
-  var noteLimpa = nota.trim() ? nota.trim() : null;
+  /* Como no servidor: com crise, a nota não é guardada. */
+  var noteLimpa = !crise && nota.trim() ? nota.trim() : null;
   if (!pacote) {
     if (!usuarios[email].checkins[String(id)]) usuarios[email].checkins[String(id)] = [];
     var guardados = usuarios[email].checkins[String(id)];
@@ -990,15 +998,17 @@ async function registrarCheckin(email, corpo, cenario) {
     registroDoCenario[email + "|" + cenario] = { day: dia, note: noteLimpa, difficult: querDificil };
   }
 
-  return {
-    status: 201,
-    dados: {
-      checkin: checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec),
-      day: dia,
-      already_done: already,
-      message: already ? ("Dia " + dia + " já estava registado!") : ("Dia " + dia + " registado! 🔥")
-    }
+  var resposta = {
+    checkin: checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec),
+    day: dia,
+    already_done: already,
+    message: already ? ("Dia " + dia + " já estava registado!") : ("Dia " + dia + " registado! 🔥")
   };
+  if (crise) {
+    resposta.crisis = true;
+    resposta.crisis_level = "alto";
+  }
+  return { status: 201, dados: resposta };
 }
 
 function contarFeitos(checkins) {

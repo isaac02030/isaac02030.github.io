@@ -19,6 +19,8 @@ function ler(nome) {
 
 var html = ler("dia-dificil.html");
 var js = ler("dia-dificil.js");
+var checkinJs = ler("checkin.js");
+var vm = require("vm");
 var css = ler("dia-dificil.css");
 var api = ler("api.js");
 var sw = ler("sw.js");
@@ -71,6 +73,75 @@ if (html.indexOf('href="crise.html"') === -1) falhas.push("falta o link de ajuda
 var trechoRede = js.slice(js.indexOf("function semRedeAgora"), js.indexOf("function icone"));
 if (trechoRede.indexOf("NexusAbas.emDev()") === -1) falhas.push("?rede=off precisa ficar só em localhost, 127.0.0.1 e [::1]");
 
+/* ---------- Contagem com os números dos dados (revisão da Clara) ---------- */
+function carregarFuncoes(fonte, nomes) {
+  var trechos = [];
+  ["var LIMITE_DIFICEIS", "var TEXTO_SEGUIDOS_REGRA", "var CAMPOS_DE_CRISE_NA_RESPOSTA"].forEach(function (inicio) {
+    var i = fonte.indexOf(inicio);
+    if (i !== -1) trechos.push(fonte.slice(i, fonte.indexOf(";", i) + 1));
+  });
+  nomes.forEach(function (nome) {
+    var i = fonte.indexOf("function " + nome + "(");
+    if (i === -1) return;
+    var fim = fonte.indexOf("\n}\n", i);
+    trechos.push(fonte.slice(i, fim + 3));
+  });
+  var caixa = {};
+  vm.runInNewContext(trechos.join("\n") + "\nthis.f = { " + nomes.map(function (n) {
+    return n + ": typeof " + n + " === 'function' ? " + n + " : null";
+  }).join(", ") + " };", caixa);
+  return caixa.f;
+}
+var fDia = carregarFuncoes(js, ["numeroValido", "textoApoio", "respostaIndicaCrise"]);
+if (!fDia.textoApoio) {
+  falhas.push("falta textoApoio");
+} else {
+  var casosTexto = [
+    [{ difficult_days: [1, 2], difficult_days_used: 2, difficult_days_remaining: 2 }, "Você tem 4 dias difíceis nesta missão e já usou 2. Restam 2. No máximo 2 seguidos."],
+    [{ difficult_days: [5], difficult_days_used: 1, difficult_days_remaining: 3 }, "Você tem 4 dias difíceis nesta missão e já usou 1. Restam 3. No máximo 2 seguidos."],
+    [{ difficult_days: [], difficult_days_used: 0, difficult_days_remaining: 4 }, "Você tem 4 dias difíceis nesta missão e ainda não usou nenhum. Restam 4. No máximo 2 seguidos."],
+    [{ difficult_days: [1, 3, 5] }, "Você tem 4 dias difíceis nesta missão e já usou 3. Restam 1. No máximo 2 seguidos."],
+    [{}, "Você tem 4 dias difíceis nesta missão. No máximo 2 seguidos."]
+  ];
+  casosTexto.forEach(function (caso) {
+    var texto = fDia.textoApoio(caso[0]);
+    if (texto !== caso[1]) falhas.push("contagem: esperado «" + caso[1] + "», veio «" + texto + "»");
+  });
+}
+if (/destes dias|Ainda restam/.test(js)) falhas.push("o texto antigo da contagem voltou");
+
+/* ---------- Sucesso com saída (revisão da Clara) ---------- */
+var sucesso = html.slice(html.indexOf('id="vista-sucesso"'), html.indexOf("</section>", html.indexOf('id="vista-sucesso"')));
+if (!/<a class="btn btn-primario btn-grande" id="btn-sucesso-hoje" href="hoje\.html">Voltar para Hoje<\/a>/.test(sucesso)) {
+  falhas.push("o sucesso não tem o botão «Voltar para Hoje»");
+}
+if (!/\.sucesso\s*\{[^}]*color:\s*var\(--text\)/.test(css) || !/\.sucesso \.icone\s*\{[^}]*color:\s*var\(--success\)/.test(css)) {
+  falhas.push("a mensagem de sucesso precisa de --text com o ícone em --success");
+}
+
+/* ---------- Crise: a resposta com crisis: true abre a ajuda ---------- */
+[["dia-dificil.js", js], ["checkin.js", checkinJs]].forEach(function (par) {
+  var nome = par[0];
+  var fonte = par[1];
+  if (!/var CAMPOS_DE_CRISE_NA_RESPOSTA = \["crisis"\];/.test(fonte)) falhas.push(nome + ": a crise não está ligada");
+  var trata = fonte.slice(fonte.indexOf("function tratarResposta"), fonte.indexOf("async function enviar"));
+  var iCrise = trata.indexOf("respostaIndicaCrise(dados)");
+  var iOk = trata.indexOf("if (resultado.ok)");
+  if (iCrise === -1 || iOk === -1 || iCrise > iOk) falhas.push(nome + ": a crise precisa ser lida antes do sucesso e dos erros");
+  var ir = fonte.slice(fonte.indexOf("function irParaCrise"), fonte.indexOf("}", fonte.indexOf("function irParaCrise")));
+  if (ir.indexOf("limparRascunho()") === -1 || ir.indexOf("limparNota()") === -1) falhas.push(nome + ": a frase de crise fica no rascunho");
+  if (ir.indexOf('"crise.html"') === -1) falhas.push(nome + ": a crise não abre crise.html");
+  var f = carregarFuncoes(fonte, ["respostaIndicaCrise"]);
+  if (!f.respostaIndicaCrise) {
+    falhas.push(nome + ": falta respostaIndicaCrise");
+  } else {
+    if (f.respostaIndicaCrise({ crisis: true, crisis_level: "alto", checkin: {} }) !== true) falhas.push(nome + ": crisis: true não abre a ajuda");
+    if (f.respostaIndicaCrise({ checkin: { difficult: true } }) !== false) falhas.push(nome + ": sem crisis a ajuda abre");
+    if (f.respostaIndicaCrise({ crisis: "true" }) !== false) falhas.push(nome + ": crisis em texto não pode abrir a ajuda");
+    if (f.respostaIndicaCrise({ crisis_level: "alto" }) !== false) falhas.push(nome + ": só crisis_level não basta");
+  }
+});
+
 /* ---------- Visual novo do Hoje ---------- */
 if (css.indexOf("body:has(.tela-dificil)") === -1 || !/body:has\(\.tela-dificil\)\s*\{[^}]*background-image:\s*none/.test(css)) {
   falhas.push("as linhas de caderno do fundo voltaram");
@@ -80,7 +151,7 @@ if (/box-shadow:\s*(?!none)/.test(css)) falhas.push("sombra na tela do dia difí
 if (html.indexOf("checkin.css") !== -1) falhas.push("a tela ainda carrega checkin.css (barra sob o título)");
 if (html.indexOf('class="spinner"') !== -1) falhas.push("nada pode girar na tela");
 if (!/\.btn-grande\s*\{[^}]*min-height:\s*48px/.test(css)) falhas.push("o botão principal não tem 48px");
-if (/height:\s*[0-9]+px/.test(css.replace(/min-height:\s*[0-9]+px/g, "").replace(/(width|height):\s*24px/g, ""))) {
+if (/height:\s*[0-9]+px/.test(css.replace(/min-height:\s*[0-9]+px/g, "").replace(/(width|height):\s*(24|28)px/g, ""))) {
   falhas.push("altura fixa em px: o texto a 200% corta");
 }
 if (/@keyframes|animation:/.test(css)) falhas.push("a tela não deve ter animação");
@@ -213,6 +284,16 @@ async function provar() {
     if (ok.status !== 201 || !ok.json.checkin || ok.json.checkin.difficult !== true) {
       falhas.push("o dia difícil sem frase e com minimum_done não foi aceito");
     }
+    if ("crisis" in ok.json) falhas.push("sem crise, a resposta não pode trazer crisis");
+
+    var tokenCrise = await entrar("post-crise@exemplo.com");
+    var missoesCrise = await pedir("GET", "/api/missions", null, { Authorization: "Bearer " + tokenCrise });
+    var idCrise = Array.isArray(missoesCrise.json) && missoesCrise.json[0] && missoesCrise.json[0].id;
+    var comCrise = await pedir("POST", "/api/checkins", {
+      mission_id: idCrise, difficult: true, minimum_done: true, note: "frase de teste"
+    }, { Authorization: "Bearer " + tokenCrise });
+    if (comCrise.status !== 201 || comCrise.json.crisis !== true) falhas.push("o cenário post-crise não devolve crisis: true");
+    if (comCrise.json.checkin && comCrise.json.checkin.note !== null) falhas.push("com crise, o mock guardou a nota");
   } finally {
     filho.kill();
   }

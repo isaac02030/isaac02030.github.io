@@ -13,7 +13,8 @@
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
-var TEXTO_APOIO = "Você tem 4 destes dias na missão, e não pode usar mais de 2 seguidos.";
+var LIMITE_DIFICEIS = 4;
+var TEXTO_SEGUIDOS_REGRA = "No máximo 2 seguidos.";
 var TEXTO_SEGUIDOS = "Você já usou 2 dias difíceis seguidos. Hoje o dia conta no ritmo normal. Se não der, a recuperação está te esperando.";
 var TEXTO_QUATRO = "Os 4 dias difíceis desta missão já foram usados. Hoje é um dia normal.";
 var MSG_QUATRO = "Você já usou os 4 dias difíceis desta missão.";
@@ -42,7 +43,10 @@ var ERROS_NOTA_CURTA = [
   "Esta missao exige uma nota curta antes do check-in."
 ];
 
-var CAMPOS_DE_CRISE_NA_RESPOSTA = [];
+/* O servidor manda crisis: true (e crisis_level) em qualquer resposta do
+   check-in quando o filtro de crise dispara, inclusive em 201 e em erro.
+   A tela abre a ajuda e apaga o rascunho: a frase de crise não fica guardada. */
+var CAMPOS_DE_CRISE_NA_RESPOSTA = ["crisis"];
 
 var ciclo = 0;
 var missaoAtual = null;
@@ -330,6 +334,8 @@ function irParaHoje(aviso) {
 
 function irParaCrise() {
   if (saindo) return;
+  limparRascunho();
+  limparNota();
   saindo = true;
   location.replace("crise.html" + busca());
 }
@@ -356,12 +362,22 @@ function mostrarFalha(tipo, texto) {
   NexusAbas.concluirRolagem();
 }
 
+function numeroValido(valor) {
+  return typeof valor === "number" && isFinite(valor) && valor >= 0;
+}
+
+/* Os números vêm do servidor (ou do que o Hoje guardou). Sem eles, a frase
+   diz só a regra, sem inventar quantos foram usados. */
 function textoApoio(sequencia) {
-  var frase = TEXTO_APOIO;
-  if (sequencia && typeof sequencia.difficult_days_remaining === "number" && isFinite(sequencia.difficult_days_remaining)) {
-    frase += " Ainda restam " + sequencia.difficult_days_remaining + ".";
-  }
-  return frase;
+  var seq = sequencia && typeof sequencia === "object" ? sequencia : {};
+  var usados = numeroValido(seq.difficult_days_used) ? seq.difficult_days_used
+    : (Array.isArray(seq.difficult_days) ? seq.difficult_days.length : null);
+  var restam = numeroValido(seq.difficult_days_remaining) ? seq.difficult_days_remaining
+    : (usados !== null ? Math.max(0, LIMITE_DIFICEIS - usados) : null);
+  var inicio = "Você tem " + LIMITE_DIFICEIS + " dias difíceis nesta missão";
+  if (usados === null || restam === null) return inicio + ". " + TEXTO_SEGUIDOS_REGRA;
+  var uso = usados === 0 ? " e ainda não usou nenhum." : " e já usou " + usados + ".";
+  return inicio + uso + " Restam " + restam + ". " + TEXTO_SEGUIDOS_REGRA;
 }
 
 function preencherForma(missao, sequencia, semRede) {
@@ -492,6 +508,8 @@ function notaEscrita() {
   return campo ? campo.value.trim() : "";
 }
 
+var seguirDepoisDoSucesso = null;
+
 function mostrarSucesso() {
   limparRascunho();
   limparNota();
@@ -527,6 +545,10 @@ function mostrarSucesso() {
     if (NexusAbas.abrirTelaIa()) guardarPassoGrandeIrmao("dificil", fraseVolta);
     location.replace(destinoDepoisDoRegistro());
   }
+  seguirDepoisDoSucesso = seguir;
+  var saida = document.getElementById("btn-sucesso-hoje");
+  saida.href = destinoDepoisDoRegistro();
+  saida.textContent = NexusAbas.abrirTelaIa() ? "Continuar" : "Voltar para Hoje";
   function sairDepois() {
     window.setTimeout(seguir, ESPERA_SUCESSO_MS);
   }
@@ -551,11 +573,11 @@ function tratarResposta(resultado) {
     return;
   }
   var dados = resultado.dados || {};
+  if (respostaIndicaCrise(dados)) {
+    irParaCrise();
+    return;
+  }
   if (resultado.ok) {
-    if (respostaIndicaCrise(dados)) {
-      irParaCrise();
-      return;
-    }
     if (dados.already_done === true) {
       limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);
@@ -639,6 +661,11 @@ function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
   ligarLinks();
   document.getElementById("form-nota").addEventListener("submit", enviar);
+  document.getElementById("btn-sucesso-hoje").addEventListener("click", function (evento) {
+    if (!seguirDepoisDoSucesso) return;
+    evento.preventDefault();
+    seguirDepoisDoSucesso();
+  });
   document.getElementById("btn-tentar").addEventListener("click", function () {
     carregar();
   });
