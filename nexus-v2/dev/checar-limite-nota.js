@@ -102,6 +102,29 @@ if (!N) {
   if (els["nota-contador"].textContent !== "280 de 280") falhas.push("esperado «280 de 280»");
   if (!els["nota-contador"].classList.has("no-limite")) falhas.push("no limite, falta a classe no-limite");
   if (els["nota-limite-aviso"].textContent !== "Chegou ao limite de 280 caracteres.") falhas.push("no limite, o aviso para leitor de tela não falou");
+  /* O aviso fala uma vez só ao chegar em 280, mesmo com várias teclas;
+     o contador nunca é região viva (conferido no HTML acima). */
+  var falas = 0;
+  var ultimo = els["nota-limite-aviso"].textContent;
+  els.nota.value = "";
+  atualizar();
+  ultimo = els["nota-limite-aviso"].textContent;
+  for (var n = 1; n <= 280; n += 1) {
+    els.nota.value = "x".repeat(n);
+    els.nota.disparar("input");
+    if (els["nota-limite-aviso"].textContent !== ultimo) {
+      ultimo = els["nota-limite-aviso"].textContent;
+      if (ultimo) falas += 1;
+    }
+  }
+  /* Teclas a mais no limite (o maxlength não deixa o valor crescer). */
+  for (var extra = 0; extra < 5; extra += 1) {
+    els.nota.disparar("input");
+    if (els["nota-limite-aviso"].textContent !== ultimo) { ultimo = els["nota-limite-aviso"].textContent; if (ultimo) falas += 1; }
+  }
+  if (falas !== 1) falhas.push("o aviso de limite falou " + falas + " vezes ao digitar até 280 (esperado 1)");
+  var css = ler("checkin.css");
+  if (!/textarea\[aria-invalid="true"\]:focus-visible \{[^}]*outline: 2px solid var\(--danger\);[^}]*outline-offset: -1px;/.test(css)) falhas.push("campo com erro e foco: falta o anel único");
   els.nota.value = "";
   atualizar();
   if (els["nota-contador"].textContent !== "0 de 280" || els["nota-limite-aviso"].textContent !== "") falhas.push("ao limpar, o contador não voltou a 0");
