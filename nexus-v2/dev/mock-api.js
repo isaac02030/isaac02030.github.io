@@ -102,6 +102,7 @@
    Check-in (POST /api/checkins com { mission_id, note } e, na tela 5,
    difficult: true e minimum_done: true; sem minimum_done, 400 como no servidor):
    A resposta segue a rota de verdade: { checkin, day, already_done, message }.
+   Nota com mais de 280 caracteres reais: 400 com a mensagem do servidor.
    Campo de crise só no cenário post-crise. Não lemos a nota para inventar um.
    Com difficult: true, o check-in volta com difficult: true, salvo nos cenários
    que ignoram o campo. A rota real devolve a coluna is_difficult; o cenário
@@ -917,6 +918,9 @@ function erroDeProva(proof, note) {
   return "";
 }
 
+var LIMITE_NOTA = 280;
+var MSG_NOTA_LONGA = "A frase passou de 280 caracteres. Encurte um pouco e envie de novo.";
+
 async function registrarCheckin(email, corpo, cenario) {
   var id = corpo && corpo.mission_id;
   if (!id) return { status: 400, dados: { error: "mission_id é obrigatório." } };
@@ -955,6 +959,11 @@ async function registrarCheckin(email, corpo, cenario) {
     return { status: 400, dados: { error: MSG_MINIMO_DIFICIL } };
   }
   var crise = !!(spec && spec.crisePost);
+  /* Como no servidor: mais de 280 caracteres reais dá 400, mas o filtro
+     de crise vem antes (nota com crise não chega a este limite). */
+  if (!crise && Array.from(nota).length > LIMITE_NOTA) {
+    return { status: 400, dados: { error: MSG_NOTA_LONGA } };
+  }
   /* Como no servidor: com crise, a prova escrita não é exigida. */
   var prova = (pedeDificil || crise) ? null : erroDeProva(missao.proof_mode, nota);
   if (prova) return { status: 400, dados: { error: prova } };

@@ -30,6 +30,9 @@ var TEXTO_INATIVA = "Esta missão não está ativa.";
 var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
+/* Limite de 280 caracteres (nota-limite.js). O servidor confere de novo. */
+var TEXTO_LONGA = "A nota passou de 280 caracteres. Encurte um pouco e envie de novo.";
+var atualizarContador = function () {};
 var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão voltar.";
 var TEXTO_JA = "ja-registrado";
 var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
@@ -115,6 +118,7 @@ function descreverNota(campo, comErro) {
   var ajuda = document.getElementById("nota-ajuda");
   var ids = [];
   if (ajuda && !ajuda.hidden && ajuda.textContent) ids.push("nota-ajuda");
+  if (document.getElementById("nota-contador")) ids.push("nota-contador");
   if (comErro) ids.push("nota-erro");
   if (ids.length) campo.setAttribute("aria-describedby", ids.join(" "));
   else campo.removeAttribute("aria-describedby");
@@ -152,6 +156,7 @@ function definirCarregando(ligado) {
 function limparNota() {
   var campo = document.getElementById("nota");
   if (campo) campo.value = "";
+  atualizarContador();
 }
 
 function lerRascunho() {
@@ -203,6 +208,7 @@ function aplicarRascunho() {
   if (Number(dados.day) !== numeroDoDia(missaoAtual.started_at)) return;
   var campo = document.getElementById("nota");
   if (campo) campo.value = dados.note;
+  atualizarContador();
 }
 
 function numeroDoDia(startedAt) {
@@ -494,6 +500,8 @@ function notaEscrita() {
 function validarNota() {
   var texto = notaEscrita();
   if (!texto) return TEXTO_VAZIO;
+  /* Rascunho antigo posto por código pode passar do maxlength. */
+  if (window.NexusNota && NexusNota.passou(texto)) return TEXTO_LONGA;
   var regra = regraDaNota(missaoAtual);
   if (texto.length < regra.minimo) return regra.ajuda || TEXTO_VAZIO;
   return "";
@@ -580,6 +588,11 @@ function tratarResposta(resultado) {
     mostrarBloqueio(TEXTO_TERMINOU);
     return;
   }
+  if (resultado.status === 400 && window.NexusNota && erro === NexusNota.MSG_SERVIDOR) {
+    definirErro(TEXTO_LONGA);
+    document.getElementById("nota").focus();
+    return;
+  }
   var ajuda = ajudaDoErroDeProva(erro, missaoAtual);
   if (resultado.status === 400 && ajuda) {
     definirErro(ajuda);
@@ -638,6 +651,7 @@ function iniciar() {
   document.getElementById("btn-tentar").addEventListener("click", function () {
     carregar();
   });
+  if (window.NexusNota) atualizarContador = NexusNota.ligar("nota", "nota-contador", "nota-limite-aviso");
   document.getElementById("nota").addEventListener("input", function () {
     var campo = document.getElementById("nota");
     if (campo.getAttribute("aria-invalid") === "true") {
