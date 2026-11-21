@@ -114,6 +114,9 @@ function modeloBase(missao) {
     duracao: quando ? quando.duracao : null,
     minimo: campoTexto(missao, "daily_minimum"),
     porque: campoTexto(missao, "why_it_matters"),
+    diasSemana: NexusDias.daMissao(missao && missao.mission_weekdays),
+    semanaDia1: missao && missao.started_at ? NexusDias.diaDaSemana(missao.started_at) : null,
+    diaLivre: false,
     linhas: null,
     avisoPlacar: "",
     mostrarConvite: !temPar,
@@ -264,6 +267,9 @@ function guardarCache(modelo) {
       duracao: typeof modelo.duracao === "number" ? modelo.duracao : null,
       minimo: modelo.minimo || "",
       porque: modelo.porque || "",
+      diasSemana: Array.isArray(modelo.diasSemana) ? modelo.diasSemana : null,
+      semanaDia1: typeof modelo.semanaDia1 === "number" ? modelo.semanaDia1 : null,
+      diaLivre: modelo.diaLivre === true,
       mostrarConvite: modelo.mostrarConvite === true,
       linhas: modelo.linhas || null,
       link: link
@@ -372,6 +378,30 @@ function mostrarLinha(id, valor) {
   el.textContent = "";
 }
 
+/* Os dias da missão, quando a pessoa escolheu de 3 a 6. É o plano dos 30 dias:
+   dia da missão com contorno, dia livre com contorno pontilhado, hoje com anel.
+   O que foi feito ou faltou fica no Hoje. A régua é aria-hidden; a linha diz os dias. */
+function pintarPlanoDias(modelo) {
+  var bloco = document.getElementById("plano-dias");
+  var caixa = document.getElementById("regua-plano");
+  var dias = NexusDias.daMissao(modelo.diasSemana);
+  if (!dias || typeof modelo.semanaDia1 !== "number" || typeof modelo.duracao !== "number") {
+    bloco.hidden = true;
+    caixa.replaceChildren();
+    return;
+  }
+  document.getElementById("dias-linha").textContent = NexusDias.TEXTOS.rotuloPrevia + ": " + NexusDias.resumo(dias);
+  var daMissao = NexusDias.verificador(dias, modelo.semanaDia1);
+  var pecas = [];
+  for (var dia = 1; dia <= modelo.duracao; dia++) {
+    var marca = document.createElement("span");
+    marca.className = "marca-plano" + (daMissao(dia) ? "" : " livre") + (dia === modelo.dia ? " hoje" : "");
+    pecas.push(marca);
+  }
+  caixa.replaceChildren.apply(caixa, pecas);
+  bloco.hidden = false;
+}
+
 function pintar(modelo) {
   var titulo = document.getElementById("titulo");
   if (modelo.titulo) {
@@ -385,9 +415,12 @@ function pintar(modelo) {
   }
   document.getElementById("modo").textContent = modelo.tituloModo || "Solo";
   mostrarLinha("dia-numero", modelo.dia && modelo.duracao ? "Dia " + modelo.dia + " de " + modelo.duracao : "");
-  mostrarLinha("minimo", modelo.minimo ? "O mínimo de hoje: " + modelo.minimo : "");
+  /* Num dia livre (today_is_mission_day false) não há mínimo de hoje: vale a frase aprovada. */
+  if (modelo.diaLivre === true) mostrarLinha("minimo", NexusDias.TEXTOS.hojeLivre);
+  else mostrarLinha("minimo", modelo.minimo ? "O mínimo de hoje: " + modelo.minimo : "");
   mostrarLinha("porque", modelo.porque ? "Porque: " + modelo.porque : "");
   document.getElementById("frase-solo").hidden = modelo.fraseSolo !== true;
+  pintarPlanoDias(modelo);
 
   var placar = document.getElementById("placar");
   var avisoPlacar = document.getElementById("aviso-placar");
@@ -625,7 +658,13 @@ async function carregar() {
     return;
   }
 
-  var missaoRes = await NexusApi.obterMissao(resumo.id);
+  /* A sequência só diz se hoje é dia livre. Se ela falhar, a tela abre como antes. */
+  var pedidos = await Promise.all([
+    NexusApi.obterMissao(resumo.id),
+    NexusApi.sequenciaDaMissao(resumo.id)
+  ]);
+  var missaoRes = pedidos[0];
+  var sequenciaRes = pedidos[1];
   if (meu !== ciclo) return;
   if (!missaoRes.ok) {
     if (missaoRes.semRede) abrirOffline();
@@ -639,6 +678,7 @@ async function carregar() {
   }
 
   var base = modeloBase(missao);
+  base.diaLivre = !!(sequenciaRes && sequenciaRes.ok && sequenciaRes.dados && sequenciaRes.dados.today_is_mission_day === false);
   if (base.rival) {
     var placar = await NexusApi.placarDaMissao(missao.id);
     if (meu !== ciclo) return;
@@ -669,7 +709,15 @@ function atualizarBarra() {
   if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
 }
 
+function aplicarTextosDosDias() {
+  document.querySelectorAll("[data-texto-dias]").forEach(function (el) {
+    var chave = el.getAttribute("data-texto-dias");
+    if (Object.prototype.hasOwnProperty.call(NexusDias.TEXTOS, chave)) el.textContent = NexusDias.TEXTOS[chave];
+  });
+}
+
 function iniciar() {
+  aplicarTextosDosDias();
   window.NEXUS_CENARIO = cenarioDaPagina();
   NexusAbas.montar("missao");
   document.getElementById("btn-tentar").addEventListener("click", carregar);

@@ -10,7 +10,13 @@
    Com recovery_needed true, o miolo do Hoje vira a volta ao ciclo.
    A barra de abas continua. Não é página separada nem modal.
    A frase usa missed_days_before_today quando o servidor manda.
-   Sem esse campo, cai em missed_days - 1. Zero e negativo não aparecem. */
+   Sem esse campo, cai em missed_days - 1. Zero e negativo não aparecem.
+
+   Dias da missão (dias-da-missao.js): a sequência manda today_is_mission_day e
+   mission_weekdays. Com today_is_mission_day false, hoje é dia livre: sem botão
+   de registrar, sem pendência, sem cor de aviso. Na régua, o dia livre tem
+   contorno pontilhado, sem preenchimento e sem o traço da falta. O dia da semana
+   de cada Dia N sai do started_at neste aparelho; para hoje, vale o servidor. */
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_USUARIO = "nexus_v2_user";
@@ -427,6 +433,22 @@ function escolherMissao(lista) {
   return null;
 }
 
+/* A sequência manda a lista já ordenada; a missão também, quando volta inteira. */
+function lerDiasDaSemana(missao, sequencia) {
+  if (sequencia && Array.isArray(sequencia.mission_weekdays)) return NexusDias.daMissao(sequencia.mission_weekdays);
+  if (missao && Array.isArray(missao.mission_weekdays)) return NexusDias.daMissao(missao.mission_weekdays);
+  return null;
+}
+
+/* (dia) => true quando o Dia N é dia livre. Hoje segue o servidor. */
+function livreDe(modelo) {
+  var daMissao = NexusDias.verificador(modelo.diasSemana, modelo.semanaDia1);
+  return function (dia) {
+    if (dia === modelo.dia) return modelo.diaLivre === true;
+    return !daMissao(dia);
+  };
+}
+
 function modeloDe(missao, progresso, sequencia) {
   var dia = numeroDoDia(missao.started_at);
   var duracao = duracaoDe(missao);
@@ -439,6 +461,9 @@ function modeloDe(missao, progresso, sequencia) {
     missedYesterday: !!(sequencia && sequencia.missed_yesterday === true),
     missedDays: lerMissedDays(sequencia),
     missedBefore: lerAntesDeHoje(sequencia),
+    diaLivre: !!(sequencia && sequencia.today_is_mission_day === false),
+    diasSemana: lerDiasDaSemana(missao, sequencia),
+    semanaDia1: NexusDias.diaDaSemana(missao.started_at),
     id: missao.id,
     category: typeof missao.category === "string" ? missao.category : "",
     proof_mode: typeof missao.proof_mode === "string" ? missao.proof_mode : "",
@@ -469,6 +494,9 @@ function guardarCache(modelo) {
       missedYesterday: modelo.missedYesterday === true,
       missedDays: typeof modelo.missedDays === "number" ? modelo.missedDays : null,
       missedBefore: typeof modelo.missedBefore === "number" ? modelo.missedBefore : null,
+      diaLivre: modelo.diaLivre === true,
+      diasSemana: Array.isArray(modelo.diasSemana) ? modelo.diasSemana : null,
+      semanaDia1: typeof modelo.semanaDia1 === "number" ? modelo.semanaDia1 : null,
       dia: modelo.dia,
       duracao: modelo.duracao,
       titulo: modelo.titulo,
@@ -523,18 +551,23 @@ function rotuloDasMarcas(modelo) {
   var nCumprido = 0;
   var nDificil = 0;
   var nFalta = 0;
+  var nLivre = 0;
+  var ehLivre = livreDe(modelo);
   var dia;
   for (dia = 1; dia <= duracao; dia++) {
     var dificil = temDificeis && !!dificeis[dia];
     var feito = !!feitos[dia];
     if (dificil) nDificil += 1;
     else if (feito) nCumprido += 1;
+    else if (ehLivre(dia)) nLivre += 1;
     else if (dia < hoje) nFalta += 1;
   }
-  return "Dia " + hoje + " de " + duracao + ": "
+  var frase = "Dia " + hoje + " de " + duracao + ": "
     + palavraDeContagem(nCumprido, "cumprido", "cumpridos") + ", "
     + palavraDeContagem(nDificil, "difícil", "difíceis") + ", "
     + palavraDeContagem(nFalta, "falta", "faltas");
+  if (nLivre > 0) frase += ", " + palavraDeContagem(nLivre, "dia livre", "dias livres");
+  return frase;
 }
 
 /* Régua de marcas, 15 por linha. Cada marca é aria-hidden;
@@ -553,8 +586,11 @@ function pintarRegua(modelo, idRegua, idDia) {
     modelo.dificeis.forEach(function (dia) { dificeis[dia] = true; });
   }
 
+  var ehLivre = livreDe(modelo);
   var visivel = document.createElement("span");
-  visivel.textContent = "Dia " + hoje + " de " + duracao;
+  visivel.textContent = modelo.diaLivre === true
+    ? NexusDias.preencher(NexusDias.TEXTOS.linhaDoDiaLivre, { dia: hoje, total: duracao })
+    : "Dia " + hoje + " de " + duracao;
   var escondido = document.createElement("span");
   escondido.className = "saltar";
   escondido.textContent = ". " + rotuloDasMarcas(modelo).replace(/^Dia \d+ de \d+: /, "") + ".";
@@ -569,6 +605,7 @@ function pintarRegua(modelo, idRegua, idDia) {
     var feito = !!feitos[dia];
     if (dificil) marca.classList.add("dificil");
     else if (feito) marca.classList.add("feito");
+    else if (ehLivre(dia)) marca.classList.add("livre");
     else if (dia < hoje) marca.classList.add("falta");
     if (dia === hoje) marca.classList.add("hoje");
     caixa.appendChild(marca);
@@ -592,6 +629,13 @@ var DESENHO_LUA = "M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z";
 function pintarEstado(modelo) {
   var el = document.getElementById("estado");
   var texto = document.createElement("span");
+  if (modelo && modelo.diaLivre === true && !modelo.hojeFeito) {
+    /* Dia livre: só o fato, sem ícone de pendência e sem cor de aviso. */
+    el.className = "estado estado-livre";
+    texto.textContent = NexusDias.TEXTOS.hojeLivre;
+    el.replaceChildren(texto);
+    return;
+  }
   if (modelo && modelo.hojeFeito && hojeEhDificil(modelo)) {
     el.className = "estado estado-dificil";
     texto.textContent = TEXTO_DIFICIL;
@@ -635,6 +679,7 @@ function pintarAcao(modelo, semRede) {
     }
     return;
   }
+  if (modelo.diaLivre === true) return;
   if (semRede) {
     acoes.appendChild(botaoRegistrarSemRede("alerta-registro"));
     return;
@@ -757,7 +802,8 @@ function pintarDia(modelo, semRede) {
   document.getElementById("titulo-missao").textContent = modelo.titulo;
   var blocoMinimo = document.getElementById("bloco-minimo");
   var minimo = document.getElementById("minimo");
-  if (modelo.minimo) {
+  var livre = modelo.diaLivre === true && !modelo.hojeFeito;
+  if (modelo.minimo && !livre) {
     blocoMinimo.hidden = false;
     minimo.textContent = modelo.minimo;
   } else {
@@ -765,6 +811,16 @@ function pintarDia(modelo, semRede) {
     minimo.textContent = "";
   }
   pintarEstado(modelo);
+
+  var proximo = document.getElementById("linha-proximo");
+  var nomeProximo = livre ? NexusDias.proximoNome(modelo.diasSemana, modelo.semanaDia1, modelo.dia, modelo.duracao) : "";
+  if (nomeProximo) {
+    proximo.hidden = false;
+    proximo.textContent = NexusDias.preencher(NexusDias.TEXTOS.proximoDia, { dia: nomeProximo });
+  } else {
+    proximo.hidden = true;
+    proximo.textContent = "";
+  }
 
   var par = document.getElementById("linha-par");
   par.replaceChildren();
@@ -781,7 +837,7 @@ function pintarDia(modelo, semRede) {
   document.getElementById("linha-espera").hidden = !modelo.esperando;
 
   var dificeis = document.getElementById("linha-dificeis");
-  if (typeof modelo.restantes === "number" && modelo.restantes > 0) {
+  if (!livre && typeof modelo.restantes === "number" && modelo.restantes > 0) {
     dificeis.hidden = false;
     dificeis.textContent = "Dias difíceis: restam " + modelo.restantes + " de 4.";
   } else {
@@ -798,7 +854,7 @@ function pintarDia(modelo, semRede) {
 }
 
 function abrirModelo(modelo, semRede) {
-  if (modelo.recuperacao) {
+  if (modelo.recuperacao && modelo.diaLivre !== true) {
     pintarRecuperacao(modelo, semRede);
     return;
   }

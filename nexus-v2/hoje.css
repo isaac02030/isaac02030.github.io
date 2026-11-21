@@ -172,6 +172,21 @@ body:has(.tela-hoje) {
   outline-offset: 2px;
 }
 
+/* Dia livre: contorno pontilhado fino em --text-muted, sem preenchimento e sem
+   o traço da falta. Hoje num dia livre mantém o pontilhado e ganha o anel de hoje. */
+.regua-dia.livre,
+.regua-dia.livre.hoje {
+  border-style: dotted;
+  border-color: var(--text-muted);
+  background: transparent;
+}
+
+.linha-proximo {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+}
+
 /* ---------- Cartão da missão ---------- */
 
 .cartao-missao {

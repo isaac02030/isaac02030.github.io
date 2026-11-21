@@ -489,6 +489,11 @@ async function carregar() {
   }
   var sequencia = respostas[1].dados || {};
   voltaPelaSequencia = sequenciaIndicaVolta(sequencia);
+  /* Dia livre (dias-da-missao.js): a mesma frase do servidor, sem erro e sem formulário. */
+  if (sequencia.today_is_mission_day === false && sequencia.today_done !== true && missao.status === "active") {
+    mostrarBloqueio(NexusDias.TEXTOS.checkinLivre);
+    return;
+  }
   decidirMissao(missao, sequencia.today_done === true, false);
 }
 
@@ -580,6 +585,12 @@ function tratarResposta(resultado) {
     return;
   }
   var erro = typeof resultado.erro === "string" ? resultado.erro : "";
+  /* Dia livre (PR 16 do servidor): 400 com free_day: true. Nada foi gravado.
+     Não é erro: a tela mostra a frase do servidor, como no bloqueio. */
+  if (resultado.status === 400 && dados.free_day === true) {
+    mostrarBloqueio(erro || NexusDias.TEXTOS.checkinLivre);
+    return;
+  }
   if (resultado.status === 400 && erro === "Missão não está ativa.") {
     mostrarBloqueio(TEXTO_INATIVA);
     return;

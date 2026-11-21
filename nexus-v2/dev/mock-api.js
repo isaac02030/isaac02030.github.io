@@ -19,6 +19,14 @@
    - sem título ou sem categoria → 400
    - título exatamente "falha" → 500
    - título exatamente "lento" → espera 8 segundos e cria
+   - mission_weekdays (1 = segunda ... 7 = domingo), como no PR 16 do servidor:
+     fora de 1 a 7 ou repetido → 400 «Escolha os dias da missão de segunda (1)
+     a domingo (7), sem repetir.»; menos de 3 → 400 «Escolha pelo menos 3 dias
+     da missão por semana.»; sem o campo (ou null) → todos os dias.
+   - título "sem-migracao" com mission_weekdays → 503, como o servidor sem a
+     migração 004. Sem o campo, cria normalmente.
+   - título "dias-servidor" com mission_weekdays → 400 com a frase dos 3 dias
+     (para ver o texto do servidor na tela, mesmo com 3 dias marcados).
    - o resto cria a missão. duration_days do pedido é ignorado e fica 30,
      como na rota de verdade. started_at nasce agora.
    Aviso:
@@ -98,6 +106,11 @@
                                                     o sinal vem só do cenário.
    - post-quatro     (post-quatro@exemplo.com)     o POST responde o 400 dos 4 dias
    - quatro-e-seguidos (quatro-e-seguidos@exemplo.com) os 4 acabaram e os 2 anteriores também
+   - dia-livre       (dia-livre@exemplo.com)       Dia 10, hoje é dia livre (3 dias por semana,
+                                                    calculados a partir de hoje). O POST do
+                                                    check-in responde 400 com free_day: true.
+   - semana-livre    (semana-livre@exemplo.com)    Dia 10, hoje é dia da missão, ainda sem
+                                                    registro; a régua mostra os dias livres.
 
    Check-in (POST /api/checkins com { mission_id, note } e, na tela 5,
    difficult: true e minimum_done: true; sem minimum_done, 400 como no servidor):
@@ -190,8 +203,51 @@ var CENARIO_POR_EMAIL = {
   "post-seguidos@exemplo.com": "post-seguidos",
   "post-crise@exemplo.com": "post-crise",
   "post-quatro@exemplo.com": "post-quatro",
-  "quatro-e-seguidos@exemplo.com": "quatro-e-seguidos"
+  "quatro-e-seguidos@exemplo.com": "quatro-e-seguidos",
+  "dia-livre@exemplo.com": "dia-livre",
+  "semana-livre@exemplo.com": "semana-livre"
 };
+
+/* Dias da missão, como lib/mission-days.js do servidor (relógio deste processo). */
+var MSG_DIAS_FORMATO = "Escolha os dias da missão de segunda (1) a domingo (7), sem repetir.";
+var MSG_DIAS_MINIMO = "Escolha pelo menos 3 dias da missão por semana.";
+var MSG_DIA_LIVRE = "Hoje é dia livre na sua missão, não precisa de check-in. O próximo é no dia da missão.";
+
+function validarDias(valor) {
+  if (valor === undefined || valor === null) return { ok: true, valor: null };
+  if (!Array.isArray(valor) || !valor.every(function (d) { return typeof d === "number" && Math.floor(d) === d && d >= 1 && d <= 7; })) {
+    return { ok: false, erro: MSG_DIAS_FORMATO };
+  }
+  var unicos = {};
+  valor.forEach(function (d) { unicos[d] = true; });
+  if (Object.keys(unicos).length !== valor.length) return { ok: false, erro: MSG_DIAS_FORMATO };
+  if (valor.length < 3) return { ok: false, erro: MSG_DIAS_MINIMO };
+  return { ok: true, valor: valor.slice().sort(function (a, b) { return a - b; }) };
+}
+
+function semanaDe(data) {
+  var d = data.getDay();
+  return d === 0 ? 7 : d;
+}
+
+/* (dia) => true quando o Dia N é dia da missão. Sem dias (ou os 7): sempre. */
+function verificadorDe(missao) {
+  var dias = Array.isArray(missao.mission_weekdays) ? missao.mission_weekdays : null;
+  if (!dias || dias.length >= 7) return function () { return true; };
+  var dia1 = semanaDe(new Date(missao.started_at));
+  return function (n) {
+    var semana = (((dia1 - 1 + n - 1) % 7) + 7) % 7 + 1;
+    return dias.indexOf(semana) !== -1;
+  };
+}
+
+function camposDosDias(missao, dia) {
+  var dias = Array.isArray(missao.mission_weekdays) && missao.mission_weekdays.length < 7 ? missao.mission_weekdays : null;
+  return {
+    today_is_mission_day: verificadorDe(missao)(dia),
+    mission_weekdays: dias
+  };
+}
 
 function faixaDeDias(ate, pular) {
   var lista = [];
@@ -307,6 +363,10 @@ var CENARIOS = {
   "post-crise": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, crisePost: true },
   "post-quatro": { dia: 5, feitos: [1, 3], dificeis: [1, 3], restantes: 2, erroPost: "quatro" },
   "quatro-e-seguidos": { dia: 6, feitos: [1, 2, 3, 4, 5], dificeis: [2, 3, 4, 5], restantes: 0 },
+  /* diasRelativos: dias da missão contados a partir do dia da semana de hoje
+     (0 = hoje). Os feitos são os dias da missão antes de hoje; o primeiro é difícil. */
+  "dia-livre": { dia: 10, diasRelativos: [1, 3, 5], feitos: [], dificeis: [], restantes: 3 },
+  "semana-livre": { dia: 10, diasRelativos: [0, 2, 4], feitos: [], dificeis: [], restantes: 3 },
   /* Ana é um nome de exemplo. Não é uma pessoa real. Os dias também são fictícios. */
   solo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
   "duo-esperando": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, aguardando: "duo" },
@@ -596,7 +656,8 @@ function novaMissao(usuario, campos) {
     partner_contact: null,
     created_at: agora.toISOString(),
     user_name: usuario.username,
-    partner_name: campos.partner_name || null
+    partner_name: campos.partner_name || null,
+    mission_weekdays: Array.isArray(campos.mission_weekdays) ? campos.mission_weekdays : null
   };
 }
 
@@ -629,8 +690,28 @@ function montarCenario(nome, usuario) {
   var dia = spec.dia;
   var extra = registroDoCenario[usuario.email + "|" + nome];
   var feitos = spec.feitos.slice();
+  var diasDaSemana = null;
+  if (Array.isArray(spec.diasRelativos)) {
+    var semanaHoje = semanaDe(new Date());
+    diasDaSemana = spec.diasRelativos.map(function (o) {
+      return (((semanaHoje - 1 + o) % 7) + 7) % 7 + 1;
+    }).sort(function (a, b) { return a - b; });
+  }
   if (extra && feitos.indexOf(extra.day) === -1) feitos.push(extra.day);
   var dificeis = Array.isArray(spec.dificeis) ? spec.dificeis.slice() : [];
+  if (diasDaSemana) {
+    var semanaDia1 = (((semanaDe(new Date()) - 1 - (dia - 1)) % 7) + 7) % 7 + 1;
+    var primeiro = true;
+    for (var n = 1; n < dia; n++) {
+      var semanaN = (((semanaDia1 - 1 + n - 1) % 7) + 7) % 7 + 1;
+      if (diasDaSemana.indexOf(semanaN) === -1) continue;
+      if (feitos.indexOf(n) === -1) feitos.push(n);
+      if (primeiro) {
+        dificeis.push(n);
+        primeiro = false;
+      }
+    }
+  }
   var acrescentouDificil = false;
   if (!spec.omitirDificeis && extra && extra.difficult === true && dificeis.indexOf(extra.day) === -1) {
     dificeis.push(extra.day);
@@ -667,6 +748,7 @@ function montarCenario(nome, usuario) {
     pair_started_at: partner ? inicio : null
   });
   if (spec.aguardando) mission.pending_invite = spec.aguardando;
+  if (diasDaSemana) mission.mission_weekdays = diasDaSemana;
   var extraDias = extensoes[usuario.email + "|" + nome] || 0;
   if (extraDias > 0) {
     mission.duration_days += extraDias;
@@ -701,10 +783,20 @@ function montarCenario(nome, usuario) {
     };
   }
 
+  var streak = ajustarSequencia(sequenciaDe(new Set(feitos), dia, sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil)), spec);
+  if (diasDaSemana) {
+    /* Como o servidor: o dia livre não é falta e não pede recuperação. */
+    Object.assign(streak, camposDosDias(mission, dia), {
+      missed_yesterday: false,
+      missed_days: 0,
+      missed_days_before_today: 0,
+      recovery_needed: false
+    });
+  }
   return {
     mission: mission,
     progress: { progress: progress },
-    streak: ajustarSequencia(sequenciaDe(new Set(feitos), dia, sequenciaDoCenario(spec, dificeis, restantes, acrescentouDificil)), spec)
+    streak: streak
   };
 }
 
@@ -803,6 +895,15 @@ async function criarMissao(email, corpo) {
   if (title === "falha") {
     return { status: 500, dados: { error: "Erro ao criar missao." } };
   }
+  var temDias = corpo.mission_weekdays !== undefined && corpo.mission_weekdays !== null;
+  var dias = validarDias(corpo.mission_weekdays);
+  if (!dias.ok) return { status: 400, dados: { error: dias.erro } };
+  if (temDias && title === "sem-migracao") {
+    return { status: 503, dados: { error: "A escolha dos dias da missão ainda não está disponível. Crie a missão sem escolher os dias ou tente mais tarde." } };
+  }
+  if (temDias && title === "dias-servidor") {
+    return { status: 400, dados: { error: MSG_DIAS_MINIMO } };
+  }
   if (title === "lento") {
     await new Promise(function (resolver) {
       setTimeout(resolver, ESPERA_MISSAO_MS);
@@ -815,7 +916,8 @@ async function criarMissao(email, corpo) {
     why_it_matters: typeof corpo.why_it_matters === "string" ? corpo.why_it_matters : null,
     proof_mode: typeof corpo.proof_mode === "string" && corpo.proof_mode ? corpo.proof_mode : "self_report",
     mode: "solo",
-    status: "active"
+    status: "active",
+    mission_weekdays: dias.valor
   });
   usuarios[email].missoes.unshift(mission);
   return {
@@ -970,6 +1072,12 @@ async function registrarCheckin(email, corpo, cenario) {
   var dia = numeroDoDia(missao.started_at);
   if (dia > missao.duration_days) {
     return { status: 400, dados: { error: "A missão já terminou." } };
+  }
+  /* Como o servidor (PR 16): num dia livre, comum ou difícil, nada é gravado. */
+  if (!verificadorDe(missao)(dia)) {
+    var livre = { error: MSG_DIA_LIVRE, free_day: true };
+    if (crise) livre.crisis = true;
+    return { status: 400, dados: livre };
   }
   var querDificil = corpo && corpo.difficult === true && !(spec && spec.ignoraDifficult);
   if (querDificil) {
@@ -1225,7 +1333,8 @@ function responderHoje(req, res, email) {
         restantes: Math.max(0, 4 - dificeisGuardados.length)
       };
     }
-    enviar(res, 200, sequenciaDe(feitos, numeroDoDia(missaoSeq.started_at), extraSeq));
+    var diaSeq = numeroDoDia(missaoSeq.started_at);
+    enviar(res, 200, Object.assign(sequenciaDe(feitos, diaSeq, extraSeq), camposDosDias(missaoSeq, diaSeq)));
     return true;
   }
 
