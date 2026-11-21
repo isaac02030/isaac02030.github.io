@@ -181,9 +181,12 @@ var NexusApi = {
   /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
      A rota atual não lê esse campo: a coluna já nasce 30 e o fim é agora + 30 dias.
      Enviar 30 não muda o resultado. Não mandamos level, description, fallback_plan
-     nem commitment_window: o servidor não exige esses campos. */
+     nem commitment_window: o servidor não exige esses campos.
+     mission_weekdays (1 = segunda ... 7 = domingo) só vai quando a pessoa
+     escolheu de 3 a 6 dias. Com os 7, o campo fica de fora: o servidor já
+     entende como todos os dias, e a missão não depende da migração 004. */
   criarMissao: function (dados) {
-    return nexusPedir("/api/missions", {
+    var corpo = {
       title: dados.title,
       category: dados.category,
       daily_minimum: dados.daily_minimum,
@@ -191,7 +194,9 @@ var NexusApi = {
       mode: "solo",
       duration_days: 30,
       proof_mode: dados.proof_mode
-    }, { metodo: "POST", auth: true });
+    };
+    if (Array.isArray(dados.mission_weekdays)) corpo.mission_weekdays = dados.mission_weekdays.slice();
+    return nexusPedir("/api/missions", corpo, { metodo: "POST", auth: true });
   },
   chaveVapid: function () {
     return nexusPedir("/api/notifications/vapid-key", null, { metodo: "GET" });
