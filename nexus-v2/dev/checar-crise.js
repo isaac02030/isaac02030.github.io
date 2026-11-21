@@ -34,7 +34,7 @@ var TEXTO = [
   "Brasil",
   "Emergência SAMU", "192",
   "CVV", "ligação gratuita, 24h", "188",
-  "CVV chat", "seg a sex 8h às 0h, sáb 13h às 0h, dom 15h às 0h", "Abrir",
+  "CVV chat", "seg a sex, das 8h à meia-noite; sáb, das 13h à meia-noite; dom, das 15h à meia-noite", "Abrir o chat do CVV",
   "Voltar à missão"
 ];
 
@@ -64,6 +64,8 @@ function textoVisivel(html) {
     .replace(/<svg[\s\S]*?<\/svg>/g, "");
   var titulo = (corpo.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "";
   var depoisDoHead = corpo.slice(corpo.indexOf("<body"));
+  /* <span class="sem-quebra"> só muda a quebra de linha, não o texto. */
+  depoisDoHead = depoisDoHead.replace(/<span class="sem-quebra">([^<]*)<\/span>/g, "$1");
   var partes = depoisDoHead.split(/<[^>]+>/).map(function (s) {
     return s.replace(/\s+/g, " ").trim();
   }).filter(Boolean);
@@ -94,7 +96,10 @@ function conferir(html, cssBruto, sw) {
     falhas.push("o texto da tela mudou (posição " + i + "): esperado «" + TEXTO[i] + "», veio «" + visto[i] + "»");
   }
   if (JSON.stringify(links(html)) !== JSON.stringify(LINKS)) falhas.push("um número, link ou rótulo de leitor de tela mudou");
-  if (!/target="_blank" rel="noopener">Abrir<\/a>/.test(html)) falhas.push("o chat do CVV perdeu target/rel");
+  if (!/target="_blank" rel="noopener">Abrir o chat do CVV<\/a>/.test(html)) falhas.push("o chat do CVV perdeu target/rel");
+  if ((html.match(/<span class="sem-quebra">meia-noite<\/span>/g) || []).length !== 3) falhas.push("cada «meia-noite» precisa estar em <span class=\"sem-quebra\">");
+  if (!/class="btn-ligar btn-chat" href="https:\/\/cvv\.org\.br\/chat\/"/.test(html)) falhas.push("o botão do chat do CVV perdeu a classe btn-chat");
+  if (/btn-chat[^>]*>[^<]*<svg/.test(html)) falhas.push("o botão do chat do CVV não pode ter ícone de telefone");
   if (html.indexOf("Conferidos em 19/11/2026") === -1) falhas.push("sumiu a data de conferência dos números");
   ["https://www.sns24.gov.pt/", "https://cvv.org.br/ligue-188/", "https://www.sosvozamiga.org/contactos"].forEach(function (fonte) {
     if (html.indexOf(fonte) === -1) falhas.push("sumiu a fonte " + fonte);
@@ -116,12 +121,14 @@ function conferir(html, cssBruto, sw) {
   if (/\.crise-titulo::after|\.titulo::after/.test(css)) falhas.push("o traço decorativo embaixo do título voltou");
   var aviso = css.slice(css.indexOf(".aviso-saude"), css.indexOf("}", css.indexOf(".aviso-saude")));
   if (aviso.indexOf("var(--text-body)") === -1) falhas.push("o aviso de saúde precisa estar em tamanho de corpo");
+  if (!/\.btn-chat \{[^}]*font: var\(--text-body\);[^}]*font-weight: 600;/.test(css)) falhas.push("o botão do chat do CVV precisa da fonte do corpo, peso 600");
+  if (!/\.sem-quebra \{\s*white-space: nowrap;/.test(css)) falhas.push("falta .sem-quebra com white-space: nowrap");
   if (!/\.btn-ligar \{[^}]*min-height: var\(--target\)/.test(css)) falhas.push("o botão de ligar precisa de 44 px");
   if (/fetch\(|XMLHttpRequest|NexusApi/.test(html)) falhas.push("a tela de crise não pode pedir nada à rede");
 
   /* ---------- Cache ---------- */
   if (sw.indexOf('"./crise.html"') === -1 || sw.indexOf('"./crise.css"') === -1) falhas.push("a tela de crise saiu do cache (precisa abrir sem internet)");
-  if (sw.indexOf('CACHE = "nexus-v2-v23"') === -1) falhas.push("o cache não está em nexus-v2-v23");
+  if (sw.indexOf('CACHE = "nexus-v2-v24"') === -1) falhas.push("o cache não está em nexus-v2-v24");
 
   /* ---------- 3. Abre sem login e sem internet ---------- */
   if (/location\.(replace|assign)\(|location\.href\s*=/.test(semComentarios(html))) falhas.push("a tela de crise não pode mandar ninguém para outra página ao abrir (precisa abrir sem login)");

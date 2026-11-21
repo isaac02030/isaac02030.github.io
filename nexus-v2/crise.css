@@ -172,6 +172,19 @@ body:has(.tela-crise) {
   font-size: min(1.375rem, 9vw);
 }
 
+/* O chat do CVV não é ligação: fonte do corpo, sem ícone, para o olho ir
+   primeiro aos números. Mantém borda, raio e 44 px dos outros contatos. */
+.btn-chat {
+  font: var(--text-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* «meia-noite» não se parte no hífen; a linha quebra antes da palavra. */
+.sem-quebra {
+  white-space: nowrap;
+}
+
 .btn-ligar:hover {
   border-color: var(--text);
 }
