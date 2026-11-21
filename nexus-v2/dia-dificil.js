@@ -345,6 +345,14 @@ function irParaCrise() {
   location.replace("crise.html" + busca());
 }
 
+/* Dia livre: as frases do Hoje, com o próximo dia da missão.
+   Fica só o «Voltar a Hoje» de baixo; o «Voltar» do topo some para não repetir. */
+var diasDaSequencia = null;
+function mostrarDiaLivre(missao) {
+  mostrarBloqueio(NexusDias.fraseDiaLivre(missao, diasDaSequencia));
+  document.getElementById("voltar").hidden = true;
+}
+
 function mostrarBloqueio(texto) {
   document.getElementById("texto-bloqueio").textContent = texto;
   mostrarVista("bloqueio");
@@ -506,8 +514,9 @@ async function carregar() {
   var sequencia = respostas[1].dados || {};
   voltaPelaSequencia = sequenciaIndicaVolta(sequencia);
   /* Dia livre (dias-da-missao.js): a mesma frase do servidor, sem erro e sem formulário. */
+  diasDaSequencia = Array.isArray(sequencia.mission_weekdays) ? sequencia.mission_weekdays : null;
   if (sequencia.today_is_mission_day === false && sequencia.today_done !== true && missao.status === "active") {
-    mostrarBloqueio(NexusDias.TEXTOS.checkinLivre);
+    mostrarDiaLivre(missao);
     return;
   }
   decidirMissao(missao, sequencia, false);
@@ -604,7 +613,7 @@ function tratarResposta(resultado) {
   /* Dia livre (PR 16 do servidor): 400 com free_day: true. Nada foi gravado.
      Não é erro: a tela mostra a frase do servidor, como no bloqueio. */
   if (resultado.status === 400 && dados.free_day === true) {
-    mostrarBloqueio(erro || NexusDias.TEXTOS.checkinLivre);
+    mostrarDiaLivre(missaoAtual);
     return;
   }
   if (resultado.status === 400 && erro === MSG_QUATRO) {

@@ -235,6 +235,9 @@
 }
 
 /* ---------- Os dias da missão (plano dos 30 dias) ----------
+   Traço de 1,5px nas marcas (também no pontilhado). Contraste do pontilhado
+   (--text-muted): 7,2:1 no cartão claro, 7,1:1 no escuro; no Hoje, 6,3:1 no
+   papel e 8,0:1 em #161411.
    Mesmas marcas do Hoje: 16px, 15 por linha. Dia da missão:
    contorno --border. Dia livre: contorno pontilhado em --text-muted, sem
    preenchimento e sem traço. Hoje: anel no acento. */
@@ -287,13 +290,28 @@
   outline-offset: 2px;
 }
 
+.titulo-plano {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+/* A legenda repete o que a linha «Dias: …» já diz; o leitor de tela não a lê. */
 .legenda-dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.legenda-dias li {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0;
-  font: var(--text-small);
-  color: var(--text-muted);
 }
 
 .legenda-dias .marca-plano {

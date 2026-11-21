@@ -348,7 +348,10 @@ function mostrarPasso(numero, moverFoco) {
   document.getElementById("passo-3").hidden = numero !== 3;
   document.getElementById("passo-4").hidden = numero !== 4;
   document.title = tituloDoPasso(numero);
-  if (numero === 4) aplicarAviso();
+  if (numero === 4) {
+    fecharIndisponivel();
+    aplicarAviso();
+  }
   window.scrollTo(0, 0);
   if (!moverFoco) return;
   var titulo = document.getElementById("titulo-" + numero);
@@ -542,7 +545,15 @@ function enviarPasso3(evento) {
 }
 
 /* 503: a escolha dos dias ainda não existe no servidor (migração 004).
-   O alerta explica e dá dois caminhos. Nada do que foi digitado some. */
+   O alerta explica e dá dois caminhos. Nada do que foi digitado some.
+   Enquanto ele está aberto, «Começar a missão» some: um só botão principal
+   («Começar com todos os dias»), e «Tentar de novo» fica como secundário. */
+function fecharIndisponivel() {
+  var alerta = document.getElementById("alerta-4");
+  if (alerta && alerta.querySelector("#btn-todos-os-dias")) esconderAviso(alerta);
+  document.getElementById("btn-comecar").hidden = false;
+}
+
 function mostrarIndisponivel(alerta, aoTodos, aoTentar) {
   var corpo = document.createElement("div");
   corpo.className = "alerta-corpo";
@@ -569,6 +580,7 @@ function mostrarIndisponivel(alerta, aoTodos, aoTentar) {
   alerta.className = "alerta alerta-rede";
   alerta.replaceChildren(iconeAviso("info"), corpo);
   alerta.hidden = false;
+  document.getElementById("btn-comecar").hidden = true;
 }
 
 function enviarPasso4(evento) {
@@ -584,6 +596,7 @@ async function criarAMissao(opcoes) {
   var alerta = document.getElementById("alerta-4");
   var botao = document.getElementById("btn-comecar");
   esconderAviso(alerta);
+  botao.hidden = false;
   lerCampos();
   /* «Começar com todos os dias»: os 7 voltam a ficar marcados e o campo não vai. */
   if (opcoes && opcoes.semDias) {

@@ -84,13 +84,14 @@
         <p class="dia-numero" id="dia-numero" hidden></p>
         <p class="minimo" id="minimo" hidden></p>
         <p class="porque" id="porque" hidden></p>
-        <section class="plano-dias" id="plano-dias" aria-labelledby="dias-linha" hidden>
+        <section class="plano-dias" id="plano-dias" aria-labelledby="titulo-plano" hidden>
+          <h2 class="titulo-plano" id="titulo-plano" data-texto-dias="tituloPlano"></h2>
           <p class="dias-linha" id="dias-linha"></p>
           <div class="regua-plano" id="regua-plano" aria-hidden="true"></div>
-          <p class="legenda-dias">
-            <span class="marca-plano livre" aria-hidden="true"></span>
-            <span data-texto-dias="legendaLivre"></span>
-          </p>
+          <ul class="legenda-dias" aria-hidden="true">
+            <li><span class="marca-plano"></span><span data-texto-dias="legendaMissao"></span></li>
+            <li><span class="marca-plano livre"></span><span data-texto-dias="legendaLivre"></span></li>
+          </ul>
         </section>
         <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
 

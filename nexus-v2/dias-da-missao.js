@@ -19,15 +19,16 @@
     proximoDia: "O próximo dia da missão é {dia}.",
     linhaDoDiaLivre: "Dia {dia} de {total}, dia livre",
     legendaLivre: "Dia livre",
+    /* Textos novos pedidos pela Clara na revisão do PR 21 (ainda esperam o sim do Isaac). */
+    legendaMissao: "Dia da missão",
+    tituloPlano: "Plano dos 30 dias",
     rotuloPrevia: "Dias",
     previaTodos: "todos os dias",
     indisponivel: "A escolha dos dias ainda não está disponível. Você pode começar a missão com todos os dias ou tentar mais tarde.",
     comecarComTodos: "Começar com todos os dias",
     tentarDeNovo: "Tentar de novo",
     semRedeMissao: "Sem internet. A missão não foi criada. Tente de novo quando a conexão voltar.",
-    avisoLembrete: "O aviso só toca nos dias da missão.",
-    /* O servidor manda esta frase com free_day: true. Ela é usada só se a resposta vier sem texto. */
-    checkinLivre: "Hoje é dia livre na sua missão, não precisa de check-in. O próximo é no dia da missão."
+    avisoLembrete: "O aviso só toca nos dias da missão."
   };
 
   /* Mensagens 400 do servidor (PR 16 do servidor) para dias inválidos. */
@@ -139,6 +140,24 @@
     return "";
   }
 
+  /* Check-in ou dia difícil num dia livre: as frases já aprovadas do Hoje,
+     com o próximo dia calculado aqui (o servidor só diz «no dia da missão»).
+     diasDaSequencia: mission_weekdays da sequência, quando houver.
+     agora (opcional, em ms) só serve para a checagem automática. */
+  function fraseDiaLivre(missao, diasDaSequencia, agora) {
+    var frase = TEXTOS.hojeLivre;
+    if (!missao || !missao.started_at) return frase;
+    var inicio = new Date(missao.started_at);
+    if (isNaN(inicio.getTime())) return frase;
+    var dias = daMissao(diasDaSequencia) || daMissao(missao.mission_weekdays);
+    var duracao = Number(missao.duration_days);
+    if (!isFinite(duracao) || duracao < 1) duracao = 30;
+    var hoje = Math.floor(((typeof agora === "number" ? agora : Date.now()) - inicio.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+    var nome = dias ? proximoNome(dias, diaDaSemana(inicio), hoje, Math.floor(duracao)) : "";
+    if (!nome) return frase;
+    return frase + " " + preencher(TEXTOS.proximoDia, { dia: nome });
+  }
+
   function erroDoServidor(texto) {
     return ERROS_DO_SERVIDOR.indexOf(texto) !== -1;
   }
@@ -160,6 +179,7 @@
     semanaDoDia: semanaDoDia,
     verificador: verificador,
     proximoNome: proximoNome,
+    fraseDiaLivre: fraseDiaLivre,
     erroDoServidor: erroDoServidor
   };
 })();

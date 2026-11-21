@@ -70,6 +70,13 @@ if (!ehDaMissao(1) || ehDaMissao(2) || !ehDaMissao(3) || ehDaMissao(6) || !ehDaM
 if (!D.verificador(null, 1)(2) || !D.verificador([1, 3, 5], null)(2)) falhas.push("sem dias (ou sem o Dia 1), todo dia é da missão");
 if (D.proximoNome([1, 3, 5], 1, 2, 30) !== "quarta-feira") falhas.push("próximo dia depois de uma terça devia ser quarta-feira");
 if (D.proximoNome([1, 3, 5], 1, 30, 30) !== "") falhas.push("sem próximo dia até o fim, a frase some");
+/* Frase do dia livre no check-in: Dia 1 numa segunda, hoje é o Dia 2 (terça). */
+var segunda = new Date(2026, 10, 16, 0, 0, 0);
+var frase = D.fraseDiaLivre({ started_at: segunda.toISOString(), duration_days: 30, mission_weekdays: [1, 3, 5] }, null, segunda.getTime() + 25 * 60 * 60 * 1000);
+if (frase !== "Hoje é dia livre. Não precisa de check-in. O próximo dia da missão é quarta-feira.") falhas.push("frase do dia livre no check-in errada: " + frase);
+var fraseSeq = D.fraseDiaLivre({ started_at: segunda.toISOString(), duration_days: 30 }, [1, 3, 5], segunda.getTime() + 25 * 60 * 60 * 1000);
+if (fraseSeq !== frase) falhas.push("a frase do dia livre precisa usar os dias da sequência");
+if (D.fraseDiaLivre(null, null) !== "Hoje é dia livre. Não precisa de check-in.") falhas.push("sem missão, a frase do dia livre fica só com a primeira parte");
 if (!D.erroDoServidor("Escolha pelo menos 3 dias da missão por semana.") || D.erroDoServidor("Erro interno.")) falhas.push("erroDoServidor errado");
 
 /* ---------- 2. Textos aprovados (seção 8 da spec), num lugar só ---------- */
@@ -84,6 +91,8 @@ var aprovados = {
   hojeLivre: "Hoje é dia livre. Não precisa de check-in.",
   proximoDia: "O próximo dia da missão é {dia}.",
   legendaLivre: "Dia livre",
+  legendaMissao: "Dia da missão",
+  tituloPlano: "Plano dos 30 dias",
   indisponivel: "A escolha dos dias ainda não está disponível. Você pode começar a missão com todos os dias ou tentar mais tarde.",
   comecarComTodos: "Começar com todos os dias",
   avisoLembrete: "O aviso só toca nos dias da missão.",
@@ -149,6 +158,7 @@ if (!/if \(conferido\.campo\) pedido\.mission_weekdays = conferido\.campo;/.test
 if (!/resultado\.status === 503 && conferido\.campo/.test(criar)) falhas.push("falta tratar o 503");
 if (!/resultado\.status === 400 && NexusDias\.erroDoServidor\(resultado\.erro\)/.test(criar)) falhas.push("falta mostrar o 400 do servidor no lugar do aviso");
 if (criar.indexOf("criarAMissao({ semDias: true })") === -1) falhas.push("«Começar com todos os dias» precisa repetir sem o campo");
+if (jsLimpo.indexOf('document.getElementById("btn-comecar").hidden = true;') === -1 || !/function fecharIndisponivel\(\)/.test(jsLimpo)) falhas.push("no 503, só um botão principal: «Começar a missão» some enquanto o alerta está aberto");
 if (criar.indexOf("definirCarregando(botao, true)") === -1) falhas.push("o botão precisa ficar desabilitado durante o envio");
 
 var api = semComentarios(ler("api.js"));
@@ -181,10 +191,12 @@ if (!/\.marca-plano\.livre\s*\{[^}]*border-style:\s*dotted/.test(missaoCss)) fal
 var missaoJs = semComentarios(ler("missao.js"));
 if (missaoJs.indexOf("today_is_mission_day === false") === -1) falhas.push("a Missão precisa ler today_is_mission_day");
 if (!/if \(modelo\.diaLivre === true\) mostrarLinha\("minimo", NexusDias\.TEXTOS\.hojeLivre\);\s*else mostrarLinha\("minimo"/.test(missaoJs)) falhas.push("num dia livre a Missão não mostra «O mínimo de hoje»");
+if (ler("missao.html").indexOf('data-texto-dias="legendaMissao"') === -1 || ler("missao.html").indexOf('data-texto-dias="tituloPlano"') === -1) falhas.push("a Missão precisa do título «Plano dos 30 dias» e da legenda «Dia da missão»");
 if (ler("missao.html").indexOf('data-texto-dias="legendaLivre"') === -1) falhas.push("falta a legenda «Dia livre» na Missão");
 ["checkin.js", "dia-dificil.js"].forEach(function (nome) {
   var texto = semComentarios(ler(nome));
-  if (!/resultado\.status === 400 && dados\.free_day === true\) \{\s*mostrarBloqueio\(/.test(texto)) falhas.push(nome + " precisa mostrar a frase do dia livre (free_day), não erro");
+  if (!/resultado\.status === 400 && dados\.free_day === true\) \{\s*mostrarDiaLivre\(missaoAtual\);/.test(texto)) falhas.push(nome + " precisa mostrar a frase do dia livre (free_day), não erro");
+  if (!/function mostrarDiaLivre\(missao\) \{\s*mostrarBloqueio\(NexusDias\.fraseDiaLivre\(missao, diasDaSequencia\)\);\s*document\.getElementById\("voltar"\)\.hidden = true;/.test(texto)) falhas.push(nome + ": no dia livre, frase do Hoje com o próximo dia e sem o «Voltar» repetido");
   if (texto.indexOf("sequencia.today_is_mission_day === false") === -1) falhas.push(nome + " precisa abrir o dia livre sem o formulário");
 });
 ["onboarding.html", "hoje.html", "missao.html", "checkin.html", "dia-dificil.html"].forEach(function (nome) {
