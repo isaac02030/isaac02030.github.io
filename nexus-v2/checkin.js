@@ -16,7 +16,10 @@
    checkin traz id, mission_id, user_id, day_number, completed, note, created_at.
    Nenhum desses campos é sinal de crise. A lista fica vazia de propósito:
    não lemos a nota para adivinhar crise. */
-var CAMPOS_DE_CRISE_NA_RESPOSTA = [];
+/* O servidor manda crisis: true (e crisis_level) em qualquer resposta do
+   check-in quando o filtro de crise dispara, inclusive em 201 e em erro.
+   A tela abre a ajuda e apaga o rascunho: a frase de crise não fica guardada. */
+var CAMPOS_DE_CRISE_NA_RESPOSTA = ["crisis"];
 
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
@@ -307,6 +310,8 @@ function irParaHoje(aviso) {
 
 function irParaCrise() {
   if (saindo) return;
+  limparRascunho();
+  limparNota();
   saindo = true;
   location.replace("crise.html" + busca());
 }
@@ -553,11 +558,11 @@ function tratarResposta(resultado) {
     return;
   }
   var dados = resultado.dados || {};
+  if (respostaIndicaCrise(dados)) {
+    irParaCrise();
+    return;
+  }
   if (resultado.ok) {
-    if (respostaIndicaCrise(dados)) {
-      irParaCrise();
-      return;
-    }
     if (dados.already_done === true) {
       limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);

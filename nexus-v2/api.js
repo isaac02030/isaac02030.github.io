@@ -173,7 +173,9 @@ var NexusApi = {
     return nexusPedir(caminhoComCenario("/api/checkins"), {
       mission_id: id,
       note: nota,
-      difficult: true
+      difficult: true,
+      /* O toque em «Fiz o mínimo». Sem isto, o servidor responde 400. */
+      minimum_done: true
     }, { metodo: "POST", auth: true });
   },
   /* duration_days vai no pedido porque estes 30 dias são o combinado da tela.
