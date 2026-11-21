@@ -1,7 +1,7 @@
 /* Service worker simples do v2.
    Só guarda os arquivos desta pasta. Não mexe no cache do app antigo
    e não guarda pedidos da API (login, cadastro e missão precisam da rede). */
-var CACHE = "nexus-v2-v21";
+var CACHE = "nexus-v2-v22";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -39,6 +39,7 @@ var ARQUIVOS = [
   "./base.css",
   "./login.css",
   "./api.js",
+  "./nota-limite.js",
   "./login.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",

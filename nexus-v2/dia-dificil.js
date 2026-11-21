@@ -27,6 +27,9 @@ var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Tente de novo quando a conexão voltar. O que você escreveu continua aqui.";
 var TEXTO_SEM_REDE_SEM_NOTA = "Sem internet. Tente de novo quando a conexão voltar.";
+/* Limite de 280 caracteres (nota-limite.js). O servidor confere de novo. */
+var TEXTO_LONGA = "A frase passou de 280 caracteres. Encurte um pouco e envie de novo.";
+var atualizarContador = function () {};
 var TEXTO_JA = "ja-registrado";
 var TEXTO_SUCESSO = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
 var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
@@ -174,11 +177,13 @@ function aplicarRascunho() {
   if (Number(dados.day) !== numeroDoDia(missaoAtual.started_at)) return;
   var campo = document.getElementById("nota");
   if (campo) campo.value = dados.note;
+  atualizarContador();
 }
 
 function limparNota() {
   var campo = document.getElementById("nota");
   if (campo) campo.value = "";
+  atualizarContador();
 }
 
 function numeroDoDia(startedAt) {
@@ -611,6 +616,11 @@ function tratarResposta(resultado) {
     mostrarAviso(document.getElementById("alerta"), "falha", MSG_MINIMO);
     return;
   }
+  if (resultado.status === 400 && window.NexusNota && erro === NexusNota.MSG_SERVIDOR) {
+    mostrarAviso(document.getElementById("alerta"), "falha", TEXTO_LONGA);
+    document.getElementById("nota").focus();
+    return;
+  }
   if (resultado.status === 400 && pedeFrase(erro)) {
     mostrarAviso(document.getElementById("alerta"), "falha", TEXTO_PEDE_FRASE);
     document.getElementById("nota").focus();
@@ -628,7 +638,13 @@ async function enviar(evento) {
     guardarNotaDoCampo();
     return;
   }
-  /* A frase é opcional: vazio também vale. */
+  /* A frase é opcional: vazio também vale. Só não pode passar de 280
+     (rascunho antigo posto por código pode passar do maxlength). */
+  if (window.NexusNota && NexusNota.passou(notaEscrita())) {
+    mostrarAviso(document.getElementById("alerta"), "falha", TEXTO_LONGA);
+    document.getElementById("nota").focus();
+    return;
+  }
   if (!missaoAtual || missaoAtual.id == null) {
     mostrarBloqueio(TEXTO_INATIVA);
     return;
@@ -669,6 +685,7 @@ function iniciar() {
   document.getElementById("btn-tentar").addEventListener("click", function () {
     carregar();
   });
+  if (window.NexusNota) atualizarContador = NexusNota.ligar("nota", "nota-contador", "nota-limite-aviso");
   document.getElementById("nota").addEventListener("input", guardarNotaDoCampo);
   document.getElementById("voltar").addEventListener("click", guardarNotaDoCampo);
   document.getElementById("btn-dia-normal").addEventListener("click", guardarNotaDoCampo);

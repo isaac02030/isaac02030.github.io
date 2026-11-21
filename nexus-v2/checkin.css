@@ -132,3 +132,10 @@ textarea[aria-invalid="true"] {
   flex: 0 0 auto;
   margin-top: 1px;
 }
+
+/* Campo com erro e com foco: um anel só, na cor do erro, colado à borda
+   (sem o anel de foco verde por fora da borda vermelha). */
+textarea[aria-invalid="true"]:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: -1px;
+}
