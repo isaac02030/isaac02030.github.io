@@ -84,6 +84,15 @@
         <p class="dia-numero" id="dia-numero" hidden></p>
         <p class="minimo" id="minimo" hidden></p>
         <p class="porque" id="porque" hidden></p>
+        <section class="plano-dias" id="plano-dias" aria-labelledby="titulo-plano" hidden>
+          <h2 class="titulo-plano" id="titulo-plano" data-texto-dias="tituloPlano"></h2>
+          <p class="dias-linha" id="dias-linha"></p>
+          <div class="regua-plano" id="regua-plano" aria-hidden="true"></div>
+          <ul class="legenda-dias" aria-hidden="true">
+            <li><span class="marca-plano"></span><span data-texto-dias="legendaMissao"></span></li>
+            <li><span class="marca-plano livre"></span><span data-texto-dias="legendaLivre"></span></li>
+          </ul>
+        </section>
         <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
 
         <section class="placar" id="placar" aria-label="Placar" hidden>
@@ -125,6 +134,7 @@
   <nav class="abas" id="abas" aria-label="Seções"></nav>
   <script src="api.js"></script>
   <script src="abas.js"></script>
+  <script src="dias-da-missao.js"></script>
   <script>
     (function () {
       var host = location.hostname;
