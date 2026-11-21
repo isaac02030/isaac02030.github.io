@@ -17,7 +17,8 @@ var ABAS = [
     id: "ajustes",
     href: "ajustes.html",
     texto: "Ajustes",
-    icone: "M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM12 3v2.2M12 18.8V21M4.9 6.2l1.6 1.6M17.5 16.2l1.6 1.6M3 12h2.2M18.8 12H21M4.9 17.8l1.6-1.6M17.5 7.8l1.6-1.6"
+    /* Três controles deslizantes. O desenho antigo parecia um sol (tema ou brilho). */
+    icone: "M4 6h9M17 6h3M15 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM4 12h3M11 12h9M9 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM4 18h11M19 18h1M17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"
   }
 ];
 

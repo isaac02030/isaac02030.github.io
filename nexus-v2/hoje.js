@@ -5,7 +5,7 @@
    Dia difícil, quando a sequência mandar:
    difficult_days (números do dia), difficult_days_remaining, difficult_days_used,
    e difficult (sim ou não) em cada check-in.
-   Sem esses campos, a linha e o losango somem. Não mostramos 0 nem um valor vazio.
+   Sem esses campos, a linha some e a régua não marca dia difícil. Não mostramos 0 nem um valor vazio.
 
    Com recovery_needed true, o miolo do Hoje vira a volta ao ciclo.
    A barra de abas continua. Não é página separada nem modal.
@@ -20,8 +20,15 @@ var TEXTO_VOLTOU = "Você voltou. O ciclo continua.";
 var MS_DIA = 24 * 60 * 60 * 1000;
 var TEXTO_ERRO = "Não foi possível abrir o dia. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. Assim que a conexão voltar, tente de novo.";
-var TEXTO_REGISTRO_OFF = "Sem internet. Tente de novo quando a conexão voltar.";
-var TEXTO_REGISTRO_OFF_NOTA = "Sem internet. Sua nota continua aqui. Tente de novo quando a conexão voltar.";
+/* Guia v2.1: a faixa diz o que a tela mostra; o toque em Registrar diz que nada foi enviado.
+   Não há fila: o registro não fica guardado para depois. */
+var TEXTO_FAIXA_REDE = "Sem internet. Mostrando o que o aparelho guardou.";
+/* A faixa já diz «Sem internet»; o alerta não repete. */
+var TEXTO_REGISTRO_OFF = "O registro não foi enviado. Tente de novo quando a conexão voltar.";
+var TEXTO_PENDENTE = "Ainda não registrou o dia.";
+var TEXTO_FEITO = "Registro feito. Palavra cumprida hoje.";
+var TEXTO_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
+var DESENHO_REDE = "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18";
 var ciclo = 0;
 
 function cenarioDaPagina() {
@@ -32,12 +39,21 @@ function cenarioDaPagina() {
   }
 }
 
+/* ?rede=off é atalho de teste: só vale em localhost, 127.0.0.1 ou [::1], como os mocks.
+   No site publicado, só a falta de rede de verdade mostra o dia guardado. */
+function hostDeDesenvolvimento() {
+  var host = location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
+}
+
 function semRedeAgora() {
   var rede = "";
-  try {
-    rede = new URLSearchParams(location.search).get("rede") || "";
-  } catch (erro) {
-    rede = "";
+  if (hostDeDesenvolvimento()) {
+    try {
+      rede = new URLSearchParams(location.search).get("rede") || "";
+    } catch (erro) {
+      rede = "";
+    }
   }
   return rede === "off" || navigator.onLine === false;
 }
@@ -62,11 +78,57 @@ function mostrarAviso(el, tipo, texto) {
   var paragrafo = document.createElement("p");
   paragrafo.textContent = texto;
   var desenho = tipo === "rede"
-    ? "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18"
+    ? DESENHO_REDE
     : "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16.5h.01";
   el.className = "alerta alerta-" + tipo;
   el.replaceChildren(icone(desenho), paragrafo);
   el.hidden = false;
+}
+
+/* Faixa no topo quando a tela mostra o dia guardado neste aparelho. */
+function mostrarFaixaRede(ligar) {
+  var faixa = document.getElementById("faixa-rede");
+  var tela = document.getElementById("conteudo");
+  if (!faixa) return;
+  if (!ligar) {
+    faixa.hidden = true;
+    faixa.replaceChildren();
+    tela.classList.remove("com-faixa");
+    return;
+  }
+  var texto = document.createElement("p");
+  texto.textContent = TEXTO_FAIXA_REDE;
+  faixa.replaceChildren(icone(DESENHO_REDE), texto);
+  faixa.hidden = false;
+  tela.classList.add("com-faixa");
+}
+
+function esconderAlertaRegistro() {
+  ["alerta-registro", "alerta-registro-recuperacao"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.hidden = true;
+    el.replaceChildren();
+  });
+}
+
+/* Sem internet, Registrar não abre o check-in: diz que nada foi enviado. */
+function botaoRegistrarSemRede(idAlerta) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-primario";
+  botao.id = "btn-registrar";
+  botao.textContent = "Registrar o dia";
+  botao.addEventListener("click", function () {
+    var alerta = document.getElementById(idAlerta);
+    alerta.hidden = true;
+    alerta.replaceChildren();
+    /* Recriar o conteúdo faz o leitor de tela ler de novo a cada toque. */
+    window.setTimeout(function () {
+      mostrarAviso(alerta, "rede", TEXTO_REGISTRO_OFF);
+    }, 50);
+  });
+  return botao;
 }
 
 function mostrarVista(qual) {
@@ -77,6 +139,7 @@ function mostrarVista(qual) {
   document.getElementById("vista-recuperacao").hidden = qual !== "recuperacao";
   document.getElementById("titulo-hoje").hidden = qual === "recuperacao";
   document.getElementById("conteudo").setAttribute("aria-busy", qual === "carregando" ? "true" : "false");
+  if (qual !== "dia" && qual !== "recuperacao") mostrarFaixaRede(false);
 }
 
 function marcarOrigemRecuperacao() {
@@ -474,9 +537,12 @@ function rotuloDasMarcas(modelo) {
     + palavraDeContagem(nFalta, "falta", "faltas");
 }
 
-function pintarMarcas(modelo, destino) {
-  var caixa = destino ? document.getElementById(destino) : document.getElementById("marcas");
-  if (!caixa) return;
+/* Régua de marcas, 15 por linha. Cada marca é aria-hidden;
+   o mesmo fato vai em texto escondido ao lado de «Dia X de 30». */
+function pintarRegua(modelo, idRegua, idDia) {
+  var caixa = document.getElementById(idRegua);
+  var linha = document.getElementById(idDia);
+  if (!caixa || !linha) return;
   var duracao = modelo.duracao;
   var hoje = modelo.dia;
   var feitos = {};
@@ -486,25 +552,25 @@ function pintarMarcas(modelo, destino) {
   if (temDificeis) {
     modelo.dificeis.forEach(function (dia) { dificeis[dia] = true; });
   }
-  caixa.setAttribute("role", "img");
-  caixa.setAttribute("aria-label", rotuloDasMarcas(modelo));
-  caixa.removeAttribute("tabindex");
+
+  var visivel = document.createElement("span");
+  visivel.textContent = "Dia " + hoje + " de " + duracao;
+  var escondido = document.createElement("span");
+  escondido.className = "saltar";
+  escondido.textContent = ". " + rotuloDasMarcas(modelo).replace(/^Dia \d+ de \d+: /, "") + ".";
+  linha.replaceChildren(visivel, escondido);
+
+  caixa.setAttribute("aria-hidden", "true");
   caixa.replaceChildren();
   for (var dia = 1; dia <= duracao; dia++) {
     var marca = document.createElement("span");
-    marca.className = "marca-dia";
-    marca.setAttribute("aria-hidden", "true");
-    var miolo = document.createElement("span");
-    miolo.className = "marca-miolo";
-    miolo.setAttribute("aria-hidden", "true");
-    var feito = !!feitos[dia];
+    marca.className = "regua-dia";
     var dificil = temDificeis && !!dificeis[dia];
-    if (dificil) miolo.classList.add("dificil");
-    if (feito) miolo.classList.add("feito");
-    else if (!dificil && dia < hoje) miolo.classList.add("falta");
-    else if (!dificil) miolo.classList.add("futuro");
+    var feito = !!feitos[dia];
+    if (dificil) marca.classList.add("dificil");
+    else if (feito) marca.classList.add("feito");
+    else if (dia < hoje) marca.classList.add("falta");
     if (dia === hoje) marca.classList.add("hoje");
-    marca.appendChild(miolo);
     caixa.appendChild(marca);
   }
 }
@@ -519,64 +585,58 @@ function hojeEhDificil(modelo) {
   return false;
 }
 
-function losangoDoDia() {
-  var caixa = document.createElement("span");
-  caixa.className = "status-losango";
-  caixa.setAttribute("aria-hidden", "true");
-  var miolo = document.createElement("span");
-  miolo.className = "marca-miolo dificil feito";
-  miolo.setAttribute("aria-hidden", "true");
-  caixa.appendChild(miolo);
-  return caixa;
-}
+var DESENHO_CIRCULO = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z";
+var DESENHO_CHECK = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9";
+var DESENHO_LUA = "M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z";
 
-function pintarStatus(modelo) {
-  var el = document.getElementById("status");
+function pintarEstado(modelo) {
+  var el = document.getElementById("estado");
   var texto = document.createElement("span");
-  var hojeFeito = !!(modelo && modelo.hojeFeito);
-  if (hojeFeito) {
-    el.className = "status status-feito";
-    if (hojeEhDificil(modelo)) {
-      texto.textContent = "Dia difícil registrado. O mínimo valeu.";
-      el.replaceChildren(losangoDoDia(), texto);
-      return;
-    }
-    texto.textContent = "Registro feito. Palavra cumprida hoje.";
-    el.replaceChildren(
-      icone("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"),
-      texto
-    );
+  if (modelo && modelo.hojeFeito && hojeEhDificil(modelo)) {
+    el.className = "estado estado-dificil";
+    texto.textContent = TEXTO_DIFICIL;
+    el.replaceChildren(icone(DESENHO_LUA), texto);
     return;
   }
-  el.className = "status status-pendente";
-  texto.textContent = "Ainda não registrou o dia.";
-  el.replaceChildren(
-    icone("M12 8v5l2.5 1.5M12 20.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z"),
-    texto
-  );
+  if (modelo && modelo.hojeFeito) {
+    el.className = "estado estado-feito";
+    texto.textContent = TEXTO_FEITO;
+    el.replaceChildren(icone(DESENHO_CHECK), texto);
+    return;
+  }
+  el.className = "estado estado-pendente";
+  texto.textContent = TEXTO_PENDENTE;
+  el.replaceChildren(icone(DESENHO_CIRCULO), texto);
 }
 
 function pintarAcao(modelo, semRede) {
   var acoes = document.getElementById("acoes");
+  var nota = document.getElementById("nota-hoje");
   acoes.replaceChildren();
+  nota.hidden = true;
+  nota.textContent = "";
   if (modelo.hojeFeito) {
+    /* Feito: o botão vira secundário e só mostra a nota que já está no aparelho. */
     if (modelo.nota) {
-      var nota = document.createElement("p");
-      nota.className = "nota-hoje";
-      nota.id = "nota-hoje";
       nota.textContent = modelo.nota;
-      acoes.appendChild(nota);
+      var ver = document.createElement("button");
+      ver.type = "button";
+      ver.className = "btn btn-secundario";
+      ver.id = "btn-ver-nota";
+      ver.textContent = "Ver a nota de hoje";
+      ver.setAttribute("aria-expanded", "false");
+      ver.setAttribute("aria-controls", "nota-hoje");
+      ver.addEventListener("click", function () {
+        var abrir = nota.hidden;
+        nota.hidden = !abrir;
+        ver.setAttribute("aria-expanded", abrir ? "true" : "false");
+      });
+      acoes.appendChild(ver);
     }
     return;
   }
   if (semRede) {
-    var botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "btn btn-primario";
-    botao.id = "btn-registrar";
-    botao.textContent = "Registrar o dia";
-    botao.setAttribute("aria-describedby", "aviso-rede");
-    acoes.appendChild(botao);
+    acoes.appendChild(botaoRegistrarSemRede("alerta-registro"));
     return;
   }
   var link = document.createElement("a");
@@ -645,13 +705,7 @@ function pintarAcoesRecuperacao(modelo, semRede) {
   var extra = buscaDaTela();
   acoes.replaceChildren();
   if (semRede && !modelo.hojeFeito) {
-    var botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "btn btn-primario";
-    botao.id = "btn-registrar";
-    botao.textContent = "Registrar o dia";
-    botao.setAttribute("aria-describedby", "aviso-rede-recuperacao");
-    acoes.appendChild(botao);
+    acoes.appendChild(botaoRegistrarSemRede("alerta-registro-recuperacao"));
   } else {
     var link = document.createElement("a");
     link.className = "btn btn-primario";
@@ -678,8 +732,7 @@ function pintarAcoesRecuperacao(modelo, semRede) {
 
 function pintarRecuperacao(modelo, semRede) {
   marcarOrigemRecuperacao();
-  document.getElementById("dia-numero-recuperacao").textContent = "Dia " + modelo.dia + " de " + modelo.duracao;
-  pintarMarcas(modelo, "marcas-recuperacao");
+  pintarRegua(modelo, "regua-recuperacao", "dia-numero-recuperacao");
   var fato = document.getElementById("fato-falta");
   var frase = textoDaFalta(modelo);
   if (frase) {
@@ -690,42 +743,28 @@ function pintarRecuperacao(modelo, semRede) {
     fato.textContent = "";
   }
   pintarCalor(modelo);
-  var aviso = document.getElementById("aviso-rede-recuperacao");
-  if (semRede && !modelo.hojeFeito) {
-    var temNota = typeof modelo.nota === "string" && modelo.nota.trim() !== "";
-    mostrarAviso(aviso, "rede", temNota ? TEXTO_REGISTRO_OFF_NOTA : TEXTO_REGISTRO_OFF);
-  } else {
-    aviso.hidden = true;
-    aviso.replaceChildren();
-  }
+  esconderAlertaRegistro();
   pintarAcoesRecuperacao(modelo, semRede);
   mostrarVista("recuperacao");
+  mostrarFaixaRede(!!semRede);
   NexusAbas.focar(document.getElementById("titulo-recuperacao"));
   NexusAbas.concluirRolagem();
 }
 
 function pintarDia(modelo, semRede) {
   pintarAvisoDeVolta();
-  document.getElementById("dia-numero").textContent = "Dia " + modelo.dia + " de " + modelo.duracao;
+  pintarRegua(modelo, "regua", "dia-numero");
   document.getElementById("titulo-missao").textContent = modelo.titulo;
+  var blocoMinimo = document.getElementById("bloco-minimo");
   var minimo = document.getElementById("minimo");
   if (modelo.minimo) {
-    minimo.hidden = false;
-    minimo.textContent = "O mínimo de hoje: " + modelo.minimo;
+    blocoMinimo.hidden = false;
+    minimo.textContent = modelo.minimo;
   } else {
-    minimo.hidden = true;
+    blocoMinimo.hidden = true;
     minimo.textContent = "";
   }
-  var porque = document.getElementById("porque");
-  if (modelo.porque) {
-    porque.hidden = false;
-    porque.textContent = "Porque: " + modelo.porque;
-  } else {
-    porque.hidden = true;
-    porque.textContent = "";
-  }
-  pintarMarcas(modelo);
-  pintarStatus(modelo);
+  pintarEstado(modelo);
 
   var par = document.getElementById("linha-par");
   par.replaceChildren();
@@ -750,18 +789,10 @@ function pintarDia(modelo, semRede) {
     dificeis.textContent = "";
   }
 
-  var aviso = document.getElementById("aviso-rede");
-  if (semRede && !modelo.hojeFeito) {
-    var temNota = typeof modelo.nota === "string" && modelo.nota.trim() !== "";
-    mostrarAviso(aviso, "rede", temNota ? TEXTO_REGISTRO_OFF_NOTA : TEXTO_REGISTRO_OFF);
-  }
-  else {
-    aviso.hidden = true;
-    aviso.replaceChildren();
-  }
-
+  esconderAlertaRegistro();
   pintarAcao(modelo, semRede);
   mostrarVista("dia");
+  mostrarFaixaRede(!!semRede);
   NexusAbas.focar(document.getElementById("titulo-hoje"));
   NexusAbas.concluirRolagem();
 }

@@ -61,6 +61,7 @@
    Troque o estado com ?cenario= na URL da tela, ou entre com o e-mail:
    - nao-registrado  (nao-registrado@exemplo.com)  dia ainda sem registro
    - registrado      (registrado@exemplo.com)      registro feito, com nota
+   - dificil-hoje                                  o dia de hoje foi registrado como difícil, com nota
    - duo             (duo@exemplo.com)             Duo, Par Teste já registrou
    - duo-sem         (duo-sem@exemplo.com)         Duo, o par ainda não registrou
    - esperando       (esperando@exemplo.com)       à espera do par, Solo visível
@@ -200,6 +201,7 @@ function faixaDeDias(ate, pular) {
 var CENARIOS = {
   "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
   registrado: { dia: 4, feitos: [1, 3, 4], dificeis: [1, 2], restantes: 2, nota: "Li a página combinada." },
+  "dificil-hoje": { dia: 4, feitos: [1, 3, 4], dificeis: [2, 4], restantes: 2, nota: "Li meia página, devagar." },
   duo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2, 3, 4] },
   "duo-sem": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, modo: "parceiro", parFeitos: [1, 2] },
   esperando: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2, esperando: true },

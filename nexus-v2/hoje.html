@@ -36,10 +36,7 @@
       if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
     })();
   </script>
-  <link rel="preload" href="fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/figtree-500.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/figtree-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/figtree-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
@@ -50,56 +47,59 @@
 </head>
 <body>
   <a class="saltar" href="#conteudo">Pular para o dia</a>
-  <main class="pagina pagina-com-abas" id="conteudo">
-    <div class="cartao hoje">
-      <noscript>
-        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir o dia.</p>
-      </noscript>
+  <div class="faixa-rede" id="faixa-rede" role="status" hidden></div>
+  <main class="pagina-com-abas tela-hoje" id="conteudo">
+    <noscript>
+      <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir o dia.</p>
+    </noscript>
 
-      <h1 class="titulo" id="titulo-hoje" tabindex="-1">Hoje</h1>
+    <h1 class="hoje-titulo" id="titulo-hoje" tabindex="-1">Hoje</h1>
 
-      <section class="vista" id="vista-carregando" aria-live="polite">
-        <p class="carregando">
-          <span class="spinner" aria-hidden="true"></span>
-          <span>Abrindo o dia…</span>
-        </p>
-      </section>
+    <!-- Carregando: texto fixo, sem nada girando. -->
+    <section class="vista" id="vista-carregando" aria-live="polite">
+      <p class="carregando-texto">Abrindo o dia…</p>
+    </section>
 
-      <section class="vista" id="vista-erro" hidden>
-        <div id="alerta-erro" class="alerta" role="alert"></div>
-        <button type="button" class="btn btn-primario" id="btn-tentar">Tentar de novo</button>
-      </section>
+    <section class="vista" id="vista-erro" hidden>
+      <div id="alerta-erro" class="alerta" role="alert"></div>
+      <button type="button" class="btn btn-primario btn-grande" id="btn-tentar">Tentar de novo</button>
+    </section>
 
-      <section class="vista" id="vista-vazia" hidden>
-        <p class="apoio">Ainda não há missões. Que tal começar a primeira?</p>
-        <a class="btn btn-primario" id="btn-comecar" href="onboarding.html">Começar uma missão</a>
-      </section>
+    <section class="vista" id="vista-vazia" hidden>
+      <p class="vazio-texto">Ainda não há missões. Que tal começar a primeira?</p>
+      <a class="btn btn-primario btn-grande" id="btn-comecar" href="onboarding.html">Começar uma missão</a>
+    </section>
 
-      <section class="vista" id="vista-dia" hidden>
-        <div id="aviso-volta" class="alerta" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-        <p class="dia-numero" id="dia-numero"></p>
-        <div class="marcas" id="marcas" role="img"></div>
+    <section class="vista" id="vista-dia" hidden>
+      <div id="aviso-volta" class="alerta" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <p class="dia-numero" id="dia-numero"></p>
+      <div class="regua" id="regua" aria-hidden="true"></div>
+      <article class="cartao-missao" aria-labelledby="titulo-missao">
         <h2 class="titulo-missao" id="titulo-missao"></h2>
-        <p class="minimo" id="minimo"></p>
-        <p class="porque" id="porque" hidden></p>
-        <p class="status" id="status"></p>
-        <p class="linha-par" id="linha-par" hidden></p>
-        <p class="linha-espera" id="linha-espera" hidden>Você já pode cumprir o dia em Solo. O par entra quando aceitar o convite.</p>
-        <p class="linha-dificeis" id="linha-dificeis" hidden></p>
-        <div id="aviso-rede" class="alerta alerta-rede" role="status" hidden></div>
-        <div class="hoje-acoes" id="acoes"></div>
-      </section>
+        <div id="bloco-minimo">
+          <p class="rotulo-minimo">O mínimo de hoje:</p>
+          <p class="minimo" id="minimo"></p>
+        </div>
+      </article>
+      <p class="estado" id="estado" aria-live="polite"></p>
+      <div id="alerta-registro" class="alerta alerta-rede" role="alert" hidden></div>
+      <p class="linha-par" id="linha-par" hidden></p>
+      <p class="linha-espera" id="linha-espera" hidden>Você já pode cumprir o dia em Solo. O par entra quando aceitar o convite.</p>
+      <p class="linha-dificeis" id="linha-dificeis" hidden></p>
+      <p class="nota-hoje" id="nota-hoje" hidden></p>
+      <!-- O botão principal fica colado acima da barra de abas, no alcance do polegar. -->
+      <div class="acao-fixa" id="acoes"></div>
+    </section>
 
-      <section class="vista" id="vista-recuperacao" aria-labelledby="titulo-recuperacao" hidden>
-        <p class="dia-numero" id="dia-numero-recuperacao"></p>
-        <div class="marcas" id="marcas-recuperacao" role="img"></div>
-        <h1 class="titulo" id="titulo-recuperacao" tabindex="-1">Hoje ainda dá para voltar</h1>
-        <p class="fato-falta" id="fato-falta" hidden></p>
-        <p class="calor" id="calor"></p>
-        <div id="aviso-rede-recuperacao" class="alerta alerta-rede" role="status" hidden></div>
-        <div class="recuperacao-acoes" id="acoes-recuperacao"></div>
-      </section>
-    </div>
+    <section class="vista" id="vista-recuperacao" aria-labelledby="titulo-recuperacao" hidden>
+      <p class="dia-numero" id="dia-numero-recuperacao"></p>
+      <div class="regua" id="regua-recuperacao" aria-hidden="true"></div>
+      <h1 class="hoje-titulo" id="titulo-recuperacao" tabindex="-1">Hoje ainda dá para voltar</h1>
+      <p class="fato-falta" id="fato-falta" hidden></p>
+      <p class="calor" id="calor"></p>
+      <div id="alerta-registro-recuperacao" class="alerta alerta-rede" role="alert" hidden></div>
+      <div class="recuperacao-acoes" id="acoes-recuperacao"></div>
+    </section>
   </main>
   <nav class="abas" id="abas" aria-label="Seções"></nav>
   <script src="api.js"></script>

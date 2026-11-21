@@ -1,45 +1,26 @@
-/* Direção A, "Caderno quente".
-   A fonte Figtree fica na pasta fonts/ (licença SIL OFL, arquivo OFL.txt).
-   Não há pedido ao Google Fonts. */
+/* Direção A, "Caderno quente". Não há pedido ao Google Fonts.
+   A cor do papel claro fica numa linha só: --papel. O --bg claro usa esse valor.
+   #EEF1EC: papel frio, aprovado pelo dono do projeto em 20/11/2026 (antes #F4EFE6).
 
+   Uma fonte variável (pesos 400 a 700), subconjunto latino.
+   Origem: pacote @fontsource-variable/figtree 5.3.0, que copia o Google Fonts.
+   Licença SIL OFL 1.1, no arquivo fonts/OFL.txt. O caminho é relativo a este CSS,
+   o mesmo que /nexus-v2/fonts/ no site publicado. */
 @font-face {
   font-family: "Figtree";
+  src: url("fonts/Figtree-Variable.woff2") format("woff2");
+  font-weight: 400 700;
   font-style: normal;
-  font-weight: 400;
   font-display: swap;
-  src: url("fonts/figtree-400.woff2") format("woff2");
 }
 
+/* Itálico do mesmo pacote, só para a linha «Porque:» da tela Missão. Não tem preload. */
 @font-face {
   font-family: "Figtree";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("fonts/figtree-500.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Figtree";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("fonts/figtree-600.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Figtree";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("fonts/figtree-700.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Figtree";
+  src: url("fonts/Figtree-Variable-Italic.woff2") format("woff2");
+  font-weight: 400 700;
   font-style: italic;
-  font-weight: 400;
   font-display: swap;
-  src: url("fonts/figtree-400-italic.woff2") format("woff2");
 }
 
 :root {
@@ -71,9 +52,11 @@
   --target: 44px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --bg: #F4EFE6;
+  --papel: #EEF1EC;
+  --bg: var(--papel);
   --surface: #FFFFFF;
-  --surface-2: #EBE4D8;
+  --surface-2: #E3E8E1;
+  --borda-cartao: #C5CDC6;
   --text: #1C1916;
   --text-muted: #5C574F;
   --accent: #0B5F52;
@@ -95,6 +78,7 @@
     --bg: #161411;
     --surface: #221F1B;
     --surface-2: #2A2621;
+    --borda-cartao: #9A948A;
     --text: #F4EFE6;
     --text-muted: #B0AAA0;
     --accent: #3CB8A4;
@@ -115,6 +99,7 @@
   --bg: #161411;
   --surface: #221F1B;
   --surface-2: #2A2621;
+  --borda-cartao: #9A948A;
   --text: #F4EFE6;
   --text-muted: #B0AAA0;
   --accent: #3CB8A4;
@@ -131,9 +116,10 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #F4EFE6;
+  --bg: var(--papel);
   --surface: #FFFFFF;
-  --surface-2: #EBE4D8;
+  --surface-2: #E3E8E1;
+  --borda-cartao: #C5CDC6;
   --text: #1C1916;
   --text-muted: #5C574F;
   --accent: #0B5F52;

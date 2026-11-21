@@ -1,7 +1,7 @@
 /* Service worker simples do v2.
    Só guarda os arquivos desta pasta. Não mexe no cache do app antigo
    e não guarda pedidos da API (login, cadastro e missão precisam da rede). */
-var CACHE = "nexus-v2-v19";
+var CACHE = "nexus-v2-v20";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -42,11 +42,8 @@ var ARQUIVOS = [
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./fonts/figtree-400.woff2",
-  "./fonts/figtree-500.woff2",
-  "./fonts/figtree-600.woff2",
-  "./fonts/figtree-700.woff2",
-  "./fonts/figtree-400-italic.woff2"
+  "./fonts/Figtree-Variable.woff2",
+  "./fonts/Figtree-Variable-Italic.woff2"
 ];
 
 self.addEventListener("install", function (event) {
