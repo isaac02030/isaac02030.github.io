@@ -1,0 +1,157 @@
+/* Dia difícil (Tela 5) com o visual novo do Hoje.
+   Papel liso, sem linhas de caderno e sem cartão com sombra.
+   A ação principal é o toque em «Fiz o mínimo». A frase é opcional.
+   A pauta fica só embaixo do mínimo, como no Hoje. */
+
+body:has(.tela-dificil) {
+  background-image: none;
+}
+
+.tela-dificil {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  overflow-wrap: break-word;
+}
+
+.btn-voltar {
+  align-self: flex-start;
+  margin-bottom: calc(var(--space-2) * -1);
+  padding-inline: 0;
+}
+
+.dificil-titulo {
+  margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.carregando-texto {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text-muted);
+}
+
+.apoio,
+.bloco-limite {
+  margin: 0;
+  text-wrap: pretty;
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.btn-grande {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* ---------- O mínimo de hoje ---------- */
+
+.bloco-minimo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rotulo-minimo {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* Mesma pauta do Hoje: uma linha de 1px embaixo de cada linha do texto. */
+.minimo-hoje {
+  margin: 0;
+  font: var(--text-title);
+  line-height: 2.25rem;
+  color: var(--text);
+  background-image: linear-gradient(to bottom, transparent calc(2.25rem - 1px), var(--border) calc(2.25rem - 1px));
+  background-size: 100% 2.25rem;
+}
+
+/* ---------- Frase opcional ---------- */
+
+.formulario {
+  gap: var(--space-4);
+}
+
+.campo label .opcional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: var(--text-body);
+  caret-color: var(--text);
+  resize: vertical;
+}
+
+/* ---------- Sucesso: sem confete, só a frase ---------- */
+
+.sucesso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--success);
+  font: var(--text-label);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.sucesso.visivel {
+  opacity: 1;
+}
+
+.sucesso .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ---------- Ajuda no rodapé: discreta, no HTML, sem rede ---------- */
+
+.rodape-ajuda {
+  display: flex;
+  margin: auto 0 0;
+  padding-top: var(--space-2);
+}
+
+.rodape-ajuda .link-ajuda {
+  align-self: flex-start;
+  justify-content: flex-start;
+  min-height: var(--target);
+  margin: 0;
+  padding: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+  font-weight: 500;
+  text-align: left;
+}

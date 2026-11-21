@@ -96,7 +96,8 @@
    - post-quatro     (post-quatro@exemplo.com)     o POST responde o 400 dos 4 dias
    - quatro-e-seguidos (quatro-e-seguidos@exemplo.com) os 4 acabaram e os 2 anteriores também
 
-   Check-in (POST /api/checkins com { mission_id, note } e, na tela 5, difficult: true):
+   Check-in (POST /api/checkins com { mission_id, note } e, na tela 5,
+   difficult: true e minimum_done: true; sem minimum_done, 400 como no servidor):
    A resposta segue a rota de verdade: { checkin, day, already_done, message }.
    Não há campo de crise. Não lemos a nota para inventar um.
    Com difficult: true, o check-in volta com difficult: true, salvo nos cenários
@@ -855,6 +856,7 @@ async function salvarLembrete(email, corpo, cenario) {
 
 var MSG_LIMITE_DIFICIL = "Você já usou os 4 dias difíceis desta missão.";
 var MSG_SEGUIDOS_DIFICIL = "Não dá para ter mais de 2 dias difíceis seguidos.";
+var MSG_MINIMO_DIFICIL = "Para marcar o dia difícil, confirme que fez o mínimo do contrato e tente de novo.";
 
 function checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec) {
   var checkin = {
@@ -941,7 +943,13 @@ async function registrarCheckin(email, corpo, cenario) {
     return { status: 400, dados: { error: "Missão não está ativa." } };
   }
   var nota = typeof corpo.note === "string" ? corpo.note : "";
-  var prova = erroDeProva(missao.proof_mode, nota);
+  /* Igual ao servidor: o dia difícil pede minimum_done: true (o toque
+     «Fiz o mínimo») e não pede a prova escrita. O check-in comum pede. */
+  var pedeDificil = corpo && corpo.difficult === true;
+  if (pedeDificil && corpo.minimum_done !== true) {
+    return { status: 400, dados: { error: MSG_MINIMO_DIFICIL } };
+  }
+  var prova = pedeDificil ? null : erroDeProva(missao.proof_mode, nota);
   if (prova) return { status: 400, dados: { error: prova } };
   var dia = numeroDoDia(missao.started_at);
   if (dia > missao.duration_days) {
