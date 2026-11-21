@@ -1,59 +1,82 @@
-/* Tela 9. Texto fixo, sem rede, sem IA e sem animação.
+/* Tela 9 (crise) com o visual novo do Hoje e do dia difícil.
+   Papel liso, sem linhas de caderno, sem cartão com sombra.
+   Texto fixo, sem rede, sem IA, sem animação nem transição (nem com hover),
+   sem cor de alarme: nada de --danger, vermelho ou destaque que pressiona.
+   O aviso de saúde fica em tamanho de corpo (checklist C da Clara).
+   Números em --text-title (guia v2.1, Tela 9), cada um num botão de 44 px.
    A maioria dos contatos é uma linha: nome à esquerda, botão à direita.
    SNS 24 e SOS Voz Amiga empilham: o nome ocupa a linha inteira
    e os botões ficam embaixo, para não parecerem do contato anterior. */
+
+body:has(.tela-crise) {
+  background-image: none;
+}
+
+.tela-crise {
+  box-sizing: border-box;
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-top: calc(var(--space-5) + env(safe-area-inset-top, 0px));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  overflow-wrap: break-word;
+}
+
+/* Nada se mexe nesta tela, mesmo sem prefers-reduced-motion. */
+.tela-crise,
+.tela-crise * {
+  transition: none !important;
+  animation: none !important;
+}
 
 .crise {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: var(--space-4);
 }
 
-.crise .btn,
-.crise .btn-ligar {
-  transition: none;
-}
-
-.crise .titulo::after {
-  content: "";
-  display: block;
-  width: 2rem;
-  height: 3px;
-  margin-top: var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-}
-
-.linha-missao {
+.crise-titulo {
   margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
   color: var(--text);
-  font: var(--text-body);
+  text-wrap: balance;
 }
 
+.linha-missao,
 .aviso-saude {
   margin: 0;
   color: var(--text);
-  font: var(--text-small);
+  font: var(--text-body);
+  text-wrap: pretty;
 }
+
+/* ---------- Contatos por país ---------- */
 
 .paises {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: var(--space-5);
+  margin-top: var(--space-2);
 }
 
 .pais-bloco {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
+/* O nome do país fica sobre uma linha de 1 px, a mesma pauta do Hoje. */
 .pais {
   margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
   font: var(--text-label);
   color: var(--text);
 }
@@ -77,11 +100,10 @@
   margin: 0;
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
-  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
 }
 
 .contato:first-child {
-  padding-top: 0;
   border-top: 0;
 }
 
@@ -97,6 +119,8 @@
 }
 
 .contato-empilhado .contato-acoes {
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
 }
 
@@ -115,7 +139,8 @@
 
 .contato-nome {
   color: var(--text);
-  font: var(--text-label);
+  font: var(--text-body);
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -132,6 +157,8 @@
   flex: 0 0 auto;
 }
 
+/* Botão de ligar: contorno fino, sem preenchimento nem sombra.
+   O número é o que mais pesa na linha. */
 .btn-ligar {
   display: inline-flex;
   align-items: center;
@@ -140,22 +167,28 @@
   box-sizing: border-box;
   min-width: var(--target);
   min-height: var(--target);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--surface-2);
+  background: transparent;
   color: var(--text);
-  font: var(--text-body);
+  font: var(--text-title);
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
 }
 
+.btn-ligar:hover {
+  border-color: var(--text);
+}
+
 .icone-ligar {
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
+  color: var(--accent);
 }
 
 .sprite {
@@ -163,4 +196,9 @@
   width: 0;
   height: 0;
   overflow: hidden;
+}
+
+.btn-voltar-missao {
+  min-height: 48px;
+  margin-top: var(--space-4);
 }

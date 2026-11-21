@@ -46,9 +46,11 @@
 </head>
 <body>
   <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
-  <main class="pagina" id="conteudo">
-    <article class="cartao cartao-topo crise">
-      <h1 class="titulo" id="titulo" tabindex="-1">Você não está sozinho nisso</h1>
+  <!-- Visual novo (papel liso, como o Hoje e o dia difícil): sem cartão, sem sombra,
+       sem linhas de fundo, sem animação. Texto, números e links continuam iguais. -->
+  <main class="tela-crise" id="conteudo">
+    <div class="crise">
+      <h1 class="crise-titulo" id="titulo" tabindex="-1">Você não está sozinho nisso</h1>
       <p class="linha-missao">Esta tela não guarda nada sobre você.</p>
       <p class="aviso-saude">O Nexus não é um serviço de saúde. Se estiver em risco de vida agora, ligue para a emergência.</p>
 
@@ -149,8 +151,8 @@
         </section>
       </div>
 
-      <a class="btn btn-primario" id="voltar-missao" href="missao.html">Voltar à missão</a>
-    </article>
+      <a class="btn btn-primario btn-voltar-missao" id="voltar-missao" href="missao.html">Voltar à missão</a>
+    </div>
   </main>
   <script src="abas.js"></script>
   <script>
