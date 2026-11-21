@@ -19,7 +19,7 @@
     proximoDia: "O próximo dia da missão é {dia}.",
     linhaDoDiaLivre: "Dia {dia} de {total}, dia livre",
     legendaLivre: "Dia livre",
-    /* Textos novos pedidos pela Clara na revisão do PR 21 (ainda esperam o sim do Isaac). */
+    /* Textos novos pedidos pela Clara na revisão do PR 21 (aguardam aprovação do dono do projeto). */
     legendaMissao: "Dia da missão",
     tituloPlano: "Plano dos 30 dias",
     rotuloPrevia: "Dias",
