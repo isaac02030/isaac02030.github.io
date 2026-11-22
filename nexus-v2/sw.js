@@ -1,7 +1,7 @@
 /* Service worker simples do v2.
    Só guarda os arquivos desta pasta. Não mexe no cache do app antigo
    e não guarda pedidos da API (login, cadastro e missão precisam da rede). */
-var CACHE = "nexus-v2-v26";
+var CACHE = "nexus-v2-v27";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -48,6 +48,11 @@ var ARQUIVOS = [
   "./equipe.html",
   "./equipe.js",
   "./login.js",
+  "./legal-textos.js",
+  "./termos.html",
+  "./privacidade.html",
+  "./legal.css",
+  "./legal-pagina.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -97,6 +102,13 @@ self.addEventListener("fetch", function (event) {
       if (pedido.mode === "navigate" && /\/crise\.html$/.test(url.pathname)) {
         return caches.match("./crise.html").then(function (crise) {
           return crise || caches.match("./offline.html");
+        });
+      }
+      /* Termos e Privacidade também abrem sem internet e sem login, com ?tema=. */
+      var legal = pedido.mode === "navigate" ? url.pathname.match(/\/(termos|privacidade)\.html$/) : null;
+      if (legal) {
+        return caches.match("./" + legal[1] + ".html").then(function (pagina) {
+          return pagina || caches.match("./offline.html");
         });
       }
       if (pedido.mode === "navigate") return caches.match("./offline.html");

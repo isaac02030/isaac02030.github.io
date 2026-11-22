@@ -1,0 +1,219 @@
+/* Termos de uso e Política de privacidade (spec da Clara, seção 4).
+   Página de documento: sem cartão, sem enfeite, leitura confortável.
+   Corpo 1,0625rem com entrelinha 1,6; coluna de até ~65 caracteres. */
+
+.pagina-legal {
+  /* Texto longo: sem as linhas de caderno ao fundo. */
+  background-image: none;
+}
+
+.topo-legal {
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) var(--space-5) 0;
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  min-width: var(--target);
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.documento {
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-5) calc(var(--space-7) + env(safe-area-inset-bottom, 0px));
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text);
+  /* Palavra longa com texto a 200% quebra em vez de abrir rolagem lateral. */
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.documento:focus {
+  outline: none;
+}
+
+.faixa-rascunho {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-label);
+}
+
+.documento h1 {
+  margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.versao {
+  margin: var(--space-2) 0 var(--space-5);
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.documento h2 {
+  margin: var(--space-6) 0 var(--space-3);
+  font: 700 1.375rem/1.3 var(--font);
+  scroll-margin-top: var(--space-4);
+}
+
+.documento p {
+  margin: 0 0 var(--space-4);
+}
+
+.documento ul,
+.documento ol {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.documento li + li {
+  margin-top: var(--space-2);
+}
+
+.documento a {
+  color: var(--accent-standout);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Índice «Neste texto»: cada link com 44 px de altura. */
+.indice {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.documento .indice-titulo {
+  margin: 0 0 var(--space-2);
+  font: var(--text-label);
+}
+
+.indice ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indice li + li {
+  margin-top: 0;
+}
+
+.indice a {
+  display: flex;
+  align-items: center;
+  min-height: var(--target);
+}
+
+.cruzado {
+  margin-top: var(--space-4);
+}
+
+.cruzado a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+}
+
+.documento blockquote {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.documento blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Tabelas viram lista: título da linha e pares rótulo/valor, sem rolagem
+   para o lado. Divisória fina entre as linhas. */
+.documento .tabela-legal {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.tabela-legal > li {
+  margin: 0;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabela-legal > li + li {
+  margin-top: 0;
+}
+
+.documento .linha-titulo {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+}
+
+.tabela-legal dl {
+  margin: 0;
+}
+
+.tabela-legal dt {
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.tabela-legal dd {
+  margin: 0 0 var(--space-2);
+}
+
+.tabela-legal dd:last-child {
+  margin-bottom: 0;
+}
+
+.rodape-legal {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.rodape-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+}
+
+@media print {
+  .topo-legal,
+  .saltar {
+    display: none;
+  }
+
+  html,
+  body,
+  .pagina-legal {
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+  .documento {
+    width: 100%;
+    padding: 0;
+    color: #000000;
+  }
+
+  .documento a {
+    color: #000000;
+  }
+
+  .faixa-rascunho {
+    background: #FFFFFF;
+    color: #000000;
+  }
+}

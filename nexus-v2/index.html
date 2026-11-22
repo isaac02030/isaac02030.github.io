@@ -145,6 +145,23 @@
             <p id="cadastro-data-erro" class="erro-campo" role="alert" hidden></p>
           </fieldset>
 
+          <!-- Aceite obrigatório (PR 28 do servidor). Caixa DESMARCADA; os links ficam fora
+               do rótulo, para o toque no link não marcar a caixa. Vai como terms_version e
+               privacy_version (legal-textos.js). -->
+          <fieldset class="campo-aceite" id="cadastro-aceite">
+            <legend data-texto-legal="aceiteLegenda"></legend>
+            <div class="caixa-aceite">
+              <input id="cadastro-aceite-caixa" name="aceite" type="checkbox" aria-required="true" aria-describedby="cadastro-aceite-apoio cadastro-aceite-erro">
+              <label for="cadastro-aceite-caixa" data-texto-legal="aceiteCaixa"></label>
+            </div>
+            <p class="links-legais">
+              <a href="termos.html" data-legal-link="cadastro" data-texto-legal="lerTermos"></a>
+              <a href="privacidade.html" data-legal-link="cadastro" data-texto-legal="lerPrivacidade"></a>
+            </p>
+            <p id="cadastro-aceite-apoio" class="dica" data-texto-legal="aceiteApoio"></p>
+            <p id="cadastro-aceite-erro" class="erro-campo" role="alert" hidden></p>
+          </fieldset>
+
           <button type="submit" class="btn btn-primario" id="btn-criar" data-texto="Criar conta" data-carregando="Criando conta…" aria-busy="false">
             <span class="btn-rotulo">Criar conta</span>
             <span class="spinner" hidden aria-hidden="true"></span>
@@ -155,6 +172,38 @@
           Já tem conta?
           <a href="#entrar">Entrar</a>
         </p>
+      </section>
+
+      <!-- Reaceitação (PR 28): quem entrou e ainda não aceitou a versão atual.
+           Uma ideia só: ler, marcar e continuar, ou sair da conta. -->
+      <section id="vista-reaceite" hidden>
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <h1 class="titulo" id="titulo-reaceite" tabindex="-1" data-texto-legal="reaceiteTitulo"></h1>
+          <p class="apoio" data-texto-legal="reaceiteTexto"></p>
+        </header>
+
+        <form class="formulario" id="form-reaceite" method="post" action="#aceitar-termos" novalidate>
+          <div id="alerta-reaceite" class="alerta" role="alert" hidden></div>
+          <p class="links-legais">
+            <a href="termos.html" data-legal-link="reaceite" data-texto-legal="lerTermos"></a>
+            <a href="privacidade.html" data-legal-link="reaceite" data-texto-legal="lerPrivacidade"></a>
+          </p>
+          <div class="campo-aceite">
+            <div class="caixa-aceite">
+              <input id="reaceite-caixa" name="aceite" type="checkbox" aria-required="true" aria-describedby="reaceite-erro">
+              <label for="reaceite-caixa" data-texto-legal="aceiteCaixa"></label>
+            </div>
+            <p id="reaceite-erro" class="erro-campo" role="alert" hidden></p>
+          </div>
+          <div class="botoes-reaceite">
+            <button type="submit" class="btn btn-secundario" id="btn-reaceite" data-texto="Continuar" data-carregando="Enviando…" aria-busy="false">
+              <span class="btn-rotulo" data-texto-legal="continuar"></span>
+              <span class="spinner" hidden aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-secundario" id="btn-reaceite-sair" data-texto-legal="sairDaConta"></button>
+          </div>
+        </form>
       </section>
 
       <!-- 403 do cadastro (menor de 18): tela calma, sem contador de anos e sem «tentar outra data». -->
@@ -169,6 +218,7 @@
     </div>
   </main>
   <script src="comunidade-textos.js"></script>
+  <script src="legal-textos.js"></script>
   <script src="api.js"></script>
   <script src="login.js"></script>
 </body>

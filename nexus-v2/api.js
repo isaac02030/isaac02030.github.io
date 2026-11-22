@@ -21,6 +21,73 @@ function caminhoComCenario(caminho) {
   return caminho + "?cenario=" + encodeURIComponent(nome);
 }
 
+/* Sessão (PR 26 do servidor): o login é conferido a cada pedido.
+   401 com code "session_ended": a conta saiu ou a sessão acabou. Limpa a
+   sessão deste aparelho (token, usuário e as cópias da missão; o tema fica),
+   guarda o aviso para a tela de entrar e volta ao login.
+   503 com code "auth_unavailable": o servidor não conseguiu conferir agora.
+   Nada é apagado; o aviso aparece no topo da tela.
+   Textos aprovados (iguais aos de legal-textos.js; a checagem confere). */
+var NEXUS_TEXTO_SESSAO_ENCERRADA = "Sessão encerrada. Entre de novo.";
+var NEXUS_TEXTO_SESSAO_INDISPONIVEL = "Não foi possível conferir sua sessão agora. Tente de novo em instantes.";
+var NEXUS_CHAVE_AVISO_LOGIN = "nexus_v2_aviso_login";
+var NEXUS_CHAVE_ACEITE_OK = "nexus_v2_aceite_conferido";
+
+function nexusLimparSessao() {
+  try {
+    var i = localStorage.length;
+    while (i > 0) {
+      i -= 1;
+      var chave = localStorage.key(i);
+      if (chave && chave.indexOf("nexus_v2_") === 0 && chave !== "nexus_v2_tema") localStorage.removeItem(chave);
+    }
+  } catch (erroLocal) {}
+  try {
+    var j = sessionStorage.length;
+    while (j > 0) {
+      j -= 1;
+      var chaveSessao = sessionStorage.key(j);
+      if (chaveSessao && chaveSessao.indexOf("nexus_v2_") === 0) sessionStorage.removeItem(chaveSessao);
+    }
+  } catch (erroSessao) {}
+}
+
+/* Mantém só o ?tema= ao trocar de tela (como a saída de Ajustes). */
+function nexusBuscaTema() {
+  try {
+    var tema = new URLSearchParams(location.search).get("tema");
+    if (tema === "claro" || tema === "escuro" || tema === "sistema") return "?tema=" + tema;
+  } catch (erro) {}
+  return "";
+}
+
+function nexusSessaoEncerrada() {
+  nexusLimparSessao();
+  try {
+    sessionStorage.setItem(NEXUS_CHAVE_AVISO_LOGIN, "sessao_encerrada");
+  } catch (erro) {}
+  location.replace("./index.html" + nexusBuscaTema());
+}
+
+/* Um aviso só, no topo da tela, com role="alert". */
+function nexusAvisoDeSessao(texto) {
+  if (typeof document === "undefined") return;
+  var aviso = document.getElementById("aviso-sessao");
+  if (!aviso) {
+    aviso = document.createElement("div");
+    aviso.id = "aviso-sessao";
+    aviso.className = "alerta alerta-neutro aviso-sessao";
+    aviso.setAttribute("role", "alert");
+    var lugar = document.querySelector("main") || document.body;
+    if (!lugar) return;
+    lugar.insertBefore(aviso, lugar.firstChild);
+  }
+  var paragrafo = document.createElement("p");
+  paragrafo.textContent = texto;
+  aviso.replaceChildren(paragrafo);
+  aviso.hidden = false;
+}
+
 async function nexusLerJson(resposta) {
   try {
     return await resposta.json();
@@ -72,6 +139,15 @@ async function nexusPedir(caminho, corpo, opcoes) {
 
   var dados = await nexusLerJson(resposta);
   var erro = dados && typeof dados.error === "string" ? dados.error : "";
+  var codigo = dados && typeof dados.code === "string" ? dados.code : "";
+  if (extras.auth && resposta.status === 401 && codigo === "session_ended") {
+    nexusSessaoEncerrada();
+    return { ok: false, semRede: false, status: 401, erro: NEXUS_TEXTO_SESSAO_ENCERRADA, dados: dados, sessaoEncerrada: true };
+  }
+  if (extras.auth && resposta.status === 503 && codigo === "auth_unavailable") {
+    nexusAvisoDeSessao(NEXUS_TEXTO_SESSAO_INDISPONIVEL);
+    return { ok: false, semRede: false, status: 503, erro: NEXUS_TEXTO_SESSAO_INDISPONIVEL, dados: dados, sessaoIndisponivel: true };
+  }
   if (!resposta.ok) {
     return { ok: false, semRede: false, status: resposta.status, erro: erro, dados: dados };
   }
@@ -139,14 +215,28 @@ var NexusApi = {
       password: senha
     });
   },
+  /* Aceite obrigatório (PR 28): terms_version e privacy_version são as que a
+     tela mostrou (legal-textos.js). Sem elas, ou com versão antiga, 400 com
+     code legal_acceptance_required ou legal_version_outdated. */
   cadastrar: function (dados) {
     return nexusPedir("/api/users/register", {
       username: dados.username,
       email: dados.email,
       password: dados.password,
       /* AAAA-MM-DD. O servidor confere os 18 anos e não grava a data (PR 18). */
-      birth_date: dados.birth_date
+      birth_date: dados.birth_date,
+      terms_version: dados.terms_version,
+      privacy_version: dados.privacy_version
     });
+  },
+  /* POST /api/users/me/legal-acceptance com as versões que a tela mostrou.
+     200 { legal }; 400 legal_acceptance_required ou legal_version_outdated;
+     503 sem a migração 008. */
+  aceitarTermos: function (versoes) {
+    return nexusPedir("/api/users/me/legal-acceptance", {
+      terms_version: versoes.terms_version,
+      privacy_version: versoes.privacy_version
+    }, { metodo: "POST", auth: true });
   },
   /* GET /api/missions devolve uma lista. Sem missão ativa, o começo abre o onboarding. */
   listarMissoes: function () {
@@ -252,3 +342,36 @@ var NexusApi = {
     }, { metodo: "POST", auth: true });
   }
 };
+
+/* Reaceitação (PR 28): quem já está com a sessão aberta e precisa aceitar a
+   versão atual vai à tela de aceite. Confere uma vez por aba, pelo /me
+   (user.legal.needs_acceptance). Não roda na tela de entrar (ela mesma
+   cuida disso) nem sem sessão. Sem internet ou com falha: segue a tela,
+   e a conferência tenta de novo na próxima tela. */
+function nexusConferirAceite() {
+  if (typeof document === "undefined" || typeof location === "undefined") return;
+  if (/(^|\/)(index\.html)?$/.test(location.pathname)) return;
+  var token = "";
+  try {
+    token = localStorage.getItem("nexus_v2_token") || "";
+    if (sessionStorage.getItem(NEXUS_CHAVE_ACEITE_OK) === "sim") return;
+  } catch (erro) {
+    return;
+  }
+  if (!token) return;
+  NexusApi.eu().then(function (resultado) {
+    if (!resultado.ok) return;
+    var usuario = resultado.dados && resultado.dados.user;
+    var legal = usuario && usuario.legal;
+    if (!legal || typeof legal.needs_acceptance !== "boolean") return;
+    if (legal.needs_acceptance) {
+      location.replace("./index.html" + nexusBuscaTema() + "#aceitar-termos");
+      return;
+    }
+    try {
+      sessionStorage.setItem(NEXUS_CHAVE_ACEITE_OK, "sim");
+    } catch (erroSessao) {}
+  });
+}
+
+nexusConferirAceite();

@@ -128,7 +128,7 @@ function conferir(html, cssBruto, sw) {
 
   /* ---------- Cache ---------- */
   if (sw.indexOf('"./crise.html"') === -1 || sw.indexOf('"./crise.css"') === -1) falhas.push("a tela de crise saiu do cache (precisa abrir sem internet)");
-  if (sw.indexOf('CACHE = "nexus-v2-v26"') === -1) falhas.push("o cache não está em nexus-v2-v26");
+  if (sw.indexOf('CACHE = "nexus-v2-v27"') === -1) falhas.push("o cache não está em nexus-v2-v27");
 
   /* ---------- 3. Abre sem login e sem internet ---------- */
   if (/location\.(replace|assign)\(|location\.href\s*=/.test(semComentarios(html))) falhas.push("a tela de crise não pode mandar ninguém para outra página ao abrir (precisa abrir sem login)");

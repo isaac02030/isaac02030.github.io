@@ -154,7 +154,24 @@
    - e-mail sem-migracao@exemplo.com → 503, como o servidor sem a migração 006
    - e-mail menor-sem-campo@exemplo.com → 403 sem under_age (caso negado do site)
    - a data não é guardada: o mock guarda só "adulto: true", como adult_confirmed_at
-   GET /api/users/me → { user: { id, username, email, adult_confirmed } }
+   GET /api/users/me → { user: { id, username, email, adult_confirmed, legal } }
+
+   Aceite dos termos (PR 28 do servidor), versão atual «beta-1» nos dois:
+   - cadastro sem terms_version/privacy_version → 400 code legal_acceptance_required
+     (depois da idade, como no servidor); versão diferente → 400 legal_version_outdated
+   - e-mail termos-mudaram@exemplo.com no cadastro → 400 legal_version_outdated
+     (para ver a frase na tela, mesmo mandando beta-1)
+   - login e /me trazem user.legal { ..., needs_acceptance }
+   - e-mail reaceitar@exemplo.com → entra sem aceite (needs_acceptance: true)
+   - e-mail aceite-antigo@exemplo.com → aceitou «beta-0» (needs_acceptance: true)
+   - e-mail aceite-falha@exemplo.com → como reaceitar, e o aceite responde 500
+   - POST /api/users/me/legal-acceptance { terms_version, privacy_version }, com login:
+     grava a versão e a hora; sem versões → 400; versão antiga → 400; 200 { legal }
+   Sessão conferida a cada pedido (PR 26 do servidor):
+   - e-mail sessao-encerrada@exemplo.com → entra, e todo pedido com login
+     responde 401 code session_ended «Sessão encerrada. Entre de novo.»
+   - e-mail sessao-indisponivel@exemplo.com → entra, e todo pedido com login
+     responde 503 code auth_unavailable
 
    Comunidade (PR 18 do servidor), tudo com login:
    - e-mail sem-idade@exemplo.com → 403 com code adult_confirmation_required em
@@ -496,7 +513,9 @@ function garantirUsuario(email, username) {
       missoes: [],
       lembrete: null,
       avisos: [],
-      checkins: {}
+      checkins: {},
+      /* Aceite dos termos (PR 28): a maioria já aceitou a versão atual. */
+      aceite: aceiteInicial(email)
     };
     proximoUsuario += 1;
   }
@@ -507,13 +526,64 @@ function tokenDe(email) {
   return "teste-local." + encodeURIComponent(email);
 }
 
+var VERSAO_TERMOS = "beta-1";
+var VERSAO_PRIVACIDADE = "beta-1";
+var MSG_ACEITE_CADASTRO = "Para criar a conta, marque que você leu e aceita os termos e a política de privacidade.";
+var MSG_ACEITE_REACEITE = "Para continuar, marque que você leu e aceita os termos e a política de privacidade.";
+var MSG_VERSAO_ANTIGA = "Os termos ou a política de privacidade mudaram. Recarregue a página para ver a versão atual e aceite de novo.";
+var MSG_SESSAO_ENCERRADA = "Sessão encerrada. Entre de novo.";
+var MSG_SESSAO_INDISPONIVEL = "Não foi possível conferir sua sessão agora. Tente de novo em instantes.";
+
+/* Como lib/legal-acceptance.js do servidor: só a versão atual vale. */
+function conferirAceite(corpo, reaceite) {
+  var termos = corpo && corpo.terms_version;
+  var privacidade = corpo && corpo.privacy_version;
+  var falta = function (v) { return typeof v !== "string" || !v.trim(); };
+  if (falta(termos) || falta(privacidade)) {
+    return { ok: false, status: 400, dados: { error: reaceite ? MSG_ACEITE_REACEITE : MSG_ACEITE_CADASTRO, code: "legal_acceptance_required" } };
+  }
+  if (termos !== VERSAO_TERMOS || privacidade !== VERSAO_PRIVACIDADE) {
+    return { ok: false, status: 400, dados: { error: MSG_VERSAO_ANTIGA, code: "legal_version_outdated", current_terms_version: VERSAO_TERMOS, current_privacy_version: VERSAO_PRIVACIDADE } };
+  }
+  return { ok: true };
+}
+
+/* Contas de teste que entram sem o aceite da versão atual. */
+function aceiteInicial(email) {
+  if (email === "reaceitar@exemplo.com" || email === "aceite-falha@exemplo.com") return null;
+  if (email === "aceite-antigo@exemplo.com") return { termos: "beta-0", privacidade: "beta-0", em: "2026-11-01T10:00:00.000Z" };
+  return { termos: VERSAO_TERMOS, privacidade: VERSAO_PRIVACIDADE, em: new Date().toISOString() };
+}
+
+function legalDe(usuario) {
+  var aceite = usuario.aceite || null;
+  return {
+    terms_version: aceite ? aceite.termos : null,
+    terms_accepted_at: aceite ? aceite.em : null,
+    privacy_version: aceite ? aceite.privacidade : null,
+    privacy_accepted_at: aceite ? aceite.em : null,
+    current_terms_version: VERSAO_TERMOS,
+    current_privacy_version: VERSAO_PRIVACIDADE,
+    needs_acceptance: !aceite || aceite.termos !== VERSAO_TERMOS || aceite.privacidade !== VERSAO_PRIVACIDADE
+  };
+}
+
+function aceitarTermosMock(email, corpo) {
+  var conferencia = conferirAceite(corpo, true);
+  if (!conferencia.ok) return { status: conferencia.status, dados: conferencia.dados };
+  if (email === "aceite-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível guardar seu aceite. Tente de novo." } };
+  usuarios[email].aceite = { termos: VERSAO_TERMOS, privacidade: VERSAO_PRIVACIDADE, em: new Date().toISOString() };
+  return { status: 200, dados: { legal: legalDe(usuarios[email]) } };
+}
+
 function sessao(email, username) {
   garantirUsuario(email, username);
   return {
     token: tokenDe(email),
     user: {
       username: username || "pessoa",
-      email: email
+      email: email,
+      legal: legalDe(usuarios[email])
     }
   };
 }
@@ -535,6 +605,12 @@ function autorizar(req) {
   }
   if (!email || !usuarios[email]) {
     return { status: 403, email: "", dados: { error: "Token inválido ou expirado." } };
+  }
+  if (email === "sessao-encerrada@exemplo.com") {
+    return { status: 401, email: "", dados: { error: MSG_SESSAO_ENCERRADA, code: "session_ended" } };
+  }
+  if (email === "sessao-indisponivel@exemplo.com") {
+    return { status: 503, email: "", dados: { error: MSG_SESSAO_INDISPONIVEL, code: "auth_unavailable" } };
   }
   return { status: 200, email: email, dados: {} };
 }
@@ -916,6 +992,12 @@ function cadastro(corpo) {
   }
   var idade = conferirIdade(corpo.birth_date);
   if (!idade.ok) return { status: idade.status, dados: idade.dados };
+  /* Aceite depois da idade, como no servidor (PR 28). Nada é criado sem ele. */
+  var aceite = conferirAceite(corpo, false);
+  if (!aceite.ok) return { status: aceite.status, dados: aceite.dados };
+  if (email === "termos-mudaram@exemplo.com") {
+    return { status: 400, dados: { error: MSG_VERSAO_ANTIGA, code: "legal_version_outdated", current_terms_version: VERSAO_TERMOS, current_privacy_version: VERSAO_PRIVACIDADE } };
+  }
   if (emailsUsados[email] || nomesUsados[username]) {
     return { status: 400, dados: { error: "Email ou username já está em uso." } };
   }
@@ -1625,7 +1707,7 @@ async function responderComunidade(req, caminho, corpo) {
 
   if (caminho === "/api/users/me" && metodo === "GET") {
     var usuario = usuarios[email];
-    return { status: 200, dados: { user: { id: usuario.id, username: usuario.username, email: usuario.email, adult_confirmed: ehAdulto(email) } } };
+    return { status: 200, dados: { user: { id: usuario.id, username: usuario.username, email: usuario.email, adult_confirmed: ehAdulto(email), legal: legalDe(usuario) } } };
   }
   /* As rotas de admin ficam antes do portão 18+, como no servidor. */
   if (caminho.indexOf("/api/communities/admin/") === 0) return equipeMock(email, metodo, caminho, cenario);
@@ -1719,6 +1801,10 @@ var servidor = http.createServer(function (req, res) {
     if (url === "/api/users/register" && req.method === "POST") return cadastro(corpo);
 
     var acesso = autorizar(req);
+    if (url === "/api/users/me/legal-acceptance" && req.method === "POST") {
+      if (acesso.status !== 200) return negar(acesso);
+      return aceitarTermosMock(acesso.email, corpo);
+    }
     if (url === "/api/missions" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);
       return criarMissao(acesso.email, corpo);

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Política de privacidade — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <!-- Gerado a partir do rascunho beta-1 dos textos legais. Não edite à mão:
+       o texto muda na origem e a página é gerada de novo. Abre sem login e sem internet. -->
+  <script>
+    (function () {
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erro) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="legal.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+</head>
+<body class="pagina-legal">
+  <a class="saltar" href="#conteudo">Pular para o texto</a>
+  <div class="topo-legal">
+    <a class="voltar" id="voltar" href="index.html">Voltar</a>
+  </div>
+  <main id="conteudo" class="documento" tabindex="-1">
+    <p class="faixa-rascunho">Rascunho beta-1</p>
+    <h1 id="topo">Política de privacidade</h1>
+    <p class="versao">Versão beta-1, de 22/11/2026</p>
+    <nav class="indice" aria-labelledby="indice-titulo">
+      <h2 id="indice-titulo" class="indice-titulo">Neste texto</h2>
+      <ul>
+          <li><a href="#secao-1">1. Quem cuida dos seus dados</a></li>
+          <li><a href="#secao-2">2. O que o Nexus guarda de você</a></li>
+          <li><a href="#secao-3">3. Filtro de crise: o que ele faz</a></li>
+          <li><a href="#secao-4">4. Dados de saúde: o que isso significa</a></li>
+          <li><a href="#secao-5">5. CONSENTIMENTO SEPARADO: a nota do check-in</a></li>
+          <li><a href="#secao-6">6. CONSENTIMENTO SEPARADO: notificações e novidades</a></li>
+          <li><a href="#secao-7">7. Com quem os dados passam (operadores)</a></li>
+          <li><a href="#secao-8">8. Por quanto tempo guardamos (beta-1)</a></li>
+          <li><a href="#secao-9">9. Como excluir sua conta</a></li>
+          <li><a href="#secao-10">10. Seus direitos</a></li>
+          <li><a href="#secao-11">11. Segurança</a></li>
+          <li><a href="#secao-12">12. Guardado no seu aparelho</a></li>
+          <li><a href="#secao-13">13. Menores</a></li>
+          <li><a href="#secao-14">14. Mudanças</a></li>
+      </ul>
+    </nav>
+    <p class="cruzado"><a href="termos.html">Ler também os Termos de uso</a></p>
+    <div class="texto-legal">
+<h2 id="secao-1">1. Quem cuida dos seus dados</h2>
+<p>[NOME DO RESPONSÁVEL] (pessoa física) é o responsável pelos seus dados no Nexus. Contato de privacidade: <strong>[E-MAIL DE PRIVACIDADE]</strong>. Respondemos em até <strong>15 dias</strong> (a lei dá até 15 dias no Brasil e 1 mês na UE). Quem lê e responde: o próprio responsável.</p>
+<p>Como o responsável pode estar na União Europeia, aplicamos a você, esteja no Brasil ou em Portugal, o padrão <strong>mais protetor</strong> entre a LGPD (Brasil) e o RGPD (UE).</p>
+<h2 id="secao-2">2. O que o Nexus guarda de você</h2>
+<p>Só o que o app usa. Nada de rastreadores, anúncios ou análise de comportamento: o site não carrega scripts de terceiros nem fontes de fora.</p>
+<ul class="tabela-legal">
+<li><p class="linha-titulo">Apelido, e-mail</p><dl><dt>De onde vem</dt><dd>Você, no cadastro</dd><dt>Para quê</dt><dd>Entrar na conta e identificar você</dd></dl></li>
+<li><p class="linha-titulo">Senha</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Guardamos só uma versão embaralhada (hash bcrypt); nunca a senha em si</dd></dl></li>
+<li><p class="linha-titulo">Confirmação de 18+ (só a hora)</p><dl><dt>De onde vem</dt><dd>Cadastro</dd><dt>Para quê</dt><dd>Provar que você declarou ser maior de idade. <strong>A data de nascimento não é guardada nem registrada em log</strong></dd></dl></li>
+<li><p class="linha-titulo">Bio e link de foto (opcionais)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Perfil</dd></dl></li>
+<li><p class="linha-titulo">Seu contrato: título, categoria, descrição, mínimo diário, janela, porquê, plano se falhar, dias da semana, foco de estudo, modo (Solo/Duo), datas, status</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Montar e acompanhar sua missão</dd></dl></li>
+<li><p class="linha-titulo">Check-in: dia, feito ou não, dia difícil</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Acompanhar a missão, pontos e recuperação</dd></dl></li>
+<li><p class="linha-titulo"><strong>Nota do check-in (texto até 280 caracteres)</strong></p><dl><dt>De onde vem</dt><dd>Você, <strong>só se consentir</strong> (seção 5)</dd><dt>Para quê</dt><dd>Registrar o que você fez; pode mostrar à IA e ao parceiro do Duo</dd></dl></li>
+<li><p class="linha-titulo">Mensagens do chat do Duo</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Conversar com seu parceiro</dd></dl></li>
+<li><p class="linha-titulo">Contato da "Porta Aberta" (opcional)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Trocar contato com o parceiro ao fim da missão, só se os dois abrirem</dd></dl></li>
+<li><p class="linha-titulo">Horário do lembrete e fuso</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Enviar o lembrete na hora certa</dd></dl></li>
+<li><p class="linha-titulo">Inscrição de notificação (endereço do navegador e chaves de criptografia)</p><dl><dt>De onde vem</dt><dd>Seu navegador, <strong>se você permitir</strong></dd><dt>Para quê</dt><dd>Enviar lembretes</dd></dl></li>
+<li><p class="linha-titulo">Registro de avisos enviados (quem, qual missão, tipo, dia)</p><dl><dt>De onde vem</dt><dd>O servidor</dd><dt>Para quê</dt><dd>Não repetir o mesmo aviso</dd></dl></li>
+<li><p class="linha-titulo">Denúncias e posts da comunidade</p><dl><dt>De onde vem</dt><dd>Você, <strong>se a Comunidade estiver ligada</strong></dd><dt>Para quê</dt><dd>Moderação</dd></dl></li>
+</ul>
+<p><strong>O que NÃO guardamos:</strong> o texto que dispara o alerta de crise; a data de nascimento; o corpo dos seus pedidos nos registros do servidor (o código evita escrever isso no log).</p>
+<h2 id="secao-3">3. Filtro de crise: o que ele faz</h2>
+<p>Quando você escreve a nota do check-in (e um post ou comentário de denúncia da Comunidade), o servidor passa o texto por uma lista de frases de crise <strong>na memória</strong>. Se o texto acende o alerta:</p>
+<ul><li>o texto é <strong>descartado</strong>: não vai para o banco, não vai para os registros do servidor e não vai para a IA;</li><li>o check-in conta normalmente, sem penalidade;</li><li>você vê os contatos de ajuda.</li></ul>
+<p>Não avisamos seu parceiro, nem ninguém, por causa de um alerta. <strong>Não guardamos nem o fato de que houve alerta.</strong> O filtro foi feito a partir de fontes públicas de prevenção e <strong>ainda será revisado por um profissional de saúde mental</strong>. Ele erra para os dois lados.</p>
+<h2 id="secao-4">4. Dados de saúde: o que isso significa</h2>
+<p>O que você escreve numa nota pode revelar sua saúde (cansaço, humor, tristeza). A lei trata isso como <strong>dado sensível</strong>. Por isso:</p>
+<ul><li><strong>Você não é obrigado a escrever nada sensível.</strong> O check-in funciona sem nota.</li><li>A nota só é guardada com o <strong>seu consentimento separado</strong> (seção 5).</li><li>Não usamos a nota para propaganda, nem para decidir nada sobre você.</li></ul>
+<h2 id="secao-5">5. CONSENTIMENTO SEPARADO: a nota do check-in</h2>
+<blockquote><p><strong>Guardar as notas dos meus check-ins?</strong></p><p>A nota é um texto livre de até 280 caracteres. O que você escrever pode revelar algo sobre sua saúde.</p><p><strong>O que é guardado:</strong> o texto da nota, o dia e sua conta.</p><p><strong>Quem vê:</strong> você; o servidor do Nexus; <strong>seu parceiro, no modo Duo</strong>; e, quando você usa o assistente, <strong>a OpenAI (empresa dos EUA)</strong> recebe as suas últimas notas (até 5) para responder.</p><p><strong>Por quanto tempo:</strong> até o fim da missão + 12 meses, ou até você apagar.</p><p><strong>Como retirar:</strong> em Ajustes, desligue "Guardar notas" (paramos de guardar novas notas) e use "Apagar minhas notas" (apagamos as já guardadas). Retirar é tão fácil quanto dar e não tira nenhum direito seu.</p><p>Se você não marcar, o check-in funciona sem nota.</p></blockquote>
+<ul><li>Base legal: <strong>consentimento específico e destacado</strong>.</li><li>Guardamos a prova do consentimento: sua conta, a versão deste texto, a data e hora, e o que você escolheu (inclusive quando retira). Essa prova sai junto com a conta, na exclusão (seção 9).</li><li>Frases de crise <strong>nunca</strong> são guardadas, com ou sem consentimento.</li></ul>
+<h2 id="secao-6">6. CONSENTIMENTO SEPARADO: notificações e novidades</h2>
+<p>São <strong>duas escolhas diferentes</strong>, ambas <strong>desligadas por padrão</strong>, cada uma com a sua caixa:</p>
+<ol><li><strong>Lembrete do meu check-in.</strong> Um aviso no horário que você escolheu. O navegador também pede a sua permissão para notificar. É serviço, não propaganda.</li><li><strong>Novidades do Nexus (marketing).</strong> Novidades, convites para voltar, ofertas. Em Portugal, marketing eletrônico a pessoa física exige consentimento prévio. <strong>No beta-1 não enviamos nenhuma.</strong> Só ligaremos se você marcar.</li></ol>
+<p>Como retirar: Ajustes, desligue a chave; vale na hora. Você também pode bloquear as notificações no navegador. Guardamos a data e a versão de cada escolha.</p>
+<h2 id="secao-7">7. Com quem os dados passam (operadores)</h2>
+<ul class="tabela-legal">
+<li><p class="linha-titulo">Railway (hospedagem do servidor e do banco)</p><dl><dt>Para quê</dt><dd>Guarda o banco e roda o servidor</dd><dt>Onde</dt><dd>—</dd></dl></li>
+<li><p class="linha-titulo">GitHub Pages (hospedagem do site)</p><dl><dt>Para quê</dt><dd>Entrega as telas do app (vê seu IP, como qualquer site)</dd><dt>Onde</dt><dd>Conforme o GitHub</dd></dl></li>
+<li><p class="linha-titulo">OpenAI (assistente "Grande Irmão")</p><dl><dt>Para quê</dt><dd>Recebe dados da missão, as últimas notas (até 5) e sua pergunta para gerar a resposta, <strong>se o assistente estiver ligado</strong></dd><dt>Onde</dt><dd>EUA</dd></dl></li>
+<li><p class="linha-titulo">Serviço de push do seu navegador (Google, Apple, Mozilla etc.)</p><dl><dt>Para quê</dt><dd>Entrega a notificação</dd><dt>Onde</dt><dd>Conforme o navegador</dd></dl></li>
+</ul>
+<p>Não vendemos seus dados. Não os damos a anunciantes. Não notificamos terceiros sobre você.</p>
+<h2 id="secao-8">8. Por quanto tempo guardamos (beta-1)</h2>
+<p>Estes são os prazos <strong>que o Nexus se compromete a cumprir</strong>.</p>
+<ul class="tabela-legal">
+<li><p class="linha-titulo">Conta (apelido, e-mail, senha embaralhada, perfil)</p><dl><dt>Prazo</dt><dd>Até você apagar a conta (na hora, pelo app). Conta sem uso por 12 meses: aviso e exclusão</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Confirmação de 18+ (hora)</p><dl><dt>Prazo</dt><dd>Enquanto a conta existir</dd><dt>Como acaba</dt><dd>Sai com a conta</dd></dl></li>
+<li><p class="linha-titulo">Contrato e missão</p><dl><dt>Prazo</dt><dd>Até apagar a conta ou 12 meses após o fim da missão</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Check-ins (feito, dia difícil)</p><dl><dt>Prazo</dt><dd>Igual à missão</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Nota do check-in</p><dl><dt>Prazo</dt><dd>Até o fim da missão + 12 meses, ou até você apagar ou retirar o consentimento</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Texto de crise</p><dl><dt>Prazo</dt><dd><strong>Não é guardado</strong></dd><dt>Como acaba</dt><dd>n/a</dd></dl></li>
+<li><p class="linha-titulo">Mensagens do Duo</p><dl><dt>Prazo</dt><dd>Até o fim da missão + 12 meses, ou até apagar a conta</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Contato da Porta Aberta</p><dl><dt>Prazo</dt><dd>Até você apagar ou o fim da missão + 12 meses</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Inscrição de push</p><dl><dt>Prazo</dt><dd>Até você desligar, ou apagar a conta, ou o navegador recusar (410)</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Registro de avisos enviados</p><dl><dt>Prazo</dt><dd>90 dias</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Denúncias (se a Comunidade estiver ligada)</p><dl><dt>Prazo</dt><dd>Enquanto aberta + 6 a 12 meses após decidir. <strong>As denúncias ligadas aos posts de quem apaga a conta são apagadas junto</strong></dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Registro dos seus consentimentos e aceites</p><dl><dt>Prazo</dt><dd>Só enquanto a conta existir; saem com ela, na hora</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Pedido de exclusão feito no app</p><dl><dt>Prazo</dt><dd><strong>Não guardamos registro nenhum</strong></dd><dt>Como acaba</dt><dd>n/a</dd></dl></li>
+<li><p class="linha-titulo">Registros técnicos do servidor (mensagens de erro, sem texto de check-in)</p><dl><dt>Prazo</dt><dd>Conforme a retenção do Railway; alvo: 6 meses no máximo</dd><dt>Como acaba</dt><dd>Expiram</dd></dl></li>
+<li><p class="linha-titulo">Cópias de segurança (backup)</p><dl><dt>Prazo</dt><dd>Hoje <strong>não existe rotina de 30 dias</strong> nem agendamento. <strong>Não prometemos prazo</strong> até existir.</dd><dt>Como acaba</dt><dd>—</dd></dl></li>
+</ul>
+<h2 id="secao-9">9. Como excluir sua conta</h2>
+<ol><li><strong>No app:</strong> Ajustes, "Excluir minha conta". Pedimos sua senha de novo e uma confirmação. <strong>A exclusão é na hora</strong>: não há prazo de espera nem volta. (Um prazo de arrependimento pode vir numa versão futura.) Muitas tentativas erradas de senha bloqueiam o pedido por um tempo. A conta de administrador não pode ser apagada por esse caminho.</li><li><strong>Por e-mail:</strong> escreva a [E-MAIL DE PRIVACIDADE]. Respondemos em até 15 dias. Atenção: o seu e-mail fica na nossa caixa de entrada; podemos apagá-lo depois de atender.</li></ol>
+<p><strong>O que apagamos, na hora:</strong> conta, e-mail, contratos e missões, check-ins, notas, mensagens, contato da Porta Aberta, inscrições de push, registros de avisos, seus posts e <strong>as denúncias ligadas a esses posts</strong>. <strong>O que fica:</strong> <strong>nada sobre o seu pedido</strong>. Não guardamos registro de que você pediu para sair, nem a prova de que aceitou os termos (ela some com a conta). Isso nos deixa sem prova se alguém contestar depois. <strong>No Duo:</strong></p>
+<ul><li><strong>Se você é o dono da missão:</strong> a missão passa para o seu parceiro, que mantém os check-ins e as notas dele. Só os <strong>seus</strong> dados são apagados (os textos do seu contrato saem e o título vira um texto neutro). Se não houver parceiro, a missão é apagada inteira.</li><li><strong>Se você é o parceiro:</strong> a missão do dono continua, agora como <strong>Solo</strong>. Seus dados são apagados.</li><li>O que seu parceiro já viu (notas, mensagens) não conseguimos desfazer.</li></ul>
+<p><strong>Comunidade:</strong> se você criou uma comunidade, ela continua, <strong>sem autor</strong>. <strong>Backups:</strong> hoje não temos rotina de 30 dias, então <strong>não prometemos</strong> quando os seus dados somem das cópias de segurança. Se um backup for restaurado, uma conta apagada poderia voltar; ainda não existe rotina para impedir isso.</p>
+<h2 id="secao-10">10. Seus direitos</h2>
+<p>Você pode pedir: confirmar se tratamos seus dados; ver e receber uma cópia; corrigir; apagar; limitar ou se opor; portar; saber com quem compartilhamos; <strong>retirar qualquer consentimento</strong> sem prejuízo; e rever decisões automáticas (não tomamos nenhuma). Escreva a [E-MAIL DE PRIVACIDADE]. Se não resolvermos, você pode reclamar à <strong>ANPD</strong> (Brasil) ou à <strong>CNPD</strong> (Portugal).</p>
+<h2 id="secao-11">11. Segurança</h2>
+<p>Senha embaralhada (bcrypt); conexão com o banco cifrada (TLS) em produção; o app do servidor usa um usuário de banco sem poder de apagar tabelas; cópias de segurança cifradas. Sua sessão fica guardada no seu aparelho por até 7 dias, até você sair. Nenhum sistema é 100% seguro. Se houver vazamento que ofereça risco a você, avisamos você e a autoridade no prazo da lei (72 h para a autoridade na UE).</p>
+<h2 id="secao-12">12. Guardado no seu aparelho</h2>
+<p>O app guarda no navegador só o que ele precisa para funcionar: sessão (token), uma cópia do estado do dia (que pode incluir o título da missão, o porquê e a nota), preferências (tema e horário do lembrete) e arquivos do app para abrir offline. <strong>Sem rastreadores e sem anúncios.</strong> Ao sair, limpamos a sessão.</p>
+<h2 id="secao-13">13. Menores</h2>
+<p>O Nexus é só para maiores de 18. Se descobrirmos uma conta de menor, bloqueamos e apagamos.</p>
+<h2 id="secao-14">14. Mudanças</h2>
+<p>Cada versão tem número e data. Se mudar algo que importe, pedimos <strong>novo aceite</strong> e novo consentimento quando o uso dos dados mudar.</p>
+    </div>
+    <footer class="rodape-legal">
+      <p>Dúvidas? Escreva para [E-MAIL DE PRIVACIDADE].</p>
+      <p>Atualizado em 22/11/2026.</p>
+      <p><a href="#topo">Voltar ao topo</a></p>
+    </footer>
+  </main>
+  <script src="legal-pagina.js"></script>
+</body>
+</html>

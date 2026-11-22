@@ -360,3 +360,9 @@ input:-webkit-autofill {
     border-color: currentColor;
   }
 }
+
+/* Aviso de sessão (503 auth_unavailable), posto pelo api.js no topo da tela. */
+.aviso-sessao {
+  width: min(100%, 28rem);
+  margin: 0 auto var(--space-4);
+}
