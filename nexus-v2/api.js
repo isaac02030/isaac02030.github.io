@@ -69,9 +69,44 @@ function nexusSessaoEncerrada() {
   location.replace("./index.html" + nexusBuscaTema());
 }
 
-/* Um aviso só, no topo da tela, com role="alert". */
-function nexusAvisoDeSessao(texto) {
-  if (typeof document === "undefined") return;
+/* 503 auth_unavailable (revisão da Clara): um aviso só.
+   Se a própria tela mostra o erro dela (um .alerta-falha visível), esse erro
+   fica, passa a neutro (não é culpa de quem usa) e o aviso do topo não
+   aparece. Só quando a tela não mostra erro (o conteúdo carregou, por
+   exemplo de uma cópia guardada) o aviso aparece no topo, com role="alert". */
+var NEXUS_ESPERA_ERRO_DA_TELA_MS = 250;
+var NEXUS_OBSERVA_ERRO_DA_TELA_MS = 3000;
+
+function nexusVisivel(el) {
+  return el.id !== "aviso-sessao" && !el.hidden && !(el.closest && el.closest("[hidden]"));
+}
+
+/* Erros visíveis da própria tela: os de falha e os que já passaram a neutro
+   por este mesmo aviso (marcados com .erro-de-sessao; um segundo 503, como o
+   do /me, não pode trazer o aviso do topo de volta). */
+function nexusErrosDaTela() {
+  var lugar = document.querySelector("main") || document.body;
+  if (!lugar || !lugar.querySelectorAll) return [];
+  var falhas = Array.prototype.filter.call(lugar.querySelectorAll(".alerta-falha"), nexusVisivel);
+  var neutros = Array.prototype.filter.call(lugar.querySelectorAll(".erro-de-sessao"), nexusVisivel);
+  return falhas.concat(neutros);
+}
+
+/* Deixa os erros da tela neutros e esconde o aviso do topo. */
+function nexusAjustarErrosDaTela() {
+  var erros = nexusErrosDaTela();
+  if (!erros.length) return false;
+  erros.forEach(function (el) {
+    el.classList.remove("alerta-falha");
+    el.classList.add("alerta-neutro");
+    el.classList.add("erro-de-sessao");
+  });
+  var topo = document.getElementById("aviso-sessao");
+  if (topo) topo.hidden = true;
+  return true;
+}
+
+function nexusMostrarAvisoNoTopo(texto) {
   var aviso = document.getElementById("aviso-sessao");
   if (!aviso) {
     aviso = document.createElement("div");
@@ -86,6 +121,22 @@ function nexusAvisoDeSessao(texto) {
   paragrafo.textContent = texto;
   aviso.replaceChildren(paragrafo);
   aviso.hidden = false;
+}
+
+function nexusAvisoDeSessao(texto) {
+  if (typeof document === "undefined") return;
+  setTimeout(function () {
+    if (nexusAjustarErrosDaTela()) return;
+    nexusMostrarAvisoNoTopo(texto);
+    /* Se o erro da tela aparecer depois, ele fica e o do topo sai. */
+    if (typeof MutationObserver === "function" && document.body) {
+      var observador = new MutationObserver(function () {
+        if (nexusAjustarErrosDaTela()) observador.disconnect();
+      });
+      observador.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "hidden"] });
+      setTimeout(function () { observador.disconnect(); }, NEXUS_OBSERVA_ERRO_DA_TELA_MS);
+    }
+  }, NEXUS_ESPERA_ERRO_DA_TELA_MS);
 }
 
 async function nexusLerJson(resposta) {

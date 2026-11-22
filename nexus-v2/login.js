@@ -499,7 +499,8 @@ async function enviarReaceite(form) {
       else if (resultado.sessaoIndisponivel) mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.sessaoIndisponivel);
       else if (codigo === TEXTOS_LEGAIS().DO_SERVIDOR.aceiteFaltando) definirErroDoAceite(caixa, erroCaixa, TEXTOS_LEGAIS().TEXTOS.erroReaceite);
       else if (codigo === TEXTOS_LEGAIS().DO_SERVIDOR.versaoAntiga) mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.versaoMudou);
-      else mostrarAviso(alerta, "falha", TEXTOS_LEGAIS().TEXTOS.falhaAceite);
+      /* Falha do servidor: aviso neutro, não vermelho (revisão da Clara). */
+      else mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.falhaAceite);
       return;
     }
     marcarAceiteConferido();

@@ -12,6 +12,9 @@
    esperam o sim junto com este PR. */
 
 (function () {
+  /* Fonte única da versão e da data em que ela passa a valer: o cadastro, a
+     reaceitação e as páginas termos.html e privacidade.html (geradas a partir
+     daqui) usam estas três linhas. */
   var VERSAO_TERMOS = "beta-1";
   var VERSAO_PRIVACIDADE = "beta-1";
   var DATA_VERSAO = "22/11/2026";
@@ -26,15 +29,18 @@
 
     /* Reaceitação (spec da Clara, «Contas que já existem»). */
     reaceiteTitulo: "Atualizamos os termos e a privacidade",
-    reaceiteTexto: "Para continuar, leia e aceite as versões novas. Foram atualizadas em " + DATA_VERSAO + ".",
+    reaceiteTexto: "Para continuar, leia e aceite as versões novas. Elas valem a partir de " + DATA_VERSAO + ".",
     continuar: "Continuar",
     continuando: "Enviando…",
     sairDaConta: "Sair da conta",
 
-    /* Aprovados (PR 28 do servidor). */
+    /* Aprovados (PR 28 do servidor). versaoMudou foi ajustado na revisão da
+       Clara (no app instalado não há botão de recarregar): o servidor ainda
+       manda «…Recarregue a página…» no campo error; o site mostra este texto
+       pelo code legal_version_outdated. Igualar o servidor num PR pequeno. */
     erroCadastro: "Para criar a conta, marque que você leu e aceita os termos e a política de privacidade.",
     erroReaceite: "Para continuar, marque que você leu e aceita os termos e a política de privacidade.",
-    versaoMudou: "Os termos ou a política de privacidade mudaram. Recarregue a página para ver a versão atual e aceite de novo.",
+    versaoMudou: "Os termos ou a política de privacidade mudaram. Atualize a página (ou feche e abra o app) para ver a versão atual e aceite de novo.",
     falhaAceite: "Não foi possível guardar seu aceite. Tente de novo.",
 
     /* Aprovados (PR 26 do servidor). Também ficam em api.js, que roda em

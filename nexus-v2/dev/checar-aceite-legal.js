@@ -30,7 +30,8 @@ function semComentarios(js) {
 var APROVADOS = {
   erroCadastro: "Para criar a conta, marque que você leu e aceita os termos e a política de privacidade.",
   erroReaceite: "Para continuar, marque que você leu e aceita os termos e a política de privacidade.",
-  versaoMudou: "Os termos ou a política de privacidade mudaram. Recarregue a página para ver a versão atual e aceite de novo.",
+  /* Ajustado na revisão da Clara (o servidor ainda manda «Recarregue a página»). */
+  versaoMudou: "Os termos ou a política de privacidade mudaram. Atualize a página (ou feche e abra o app) para ver a versão atual e aceite de novo.",
   falhaAceite: "Não foi possível guardar seu aceite. Tente de novo.",
   sessaoEncerrada: "Sessão encerrada. Entre de novo.",
   sessaoIndisponivel: "Não foi possível conferir sua sessão agora. Tente de novo em instantes."
@@ -136,10 +137,12 @@ if (!/if \(!caixa\.checked\)/.test(envioR)) falhas.push("a reaceitação não ba
 if (!/NexusApi\.aceitarTermos\(versoesAceitas\(\)\)/.test(envioR)) falhas.push("a reaceitação não manda as versões");
 if (!/sair\.disabled = true/.test(envioR) || !/definirCarregando\(botao, true\)/.test(envioR)) falhas.push("os botões da reaceitação não ficam desabilitados durante o envio");
 if (envioR.indexOf("falhaAceite") === -1) falhas.push("a reaceitação não mostra a falha aprovada");
+if (envioR.indexOf('mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.falhaAceite)') === -1) falhas.push("a falha ao guardar o aceite precisa ser neutra (não vermelha)");
+if (L && L.TEXTOS.reaceiteTexto !== "Para continuar, leia e aceite as versões novas. Elas valem a partir de " + L.DATA_VERSAO + ".") falhas.push("o texto da reaceitação não usa a data de vigência da fonte única");
 
 /* ---------- Páginas de Termos e Privacidade ---------- */
 var PROIBIDAS = ["isaac", "pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
-  "aviso interno", "apagar antes de publicar", "testers", "pr 26", "legal/", ".md", "ver lacunas", "proposta do", "a aprovar", "urso"];
+  "aviso interno", "apagar antes de publicar", "testers", "pr 26", "legal/", ".md", "ver lacunas", "proposta do", "a aprovar", "urso", "[conferir"];
 var MARCADORES = ["[E-MAIL DE PRIVACIDADE]", "[NOME DO RESPONSÁVEL]"];
 ["termos.html", "privacidade.html"].forEach(function (nome) {
   var html = ler(nome);
@@ -199,6 +202,11 @@ if (!/@media print/.test(legalCss)) falhas.push("legal.css: falta o CSS de impre
 if (!/\.caixa-aceite input \{[\s\S]*?width: var\(--target\);[\s\S]*?height: var\(--target\);/.test(css)) falhas.push("a caixa de aceite não tem alvo de 44 px");
 if (!/\.caixa-aceite input:focus-visible \+ label::before/.test(css)) falhas.push("a caixa de aceite não mostra o foco");
 if (!/\.links-legais a \{[\s\S]*?min-height: var\(--target\);/.test(css)) falhas.push("os links para ler não têm 44 px");
+if (!/\.links-legais \{[\s\S]*?gap: var\(--space-3\);/.test(css)) falhas.push("os dois links para ler precisam de 12 px entre eles");
+/* Versão e vigência das páginas vêm da mesma fonte do cadastro (legal-textos.js). */
+["termos.html", "privacidade.html"].forEach(function (nome) {
+  if (L && ler(nome).indexOf('<p class="versao">Versão ' + L.VERSAO_TERMOS + " \u00B7 em vigor desde " + L.DATA_VERSAO + ".</p>") === -1) falhas.push(nome + ": a versão e a vigência não batem com legal-textos.js");
+});
 [index, ler("termos.html"), ler("privacidade.html"), textos].forEach(function (t) {
   if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(t)) falhas.push("há emoji nas telas novas");
 });
@@ -217,12 +225,30 @@ function novoArmazem(inicial) {
 }
 
 function elemento(tag) {
-  return {
+  var el = {
     tagName: tag, id: "", className: "", hidden: false, filhos: [], atributos: {}, textContent: "",
     setAttribute: function (k, v) { this.atributos[k] = v; },
     insertBefore: function (novo) { this.filhos.unshift(novo); },
-    replaceChildren: function () { this.filhos = Array.prototype.slice.call(arguments); }
+    appendChild: function (novo) { this.filhos.push(novo); },
+    replaceChildren: function () { this.filhos = Array.prototype.slice.call(arguments); },
+    closest: function () { return null; },
+    querySelectorAll: function (sel) {
+      var classe = sel.replace(/^\./, "");
+      var achados = [];
+      (function andar(lista) {
+        lista.forEach(function (f) {
+          if ((" " + f.className + " ").indexOf(" " + classe + " ") !== -1) achados.push(f);
+          andar(f.filhos || []);
+        });
+      })(this.filhos);
+      return achados;
+    }
   };
+  el.classList = {
+    add: function (c) { if ((" " + el.className + " ").indexOf(" " + c + " ") === -1) el.className = (el.className + " " + c).trim(); },
+    remove: function (c) { el.className = (" " + el.className + " ").replace(" " + c + " ", " ").trim(); }
+  };
+  return el;
 }
 
 function navegador(caminho, respostas, local) {
@@ -246,6 +272,7 @@ function navegador(caminho, respostas, local) {
     location: { pathname: caminho, search: "?tema=escuro", replace: function (u) { trocas.push(u); } },
     URLSearchParams: URLSearchParams,
     JSON: JSON,
+    setTimeout: setTimeout,
     fetch: function (url, pedido) {
       pedidos.push({ url: url, pedido: pedido });
       var r = respostas.shift() || { status: 200, corpo: {} };
@@ -282,20 +309,44 @@ async function casosDoNavegador() {
   await semAuth.contexto.NexusApi.entrar("a@b.c", "x");
   if (semAuth.contexto.localStorage.getItem("nexus_v2_token") !== "t" || semAuth.trocas.length) falhas.push("pedido sem login não pode apagar a sessão");
 
-  /* 503 auth_unavailable: aviso aprovado no topo, com role=alert, sem apagar. */
+  /* 503 auth_unavailable sem erro na tela: aviso aprovado no topo, com role=alert, sem apagar. */
   var i = navegador("/nexus-v2/missao.html", [{ status: 200, corpo: { user: { legal: { needs_acceptance: false } } } }, { status: 503, corpo: { error: "x", code: "auth_unavailable" } }], SESSAO);
   await new Promise(function (r3) { setTimeout(r3, 5); });
   var r503 = await i.contexto.NexusApi.listarMissoes();
+  await new Promise(function (r3b) { setTimeout(r3b, 400); });
   var aviso = i.main.filhos.find(function (f) { return f.id === "aviso-sessao"; });
   if (!aviso || aviso.atributos.role !== "alert" || !aviso.filhos[0] || aviso.filhos[0].textContent !== APROVADOS.sessaoIndisponivel) falhas.push("503 auth_unavailable: falta o aviso aprovado com role=alert");
   if (r503.erro !== APROVADOS.sessaoIndisponivel) falhas.push("503 auth_unavailable: o erro não é o texto aprovado");
   if (i.contexto.localStorage.getItem("nexus_v2_token") !== "t" || i.trocas.length) falhas.push("503 auth_unavailable não pode apagar a sessão nem trocar de tela");
 
+  /* 503 auth_unavailable com o erro da própria tela: um aviso só (o da tela),
+     e ele passa a neutro. Negado: o aviso do topo não aparece. */
+  var t = navegador("/nexus-v2/missao.html", [{ status: 200, corpo: { user: { legal: { needs_acceptance: false } } } }, { status: 503, corpo: { error: "x", code: "auth_unavailable" } }], SESSAO);
+  await new Promise(function (r9) { setTimeout(r9, 5); });
+  await t.contexto.NexusApi.listarMissoes();
+  var erroDaTela = elemento("div");
+  erroDaTela.className = "alerta alerta-falha";
+  t.main.appendChild(erroDaTela);
+  await new Promise(function (r10) { setTimeout(r10, 400); });
+  var topo = t.main.filhos.find(function (f) { return f.id === "aviso-sessao"; });
+  if (topo && !topo.hidden) falhas.push("503 com erro na tela: o aviso do topo não pode aparecer (dois avisos)");
+  if (erroDaTela.className.indexOf("alerta-falha") !== -1 || erroDaTela.className.indexOf("alerta-neutro") === -1) falhas.push("503 com erro na tela: o erro da tela precisa ficar neutro");
+  /* Um segundo 503 (como o do /me) não traz o aviso do topo de volta. */
+  t.contexto.nexusAvisoDeSessao(APROVADOS.sessaoIndisponivel);
+  await new Promise(function (r12) { setTimeout(r12, 400); });
+  var topo2 = t.main.filhos.find(function (f) { return f.id === "aviso-sessao"; });
+  if (topo2 && !topo2.hidden) falhas.push("503 repetido com erro na tela: o aviso do topo voltou");
+
   /* Negado: 503 sem o código (ex.: comunidade sem migração) não mostra o aviso da sessão. */
   var o = navegador("/nexus-v2/missao.html", [{ status: 200, corpo: { user: { legal: { needs_acceptance: false } } } }, { status: 503, corpo: { error: "A comunidade ainda não está disponível." } }], SESSAO);
   await new Promise(function (r4) { setTimeout(r4, 5); });
+  var erroComum = elemento("div");
+  erroComum.className = "alerta alerta-falha";
+  o.main.appendChild(erroComum);
   await o.contexto.NexusApi.listarMissoes();
-  if (o.main.filhos.length) falhas.push("503 sem auth_unavailable não pode mostrar o aviso da sessão");
+  await new Promise(function (r11) { setTimeout(r11, 400); });
+  if (o.main.filhos.some(function (f) { return f.id === "aviso-sessao"; })) falhas.push("503 sem auth_unavailable não pode mostrar o aviso da sessão");
+  if (erroComum.className.indexOf("alerta-falha") === -1) falhas.push("503 sem auth_unavailable não muda o erro da tela");
 
   /* Reaceitação: /me com needs_acceptance leva à tela de aceite. */
   var p = navegador("/nexus-v2/hoje.html", [{ status: 200, corpo: { user: { legal: { needs_acceptance: true } } } }], SESSAO);

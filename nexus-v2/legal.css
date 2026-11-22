@@ -112,6 +112,8 @@
   display: flex;
   align-items: center;
   min-height: var(--target);
+  /* Título que quebra em duas linhas não encosta no próximo. */
+  padding: var(--space-1) 0;
 }
 
 .cruzado {

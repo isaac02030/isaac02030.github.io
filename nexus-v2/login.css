@@ -195,7 +195,10 @@
   cursor: pointer;
 }
 
-/* A caixa. */
+/* A caixa. Contorno medido (22/11, revisão da Clara), mínimo 3:1:
+   claro #7A756C: 4,58:1 no cartão branco e 3,68:1 no preenchimento #E3E8E1;
+   escuro #9A948A: 5,45:1 no cartão #221F1B e 4,99:1 no preenchimento #2A2621.
+   Marcada: acento 7,57:1 (claro) e 6,71:1 (escuro) no cartão. */
 .caixa-aceite label::before {
   content: "";
   position: absolute;
@@ -242,10 +245,12 @@
 }
 
 /* Links para ler: cada um numa linha de 44 px, fora do rótulo. */
+/* 12 px entre os dois links, também com texto a 200% (revisão da Clara). */
 .links-legais {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: var(--space-3);
   margin: 0;
 }
 
