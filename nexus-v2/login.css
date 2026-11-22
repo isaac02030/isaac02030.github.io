@@ -1,33 +1,45 @@
 /* Tela 00: entrar e criar conta.
    A página, o cartão e o formulário ficam em base.css. */
 
+/* Senha: rótulo e «Mostrar senha» na mesma linha quando cabem. Com texto grande
+   (200%), «Mostrar senha» desce para uma linha própria em vez de espremer o
+   rótulo letra por letra (WCAG 1.4.4 e 1.4.10). */
 .campo-senha {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   column-gap: var(--space-2);
   row-gap: var(--space-2);
 }
 
 .campo-senha label {
-  grid-column: 1;
-  grid-row: 1;
+  order: 0;
+  flex: 1 0 auto;
+  max-width: 100%;
 }
 
 .campo-senha .btn {
-  grid-column: 2;
-  grid-row: 1;
+  order: 1;
   padding-inline: var(--space-3);
 }
 
 .campo-senha input,
 .campo-senha .dica,
 .campo-senha .erro-campo {
-  grid-column: 1 / -1;
+  flex: 0 0 100%;
 }
 
 .campo-senha input {
-  grid-row: 2;
+  order: 2;
+}
+
+.campo-senha .dica {
+  order: 3;
+}
+
+.campo-senha .erro-campo {
+  order: 4;
 }
 
 .esqueci {
@@ -125,4 +137,10 @@
 
 .texto-menor {
   color: var(--text);
+}
+
+/* Aviso calmo (503 e afins): borda e texto comuns, com ícone. Não é erro de quem digitou. */
+.alerta-neutro {
+  color: var(--text);
+  border-color: var(--border);
 }

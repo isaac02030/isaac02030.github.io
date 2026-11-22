@@ -175,7 +175,7 @@ function mensagemDaApi(modo, resultado) {
     return { onde: "data", tipo: "falha", texto: TEXTOS_IDADE().TEXTOS.dataErro };
   }
   if (modo === "cadastro" && resultado.status === 503) {
-    return { onde: "topo", tipo: "falha", texto: TEXTOS_IDADE().TEXTOS.cadastroIndisponivel };
+    return { onde: "topo", tipo: "neutro", texto: TEXTOS_IDADE().TEXTOS.cadastroIndisponivel };
   }
   if (erro === "Password deve ter pelo menos 6 caracteres.") {
     return {
@@ -392,8 +392,10 @@ async function enviarCadastro(form) {
       birth_date: nascimento
     });
     if (!resultado.ok) {
-      /* 403 do servidor: menor de 18. Nada foi guardado; a tela troca por inteiro. */
-      if (resultado.status === 403 && resultado.dados && resultado.dados.under_age === true) {
+      /* 403 do cadastro: menor de 18 (o servidor manda under_age: true; é o único 403
+         desta rota). Mesmo sem o campo, a tela é a do menor: uma mensagem genérica
+         de «tente de novo» seria enganosa. Nada foi guardado; a tela troca por inteiro. */
+      if (resultado.status === 403) {
         limparCadastro(form);
         mostrarVista("menor", true);
         return;

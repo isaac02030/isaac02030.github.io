@@ -78,8 +78,9 @@
   </main>
 
   <!-- Confirmação de Restaurar ou Apagar. O foco começa em «Cancelar». -->
-  <dialog class="confirmacao" id="confirmacao" aria-labelledby="pergunta">
-    <p class="pergunta" id="pergunta"></p>
+  <dialog class="confirmacao" id="confirmacao" aria-labelledby="pergunta" aria-describedby="explica">
+    <h2 class="pergunta" id="pergunta"></h2>
+    <p class="explica" id="explica"></p>
     <div id="alerta-acao" class="alerta" role="alert" hidden></div>
     <div class="folha-botoes">
       <button type="button" class="btn" id="btn-confirmar" aria-busy="false"><span class="btn-rotulo"></span></button>

@@ -55,8 +55,12 @@
     alertaRepetido: "Atenção: quem ajudou a esconder este post escondeu vários posts hoje. Confira se a denúncia é justa.",
     restaurar: "Restaurar",
     apagar: "Apagar",
-    restaurarPergunta: "Restaurar este post? Ele volta ao feed. Só contam denúncias novas.",
-    apagarPergunta: "Apagar este post para sempre? Isso não dá para desfazer.",
+    /* Confirmações: título curto + explicação em corpo normal (revisão da Clara).
+       Apagar: as mesmas palavras da spec, só divididas. Restaurar: texto novo da Clara, sem «feed». */
+    restaurarTitulo: "Restaurar este post?",
+    restaurarCorpo: "Ele volta para a comunidade. Só denúncias novas poderão escondê-lo de novo.",
+    apagarTitulo: "Apagar este post para sempre?",
+    apagarCorpo: "Isso não dá para desfazer.",
     adminVazio: "Nenhum post escondido agora.",
 
     /* 503 (migração ainda não aplicada no servidor). */
@@ -70,10 +74,10 @@
     comunidadeErro: "Não foi possível abrir a comunidade. Tente de novo.",
     semRede: "Sem internet. Tente de novo quando a conexão voltar.",
     feedVazio: "Ainda não há posts nesta comunidade.",
-    feedFechado: "Os posts desta comunidade ainda não abriram para você.",
+    feedFechado: "Você ainda não pode ver os posts desta comunidade.",
+    voce: "Você",
     adminTitulo: "Posts escondidos",
     adminErro: "Não foi possível abrir a lista. Tente de novo.",
-    adminDenuncias: "Denúncias",
     acaoErro: "Não foi possível concluir. Tente de novo.",
     acaoSemRede: "Sem internet. Nada mudou. Tente de novo quando a conexão voltar.",
     restaurado: "Post restaurado.",

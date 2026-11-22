@@ -152,6 +152,7 @@
    - menos de 18 anos (corte no fuso UTC-12, 29/02 faz 18 em 01/03) → 403 com under_age: true,
      e nada é guardado (o e-mail continua livre)
    - e-mail sem-migracao@exemplo.com → 503, como o servidor sem a migração 006
+   - e-mail menor-sem-campo@exemplo.com → 403 sem under_age (caso negado do site)
    - a data não é guardada: o mock guarda só "adulto: true", como adult_confirmed_at
    GET /api/users/me → { user: { id, username, email, adult_confirmed } }
 
@@ -908,6 +909,10 @@ function cadastro(corpo) {
   }
   if (senha.length < 6) {
     return { status: 400, dados: { error: "Password deve ter pelo menos 6 caracteres." } };
+  }
+  /* Caso negado do site: 403 sem o campo under_age (a tela tem de mostrar a do menor). */
+  if (email === "menor-sem-campo@exemplo.com") {
+    return { status: 403, dados: { error: MSG_MENOR } };
   }
   var idade = conferirIdade(corpo.birth_date);
   if (!idade.ok) return { status: idade.status, dados: idade.dados };

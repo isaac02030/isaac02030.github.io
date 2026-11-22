@@ -283,14 +283,29 @@ body:has(.tela-comunidade) {
   border-top: 1px solid var(--borda-cartao);
 }
 
+/* Radio desenhado aqui, para o contorno ter contraste medido nos dois temas:
+   --border contra --surface (claro #7A756C/#FFFFFF 4,6:1; escuro #9A948A/#221F1B 5,5:1).
+   Marcado: contorno e miolo em --accent. O foco usa o anel de :focus-visible da base. */
 .motivo input {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
   width: 22px;
   height: 22px;
   min-height: 0;
   flex: 0 0 auto;
   margin: 0;
   padding: 0;
-  accent-color: var(--accent);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.motivo input:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 4px var(--surface);
 }
 
 .folha .campo label .opcional {
@@ -387,25 +402,23 @@ body:has(.tela-comunidade) {
   white-space: pre-line;
 }
 
-.denuncias-rotulo {
-  margin: 0;
-  font: var(--text-small);
-  color: var(--text-muted);
-}
-
+/* Uma denúncia por bloco: motivo em negrito e o comentário dela logo abaixo.
+   Um traço fino separa uma denúncia da outra. */
 .denuncias {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin: calc(var(--space-2) * -1) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--borda-cartao);
 }
 
-.denuncias li {
+.denuncia {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--borda-cartao);
 }
 
 .denuncia-motivo {
@@ -436,8 +449,14 @@ body:has(.tela-comunidade) {
 }
 
 .pergunta {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-2);
   font: var(--text-title);
+  color: var(--text);
+}
+
+.explica {
+  margin: 0 0 var(--space-4);
+  font: var(--text-body);
   color: var(--text);
 }
 

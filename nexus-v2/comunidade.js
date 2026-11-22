@@ -197,12 +197,18 @@ function cartaoEscondido(post) {
 function itemDoPost(post) {
   var item = document.createElement("li");
   item.className = "post";
-  var idAutor = "autor-" + post.id;
-  var autor = document.createElement("p");
-  autor.className = "post-autor";
-  autor.id = idAutor;
-  autor.textContent = typeof post.username === "string" ? post.username : "";
-  item.appendChild(autor);
+  /* O próprio post aparece como «Você». Sem apelido do servidor, a linha some:
+     nunca uma palavra genérica no lugar do nome. */
+  var meu = ehMeu(post) || post.hidden === true;
+  var nome = meu ? T.voce : (typeof post.username === "string" ? post.username.trim() : "");
+  var idAutor = nome ? "autor-" + post.id : "";
+  if (nome) {
+    var autor = document.createElement("p");
+    autor.className = "post-autor";
+    autor.id = idAutor;
+    autor.textContent = nome;
+    item.appendChild(autor);
+  }
 
   if (post.hidden === true) {
     item.classList.add("post-escondido");
@@ -226,12 +232,12 @@ function itemDoPost(post) {
     rodape.appendChild(data);
   }
   /* «Denunciar» não aparece no próprio post. */
-  if (!ehMeu(post)) {
+  if (!meu) {
     var botao = document.createElement("button");
     botao.type = "button";
     botao.className = "btn btn-texto btn-denunciar";
     botao.textContent = T.denunciar;
-    botao.setAttribute("aria-describedby", idAutor);
+    if (idAutor) botao.setAttribute("aria-describedby", idAutor);
     botao.setAttribute("aria-haspopup", "dialog");
     botao.addEventListener("click", function () {
       abrirFolha(post, botao);
@@ -449,7 +455,8 @@ function lerMeuNome() {
 }
 
 function iniciar() {
-  window.NEXUS_CENARIO = parametro("cenario");
+  /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
+  window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
   meuNome = lerMeuNome();
   document.getElementById("btn-agora-nao").href = "hoje.html" + busca();

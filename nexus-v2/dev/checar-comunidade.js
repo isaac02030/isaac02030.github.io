@@ -68,8 +68,13 @@ var APROVADOS = {
   alertaRepetido: "Atenção: quem ajudou a esconder este post escondeu vários posts hoje. Confira se a denúncia é justa.",
   restaurar: "Restaurar",
   apagar: "Apagar",
-  restaurarPergunta: "Restaurar este post? Ele volta ao feed. Só contam denúncias novas.",
-  apagarPergunta: "Apagar este post para sempre? Isso não dá para desfazer.",
+  apagarTitulo: "Apagar este post para sempre?",
+  apagarCorpo: "Isso não dá para desfazer.",
+  /* Revisão da Clara (22/11): título curto + corpo, sem «feed». Novos, esperam o sim. */
+  restaurarTitulo: "Restaurar este post?",
+  restaurarCorpo: "Ele volta para a comunidade. Só denúncias novas poderão escondê-lo de novo.",
+  feedFechado: "Você ainda não pode ver os posts desta comunidade.",
+  voce: "Você",
   adminVazio: "Nenhum post escondido agora.",
   indisponivel: "Esta parte ainda não está disponível. Tente mais tarde.",
   tentarDeNovo: "Tentar de novo"
@@ -108,6 +113,7 @@ function conferirTextos(fonte) {
   if (/Tenho 18 anos ou mais|Confirmar e entrar/.test(fonte)) erros.push("voltou a caixa de 18+ (decidido: só o aviso)");
   /* O aviso ao autor nunca diz quantas denúncias houve. */
   if (/\{(n|total|quantas|contagem)\}/.test(fonte)) erros.push("um texto da comunidade tem lugar para número de denúncias");
+  if (/\bfeed\b|adminDenuncias/.test(fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/feed(Vazio|Fechado)/g, ""))) erros.push("«feed» ou o rótulo solto «Denúncias» voltou");
   return erros;
 }
 
@@ -153,10 +159,26 @@ if (index.indexOf('<script src="comunidade-textos.js"></script>') === -1) falhas
 if (index.indexOf("btn-criar") < index.indexOf("cadastro-data-ajuda")) falhas.push("a data precisa vir antes do botão de criar conta");
 var pedidoCadastro = api.slice(api.indexOf("cadastrar:"), api.indexOf("listarMissoes"));
 if (!/birth_date:\s*dados\.birth_date/.test(pedidoCadastro)) falhas.push("o cadastro não manda birth_date");
-if (!/resultado\.status === 403 && resultado\.dados && resultado\.dados\.under_age === true/.test(login)) falhas.push("o 403 do menor não troca a tela");
+if (!/if \(resultado\.status === 403\) \{\s*limparCadastro\(form\);\s*mostrarVista\("menor", true\)/.test(login)) falhas.push("todo 403 do cadastro precisa trocar pela tela do menor (com ou sem under_age)");
 if (!/limparCadastro\(form\);\s*mostrarVista\("menor", true\)/.test(login)) falhas.push("no 403 do menor, os campos precisam ser apagados");
 if (/outra data/i.test(semComentarios(login + index))) falhas.push("a tela do menor não oferece «tentar outra data»");
-if (!/resultado\.status === 503\)\s*\{\s*return \{ onde: "topo", tipo: "falha", texto: TEXTOS_IDADE\(\)\.TEXTOS\.cadastroIndisponivel/.test(login)) falhas.push("o 503 do cadastro não usa a frase aprovada");
+if (!/resultado\.status === 503\)\s*\{\s*return \{ onde: "topo", tipo: "neutro", texto: TEXTOS_IDADE\(\)\.TEXTOS\.cadastroIndisponivel/.test(login)) falhas.push("o 503 do cadastro precisa da frase aprovada, em aviso neutro");
+var loginCss = ler("login.css");
+if (!/\.alerta-neutro \{\s*color: var\(--text\);\s*border-color: var\(--border\);/.test(loginCss)) falhas.push("falta o aviso neutro (sem vermelho) no cadastro");
+if (!/\.campo-senha \{\s*display: flex;\s*flex-direction: row;\s*flex-wrap: wrap;/.test(loginCss) || !/\.campo-senha label \{[^}]*flex: 1 0 auto;/.test(loginCss)) falhas.push("a 200%, «Mostrar senha» precisa descer em vez de espremer o rótulo");
+
+/* Contrato com o servidor (PR 18): o 403 do menor traz under_age: true.
+   Lê o repositório do servidor ao lado, se existir; senão, avisa que pulou. */
+var servidor = path.join(raiz, "..", "..", "nexus-backend");
+if (fs.existsSync(path.join(servidor, "lib", "adult-age.js"))) {
+  var idadeSrv = fs.readFileSync(path.join(servidor, "lib", "adult-age.js"), "utf8");
+  var usersSrv = fs.readFileSync(path.join(servidor, "routes", "users.js"), "utf8");
+  if (!/status: 403, error: UNDER_AGE_MESSAGE, under_age: true/.test(idadeSrv)) falhas.push("contrato: o servidor deixou de mandar 403 com under_age: true");
+  if (!/adult\.under_age \? \{ under_age: true \} : \{\}/.test(usersSrv)) falhas.push("contrato: a rota de cadastro deixou de repassar under_age");
+  if ((usersSrv.match(/status\(403\)/g) || []).length > 0) falhas.push("contrato: o cadastro do servidor ganhou outro 403 (a tela trata todo 403 como menor)");
+} else {
+  console.log("aviso: repositório do servidor não encontrado ao lado; contrato do 403 não conferido");
+}
 
 /* Data: só a forma. */
 var M = carregarTextos(textosFonte);
@@ -196,7 +218,11 @@ if (comJs.indexOf("folha.showModal()") === -1) falhas.push("a folha precisa abri
 if (!/<textarea id="detalhes"[^>]*maxlength="280"/.test(comHtml)) falhas.push("o comentário precisa do limite de 280");
 if (comHtml.indexOf('<p class="contador" id="detalhes-contador">0 de 280</p>') === -1) falhas.push("falta o contador «0 de 280»");
 if (!/id="btn-enviar-denuncia" aria-busy="false" disabled/.test(comHtml)) falhas.push("«Enviar denúncia» começa desligado (sem motivo)");
-if (!/if \(!ehMeu\(post\)\)/.test(comJs)) falhas.push("«Denunciar» não pode aparecer no próprio post");
+if (!/var meu = ehMeu\(post\) \|\| post\.hidden === true;/.test(comJs) || !/if \(!meu\) \{/.test(comJs)) falhas.push("«Denunciar» não pode aparecer no próprio post");
+if (!/var nome = meu \? T\.voce :/.test(comJs) || !/if \(nome\) \{/.test(comJs)) falhas.push("o próprio post aparece como «Você» e, sem apelido, a linha some");
+[["comunidade.js", comJs], ["equipe.js", semComentarios(ler("equipe.js"))]].forEach(function (par) {
+  if (!/window\.NEXUS_CENARIO = hostDeDesenvolvimento\(\) \? parametro\("cenario"\) : "";/.test(par[1])) falhas.push(par[0] + ": ?cenario= só pode valer em localhost");
+});
 if (!/resultado\.dados\.crisis === true\)\s*\{\s*fecharFolha\(\);\s*abrirAjuda\(resultado\.dados\.reported === true\)/.test(comJs)) falhas.push("crise na denúncia precisa abrir a ajuda");
 if (!/resultado\.status === 409\) return mostrarAviso\(alerta, "falha", T\.denunciaRepetida\)/.test(comJs)) falhas.push("o 409 precisa da frase aprovada");
 if (!/resultado\.status === 503\) return mostrarAviso\(alerta, "falha", T\.denunciaIndisponivel\)/.test(comJs)) falhas.push("o 503 da denúncia precisa da frase aprovada");
@@ -204,6 +230,9 @@ if (!/resultado\.ok && resultado\.dados && resultado\.dados\.reported === true/.
 if (/hidden_message|report_count|reports_count|\.reports\b/.test(comJs)) falhas.push("o aviso ao autor não pode usar contagem nem frase do servidor");
 if (!/semIdade\(resultado\)\) return abrirIdade\(\)/.test(comJs)) falhas.push("o 403 de idade precisa mostrar o aviso");
 if (/\.username|user_id|reporter_id|\.reporter\b/.test(eqJs)) falhas.push("a área da equipe não pode mostrar autor nem quem denunciou");
+if (/denuncias-rotulo|adminDenuncias/.test(eqJs + css)) falhas.push("o rótulo solto «Denúncias» voltou");
+if (!/T\.apagarTitulo[\s\S]*T\.apagarCorpo/.test(eqJs) || !/aria-describedby="explica"/.test(eqHtml)) falhas.push("a confirmação precisa de título curto + corpo");
+if (!/\.motivo input \{[^}]*appearance: none;[^}]*border: 2px solid var\(--border\);/.test(css)) falhas.push("o radio precisa do contorno em --border (contraste medido)");
 if (!/document\.getElementById\("btn-cancelar"\)\.focus\(\)/.test(eqJs)) falhas.push("a confirmação começa com o foco em «Cancelar»");
 if (!/resultado\.status === 403\) return abrirNegado\(\)/.test(eqJs)) falhas.push("quem não é admin precisa da frase calma");
 if (!/post\.priority === "alta"[\s\S]*T\.prioridadeAlta/.test(eqJs)) falhas.push("prioridade alta precisa do rótulo em texto");
@@ -288,6 +317,8 @@ async function casosDoMock() {
   var menor = await pedir("POST", "/api/users/register", Object.assign({}, cad, { birth_date: "2015-06-01" }));
   igual("cadastro de menor", menor.status, 403);
   igual("menor traz under_age", menor.json.under_age, true);
+  var semCampo = await pedir("POST", "/api/users/register", Object.assign({}, cad, { email: "menor-sem-campo@exemplo.com", username: "msc", birth_date: "1995-03-07" }));
+  igual("403 sem under_age (caso negado do site)", semCampo.status === 403 && semCampo.json.under_age === undefined, true);
   igual("sem migração 006", (await pedir("POST", "/api/users/register", Object.assign({}, cad, { email: "sem-migracao@exemplo.com", username: "sm", birth_date: "1995-03-07" }))).status, 503);
   /* O menor não deixou nada guardado: o mesmo e-mail cria a conta com uma data de adulto. */
   igual("cadastro de adulto depois do menor", (await pedir("POST", "/api/users/register", Object.assign({}, cad, { birth_date: "1995-03-07" }))).status, 201);

@@ -142,17 +142,16 @@ function itemEscondido(post) {
     item.appendChild(linhaComIcone("alerta-repetido", DESENHOS.info, T.alertaRepetido));
   }
 
+  /* Uma linha por denúncia: o motivo em negrito e, logo abaixo, o comentário dela.
+     Sem nomes e sem rótulo solto. */
   var denuncias = Array.isArray(post.reports) ? post.reports : [];
   if (denuncias.length) {
-    var rotulo = document.createElement("p");
-    rotulo.className = "denuncias-rotulo";
-    rotulo.textContent = T.adminDenuncias;
-    item.appendChild(rotulo);
     var lista = document.createElement("ul");
     lista.className = "denuncias";
     denuncias.forEach(function (denuncia) {
       if (!denuncia) return;
       var linha = document.createElement("li");
+      linha.className = "denuncia";
       var motivo = document.createElement("span");
       motivo.className = "denuncia-motivo";
       motivo.textContent = rotuloDoMotivo(denuncia.reason) || rotuloDoMotivo("outro");
@@ -229,7 +228,8 @@ function abrirConfirmacao(tipo, postId, origem) {
   var dialogo = document.getElementById("confirmacao");
   var confirmar = document.getElementById("btn-confirmar");
   acaoAberta = { tipo: tipo, postId: postId, origem: origem };
-  document.getElementById("pergunta").textContent = tipo === "apagar" ? T.apagarPergunta : T.restaurarPergunta;
+  document.getElementById("pergunta").textContent = tipo === "apagar" ? T.apagarTitulo : T.restaurarTitulo;
+  document.getElementById("explica").textContent = tipo === "apagar" ? T.apagarCorpo : T.restaurarCorpo;
   confirmar.querySelector(".btn-rotulo").textContent = tipo === "apagar" ? T.apagar : T.restaurar;
   confirmar.className = "btn " + (tipo === "apagar" ? "btn-perigo" : "btn-primario");
   esconderAviso(document.getElementById("alerta-acao"));
@@ -327,7 +327,8 @@ async function carregar() {
 }
 
 function iniciar() {
-  window.NEXUS_CENARIO = parametro("cenario");
+  /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
+  window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
   document.getElementById("btn-tentar").addEventListener("click", carregar);
   ligarConfirmacao();
