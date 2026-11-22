@@ -212,6 +212,12 @@
             <p>Aviso ativado. Você já pode começar a missão.</p>
           </div>
           <p id="aviso-recusado" class="dica" hidden></p>
+          <!-- Os lembretes só ligam com esta confirmação (decisão do PR 29).
+               Permitir o aviso no navegador, sozinho, não liga nada. Começa desmarcada. -->
+          <div class="caixa-aceite caixa-lembretes">
+            <input id="quero-lembretes" name="reminders" type="checkbox">
+            <label for="quero-lembretes" data-texto-dados="querLembretes"></label>
+          </div>
           <button type="button" class="btn btn-secundario btn-bloco" id="btn-aviso">Ativar o aviso</button>
 
           <button type="submit" class="btn btn-primario" id="btn-comecar" data-texto="Começar a missão" data-carregando="Criando a missão…" aria-busy="false">
@@ -222,6 +228,7 @@
       </section>
     </div>
   </main>
+  <script src="dados-textos.js"></script>
   <script src="api.js"></script>
   <script src="dias-da-missao.js"></script>
   <script src="onboarding.js"></script>

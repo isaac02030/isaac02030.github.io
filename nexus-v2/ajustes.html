@@ -88,6 +88,16 @@
         </div>
       </section>
 
+      <!-- Meus dados: uma linha da lista que abre a tela própria (spec da Clara, seção 3). -->
+      <section class="bloco" aria-label="Privacidade">
+        <a class="linha-lista" id="link-meus-dados" href="meus-dados.html">
+          <span data-texto-dados="linhaMeusDados"></span>
+          <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
+          </svg>
+        </a>
+      </section>
+
       <section class="bloco" aria-labelledby="titulo-sair">
         <h2 class="bloco-titulo" id="titulo-sair">Conta</h2>
         <button type="button" class="btn btn-secundario btn-bloco" id="btn-pedir-saida" aria-expanded="false" aria-controls="confirma-sair">Sair da conta</button>
@@ -103,6 +113,7 @@
     </div>
   </main>
   <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="dados-textos.js"></script>
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="ajustes.js"></script>

@@ -280,6 +280,33 @@ var NexusApi = {
       privacy_version: dados.privacy_version
     });
   },
+  /* Nota do check-in (PR 27 do servidor). GET devolve { note_consent:
+     "yes" | "no" | null, decided_at, version }. POST com { consent: true }
+     liga; DELETE grava «não» e apaga as notas já guardadas (notes_deleted).
+     Sem a migração 007: GET null, POST e DELETE 503. */
+  escolhaDaNota: function () {
+    return nexusPedir("/api/users/me/note-consent", null, { metodo: "GET", auth: true });
+  },
+  guardarNotas: function () {
+    return nexusPedir("/api/users/me/note-consent", { consent: true }, { metodo: "POST", auth: true });
+  },
+  naoGuardarNotas: function () {
+    return nexusPedir("/api/users/me/note-consent", null, { metodo: "DELETE", auth: true });
+  },
+  /* Lembretes e novidades (PR 29). GET { reminders: { choice, decided_at },
+     news: {...} }; PUT só com true/false de verdade. O site só mexe nos
+     lembretes: o interruptor de novidades fica escondido (decisão de 22/11). */
+  escolhasDeAvisos: function () {
+    return nexusPedir("/api/users/me/notification-preferences", null, { metodo: "GET", auth: true });
+  },
+  mudarLembretes: function (ligado) {
+    return nexusPedir("/api/users/me/notification-preferences", { reminders: ligado === true }, { metodo: "PUT", auth: true });
+  },
+  /* DELETE /api/users/me com { password } (PR 26). 200 { deleted: true };
+     403 wrong_password ou admin_account; 400 password_required; 429. */
+  excluirConta: function (senha) {
+    return nexusPedir("/api/users/me", { password: senha }, { metodo: "DELETE", auth: true });
+  },
   /* POST /api/users/me/legal-acceptance com as versões que a tela mostrou.
      200 { legal }; 400 legal_acceptance_required ou legal_version_outdated;
      503 sem a migração 008. */

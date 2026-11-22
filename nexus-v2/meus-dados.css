@@ -1,0 +1,246 @@
+/* Ajustes › Meus dados (spec da Clara, seção 3). Seções em h2, linhas com
+   divisória fina, sem cartão dentro de cartão. Vermelho só em «Excluir» (texto
+   e contorno) e no campo da senha errada. */
+
+.meus-dados.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.meus-dados .btn-voltar {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+
+.meus-dados .titulo {
+  margin: 0;
+  font: var(--text-title);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.secao:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.secao-titulo {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.secao-texto {
+  margin: 0;
+  color: var(--text);
+}
+
+/* Excluir conta: por último, afastado, com divisória mais espaçada. */
+.secao-excluir {
+  margin-top: var(--space-6);
+}
+
+.linhas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linhas > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.linha-aceite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) 0;
+}
+
+.linha-texto {
+  flex: 1 1 12rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.link-ler {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  min-width: var(--target);
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.linha-interruptor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.linha-interruptor .dica {
+  margin: 0;
+}
+
+.dica-forte {
+  color: var(--text);
+}
+
+/* A linha inteira é o interruptor (≥ 56 px). O estado também está em texto. */
+.interruptor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  margin: 0;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.interruptor[aria-busy="true"] {
+  cursor: wait;
+}
+
+.interruptor-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.interruptor-rotulo {
+  font: var(--text-label);
+}
+
+.interruptor-estado {
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+/* Trilho de 52x32 e bolinha. Desligado: contorno e bolinha em --border
+   (3:1 ou mais nos dois temas). Ligado: trilho no acento. */
+.trilho {
+  position: relative;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 32px;
+  box-sizing: border-box;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.bolinha {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.interruptor[aria-checked="true"] .trilho {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.interruptor[aria-checked="true"] .bolinha {
+  left: 24px;
+  background: var(--accent-text);
+}
+
+.interruptor:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* «Excluir»: só texto e contorno em --danger, nunca fundo vermelho. */
+.btn-perigo {
+  min-height: 48px;
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-perigo:disabled {
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.btn-bloco {
+  width: 100%;
+}
+
+/* Diálogo de exclusão: sem animação; foco preso pelo próprio <dialog>. */
+.dialogo {
+  width: min(calc(100% - 2 * var(--space-4)), 26rem);
+  max-height: calc(100dvh - 2 * var(--space-4));
+  overflow: auto;
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.dialogo::backdrop {
+  background: color-mix(in srgb, #000 55%, transparent);
+}
+
+.dialogo-titulo {
+  margin: 0;
+  font: var(--text-title);
+}
+
+.dialogo .campo input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.dialogo-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dialogo-botoes .btn {
+  width: 100%;
+  min-height: 48px;
+}

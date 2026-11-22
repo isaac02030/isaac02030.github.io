@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Meus dados — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="meus-dados.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
+  <main class="pagina pagina-com-abas" id="conteudo">
+    <div class="cartao cartao-topo meus-dados">
+      <noscript>
+        <p class="alerta alerta-rede">O Nexus precisa de JavaScript para mostrar seus dados.</p>
+      </noscript>
+      <a class="btn btn-texto btn-voltar" id="voltar" href="ajustes.html" data-texto-dados="voltar"></a>
+      <h1 class="titulo" id="titulo" tabindex="-1" data-texto-dados="titulo"></h1>
+
+      <section class="vista" id="vista-carregando" aria-live="polite">
+        <p class="carregando">
+          <span class="spinner" aria-hidden="true"></span>
+          <span data-texto-dados="abrindo"></span>
+        </p>
+      </section>
+
+      <section class="vista" id="vista-erro" hidden>
+        <div id="alerta-erro" class="alerta alerta-neutro" role="alert"></div>
+        <button type="button" class="btn btn-primario" id="btn-tentar" data-texto-dados="tentarDeNovo"></button>
+      </section>
+
+      <div class="vista" id="vista-dados" hidden>
+        <section class="secao" aria-labelledby="titulo-aceites">
+          <h2 class="secao-titulo" id="titulo-aceites" data-texto-dados="aceitesTitulo"></h2>
+          <ul class="linhas">
+            <li class="linha-aceite">
+              <p class="linha-texto" id="aceite-termos"></p>
+              <a class="link-ler" href="termos.html" aria-describedby="aceite-termos" data-texto-dados="ler"></a>
+            </li>
+            <li class="linha-aceite">
+              <p class="linha-texto" id="aceite-privacidade"></p>
+              <a class="link-ler" href="privacidade.html" aria-describedby="aceite-privacidade" data-texto-dados="ler"></a>
+            </li>
+          </ul>
+        </section>
+
+        <section class="secao" aria-labelledby="titulo-ligado">
+          <h2 class="secao-titulo" id="titulo-ligado" data-texto-dados="ligadoTitulo"></h2>
+          <div id="aviso-dados" class="alerta" role="status" hidden></div>
+          <ul class="linhas">
+            <li class="linha-interruptor">
+              <!-- O estado também vem em texto («Ligado»/«Desligado»), nunca só pela cor.
+                   Começa desligado até o servidor dizer o contrário. -->
+              <button type="button" class="interruptor" id="sw-notas" role="switch" aria-checked="false" aria-labelledby="notas-rotulo" aria-describedby="notas-estado notas-apoio notas-apaga">
+                <span class="interruptor-textos">
+                  <span class="interruptor-rotulo" id="notas-rotulo" data-texto-dados="notasRotulo"></span>
+                  <span class="interruptor-estado" id="notas-estado" data-texto-dados="desligado"></span>
+                </span>
+                <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+              </button>
+              <p class="dica" id="notas-apoio" data-texto-dados="notasApoio"></p>
+              <p class="dica dica-forte" id="notas-apaga" data-texto-dados="desligarApaga"></p>
+            </li>
+            <li class="linha-interruptor">
+              <button type="button" class="interruptor" id="sw-lembretes" role="switch" aria-checked="false" aria-labelledby="lembretes-rotulo" aria-describedby="lembretes-estado lembretes-apoio lembretes-bloqueados">
+                <span class="interruptor-textos">
+                  <span class="interruptor-rotulo" id="lembretes-rotulo" data-texto-dados="lembretesRotulo"></span>
+                  <span class="interruptor-estado" id="lembretes-estado" data-texto-dados="desligado"></span>
+                </span>
+                <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+              </button>
+              <p class="dica" id="lembretes-apoio" data-texto-dados="lembretesApoio"></p>
+              <p class="dica" id="lembretes-bloqueados" data-texto-dados="lembretesBloqueados" hidden></p>
+            </li>
+            <!-- Novidades por e-mail: escondido de propósito até existir envio (decisão de 22/11, PR 29). -->
+          </ul>
+        </section>
+
+        <section class="secao" aria-labelledby="titulo-falar">
+          <h2 class="secao-titulo" id="titulo-falar" data-texto-dados="falarTitulo"></h2>
+          <!-- O endereço não fica no repositório público: o marcador fica visível até o dono do projeto decidir. -->
+          <p class="secao-texto" data-texto-dados="falarTexto"></p>
+          <p class="secao-texto" data-texto-dados="falarPrazo"></p>
+        </section>
+
+        <section class="secao secao-excluir" aria-labelledby="titulo-excluir">
+          <h2 class="secao-titulo" id="titulo-excluir" data-texto-dados="excluirTitulo"></h2>
+          <p class="secao-texto" data-texto-dados="excluirTexto"></p>
+          <button type="button" class="btn btn-perigo btn-bloco" id="btn-excluir" aria-haspopup="dialog" data-texto-dados="excluirBotao"></button>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="dialogo" id="dialogo-excluir" aria-labelledby="dialogo-titulo" aria-describedby="dialogo-texto dialogo-duo">
+    <form class="formulario" id="form-excluir" method="post" action="#excluir" novalidate>
+      <h2 class="dialogo-titulo" id="dialogo-titulo" data-texto-dados="dialogoTitulo"></h2>
+      <p class="secao-texto" id="dialogo-texto" data-texto-dados="dialogoTexto"></p>
+      <p class="secao-texto" id="dialogo-duo" data-texto-dados="dialogoDuo"></p>
+      <div class="campo">
+        <label for="senha-excluir" data-texto-dados="senhaRotulo"></label>
+        <input id="senha-excluir" name="password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" aria-describedby="erro-excluir">
+      </div>
+      <div id="erro-excluir" class="alerta alerta-neutro" role="alert" hidden></div>
+      <div class="dialogo-botoes">
+        <!-- Cancelar primeiro e com o foco: é a ação segura. -->
+        <button type="button" class="btn btn-primario" id="btn-cancelar-excluir" autofocus data-texto-dados="cancelar"></button>
+        <button type="submit" class="btn btn-perigo" id="btn-confirmar-excluir" disabled aria-busy="false" data-texto-dados="excluirConfirmar"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="dados-textos.js"></script>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="meus-dados.js"></script>
+</body>
+</html>

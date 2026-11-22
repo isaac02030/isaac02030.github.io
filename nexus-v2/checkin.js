@@ -49,6 +49,12 @@ var ERROS_NOTA_CURTA = {
   "Esta missao exige uma nota curta antes do check-in.": "academia"
 };
 
+/* Escolha da nota (PR 27): "yes", "no", null (nunca respondeu) ou
+   "desconhecida" (não deu para ler; a pergunta não aparece e a linha de
+   apoio também não, para nunca dizer algo falso). */
+var escolhaNota = "desconhecida";
+var TITULO_REGISTRO = "Registro de hoje";
+
 var ciclo = 0;
 var missaoAtual = null;
 var saindo = false;
@@ -110,6 +116,8 @@ function mostrarVista(qual) {
   document.getElementById("vista-erro").hidden = qual !== "erro";
   document.getElementById("vista-bloqueio").hidden = qual !== "bloqueio";
   document.getElementById("vista-form").hidden = qual !== "form";
+  document.getElementById("vista-pergunta").hidden = qual !== "pergunta";
+  document.getElementById("titulo").textContent = qual === "pergunta" ? NexusDados.texto("perguntaTitulo") : TITULO_REGISTRO;
   document.getElementById("vista-sucesso").hidden = qual !== "sucesso";
   document.getElementById("conteudo").setAttribute("aria-busy", qual === "carregando" ? "true" : "false");
 }
@@ -397,9 +405,77 @@ function preencherForma(missao, semRede) {
   esconderAviso(document.getElementById("alerta"));
   aplicarRascunho();
   if (semRede) mostrarAviso(document.getElementById("alerta"), "rede", TEXTO_SEM_REDE);
+  /* Primeiro check-in: a pergunta antes do campo da nota. */
+  if (!semRede && escolhaNota === null) {
+    mostrarPergunta();
+    return;
+  }
+  mostrarFormulario();
+}
+
+function pintarApoioDaNota() {
+  var linha = document.getElementById("nota-guarda");
+  if (escolhaNota === "yes" || escolhaNota === "no") {
+    linha.textContent = NexusDados.texto(escolhaNota === "yes" ? "apoioSim" : "apoioNao");
+    linha.hidden = false;
+  } else {
+    linha.textContent = "";
+    linha.hidden = true;
+  }
+  var campo = document.getElementById("nota");
+  var ids = (campo.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (id) { return id && id !== "nota-guarda"; });
+  if (!linha.hidden) ids.push("nota-guarda");
+  campo.setAttribute("aria-describedby", ids.join(" "));
+}
+
+function mostrarFormulario() {
+  pintarApoioDaNota();
   mostrarVista("form");
   NexusAbas.focar(document.getElementById("titulo"));
   NexusAbas.concluirRolagem();
+}
+
+function mostrarPergunta() {
+  esconderAviso(document.getElementById("alerta-pergunta"));
+  mostrarVista("pergunta");
+  NexusAbas.focar(document.getElementById("titulo"));
+  NexusAbas.concluirRolagem();
+}
+
+/* «Sim» só vale depois que o servidor confirma. */
+async function responderSim() {
+  var botao = document.getElementById("btn-guardar-notas");
+  if (botao.disabled) return;
+  var alerta = document.getElementById("alerta-pergunta");
+  esconderAviso(alerta);
+  if (semRedeAgora()) {
+    mostrarAviso(alerta, "rede", NexusDados.texto("escolhaSemRede"));
+    return;
+  }
+  botao.disabled = true;
+  botao.setAttribute("aria-busy", "true");
+  var resultado = await NexusApi.guardarNotas();
+  botao.disabled = false;
+  botao.setAttribute("aria-busy", "false");
+  if (resultado.sessaoEncerrada) return;
+  if (resultado.ok && resultado.dados && resultado.dados.note_consent === "yes") {
+    escolhaNota = "yes";
+    mostrarFormulario();
+    return;
+  }
+  /* Neutro: é falha do servidor ou da rede, não de quem respondeu. */
+  mostrarAviso(alerta, "rede", resultado.semRede ? NexusDados.texto("escolhaSemRede") : NexusDados.texto("guardarEscolhaErro"));
+}
+
+/* «Não guardar» nunca falha nem espera: o padrão seguro já é não guardar.
+   O pedido grava o «não» para a pergunta não voltar; se falhar, ela volta
+   no próximo check-in e nada é guardado. */
+function responderNao() {
+  escolhaNota = "no";
+  if (!semRedeAgora()) {
+    NexusApi.naoGuardarNotas().catch(function () {});
+  }
+  mostrarFormulario();
 }
 
 function missaoTerminou(missao) {
@@ -480,8 +556,18 @@ async function carregar() {
 
   var respostas = await Promise.all([
     NexusApi.obterMissao(resumo.id),
-    NexusApi.sequenciaDaMissao(resumo.id)
+    NexusApi.sequenciaDaMissao(resumo.id),
+    NexusApi.escolhaDaNota()
   ]);
+  /* A escolha da nota não impede o registro: sem ela, a tela segue sem a
+     pergunta e sem a linha de apoio (o servidor decide o que guarda). */
+  var escolha = respostas[2];
+  if (escolha && escolha.ok && escolha.dados) {
+    var valor = escolha.dados.note_consent;
+    escolhaNota = valor === "yes" || valor === "no" ? valor : null;
+  } else {
+    escolhaNota = "desconhecida";
+  }
   if (meu !== ciclo) return;
   if (!respostas[0].ok || !respostas[1].ok) {
     var falha = respostas[0].semRede ? respostas[0] : respostas[1];
@@ -574,6 +660,20 @@ function mostrarSucesso() {
   });
 }
 
+/* Sem note_saved, a cópia do dia neste aparelho não guarda a nota: o Hoje
+   não mostra «Ver a nota de hoje». */
+function esquecerNotaDoAparelho() {
+  try {
+    var bruto = localStorage.getItem(CHAVE_CACHE);
+    if (!bruto) return;
+    var cache = JSON.parse(bruto);
+    if (cache && typeof cache === "object" && cache.nota) {
+      cache.nota = "";
+      localStorage.setItem(CHAVE_CACHE, JSON.stringify(cache));
+    }
+  } catch (erro) {}
+}
+
 function tratarResposta(resultado) {
   if (!resultado || resultado.semRede) {
     mostrarAviso(document.getElementById("alerta"), "rede", TEXTO_SEM_REDE);
@@ -585,6 +685,8 @@ function tratarResposta(resultado) {
     return;
   }
   if (resultado.ok) {
+    /* A nota só existe para rever se o servidor a guardou (note_saved). */
+    if (dados.note_saved !== true) esquecerNotaDoAparelho();
     if (dados.already_done === true) {
       limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);
@@ -653,6 +755,7 @@ function ligarLinks() {
   var extra = busca();
   document.getElementById("voltar").href = "hoje.html" + buscaHoje();
   document.getElementById("link-dificil").href = "dia-dificil.html" + extra;
+  document.getElementById("link-como-tratamos").href = "privacidade.html" + NexusAbas.busca(["tema"]) + "#secao-5";
   /* Quando a tela 10 existir, este botão passa a dizer «Ver o resultado». */
   document.getElementById("btn-voltar-hoje").href = "hoje.html" + buscaHoje();
 }
@@ -666,7 +769,10 @@ function atualizarBarra() {
 
 function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
+  NexusDados.aplicar(document);
   ligarLinks();
+  document.getElementById("btn-guardar-notas").addEventListener("click", responderSim);
+  document.getElementById("btn-nao-guardar").addEventListener("click", responderNao);
   document.getElementById("form-nota").addEventListener("submit", enviar);
   document.getElementById("btn-tentar").addEventListener("click", function () {
     carregar();

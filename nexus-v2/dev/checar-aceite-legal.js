@@ -42,7 +42,7 @@ var login = ler("login.js");
 var api = ler("api.js");
 var textos = ler("legal-textos.js");
 var sw = ler("sw.js");
-var css = ler("login.css");
+var css = ler("login.css") + "\n" + ler("base.css");
 var legalCss = ler("legal.css");
 
 /* ---------- Textos num lugar só ---------- */
@@ -188,7 +188,8 @@ if (!/url\.pathname\.match\(\/\\\/\(termos\|privacidade\)\\\.html\$\/\)/.test(sw
 if (!/\/\\\/crise\\\.html\$\/\.test\(url\.pathname\)/.test(sw)) falhas.push("o caminho da crise offline mudou");
 
 /* Regra 11 e acessibilidade no CSS novo. */
-[["legal.css", legalCss], ["login.css", css.slice(css.indexOf("/* Aceite dos termos"))]].forEach(function (par) {
+var baseCss = ler("base.css");
+[["legal.css", legalCss], ["login.css", ler("login.css").slice(ler("login.css").indexOf("/* Aceite dos termos"))], ["base.css (caixa)", baseCss.slice(baseCss.indexOf("/* Caixa de marcar desenhada"))]].forEach(function (par) {
   var c = par[1];
   if (/gradient/i.test(c)) falhas.push(par[0] + ": sem gradiente");
   if (/box-shadow:(?!\s*(inset|none))/.test(c)) falhas.push(par[0] + ": sem sombra");

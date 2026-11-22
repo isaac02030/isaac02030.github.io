@@ -666,6 +666,16 @@ async function criarAMissao(opcoes) {
         /* A missão já existe. O aviso pode ser ligado depois. */
       }
     }
+    /* Lembretes: só com a confirmação marcada (PUT reminders: true). Sem ela,
+       nada liga, mesmo com o aviso permitido. Falha aqui não desfaz a missão:
+       a escolha pode ser feita depois em Ajustes › Meus dados. */
+    if (document.getElementById("quero-lembretes").checked) {
+      try {
+        await NexusApi.mudarLembretes(true);
+      } catch (erroEscolha) {
+        /* Segue para o Hoje. */
+      }
+    }
     if (estado.reminder_time) {
       guardarLembreteLocal(estado.reminder_time);
       try {
@@ -733,6 +743,7 @@ function iniciar() {
     aplicarDias(NexusDias.UTEIS);
     lerCampos();
   });
+  if (window.NexusDados) NexusDados.aplicar(document);
   document.getElementById("btn-aviso").addEventListener("click", pedirAviso);
 
   document.querySelectorAll("[data-voltar]").forEach(function (botao) {

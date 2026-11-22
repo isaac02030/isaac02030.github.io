@@ -167,6 +167,23 @@
    - e-mail aceite-falha@exemplo.com → como reaceitar, e o aceite responde 500
    - POST /api/users/me/legal-acceptance { terms_version, privacy_version }, com login:
      grava a versão e a hora; sem versões → 400; versão antiga → 400; 200 { legal }
+   Nota do check-in (PR 27), com login:
+   - GET/POST/DELETE /api/users/me/note-consent. POST só com { consent: true }.
+     DELETE grava «não» e apaga as notas guardadas da pessoa (notes_deleted).
+   - Quem entra pelo login começa com «sim» (para os cenários antigos com nota);
+     conta criada no cadastro e os e-mails primeira-vez@exemplo.com e
+     escolha-falha@exemplo.com começam sem resposta (a pergunta aparece);
+     nao-guarda@exemplo.com começa com «não».
+   - e-mail escolha-falha@exemplo.com → POST e DELETE respondem 500.
+   - POST /api/checkins só guarda a nota com «sim» e responde note_saved.
+   Lembretes e novidades (PR 29), com login:
+   - GET/PUT /api/users/me/notification-preferences ({ reminders?, news? },
+     só true/false). Tudo começa sem escolha. avisos-falha@exemplo.com → PUT 500.
+   Excluir conta (PR 26): DELETE /api/users/me com { password }:
+   - sem senha → 400 password_required; senha "errada" → 403 wrong_password;
+     senha "muitas" → 429 too_many_attempts; admin@exemplo.com → 403
+     admin_account; excluir-falha@exemplo.com → 500; o resto apaga a conta
+     (depois disso, o token antigo responde 401 session_ended).
    Sessão conferida a cada pedido (PR 26 do servidor):
    - e-mail sessao-encerrada@exemplo.com → entra, e todo pedido com login
      responde 401 code session_ended «Sessão encerrada. Entre de novo.»
@@ -504,6 +521,11 @@ function lerCorpo(req) {
   });
 }
 
+/* Contas de teste que ainda não responderam sobre a nota (a pergunta aparece). */
+function semRespostaDaNota(email) {
+  return email === "primeira-vez@exemplo.com" || email === "escolha-falha@exemplo.com";
+}
+
 function garantirUsuario(email, username) {
   if (!usuarios[email]) {
     usuarios[email] = {
@@ -515,7 +537,15 @@ function garantirUsuario(email, username) {
       avisos: [],
       checkins: {},
       /* Aceite dos termos (PR 28): a maioria já aceitou a versão atual. */
-      aceite: aceiteInicial(email)
+      aceite: aceiteInicial(email),
+      /* Nota (PR 27): true = sim, false = não, null = ainda não respondeu. */
+      notaConsent: semRespostaDaNota(email) ? null : (email === "nao-guarda@exemplo.com" ? false : true),
+      notaConsentEm: semRespostaDaNota(email) ? null : new Date().toISOString(),
+      /* Avisos (PR 29): nada nasce ligado. */
+      lembretes: null,
+      lembretesEm: null,
+      novidades: null,
+      novidadesEm: null
     };
     proximoUsuario += 1;
   }
@@ -576,6 +606,85 @@ function aceitarTermosMock(email, corpo) {
   return { status: 200, dados: { legal: legalDe(usuarios[email]) } };
 }
 
+var excluidos = {};
+
+function escolhaNotaDe(usuario) {
+  var c = usuario.notaConsent;
+  return {
+    note_consent: c === true ? "yes" : (c === false ? "no" : null),
+    decided_at: c == null ? null : usuario.notaConsentEm,
+    version: c == null ? null : "nota-beta-1"
+  };
+}
+
+function avisosDe(usuario) {
+  var um = function (valor, em) {
+    return { choice: valor === true ? "yes" : (valor === false ? "no" : null), decided_at: valor == null ? null : em };
+  };
+  return { reminders: um(usuario.lembretes, usuario.lembretesEm), news: um(usuario.novidades, usuario.novidadesEm) };
+}
+
+/* Rotas de dados da pessoa (PR 26, 27 e 29). Devolve null se não é daqui. */
+function responderDados(req, url, corpo) {
+  var metodo = req.method;
+  var nota = url === "/api/users/me/note-consent";
+  var avisos = url === "/api/users/me/notification-preferences";
+  var excluir = url === "/api/users/me" && metodo === "DELETE";
+  if (!nota && !avisos && !excluir) return null;
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var email = acesso.email;
+  var usuario = usuarios[email];
+  var agora = new Date().toISOString();
+  if (nota && metodo === "GET") return { status: 200, dados: escolhaNotaDe(usuario) };
+  if (nota && metodo === "POST") {
+    if (!corpo || corpo.consent !== true) return { status: 400, dados: { error: "Escolha não reconhecida. Toque de novo em «Sim, guardar minhas notas».", code: "consent_required" } };
+    if (email === "escolha-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível guardar sua escolha. Tente de novo." } };
+    usuario.notaConsent = true;
+    usuario.notaConsentEm = agora;
+    return { status: 200, dados: escolhaNotaDe(usuario) };
+  }
+  if (nota && metodo === "DELETE") {
+    if (email === "escolha-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível guardar sua escolha. Tente de novo." } };
+    usuario.notaConsent = false;
+    usuario.notaConsentEm = agora;
+    var apagadas = 0;
+    Object.keys(usuario.checkins).forEach(function (id) {
+      usuario.checkins[id].forEach(function (item) {
+        if (item.note) { item.note = null; apagadas += 1; }
+      });
+    });
+    var saida = escolhaNotaDe(usuario);
+    saida.notes_deleted = apagadas;
+    return { status: 200, dados: saida };
+  }
+  if (avisos && metodo === "GET") return { status: 200, dados: avisosDe(usuario) };
+  if (avisos && metodo === "PUT") {
+    var chaves = corpo && typeof corpo === "object" ? Object.keys(corpo) : [];
+    var valido = chaves.length > 0 && chaves.every(function (k) {
+      return (k === "reminders" || k === "news") && typeof corpo[k] === "boolean";
+    });
+    if (!valido) return { status: 400, dados: { error: "Escolha não reconhecida. Toque de novo no interruptor.", code: "preferences_invalid" } };
+    if (email === "avisos-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível salvar. Tente de novo." } };
+    if (typeof corpo.reminders === "boolean") { usuario.lembretes = corpo.reminders; usuario.lembretesEm = agora; }
+    if (typeof corpo.news === "boolean") { usuario.novidades = corpo.news; usuario.novidadesEm = agora; }
+    return { status: 200, dados: avisosDe(usuario) };
+  }
+  if (excluir) {
+    var senha = corpo && corpo.password;
+    if (email === "admin@exemplo.com") return { status: 403, dados: { error: "A conta de administração não pode ser excluída por aqui.", code: "admin_account" } };
+    if (typeof senha !== "string" || !senha) return { status: 400, dados: { error: "Digite sua senha para confirmar.", code: "password_required" } };
+    if (senha === "muitas") return { status: 429, dados: { error: "Muitas tentativas com a senha errada. Sua conta não foi excluída. Tente de novo em 15 minutos.", code: "too_many_attempts" } };
+    if (senha === "errada") return { status: 403, dados: { error: "Senha incorreta. Sua conta não foi excluída.", code: "wrong_password" } };
+    if (email === "excluir-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível excluir agora. Tente de novo." } };
+    excluidos[email] = true;
+    delete usuarios[email];
+    delete emailsUsados[email];
+    return { status: 200, dados: { deleted: true } };
+  }
+  return { status: 404, dados: { error: "Não encontrado." } };
+}
+
 function sessao(email, username) {
   garantirUsuario(email, username);
   return {
@@ -602,6 +711,9 @@ function autorizar(req) {
     email = decodeURIComponent(partes[1].slice("teste-local.".length));
   } catch (erro) {
     email = "";
+  }
+  if (email && excluidos[email]) {
+    return { status: 401, email: "", dados: { error: MSG_SESSAO_ENCERRADA, code: "session_ended" } };
   }
   if (!email || !usuarios[email]) {
     return { status: 403, email: "", dados: { error: "Token inválido ou expirado." } };
@@ -1009,7 +1121,11 @@ function cadastro(corpo) {
   }
   emailsUsados[email] = true;
   nomesUsados[username] = true;
-  return { status: 201, dados: sessao(email, username) };
+  var criada = sessao(email, username);
+  /* Conta nova: como no servidor, ainda sem resposta sobre a nota. */
+  usuarios[email].notaConsent = null;
+  usuarios[email].notaConsentEm = null;
+  return { status: 201, dados: criada };
 }
 
 /* Como lib/adult-age.js do servidor: a data só é conferida, nunca guardada. */
@@ -1253,8 +1369,9 @@ async function registrarCheckin(email, corpo, cenario) {
     });
   }
 
-  /* Como no servidor: com crise, a nota não é guardada. */
-  var noteLimpa = !crise && nota.trim() ? nota.trim() : null;
+  /* Como no servidor: com crise, a nota não é guardada; sem o «sim» da
+     pessoa (PR 27), também não. */
+  var noteLimpa = !crise && nota.trim() && usuarios[email].notaConsent === true ? nota.trim() : null;
   if (!pacote) {
     if (!usuarios[email].checkins[String(id)]) usuarios[email].checkins[String(id)] = [];
     var guardados = usuarios[email].checkins[String(id)];
@@ -1277,6 +1394,7 @@ async function registrarCheckin(email, corpo, cenario) {
     checkin: checkinDeResposta(id, email, dia, noteLimpa, querDificil, spec),
     day: dia,
     already_done: already,
+    note_saved: noteLimpa !== null,
     message: already ? ("Dia " + dia + " já estava registado!") : ("Dia " + dia + " registado! 🔥")
   };
   if (crise) {
@@ -1765,6 +1883,17 @@ var servidor = http.createServer(function (req, res) {
   }
 
   var url = req.url.split("?")[0];
+  if (url === "/api/users/me/note-consent" || url === "/api/users/me/notification-preferences" || (url === "/api/users/me" && req.method === "DELETE")) {
+    var leituraDados = (req.method === "GET") ? Promise.resolve({}) : lerCorpo(req);
+    leituraDados.then(function (corpo) {
+      return responderDados(req, url, corpo);
+    }).then(function (resultado) {
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 400, { error: "Escolha não reconhecida. Toque de novo no interruptor.", code: "preferences_invalid" });
+    });
+    return;
+  }
   if (url === "/api/users/me" || url.indexOf("/api/communities") === 0) {
     var leitura = (req.method === "POST" || req.method === "PUT") ? lerCorpo(req) : Promise.resolve({});
     leitura.then(function (corpo) {
