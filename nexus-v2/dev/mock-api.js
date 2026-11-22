@@ -146,6 +146,45 @@
    - ia-exemplo    só em localhost/127.0.0.1; o texto fica em dev/ia-exemplo.js
    Não existe GET /api/vertice/message nem POST /api/assistant/mission.
 
+   Idade no cadastro (PR 18 do servidor):
+   - sem birth_date → 400 «Falta a data de nascimento...»
+   - birth_date fora de AAAA-MM-DD ou data que não existe → 400 «A data de nascimento não parece certa...»
+   - menos de 18 anos (corte no fuso UTC-12, 29/02 faz 18 em 01/03) → 403 com under_age: true,
+     e nada é guardado (o e-mail continua livre)
+   - e-mail sem-migracao@exemplo.com → 503, como o servidor sem a migração 006
+   - e-mail menor-sem-campo@exemplo.com → 403 sem under_age (caso negado do site)
+   - a data não é guardada: o mock guarda só "adulto: true", como adult_confirmed_at
+   GET /api/users/me → { user: { id, username, email, adult_confirmed } }
+
+   Comunidade (PR 18 do servidor), tudo com login:
+   - e-mail sem-idade@exemplo.com → 403 com code adult_confirmation_required em
+     toda a comunidade (menos a área da equipe, que tem a própria regra)
+   - GET /api/communities → lista; GET /api/communities/:slug → { community, ranking, posts, access }
+   - o post 50 é sempre de quem está logado (o site não mostra «Denunciar» nele);
+     com autor@exemplo.com ele vem escondido (hidden: true, hidden_reason "perigoso"),
+     sem contagem de denúncias, como no servidor. Os outros não veem post escondido.
+   - POST .../posts/:postId/report com { reason, details? }: motivo fora da lista → 400;
+     o próprio post → 400; segunda denúncia do mesmo post → 409; o resto → 201.
+     O mock não lê o comentário para achar crise: o sinal vem só do cenário.
+   Cenários da comunidade (?cenario= na página):
+   - comunidade-indisponivel  503 ao abrir (e na denúncia), como sem a migração 005
+   - comunidade-erro          500 ao abrir
+   - comunidade-vazia         sem posts
+   - comunidade-fechada       access.can_read_forum false, sem posts
+   - denuncia-crise           201 com reported: true e crisis: true (comentário não guardado)
+   - denuncia-crise-nao-enviada 200 com reported: false e crisis: true
+   - denuncia-indisponivel    503 na denúncia
+   - denuncia-erro            500 na denúncia
+   - denuncia-lenta           espera 4 segundos e registra
+   - idade-crise              com sem-idade@: 200 com crisis: true e saved: false (o portão
+                              18+ responde a ajuda antes do 403)
+   Área da equipe (só admin@exemplo.com; os outros → 403 «Esta area esta disponivel apenas para o admin.»):
+   - GET /api/communities/admin/hidden-posts → posts escondidos (prioridade alta primeiro;
+     um com repeat_reporter_alert). Vem username e user_id, como no servidor: a tela não mostra.
+   - POST /api/communities/admin/posts/:id/restore → { restored: true }; não escondido → 409
+   - DELETE /api/communities/admin/posts/:id → { deleted: true }; não existe → 404
+   - ?cenario=equipe-vazia (lista vazia), equipe-indisponivel (503), equipe-erro-acao (500 na ação)
+
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.
    Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
@@ -416,7 +455,7 @@ function enviar(res, status, dados) {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Content-Length": Buffer.byteLength(corpo),
     "Cache-Control": "no-store"
   });
@@ -871,15 +910,52 @@ function cadastro(corpo) {
   if (senha.length < 6) {
     return { status: 400, dados: { error: "Password deve ter pelo menos 6 caracteres." } };
   }
+  /* Caso negado do site: 403 sem o campo under_age (a tela tem de mostrar a do menor). */
+  if (email === "menor-sem-campo@exemplo.com") {
+    return { status: 403, dados: { error: MSG_MENOR } };
+  }
+  var idade = conferirIdade(corpo.birth_date);
+  if (!idade.ok) return { status: idade.status, dados: idade.dados };
   if (emailsUsados[email] || nomesUsados[username]) {
     return { status: 400, dados: { error: "Email ou username já está em uso." } };
   }
   if (email === "falha@exemplo.com") {
     return { status: 500, dados: { error: "Erro interno." } };
   }
+  if (email === "sem-migracao@exemplo.com") {
+    return { status: 503, dados: { error: "Não deu para criar a conta agora. Tente de novo mais tarde." } };
+  }
   emailsUsados[email] = true;
   nomesUsados[username] = true;
   return { status: 201, dados: sessao(email, username) };
+}
+
+/* Como lib/adult-age.js do servidor: a data só é conferida, nunca guardada. */
+var MSG_DATA_FALTA = "Falta a data de nascimento. Preencha e envie de novo.";
+var MSG_DATA_INVALIDA = "A data de nascimento não parece certa. Use o formato dia, mês e ano e envie de novo.";
+var MSG_MENOR = "O Nexus é só para maiores de 18 anos, por isso não dá para criar a conta agora. Nada do que você escreveu foi guardado.";
+
+function conferirIdade(valor, agora) {
+  if (valor === undefined || valor === null || valor === "") {
+    return { ok: false, status: 400, dados: { error: MSG_DATA_FALTA } };
+  }
+  var m = typeof valor === "string" ? valor.match(/^(\d{4})-(\d{2})-(\d{2})$/) : null;
+  if (!m) return { ok: false, status: 400, dados: { error: MSG_DATA_INVALIDA } };
+  var ano = Number(m[1]);
+  var mes = Number(m[2]);
+  var dia = Number(m[3]);
+  var data = new Date(Date.UTC(ano, mes - 1, dia));
+  if (data.getUTCFullYear() !== ano || data.getUTCMonth() !== mes - 1 || data.getUTCDate() !== dia) {
+    return { ok: false, status: 400, dados: { error: MSG_DATA_INVALIDA } };
+  }
+  /* Hoje no fuso mais atrasado (UTC-12): ninguém faz 18 antes da hora. */
+  var hoje = new Date((typeof agora === "number" ? agora : Date.now()) - 12 * 60 * 60 * 1000);
+  var hojeUtc = Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate());
+  if (data.getTime() > hojeUtc) return { ok: false, status: 400, dados: { error: MSG_DATA_INVALIDA } };
+  /* Date.UTC leva 29/02 de ano não bissexto para 01/03. */
+  var dezoito = Date.UTC(ano + 18, mes - 1, dia);
+  if (dezoito > hojeUtc) return { ok: false, status: 403, dados: { error: MSG_MENOR, under_age: true } };
+  return { ok: true };
 }
 
 function listarMissoes(email) {
@@ -1379,6 +1455,215 @@ function responderHoje(req, res, email) {
   return false;
 }
 
+/* ---------- Comunidade, denúncia e área da equipe (PR 18 do servidor) ---------- */
+
+var MSG_IDADE = "A comunidade é só para maiores de 18 anos. Confirme sua idade para entrar, ler, publicar ou denunciar.";
+var MSG_SO_ADMIN = "Esta area esta disponivel apenas para o admin.";
+var MOTIVOS_DENUNCIA = ["perigoso", "ofensa", "improprio", "spam", "outro"];
+var EMAIL_ADMIN = "admin@exemplo.com";
+var POST_DA_PESSOA = 50;
+var COMUNIDADES = [
+  { id: 1, slug: "ingles-diario", name: "Inglês todo dia", category: "aprendizagem" },
+  { id: 2, slug: "academia-cedo", name: "Academia cedo", category: "fitness" }
+];
+/* Nomes de teste, não são pessoas reais. */
+var POSTS_DE_TESTE = [
+  { id: 11, community_id: 1, user_id: 901, username: "caderno_azul", content: "Hoje li duas páginas sem traduzir. A segunda foi mais fácil que a primeira.", horas: 3 },
+  { id: 12, community_id: 1, user_id: 902, username: "leitura_lenta", content: "Dica que me ajudou: deixar o livro aberto em cima da mesa antes de dormir.", horas: 20 },
+  { id: 13, community_id: 2, user_id: 903, username: "treino_cedo", content: "Fui às 7h. Só o mínimo, mas fui.", horas: 5 }
+];
+var denunciasFeitas = {};
+var escondidosDaEquipe = null;
+
+function escondidosIniciais() {
+  var agora = Date.now();
+  return [
+    {
+      id: 21, community_id: 1, community_slug: "ingles-diario", user_id: 904, username: "conta_teste_a",
+      content: "Para estudar mais, fique sem comer o dia inteiro. Comigo funcionou.",
+      created_at: new Date(agora - 6 * 3600000).toISOString(),
+      hidden_at: new Date(agora - 2 * 3600000).toISOString(), hidden_reason: "perigoso",
+      reports: [
+        { reason: "perigoso", details: "Isso pode fazer mal a quem ler.", created_at: new Date(agora - 2 * 3600000).toISOString() }
+      ],
+      priority: "alta", repeat_reporter_alert: true, hidden_reason_label: "Conselho perigoso para a saúde"
+    },
+    {
+      id: 22, community_id: 2, community_slug: "academia-cedo", user_id: 905, username: "conta_teste_b",
+      content: "Compre o meu curso no link do perfil, desconto só hoje.",
+      created_at: new Date(agora - 30 * 3600000).toISOString(),
+      hidden_at: new Date(agora - 26 * 3600000).toISOString(), hidden_reason: "spam",
+      reports: [
+        { reason: "spam", details: null, created_at: new Date(agora - 28 * 3600000).toISOString() },
+        { reason: "spam", details: "Propaganda.", created_at: new Date(agora - 27 * 3600000).toISOString() },
+        { reason: "outro", details: null, created_at: new Date(agora - 26 * 3600000).toISOString() }
+      ],
+      priority: "normal", repeat_reporter_alert: false, hidden_reason_label: "Propaganda ou spam"
+    }
+  ];
+}
+
+function ehAdulto(email) {
+  var usuario = usuarios[email];
+  return !!usuario && usuario.adulto !== false && email !== "sem-idade@exemplo.com";
+}
+
+function corpoSemIdade() {
+  return { error: MSG_IDADE, code: "adult_confirmation_required", adult_confirmation_required: true };
+}
+
+function comunidadePorSlug(slug) {
+  for (var i = 0; i < COMUNIDADES.length; i++) {
+    if (COMUNIDADES[i].slug === slug) return COMUNIDADES[i];
+  }
+  return null;
+}
+
+function postsDaComunidade(comunidade, email) {
+  var usuario = usuarios[email];
+  var agora = Date.now();
+  var lista = [];
+  /* O post 50 é de quem está logado. */
+  var meu = {
+    id: POST_DA_PESSOA, community_id: comunidade.id, user_id: usuario.id, username: usuario.username,
+    content: "Meu dia 4: fiz o mínimo e anotei duas palavras novas.",
+    created_at: new Date(agora - 3600000).toISOString(), hidden: false
+  };
+  if (email === "autor@exemplo.com") {
+    meu.hidden = true;
+    meu.hidden_reason = "perigoso";
+    meu.hidden_reason_label = "Conselho perigoso para a saúde";
+    meu.hidden_message = "Seu post foi escondido por enquanto, até a equipe conferir.";
+  }
+  lista.push(meu);
+  POSTS_DE_TESTE.forEach(function (post) {
+    if (post.community_id !== comunidade.id) return;
+    lista.push({
+      id: post.id, community_id: post.community_id, user_id: post.user_id, username: post.username,
+      content: post.content, created_at: new Date(agora - post.horas * 3600000).toISOString(), hidden: false
+    });
+  });
+  return lista;
+}
+
+function acharPost(comunidade, postId, email) {
+  var lista = postsDaComunidade(comunidade, email);
+  for (var i = 0; i < lista.length; i++) {
+    if (String(lista[i].id) === String(postId)) return lista[i];
+  }
+  return null;
+}
+
+async function denunciarMock(email, slug, postId, corpo, cenario) {
+  var motivo = corpo && corpo.reason;
+  var crise = cenario === "denuncia-crise" || cenario === "denuncia-crise-nao-enviada";
+  if (cenario === "denuncia-crise-nao-enviada") {
+    return { status: 200, dados: { reported: false, crisis: true, crisis_level: "alto", message: "Sua denúncia não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+  }
+  if (MOTIVOS_DENUNCIA.indexOf(motivo) === -1) return { status: 400, dados: { error: "Escolha um dos motivos da lista e envie de novo." } };
+  if (!crise && corpo.details != null) {
+    if (typeof corpo.details !== "string") return { status: 400, dados: { error: "O comentário precisa ser um texto. Escreva de novo e envie." } };
+    if (Array.from(corpo.details.trim()).length > 280) return { status: 400, dados: { error: "O comentário passou de 280 caracteres. Encurte um pouco e envie de novo." } };
+  }
+  if (cenario === "denuncia-indisponivel" || cenario === "comunidade-indisponivel") {
+    return { status: 503, dados: { error: "A denúncia ainda não está disponível. Tente de novo mais tarde." } };
+  }
+  if (cenario === "denuncia-erro") return { status: 500, dados: { error: "Não deu para enviar a denúncia agora. Tente de novo daqui a pouco." } };
+  if (cenario === "denuncia-lenta") {
+    await new Promise(function (resolver) { setTimeout(resolver, ESPERA_LENTA_MS); });
+  }
+  var comunidade = comunidadePorSlug(slug);
+  if (!comunidade) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+  var post = acharPost(comunidade, postId, email);
+  if (!post) return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+  if (String(post.user_id) === String(usuarios[email].id)) return { status: 400, dados: { error: "Você não pode denunciar o seu próprio post." } };
+  var chave = email + "|" + post.id;
+  if (denunciasFeitas[chave]) return { status: 409, dados: { error: "Você já denunciou este post. Uma denúncia por pessoa já basta, obrigado.", already_reported: true } };
+  /* O comentário não é guardado neste mock (nem com crise). */
+  denunciasFeitas[chave] = { reason: motivo };
+  if (crise) {
+    return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+  }
+  return { status: 201, dados: { reported: true, message: "Obrigado. Sua denúncia foi registrada." } };
+}
+
+function equipeMock(email, metodo, caminho, cenario) {
+  if (email !== EMAIL_ADMIN) return { status: 403, dados: { error: MSG_SO_ADMIN } };
+  if (!escondidosDaEquipe) escondidosDaEquipe = escondidosIniciais();
+  if (cenario === "equipe-indisponivel") {
+    return { status: 503, dados: { error: "A moderação ainda não está disponível: falta aplicar a migração 005." } };
+  }
+  if (metodo === "GET" && caminho === "/api/communities/admin/hidden-posts") {
+    return { status: 200, dados: { posts: cenario === "equipe-vazia" ? [] : escondidosDaEquipe.slice() } };
+  }
+  var restaurar = caminho.match(/^\/api\/communities\/admin\/posts\/(\d+)\/restore$/);
+  var apagar = caminho.match(/^\/api\/communities\/admin\/posts\/(\d+)$/);
+  var alvo = (metodo === "POST" && restaurar) ? restaurar[1] : ((metodo === "DELETE" && apagar) ? apagar[1] : "");
+  if (!alvo) return { status: 404, dados: { error: "Não encontrado." } };
+  if (cenario === "equipe-erro-acao") return { status: 500, dados: { error: "Não deu para concluir agora. Tente de novo daqui a pouco." } };
+  var indice = -1;
+  for (var i = 0; i < escondidosDaEquipe.length; i++) {
+    if (String(escondidosDaEquipe[i].id) === alvo) indice = i;
+  }
+  if (indice === -1) {
+    if (metodo === "POST" && alvo === "11") return { status: 409, dados: { error: "Este post não está escondido." } };
+    return { status: 404, dados: { error: "Post não encontrado." } };
+  }
+  escondidosDaEquipe.splice(indice, 1);
+  if (metodo === "DELETE") return { status: 200, dados: { deleted: true, post_id: Number(alvo) } };
+  return { status: 200, dados: { restored: true, post_id: Number(alvo) } };
+}
+
+/* Rotas da comunidade e /api/users/me. Devolve null se o caminho não é daqui. */
+async function responderComunidade(req, caminho, corpo) {
+  if (caminho !== "/api/users/me" && caminho.indexOf("/api/communities") !== 0) return null;
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var email = acesso.email;
+  var cenario = nomeDoCenario(req);
+  var metodo = req.method;
+
+  if (caminho === "/api/users/me" && metodo === "GET") {
+    var usuario = usuarios[email];
+    return { status: 200, dados: { user: { id: usuario.id, username: usuario.username, email: usuario.email, adult_confirmed: ehAdulto(email) } } };
+  }
+  /* As rotas de admin ficam antes do portão 18+, como no servidor. */
+  if (caminho.indexOf("/api/communities/admin/") === 0) return equipeMock(email, metodo, caminho, cenario);
+
+  if (!ehAdulto(email)) {
+    if (cenario === "idade-crise" && metodo === "POST") {
+      return { status: 200, dados: { saved: false, crisis: true, crisis_level: "alto", message: "Nada foi enviado. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.", code: "adult_confirmation_required" } };
+    }
+    return { status: 403, dados: corpoSemIdade() };
+  }
+
+  if (caminho === "/api/communities" && metodo === "GET") {
+    if (cenario === "comunidade-erro") return { status: 500, dados: { error: "Erro ao listar comunidades." } };
+    return { status: 200, dados: COMUNIDADES.map(function (c) { return { id: c.id, slug: c.slug, name: c.name, category: c.category }; }) };
+  }
+  var denuncia = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/report$/);
+  if (denuncia && metodo === "POST") return denunciarMock(email, denuncia[1], denuncia[2], corpo || {}, cenario);
+  var aberta = caminho.match(/^\/api\/communities\/([a-z0-9-]+)$/);
+  if (aberta && metodo === "GET") {
+    if (cenario === "comunidade-indisponivel") return { status: 503, dados: { error: "A comunidade ainda não está disponível." } };
+    if (cenario === "comunidade-erro") return { status: 500, dados: { error: "Erro ao obter comunidade." } };
+    var comunidade = comunidadePorSlug(aberta[1]);
+    if (!comunidade) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+    var fechada = cenario === "comunidade-fechada";
+    var posts = (fechada || cenario === "comunidade-vazia") ? [] : postsDaComunidade(comunidade, email);
+    return {
+      status: 200,
+      dados: {
+        community: { id: comunidade.id, slug: comunidade.slug, name: comunidade.name, category: comunidade.category, is_member: true },
+        ranking: [],
+        posts: posts,
+        access: { is_member: true, can_read_forum: !fechada, can_post_forum: false }
+      }
+    };
+  }
+  return { status: 404, dados: { error: "Não encontrado." } };
+}
+
 garantirUsuario("com-missao@exemplo.com", "pessoa");
 usuarios["com-missao@exemplo.com"].missoes.push(novaMissao(usuarios["com-missao@exemplo.com"], {
   id: 1,
@@ -1398,6 +1683,18 @@ var servidor = http.createServer(function (req, res) {
   }
 
   var url = req.url.split("?")[0];
+  if (url === "/api/users/me" || url.indexOf("/api/communities") === 0) {
+    var leitura = (req.method === "POST" || req.method === "PUT") ? lerCorpo(req) : Promise.resolve({});
+    leitura.then(function (corpo) {
+      return responderComunidade(req, url, corpo);
+    }).then(function (resultado) {
+      if (!resultado) resultado = { status: 404, dados: { error: "Não encontrado." } };
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 400, { error: "Escolha um dos motivos da lista e envie de novo." });
+    });
+    return;
+  }
   if (req.method === "GET" && url === "/api/notifications/vapid-key") {
     enviar(res, 200, { publicKey: CHAVE_PUBLICA });
     return;

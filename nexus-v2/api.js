@@ -31,7 +31,7 @@ async function nexusLerJson(resposta) {
 
 /* Envia JSON e devolve um resultado simples.
    A senha só viaja no login e no cadastro. Este arquivo não a guarda.
-   opcoes.metodo: GET, POST ou PUT. Sem opcoes, o pedido é POST.
+   opcoes.metodo: GET, POST, PUT ou DELETE. Sem opcoes, o pedido é POST.
    opcoes.auth: manda o token da sessão, se existir neste aparelho. */
 async function nexusPedir(caminho, corpo, opcoes) {
   var extras = opcoes || {};
@@ -100,6 +100,39 @@ function saveReminderTime(dados) {
 }
 
 var NexusApi = {
+  /* GET /api/users/me devolve { user: { id, username, adult_confirmed, ... } }.
+     A comunidade usa o id só para não mostrar «Denunciar» no próprio post. */
+  eu: function () {
+    return nexusPedir("/api/users/me", null, { metodo: "GET", auth: true });
+  },
+  /* Comunidade (PR 18 do servidor). Tudo exige login e 18+ confirmado.
+     Sem a confirmação: 403 com code "adult_confirmation_required". */
+  listarComunidades: function () {
+    return nexusPedir(caminhoComCenario("/api/communities"), null, { metodo: "GET", auth: true });
+  },
+  /* GET /api/communities/:slug devolve { community, ranking, posts, access }.
+     Post escondido só vem para o autor, com hidden: true e hidden_reason. */
+  abrirComunidade: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug)), null, { metodo: "GET", auth: true });
+  },
+  /* POST /api/communities/:slug/posts/:postId/report com { reason, details? }.
+     201 { reported: true }; 201 ou 200 com crisis: true (a tela abre a ajuda);
+     409 já denunciado; 503 sem a migração 005. details só vai se tiver texto. */
+  denunciarPost: function (slug, postId, motivo, detalhes) {
+    var corpo = { reason: motivo };
+    if (typeof detalhes === "string" && detalhes.trim()) corpo.details = detalhes.trim();
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) + "/report"), corpo, { metodo: "POST", auth: true });
+  },
+  /* Só admin (o servidor decide). Os outros recebem 403. */
+  postsEscondidos: function () {
+    return nexusPedir(caminhoComCenario("/api/communities/admin/hidden-posts"), null, { metodo: "GET", auth: true });
+  },
+  restaurarPost: function (postId) {
+    return nexusPedir(caminhoComCenario("/api/communities/admin/posts/" + encodeURIComponent(postId) + "/restore"), null, { metodo: "POST", auth: true });
+  },
+  apagarPost: function (postId) {
+    return nexusPedir(caminhoComCenario("/api/communities/admin/posts/" + encodeURIComponent(postId)), null, { metodo: "DELETE", auth: true });
+  },
   entrar: function (email, senha) {
     return nexusPedir("/api/users/login", {
       email: email,
@@ -110,7 +143,9 @@ var NexusApi = {
     return nexusPedir("/api/users/register", {
       username: dados.username,
       email: dados.email,
-      password: dados.password
+      password: dados.password,
+      /* AAAA-MM-DD. O servidor confere os 18 anos e não grava a data (PR 18). */
+      birth_date: dados.birth_date
     });
   },
   /* GET /api/missions devolve uma lista. Sem missão ativa, o começo abre o onboarding. */

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Área da equipe — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="comunidade.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
+  <!-- Área da equipe: posts escondidos. Só admin (o servidor decide; os outros recebem 403).
+       Nunca mostra quem denunciou nem o nome do autor. Sem urso. -->
+  <main class="pagina-com-abas tela-comunidade tela-equipe" id="conteudo">
+    <noscript>
+      <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir esta área.</p>
+    </noscript>
+
+    <h1 class="comunidade-titulo" id="titulo" tabindex="-1" data-texto-comunidade="adminTitulo"></h1>
+
+    <section class="vista" id="vista-carregando" aria-live="polite">
+      <p class="carregando-texto" data-texto-comunidade="abrindo"></p>
+    </section>
+
+    <section class="vista" id="vista-aviso" hidden>
+      <div id="alerta" class="alerta" role="alert"></div>
+      <button type="button" class="btn btn-primario btn-grande" id="btn-tentar" data-texto-comunidade="tentarDeNovo"></button>
+    </section>
+
+    <!-- 403 para quem não é admin: uma frase calma, sem botão de tentar de novo. -->
+    <section class="vista" id="vista-negado" hidden>
+      <p class="aviso-texto" data-texto-comunidade="soEquipe"></p>
+    </section>
+
+    <section class="vista" id="vista-lista" hidden>
+      <div id="status-acao" class="alerta alerta-ok" role="status" hidden></div>
+      <ol class="escondidos" id="escondidos"></ol>
+      <p class="vazio-texto" id="lista-vazia" data-texto-comunidade="adminVazio" hidden></p>
+    </section>
+  </main>
+
+  <!-- Confirmação de Restaurar ou Apagar. O foco começa em «Cancelar». -->
+  <dialog class="confirmacao" id="confirmacao" aria-labelledby="pergunta" aria-describedby="explica">
+    <h2 class="pergunta" id="pergunta"></h2>
+    <p class="explica" id="explica"></p>
+    <div id="alerta-acao" class="alerta" role="alert" hidden></div>
+    <div class="folha-botoes">
+      <button type="button" class="btn" id="btn-confirmar" aria-busy="false"><span class="btn-rotulo"></span></button>
+      <button type="button" class="btn btn-secundario" id="btn-cancelar" data-texto-comunidade="cancelar"></button>
+    </div>
+  </dialog>
+
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="comunidade-textos.js"></script>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="equipe.js"></script>
+</body>
+</html>

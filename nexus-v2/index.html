@@ -123,6 +123,28 @@
             <p id="cadastro-confirma-erro" class="erro-campo" hidden></p>
           </div>
 
+          <!-- Três campos de texto (não type=date, que muda de aparelho para aparelho).
+               Vai como birth_date AAAA-MM-DD. O servidor confere os 18 anos e não grava a data. -->
+          <fieldset class="campo-data" id="cadastro-data">
+            <legend data-texto-comunidade="dataLegenda"></legend>
+            <div class="data-partes">
+              <div class="data-parte">
+                <label for="cadastro-dia" data-texto-comunidade="dataDia"></label>
+                <input id="cadastro-dia" name="bday-day" type="text" inputmode="numeric" autocomplete="bday-day" maxlength="2" pattern="[0-9]*" aria-required="true" aria-describedby="cadastro-data-ajuda cadastro-data-erro" data-proximo="cadastro-mes">
+              </div>
+              <div class="data-parte">
+                <label for="cadastro-mes" data-texto-comunidade="dataMes"></label>
+                <input id="cadastro-mes" name="bday-month" type="text" inputmode="numeric" autocomplete="bday-month" maxlength="2" pattern="[0-9]*" aria-required="true" aria-describedby="cadastro-data-ajuda cadastro-data-erro" data-proximo="cadastro-ano">
+              </div>
+              <div class="data-parte">
+                <label for="cadastro-ano" data-texto-comunidade="dataAno"></label>
+                <input id="cadastro-ano" name="bday-year" type="text" inputmode="numeric" autocomplete="bday-year" maxlength="4" pattern="[0-9]*" aria-required="true" aria-describedby="cadastro-data-ajuda cadastro-data-erro">
+              </div>
+            </div>
+            <p id="cadastro-data-ajuda" class="dica" data-texto-comunidade="dataAjuda"></p>
+            <p id="cadastro-data-erro" class="erro-campo" role="alert" hidden></p>
+          </fieldset>
+
           <button type="submit" class="btn btn-primario" id="btn-criar" data-texto="Criar conta" data-carregando="Criando conta…" aria-busy="false">
             <span class="btn-rotulo">Criar conta</span>
             <span class="spinner" hidden aria-hidden="true"></span>
@@ -134,8 +156,19 @@
           <a href="#entrar">Entrar</a>
         </p>
       </section>
+
+      <!-- 403 do cadastro (menor de 18): tela calma, sem contador de anos e sem «tentar outra data». -->
+      <section id="vista-menor" hidden>
+        <header class="cabecalho">
+          <p class="marca">Nexus</p>
+          <h1 class="titulo" id="titulo-menor" tabindex="-1" data-texto-comunidade="menorTitulo"></h1>
+        </header>
+        <p class="apoio texto-menor" data-texto-comunidade="menorTexto"></p>
+        <a class="btn btn-primario" id="btn-menor-voltar" href="#entrar" data-texto-comunidade="menorVoltar"></a>
+      </section>
     </div>
   </main>
+  <script src="comunidade-textos.js"></script>
   <script src="api.js"></script>
   <script src="login.js"></script>
 </body>

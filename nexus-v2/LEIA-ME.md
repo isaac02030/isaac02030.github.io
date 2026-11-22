@@ -253,3 +253,25 @@ No mock, com a sessão já gravada:
 
 Ana não é uma pessoa real. O nome da conta no mock continua `pessoa`.
 
+
+## Idade no cadastro, comunidade, denúncia e área da equipe
+
+Acompanha o PR 18 do servidor. Os textos destas telas ficam só em `comunidade-textos.js`.
+
+- **Cadastro:** antes de «Criar conta», a data de nascimento em três campos (dia, mês e ano). Vai como `birth_date` (AAAA-MM-DD). O site só confere se a data existe; quem decide a idade é o servidor, que não grava a data. Menor de 18 (403): a tela troca por «Ainda não dá para criar sua conta» e os campos são apagados. Sem a migração 006 (503): «Não foi possível criar a conta agora. Tente mais tarde.»
+- **Comunidade** (`comunidade.html`, sem link nas abas por enquanto): sem `?c=` mostra a lista; com `?c=<slug>`, os posts. Só leitura. Conta sem a confirmação de idade (403 `adult_confirmation_required`) vê só o aviso e «Agora não». Não há caixa de «Tenho 18 anos»: o banco novo começa do zero e toda conta nasce com a data.
+- **Denúncia:** «Denunciar» em cada post que não é seu abre uma folha com os 5 motivos e um comentário opcional (até 280). Com sinal de crise no comentário, o servidor responde `crisis: true` e a tela de ajuda abre; se a denúncia valeu, a ajuda mostra uma linha a mais (`crise.html?de=denuncia`).
+- **Post escondido:** só o autor vê, com o motivo mais citado. Nunca o número de denúncias.
+- **Área da equipe** (`equipe.html`): só admin. Os outros veem «Esta área é só da equipe.» Nunca mostra quem denunciou nem o autor.
+
+No mock (`node nexus-v2/dev/mock-api.js`), entre com:
+
+- `sem-idade@exemplo.com` — conta sem a confirmação de idade
+- `autor@exemplo.com` — o seu post vem escondido
+- `admin@exemplo.com` — abre a área da equipe
+- qualquer outro e-mail — comunidade normal
+- no cadastro: data de menos de 18 anos (403) ou e-mail `sem-migracao@exemplo.com` (503)
+
+Cenários na URL: `comunidade.html?c=ingles-diario&cenario=` com `comunidade-indisponivel`, `comunidade-erro`, `comunidade-vazia`, `comunidade-fechada`, `denuncia-crise`, `denuncia-crise-nao-enviada`, `denuncia-indisponivel`, `denuncia-erro` ou `denuncia-lenta`; `equipe.html?cenario=` com `equipe-vazia`, `equipe-indisponivel` ou `equipe-erro-acao`. `?rede=off` só vale em localhost.
+
+A checagem é `node nexus-v2/dev/checar-comunidade.js`.

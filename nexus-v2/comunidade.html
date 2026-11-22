@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Comunidade — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="comunidade.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
+  <!-- Comunidade (leitura). Visual novo: papel liso, sem cartão com sombra, sem urso.
+       Os textos vêm de comunidade-textos.js. -->
+  <main class="pagina-com-abas tela-comunidade" id="conteudo">
+    <noscript>
+      <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir a comunidade.</p>
+    </noscript>
+
+    <h1 class="comunidade-titulo" id="titulo" tabindex="-1" data-texto-comunidade="comunidadesTitulo"></h1>
+
+    <section class="vista" id="vista-carregando" aria-live="polite">
+      <p class="carregando-texto" data-texto-comunidade="abrindo"></p>
+    </section>
+
+    <!-- Erro, sem internet e 503: frase calma e um botão. -->
+    <section class="vista" id="vista-aviso" hidden>
+      <div id="alerta" class="alerta" role="alert"></div>
+      <button type="button" class="btn btn-primario btn-grande" id="btn-tentar" data-texto-comunidade="tentarDeNovo"></button>
+    </section>
+
+    <!-- 403 adult_confirmation_required: só o aviso. Sem caixa de 18+ (o banco começa do zero). -->
+    <section class="vista" id="vista-idade" hidden>
+      <p class="aviso-texto" data-texto-comunidade="idadeAviso"></p>
+      <a class="btn btn-secundario btn-grande" id="btn-agora-nao" href="hoje.html" data-texto-comunidade="agoraNao"></a>
+    </section>
+
+    <section class="vista" id="vista-lista" hidden>
+      <ul class="lista-comunidades" id="lista-comunidades"></ul>
+      <p class="vazio-texto" id="lista-vazia" data-texto-comunidade="comunidadesVazio" hidden></p>
+    </section>
+
+    <section class="vista" id="vista-feed" hidden>
+      <ol class="posts" id="posts"></ol>
+      <p class="vazio-texto" id="feed-vazio" hidden></p>
+    </section>
+  </main>
+
+  <!-- Folha de denúncia: diálogo modal (o foco fica preso nele e Esc fecha). -->
+  <dialog class="folha" id="folha-denuncia" aria-labelledby="titulo-denuncia">
+    <form class="formulario" id="form-denuncia" method="post" action="#denunciar" novalidate>
+      <fieldset class="motivos" id="motivos">
+        <legend class="folha-titulo" id="titulo-denuncia" data-texto-comunidade="denunciaTitulo"></legend>
+      </fieldset>
+      <div class="campo">
+        <label for="detalhes"><span data-texto-comunidade="explicarRotulo"></span> <span class="opcional" data-texto-comunidade="explicarOpcional"></span></label>
+        <textarea id="detalhes" name="details" rows="3" maxlength="280" aria-describedby="detalhes-contador detalhes-aviso"></textarea>
+        <p class="contador" id="detalhes-contador">0 de 280</p>
+        <p class="so-leitor" id="detalhes-aviso" aria-live="polite"></p>
+      </div>
+      <div id="alerta-denuncia" class="alerta" role="alert" hidden></div>
+      <div class="folha-botoes">
+        <button type="submit" class="btn btn-primario" id="btn-enviar-denuncia" aria-busy="false" disabled>
+          <span class="btn-rotulo" data-texto-comunidade="enviarDenuncia"></span>
+        </button>
+        <button type="button" class="btn btn-secundario" id="btn-cancelar-denuncia" data-texto-comunidade="cancelar"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="comunidade-textos.js"></script>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="nota-limite.js"></script>
+  <script src="comunidade.js"></script>
+</body>
+</html>
