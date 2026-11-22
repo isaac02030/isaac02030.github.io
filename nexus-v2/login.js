@@ -278,11 +278,12 @@ function definirErroDoAceite(caixa, aviso, texto) {
   if (texto) caixa.focus();
 }
 
-/* Ao abrir Termos ou Privacidade a partir do cadastro, o que já foi escrito
-   fica guardado nesta aba (sessionStorage) e volta ao retornar. A senha
-   nunca é guardada: precisa ser digitada de novo. */
+/* Ao abrir Termos ou Privacidade a partir do cadastro, o nome e o e-mail
+   ficam guardados nesta aba (sessionStorage) e voltam ao retornar, se o
+   navegador recarregar a página. A senha e a data de nascimento nunca são
+   guardadas (achado do Argos no PR 23): a data é digitada de novo. */
 var CHAVE_RASCUNHO_CADASTRO = "nexus_v2_cadastro_rascunho";
-var CAMPOS_RASCUNHO = ["cadastro-nome", "cadastro-email", "cadastro-dia", "cadastro-mes", "cadastro-ano"];
+var CAMPOS_RASCUNHO = ["cadastro-nome", "cadastro-email"];
 
 function guardarRascunhoCadastro() {
   var rascunho = {};

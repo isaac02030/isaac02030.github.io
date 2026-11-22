@@ -33,7 +33,6 @@
   color: var(--text);
   /* Palavra longa com texto a 200% quebra em vez de abrir rolagem lateral. */
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 .documento:focus {

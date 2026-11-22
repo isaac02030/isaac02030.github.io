@@ -97,6 +97,27 @@ var mapa = login.slice(login.indexOf("function mensagemDaApi"), login.indexOf("f
 if (mapa.indexOf("DO_SERVIDOR.aceiteFaltando") === -1 || mapa.indexOf("DO_SERVIDOR.versaoAntiga") === -1) falhas.push("login.js não trata os dois códigos do aceite");
 if (!/if \(campo\.type === "checkbox"\) campo\.checked = false;/.test(login)) falhas.push("depois do 403 do menor a caixa não é desmarcada");
 
+/* Rascunho do cadastro ao abrir os textos: só nome e e-mail. Negado: a data
+   de nascimento e a senha nunca vão para o sessionStorage. */
+var rascunho = login.slice(login.indexOf("var CAMPOS_RASCUNHO"), login.indexOf(";", login.indexOf("var CAMPOS_RASCUNHO")));
+if (rascunho !== 'var CAMPOS_RASCUNHO = ["cadastro-nome", "cadastro-email"]') falhas.push("o rascunho do cadastro guarda mais que nome e e-mail: " + rascunho);
+var guarda = login.slice(login.indexOf("function guardarRascunhoCadastro"), login.indexOf("function restaurarRascunhoCadastro"));
+if (/cadastro-(dia|mes|ano|senha|confirma)|birth|nascimento/.test(guarda)) falhas.push("o rascunho do cadastro não pode guardar a data nem a senha");
+(function () {
+  /* Roda guardarRascunhoCadastro de verdade, com os campos preenchidos. */
+  var valores = { "cadastro-nome": "Leitora", "cadastro-email": "leitora@exemplo.com", "cadastro-dia": "07", "cadastro-mes": "03", "cadastro-ano": "1995", "cadastro-senha": "senha123", "cadastro-confirma": "senha123" };
+  var guardado = {};
+  var ctx = {
+    document: { getElementById: function (id) { return { value: valores[id] || "" }; } },
+    sessionStorage: { setItem: function (k, v) { guardado[k] = v; } },
+    JSON: JSON
+  };
+  vm.runInNewContext(rascunho + ";\nvar CHAVE_RASCUNHO_CADASTRO = \"nexus_v2_cadastro_rascunho\";\n" + guarda + "\nguardarRascunhoCadastro();", ctx);
+  var texto = guardado.nexus_v2_cadastro_rascunho || "";
+  if (!/Leitora/.test(texto)) falhas.push("o rascunho do cadastro não guardou o nome");
+  if (/1995|"07"|"03"|senha123/.test(texto)) falhas.push("o rascunho do cadastro guardou a data de nascimento ou a senha");
+})();
+
 /* ---------- Reaceitação ---------- */
 var reaceite = index.slice(index.indexOf('id="vista-reaceite"'), index.indexOf("</section>", index.indexOf('id="vista-reaceite"')));
 if (!reaceite) falhas.push("falta a tela de reaceitação");
@@ -117,7 +138,7 @@ if (!/sair\.disabled = true/.test(envioR) || !/definirCarregando\(botao, true\)/
 if (envioR.indexOf("falhaAceite") === -1) falhas.push("a reaceitação não mostra a falha aprovada");
 
 /* ---------- Páginas de Termos e Privacidade ---------- */
-var PROIBIDAS = ["isaac", "pirro", "dédalo", "maestro", "lacuna", "conferir", "desconhecido", "decidir:", "hipótese",
+var PROIBIDAS = ["isaac", "pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
   "aviso interno", "apagar antes de publicar", "testers", "pr 26", "legal/", ".md", "ver lacunas", "proposta do", "a aprovar", "urso"];
 var MARCADORES = ["[E-MAIL DE PRIVACIDADE]", "[NOME DO RESPONSÁVEL]"];
 ["termos.html", "privacidade.html"].forEach(function (nome) {
