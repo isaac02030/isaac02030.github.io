@@ -360,3 +360,16 @@ input:-webkit-autofill {
     border-color: currentColor;
   }
 }
+
+/* Aviso calmo, sem vermelho (falha do servidor, 503). Também em login.css.
+   O api.js passa o erro da tela para este estilo no 503 auth_unavailable. */
+.alerta-neutro {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* Aviso de sessão (503 auth_unavailable), posto pelo api.js no topo da tela. */
+.aviso-sessao {
+  width: min(100%, 28rem);
+  margin: 0 auto var(--space-4);
+}

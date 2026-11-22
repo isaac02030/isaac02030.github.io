@@ -144,3 +144,139 @@
   color: var(--text);
   border-color: var(--border);
 }
+
+/* Aceite dos termos (cadastro e reaceitação). Caixa desenhada com os tokens:
+   a nativa no escuro fica com borda fraca. O input real (invisível) cobre a
+   caixa com 44 px; o rótulo inteiro também marca. Começa desmarcada. */
+.campo-aceite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.campo-aceite legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.caixa-aceite {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.caixa-aceite input {
+  position: absolute;
+  top: 0;
+  left: -10px;
+  width: var(--target);
+  height: var(--target);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.caixa-aceite label {
+  position: relative;
+  display: block;
+  min-height: var(--target);
+  padding: 10px 0 10px calc(24px + var(--space-3));
+  font: var(--text-body);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* A caixa. Contorno medido (22/11, revisão da Clara), mínimo 3:1:
+   claro #7A756C: 4,58:1 no cartão branco e 3,68:1 no preenchimento #E3E8E1;
+   escuro #9A948A: 5,45:1 no cartão #221F1B e 4,99:1 no preenchimento #2A2621.
+   Marcada: acento 7,57:1 (claro) e 6,71:1 (escuro) no cartão. */
+.caixa-aceite label::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+/* O visto: um «L» de bordas, na cor do texto sobre o acento. */
+.caixa-aceite label::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 8px;
+  width: 8px;
+  height: 13px;
+  border-right: 3px solid var(--accent-text);
+  border-bottom: 3px solid var(--accent-text);
+  transform: rotate(45deg);
+  opacity: 0;
+}
+
+.caixa-aceite input:checked + label::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.caixa-aceite input:checked + label::after {
+  opacity: 1;
+}
+
+.caixa-aceite input[aria-invalid="true"] + label::before {
+  border-color: var(--danger);
+}
+
+.caixa-aceite input:focus-visible + label::before {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Links para ler: cada um numa linha de 44 px, fora do rótulo. */
+/* 12 px entre os dois links, também com texto a 200% (revisão da Clara). */
+.links-legais {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.links-legais a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Reaceitação: «Continuar» e «Sair da conta» com o mesmo estilo e tamanho. */
+#vista-reaceite .cabecalho {
+  margin-bottom: var(--space-4);
+}
+
+.botoes-reaceite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.botoes-reaceite .btn {
+  width: 100%;
+  min-height: 48px;
+  gap: var(--space-2);
+}

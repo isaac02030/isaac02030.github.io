@@ -267,7 +267,7 @@ if (!/de === "denuncia" && window\.NexusComunidade[\s\S]*TEXTOS\.denunciaCrise/.
 ["comunidade-textos.js", "comunidade.html", "comunidade.css", "comunidade.js", "equipe.html", "equipe.js"].forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v26"') === -1) falhas.push("o cache não está em nexus-v2-v26");
+if (sw.indexOf('CACHE = "nexus-v2-v27"') === -1) falhas.push("o cache não está em nexus-v2-v27");
 
 /* A pasta antiga não muda neste trabalho. */
 if (!fs.existsSync(path.join(raiz, "..", "nexus"))) falhas.push("a pasta nexus/ sumiu");
@@ -311,7 +311,8 @@ function igual(nome, veio, esperado) {
 }
 
 async function casosDoMock() {
-  var cad = { username: "nova", email: "nova@exemplo.com", password: "123456" };
+  /* Com o aceite dos termos (PR 28): sem ele o cadastro é 400 (checar-aceite-legal.js). */
+  var cad = { username: "nova", email: "nova@exemplo.com", password: "123456", terms_version: "beta-1", privacy_version: "beta-1" };
   igual("cadastro sem data", (await pedir("POST", "/api/users/register", cad)).status, 400);
   igual("cadastro com 31/02", (await pedir("POST", "/api/users/register", Object.assign({}, cad, { birth_date: "1995-02-31" }))).status, 400);
   var menor = await pedir("POST", "/api/users/register", Object.assign({}, cad, { birth_date: "2015-06-01" }));
