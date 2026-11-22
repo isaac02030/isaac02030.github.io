@@ -75,7 +75,7 @@ var alternar = mdJs.slice(mdJs.indexOf("async function alternar"), mdJs.indexOf(
 if (alternar.indexOf("estado[qual] = queroLigar") < alternar.indexOf("await NexusApi")) falhas.push("o interruptor muda antes de o servidor confirmar");
 if (/confirm\(/.test(alternar)) falhas.push("ligar e desligar não pedem confirmação");
 /* Diálogo de exclusão. */
-var dialogo = md.slice(md.indexOf('<dialog'), md.indexOf("</dialog>"));
+var dialogo = md.slice(md.indexOf('id="dialogo-excluir"'), md.indexOf("</dialog>", md.indexOf('id="dialogo-excluir"')));
 var iCancelar = dialogo.indexOf('id="btn-cancelar-excluir"');
 var iExcluir = dialogo.indexOf('id="btn-confirmar-excluir"');
 if (iCancelar === -1 || iExcluir === -1 || iCancelar > iExcluir) falhas.push("no diálogo, «Cancelar» vem primeiro");
@@ -123,7 +123,7 @@ var ckJs = ler("checkin.js");
 var nao = ckJs.slice(ckJs.indexOf("function responderNao"), ckJs.indexOf("}\n", ckJs.indexOf("function responderNao")) + 2);
 if (/await/.test(nao)) falhas.push("«Não guardar» não espera o servidor");
 if (!/escolhaNota === null/.test(ckJs)) falhas.push("a pergunta só aparece quando nunca houve resposta");
-if (!/dados\.note_saved !== true\) esquecerNotaDoAparelho\(\)/.test(ckJs)) falhas.push("sem note_saved, a nota sai da cópia do dia");
+if (!/dados\.note_saved !== true\) nexusEsquecerNotasLocais\(\)/.test(ckJs)) falhas.push("sem note_saved, a nota sai da cópia do dia");
 var hoje = ler("hoje.js");
 if (!/if \(modelo\.nota\) \{[\s\S]{0,400}Ver a nota de hoje/.test(hoje)) falhas.push("«Ver a nota de hoje» só aparece com nota guardada");
 
@@ -136,6 +136,53 @@ if (!/if \(document\.getElementById\("quero-lembretes"\)\.checked\) \{[\s\S]{0,8
 if ((obJs.match(/mudarLembretes\(/g) || []).length !== 1) falhas.push("o começo da missão liga os lembretes em um lugar só");
 var inscrever = obJs.slice(obJs.indexOf("async function inscreverSeAceito"), obJs.indexOf("function travarPasso4"));
 if (/mudarLembretes/.test(inscrever)) falhas.push("ativar o push sozinho não pode ligar os lembretes");
+
+/* ---------- Ajustes da revisão (Argos e Clara, PR 24) ---------- */
+/* Desligar as notas: só pela confirmação, com Cancelar primeiro e em foco. */
+var dlg = md.slice(md.indexOf('id="dialogo-desligar"'), md.indexOf("</dialog>", md.indexOf('id="dialogo-desligar"')));
+if (!dlg) falhas.push("falta a confirmação de desligar as notas");
+else {
+  var iC = dlg.indexOf('id="btn-cancelar-desligar"'), iD = dlg.indexOf('id="btn-confirmar-desligar"');
+  if (iC === -1 || iD === -1 || iC > iD || !/id="btn-cancelar-desligar" autofocus/.test(dlg)) falhas.push("na confirmação de desligar, «Cancelar» vem primeiro e com o foco");
+  if (!/id="btn-confirmar-desligar"[^>]*/.test(dlg) || !/class="btn btn-perigo" id="btn-confirmar-desligar"/.test(dlg)) falhas.push("«Desligar e apagar» só em contorno vermelho");
+}
+var tocar = mdJs.slice(mdJs.indexOf("function tocarInterruptor"), mdJs.indexOf("/* O interruptor só muda"));
+if (!/estado\.notas && !estado\.ocupado\.notas\) \{\s*pedirParaDesligarNotas\(\)/.test(tocar)) falhas.push("desligar as notas precisa da confirmação");
+if (!/if \(qual === "notas" && !queroLigar && confirmado !== true\) return;/.test(mdJs)) falhas.push("negado: desligar as notas sem confirmar não pode chamar o servidor");
+if (!/notes_deleted > 0 \? "notasDesligouApagou" : "notasDesligou"/.test(mdJs)) falhas.push("o sucesso de desligar diz se apagou as notas");
+if (T && T.aceitoEm.indexOf("(hora de Lisboa)") === -1) falhas.push("a hora do aceite diz «(hora de Lisboa)»");
+if (!/timeZone: "Europe\/Lisbon"/.test(mdJs)) falhas.push("a hora do aceite é mostrada em Lisboa");
+if (!/estadoAviso === "pendente"/.test(mdJs) || !/D\.texto\("ligadoSemPermissao"\)/.test(mdJs)) falhas.push("lembretes ligados sem permissão do aparelho precisam dizer isso");
+/* Notas no aparelho: sem «sim», nada de rascunho nem de cópia (vm com api.js). */
+["checkin.js", "dia-dificil.js"].forEach(function (nome) {
+  var js = ler(nome);
+  var g = js.slice(js.indexOf("function guardarRascunho"), js.indexOf("try {", js.indexOf("function guardarRascunho")));
+  if (!/if \(!nexusPodeGuardarRascunhoDaNota\(\)\) return;/.test(g)) falhas.push(nome + ": o rascunho da nota só fica com o «sim» confirmado");
+});
+(function () {
+  function armazem(inicial) {
+    var d = Object.assign({}, inicial);
+    return { d: d, getItem: function (k) { return k in d ? d[k] : null; }, setItem: function (k, v) { d[k] = String(v); }, removeItem: function (k) { delete d[k]; }, get length() { return Object.keys(d).length; }, key: function (i) { return Object.keys(d)[i]; } };
+  }
+  var local = armazem({ nexus_v2_hoje: JSON.stringify({ id: 1, nota: "nota antiga" }), nexus_v2_tema: "escuro" });
+  var sessao = armazem({ nexus_v2_rascunho_checkin: JSON.stringify({ note: "rascunho" }) });
+  var ctx = { localStorage: local, sessionStorage: sessao, JSON: JSON, location: { pathname: "/nexus-v2/index.html", search: "" }, document: undefined, navigator: { onLine: true }, URLSearchParams: URLSearchParams, setTimeout: setTimeout };
+  vm.runInNewContext(ler("api.js"), ctx);
+  if (ctx.nexusPodeGuardarRascunhoDaNota()) falhas.push("sem escolha, o rascunho não pode ser guardado");
+  ctx.nexusLembrarEscolhaNota(null);
+  if (JSON.parse(local.d.nexus_v2_hoje).nota) falhas.push("sem «sim», a nota sai da cópia do dia (cópia de antes da escolha)");
+  if (sessao.d.nexus_v2_rascunho_checkin) falhas.push("sem «sim», o rascunho da nota sai");
+  ctx.nexusLembrarEscolhaNota("yes");
+  if (!ctx.nexusPodeGuardarRascunhoDaNota()) falhas.push("com «sim» confirmado, o rascunho pode ser guardado");
+  ctx.nexusLembrarEscolhaNota("no");
+  if (ctx.nexusPodeGuardarRascunhoDaNota()) falhas.push("depois de «não», o rascunho volta a não ser guardado");
+})();
+if (!/nexusLembrarEscolhaNota\("no"\);\s*chave = resultado\.dados\.notes_deleted/.test(mdJs)) falhas.push("depois de desligar, as cópias locais da nota saem");
+/* Começo da missão: um caminho só. */
+if (!/id="btn-aviso" hidden data-texto-dados="permitirAvisos"/.test(ob)) falhas.push("o pedido de permissão começa escondido e se chama «Permitir avisos neste aparelho»");
+if (!/var quer = document\.getElementById\("quero-lembretes"\)\.checked;\s*if \(!quer\) \{/.test(obJs)) falhas.push("sem a caixa marcada, nada de pedido de permissão");
+if (!/var querAviso = document\.getElementById\("quero-lembretes"\)\.checked &&/.test(obJs)) falhas.push("a inscrição do aparelho só com a caixa marcada");
+if (/te lembramos/.test(ob + obJs)) falhas.push("o título usa «você»: «Quando lembramos você?»");
 
 /* ---------- Cache ---------- */
 var sw = ler("sw.js");

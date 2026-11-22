@@ -31,7 +31,8 @@
     aceitesTitulo: "Seus aceites",
     termosRotulo: "Termos de uso",
     privacidadeRotulo: "Política de privacidade",
-    aceitoEm: "versão {versao}, aceita em {data}",
+    /* Hora do servidor mostrada em Lisboa, com o fuso escrito (revisão da Clara). */
+    aceitoEm: "versão {versao}, aceita em {data} (hora de Lisboa)",
     semAceite: "Sem registro de aceite.",
     ler: "Ler",
     ligadoTitulo: "O que você deixou ligado",
@@ -41,11 +42,22 @@
     lembretesRotulo: "Lembretes do registro diário",
     lembretesApoio: "Avisos neste aparelho no horário que você escolheu.",
     lembretesBloqueados: "O navegador bloqueou os avisos. Libere nas configurações do aparelho.",
+    /* Estado real do aparelho com os lembretes ligados (revisão da Clara). */
+    ligadoSemPermissao: "Ligado, mas este aparelho ainda não permitiu avisos.",
+    permitirAvisos: "Permitir avisos neste aparelho",
+    /* NOVO: aparelho que não recebe avisos do navegador. */
+    lembretesSemSuporte: "Este navegador não mostra avisos. No iPhone, só funciona com o Nexus na Tela de Início.",
     ligado: "Ligado",
     desligado: "Desligado",
     salvando: "Salvando…",
     notasLigou: "Pronto. Você ligou as notas.",
     notasDesligou: "Pronto. Você desligou as notas.",
+    /* Revisão da Clara: desligar apaga as notas guardadas, com confirmação. */
+    notasDesligouApagou: "Pronto. Você desligou as notas e apagou as que estavam guardadas.",
+    desligarTitulo: "Desligar e apagar as notas guardadas?",
+    /* NOVO: o corpo do diálogo. */
+    desligarTexto: "As notas que você já guardou serão apagadas, e isso não dá para desfazer. O registro dos dias continua.",
+    desligarConfirmar: "Desligar e apagar",
     /* NOVOS (mesmo molde dos de cima). */
     lembretesLigou: "Pronto. Você ligou os lembretes.",
     lembretesDesligou: "Pronto. Você desligou os lembretes.",

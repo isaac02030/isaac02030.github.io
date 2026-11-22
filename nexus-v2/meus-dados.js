@@ -72,12 +72,20 @@ function doisDigitos(n) {
   return (n < 10 ? "0" : "") + n;
 }
 
-/* Data e hora do servidor, mostradas no relógio deste aparelho. */
+/* Data e hora do servidor, mostradas na hora de Lisboa (o texto diz o fuso). */
 function formatarData(iso) {
   var data = new Date(iso);
   if (!iso || isNaN(data.getTime())) return "";
-  return doisDigitos(data.getDate()) + "/" + doisDigitos(data.getMonth() + 1) + "/" + data.getFullYear()
-    + ", " + doisDigitos(data.getHours()) + ":" + doisDigitos(data.getMinutes());
+  var partes = {};
+  try {
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "Europe/Lisbon", day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    }).formatToParts(data).forEach(function (p) { partes[p.type] = p.value; });
+  } catch (erro) {
+    return "";
+  }
+  return partes.day + "/" + partes.month + "/" + partes.year + ", " + partes.hour + ":" + partes.minute;
 }
 
 function linhaDeAceite(rotulo, versao, quando) {
@@ -97,12 +105,35 @@ function pintarInterruptor(qual, ligado, salvando) {
   var texto = document.getElementById(qual + "-estado");
   botao.setAttribute("aria-checked", ligado ? "true" : "false");
   botao.setAttribute("aria-busy", salvando ? "true" : "false");
-  texto.textContent = salvando ? D.texto("salvando") : D.texto(ligado ? "ligado" : "desligado");
+  var estadoTexto = D.texto(ligado ? "ligado" : "desligado");
+  /* Lembretes ligados num aparelho que ainda não permitiu avisos: dizer isso. */
+  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "pendente") estadoTexto = D.texto("ligadoSemPermissao");
+  texto.textContent = salvando ? D.texto("salvando") : estadoTexto;
+  if (qual === "lembretes") pintarAparelho();
 }
 
-function pintarBloqueio() {
-  var negado = "Notification" in window && Notification.permission === "denied";
-  document.getElementById("lembretes-bloqueados").hidden = !negado;
+/* O estado real do aparelho, só com os lembretes ligados. */
+function pintarAparelho() {
+  var estadoAviso = nexusEstadoDoAviso();
+  var ligado = estado.lembretes === true;
+  document.getElementById("lembretes-bloqueados").hidden = !(ligado && estadoAviso === "bloqueado");
+  document.getElementById("lembretes-sem-suporte").hidden = !(ligado && estadoAviso === "sem-suporte");
+  document.getElementById("btn-permitir-avisos").hidden = !(ligado && estadoAviso === "pendente");
+}
+
+/* «Permitir avisos neste aparelho»: o pedido do navegador e a inscrição. */
+async function permitirAvisos() {
+  var botao = document.getElementById("btn-permitir-avisos");
+  if (botao.disabled) return;
+  botao.disabled = true;
+  try {
+    if (typeof Notification.requestPermission === "function") await Promise.resolve(Notification.requestPermission());
+    if (nexusEstadoDoAviso() === "permitido") await nexusInscreverAvisos();
+  } catch (erro) {
+    /* O estado abaixo diz o que o aparelho permitiu. */
+  }
+  botao.disabled = false;
+  pintarInterruptor("lembretes", estado.lembretes, false);
 }
 
 async function carregar() {
@@ -128,21 +159,48 @@ async function carregar() {
   var usuario = (r[0].dados && r[0].dados.user) || {};
   pintarAceites(usuario.legal);
   estado.notas = r[1].dados && r[1].dados.note_consent === "yes";
+  /* Sem «sim», nenhuma cópia local da nota (também as de antes da escolha). */
+  nexusLembrarEscolhaNota(estado.notas ? "yes" : "no");
   var avisos = r[2].dados || {};
   estado.lembretes = !!(avisos.reminders && avisos.reminders.choice === "yes");
   pintarInterruptor("notas", estado.notas, false);
   pintarInterruptor("lembretes", estado.lembretes, false);
-  pintarBloqueio();
   mostrarVista("dados");
 }
 
-/* Um toque liga ou desliga, sem confirmação (retirar é tão fácil quanto dar).
-   O interruptor só muda depois que o servidor confirma. */
-async function alternar(qual) {
+/* Desligar as notas apaga as já guardadas: antes, a confirmação (revisão da
+   Clara), com o foco em «Cancelar». Ligar e os lembretes: um toque só. */
+function pedirParaDesligarNotas() {
+  var dialogo = document.getElementById("dialogo-desligar");
+  if (typeof dialogo.showModal === "function") dialogo.showModal();
+  else dialogo.setAttribute("open", "");
+  document.getElementById("btn-cancelar-desligar").focus();
+}
+
+function fecharDialogoDesligar(confirmou) {
+  var dialogo = document.getElementById("dialogo-desligar");
+  if (typeof dialogo.close === "function") dialogo.close();
+  else dialogo.removeAttribute("open");
+  if (confirmou) alternar("notas", true);
+  else document.getElementById("sw-notas").focus();
+}
+
+function tocarInterruptor(qual) {
+  if (qual === "notas" && estado.notas && !estado.ocupado.notas) {
+    pedirParaDesligarNotas();
+    return;
+  }
+  alternar(qual);
+}
+
+/* O interruptor só muda depois que o servidor confirma. */
+async function alternar(qual, confirmado) {
   if (estado.ocupado[qual]) return;
   var aviso = document.getElementById("aviso-dados");
   esconderAviso(aviso);
   var queroLigar = !estado[qual];
+  /* Proteção: desligar as notas só passa pela confirmação. */
+  if (qual === "notas" && !queroLigar && confirmado !== true) return;
   if (semRedeAgora()) {
     mostrarAviso(aviso, "falha", D.texto("salvarSemRede"));
     return;
@@ -164,9 +222,14 @@ async function alternar(qual) {
   }
   estado[qual] = queroLigar;
   pintarInterruptor(qual, estado[qual], false);
-  var chave = qual === "notas"
-    ? (queroLigar ? "notasLigou" : "notasDesligou")
-    : (queroLigar ? "lembretesLigou" : "lembretesDesligou");
+  var chave;
+  if (qual === "notas" && queroLigar) chave = "notasLigou";
+  else if (qual === "notas") {
+    /* O servidor apagou as notas guardadas: nenhuma cópia fica no aparelho. */
+    nexusLembrarEscolhaNota("no");
+    chave = resultado.dados.notes_deleted > 0 ? "notasDesligouApagou" : "notasDesligou";
+  } else chave = queroLigar ? "lembretesLigou" : "lembretesDesligou";
+  if (qual === "notas" && queroLigar) nexusLembrarEscolhaNota("yes");
   mostrarAviso(aviso, "ok", D.texto(chave));
 }
 
@@ -272,8 +335,15 @@ function iniciar() {
     link.href = link.getAttribute("href").split("?")[0] + buscaTema();
   });
   document.getElementById("btn-tentar").addEventListener("click", carregar);
-  document.getElementById("sw-notas").addEventListener("click", function () { alternar("notas"); });
-  document.getElementById("sw-lembretes").addEventListener("click", function () { alternar("lembretes"); });
+  document.getElementById("sw-notas").addEventListener("click", function () { tocarInterruptor("notas"); });
+  document.getElementById("sw-lembretes").addEventListener("click", function () { tocarInterruptor("lembretes"); });
+  document.getElementById("btn-permitir-avisos").addEventListener("click", permitirAvisos);
+  document.getElementById("btn-cancelar-desligar").addEventListener("click", function () { fecharDialogoDesligar(false); });
+  document.getElementById("btn-confirmar-desligar").addEventListener("click", function () { fecharDialogoDesligar(true); });
+  document.getElementById("dialogo-desligar").addEventListener("cancel", function (evento) {
+    evento.preventDefault();
+    fecharDialogoDesligar(false);
+  });
   document.getElementById("btn-excluir").addEventListener("click", abrirDialogo);
   document.getElementById("btn-cancelar-excluir").addEventListener("click", fecharDialogo);
   var dialogo = document.getElementById("dialogo-excluir");

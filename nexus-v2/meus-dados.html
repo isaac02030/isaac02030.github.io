@@ -100,7 +100,7 @@
               <p class="dica dica-forte" id="notas-apaga" data-texto-dados="desligarApaga"></p>
             </li>
             <li class="linha-interruptor">
-              <button type="button" class="interruptor" id="sw-lembretes" role="switch" aria-checked="false" aria-labelledby="lembretes-rotulo" aria-describedby="lembretes-estado lembretes-apoio lembretes-bloqueados">
+              <button type="button" class="interruptor" id="sw-lembretes" role="switch" aria-checked="false" aria-labelledby="lembretes-rotulo" aria-describedby="lembretes-estado lembretes-apoio lembretes-bloqueados lembretes-sem-suporte">
                 <span class="interruptor-textos">
                   <span class="interruptor-rotulo" id="lembretes-rotulo" data-texto-dados="lembretesRotulo"></span>
                   <span class="interruptor-estado" id="lembretes-estado" data-texto-dados="desligado"></span>
@@ -108,7 +108,10 @@
                 <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
               </button>
               <p class="dica" id="lembretes-apoio" data-texto-dados="lembretesApoio"></p>
+              <!-- Estado real do aparelho quando os lembretes estão ligados (revisão da Clara). -->
               <p class="dica" id="lembretes-bloqueados" data-texto-dados="lembretesBloqueados" hidden></p>
+              <p class="dica" id="lembretes-sem-suporte" data-texto-dados="lembretesSemSuporte" hidden></p>
+              <button type="button" class="btn btn-secundario btn-bloco" id="btn-permitir-avisos" data-texto-dados="permitirAvisos" hidden></button>
             </li>
             <!-- Novidades por e-mail: escondido de propósito até existir envio (decisão de 22/11, PR 29). -->
           </ul>
@@ -129,6 +132,18 @@
       </div>
     </div>
   </main>
+
+  <!-- Desligar as notas apaga as já guardadas: confirmação com o foco em Cancelar. -->
+  <dialog class="dialogo" id="dialogo-desligar" aria-labelledby="desligar-titulo" aria-describedby="desligar-texto">
+    <div class="formulario">
+      <h2 class="dialogo-titulo" id="desligar-titulo" data-texto-dados="desligarTitulo"></h2>
+      <p class="secao-texto" id="desligar-texto" data-texto-dados="desligarTexto"></p>
+      <div class="dialogo-botoes">
+        <button type="button" class="btn btn-primario" id="btn-cancelar-desligar" autofocus data-texto-dados="cancelar"></button>
+        <button type="button" class="btn btn-perigo" id="btn-confirmar-desligar" data-texto-dados="desligarConfirmar"></button>
+      </div>
+    </div>
+  </dialog>
 
   <dialog class="dialogo" id="dialogo-excluir" aria-labelledby="dialogo-titulo" aria-describedby="dialogo-texto dialogo-duo">
     <form class="formulario" id="form-excluir" method="post" action="#excluir" novalidate>

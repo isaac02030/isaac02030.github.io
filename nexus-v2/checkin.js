@@ -180,6 +180,8 @@ function lerRascunho() {
 }
 
 function guardarRascunho(id, dia, nota) {
+  /* Sem o «sim» confirmado, o texto da nota não fica no aparelho (nem rascunho). */
+  if (!nexusPodeGuardarRascunhoDaNota()) return;
   try {
     sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
       mission_id: id,
@@ -460,6 +462,7 @@ async function responderSim() {
   if (resultado.sessaoEncerrada) return;
   if (resultado.ok && resultado.dados && resultado.dados.note_consent === "yes") {
     escolhaNota = "yes";
+    nexusLembrarEscolhaNota("yes");
     mostrarFormulario();
     return;
   }
@@ -472,6 +475,7 @@ async function responderSim() {
    no próximo check-in e nada é guardado. */
 function responderNao() {
   escolhaNota = "no";
+  nexusLembrarEscolhaNota("no");
   if (!semRedeAgora()) {
     NexusApi.naoGuardarNotas().catch(function () {});
   }
@@ -568,6 +572,8 @@ async function carregar() {
   } else {
     escolhaNota = "desconhecida";
   }
+  /* Só o «sim» confirmado deixa cópia local da nota; o resto esquece as que houver. */
+  nexusLembrarEscolhaNota(escolhaNota);
   if (meu !== ciclo) return;
   if (!respostas[0].ok || !respostas[1].ok) {
     var falha = respostas[0].semRede ? respostas[0] : respostas[1];
@@ -660,20 +666,8 @@ function mostrarSucesso() {
   });
 }
 
-/* Sem note_saved, a cópia do dia neste aparelho não guarda a nota: o Hoje
-   não mostra «Ver a nota de hoje». */
-function esquecerNotaDoAparelho() {
-  try {
-    var bruto = localStorage.getItem(CHAVE_CACHE);
-    if (!bruto) return;
-    var cache = JSON.parse(bruto);
-    if (cache && typeof cache === "object" && cache.nota) {
-      cache.nota = "";
-      localStorage.setItem(CHAVE_CACHE, JSON.stringify(cache));
-    }
-  } catch (erro) {}
-}
-
+/* Sem note_saved, a cópia do dia neste aparelho não guarda a nota
+   (nexusEsquecerNotasLocais, api.js): o Hoje não mostra «Ver a nota de hoje». */
 function tratarResposta(resultado) {
   if (!resultado || resultado.semRede) {
     mostrarAviso(document.getElementById("alerta"), "rede", TEXTO_SEM_REDE);
@@ -686,7 +680,7 @@ function tratarResposta(resultado) {
   }
   if (resultado.ok) {
     /* A nota só existe para rever se o servidor a guardou (note_saved). */
-    if (dados.note_saved !== true) esquecerNotaDoAparelho();
+    if (dados.note_saved !== true) nexusEsquecerNotasLocais();
     if (dados.already_done === true) {
       limparOrigemRecuperacao();
       irParaHoje(TEXTO_JA);

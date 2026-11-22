@@ -184,7 +184,7 @@
             <button type="button" class="btn btn-texto btn-voltar" data-voltar="3">Voltar</button>
             <p class="passo" id="passo-indicador-4"><span class="sr-only">Passo </span>4 de 4</p>
           </div>
-          <h1 class="titulo" id="titulo-4" tabindex="-1" aria-describedby="passo-indicador-4">Quando te lembramos?</h1>
+          <h1 class="titulo" id="titulo-4" tabindex="-1" aria-describedby="passo-indicador-4">Quando lembramos você?</h1>
           <p class="apoio">Um toque no horário que você escolher.</p>
           <p class="apoio" data-texto-dias="avisoLembrete"></p>
         </header>
@@ -205,6 +205,13 @@
             <p>No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).</p>
           </div>
 
+          <!-- Um caminho só (revisão da Clara): a caixa registra a vontade; só com ela
+               marcada aparece o pedido de permissão do navegador. Sem a caixa, nada é pedido. -->
+          <div class="caixa-aceite caixa-lembretes">
+            <input id="quero-lembretes" name="reminders" type="checkbox">
+            <label for="quero-lembretes" data-texto-dados="querLembretes"></label>
+          </div>
+
           <div id="aviso-ok" class="alerta alerta-ok" role="status" hidden>
             <svg class="icone" aria-hidden="true" viewBox="0 0 24 24">
               <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"/>
@@ -212,13 +219,7 @@
             <p>Aviso ativado. Você já pode começar a missão.</p>
           </div>
           <p id="aviso-recusado" class="dica" hidden></p>
-          <!-- Os lembretes só ligam com esta confirmação (decisão do PR 29).
-               Permitir o aviso no navegador, sozinho, não liga nada. Começa desmarcada. -->
-          <div class="caixa-aceite caixa-lembretes">
-            <input id="quero-lembretes" name="reminders" type="checkbox">
-            <label for="quero-lembretes" data-texto-dados="querLembretes"></label>
-          </div>
-          <button type="button" class="btn btn-secundario btn-bloco" id="btn-aviso">Ativar o aviso</button>
+          <button type="button" class="btn btn-secundario btn-bloco" id="btn-aviso" hidden data-texto-dados="permitirAvisos"></button>
 
           <button type="submit" class="btn btn-primario" id="btn-comecar" data-texto="Começar a missão" data-carregando="Criando a missão…" aria-busy="false">
             <span class="btn-rotulo">Começar a missão</span>

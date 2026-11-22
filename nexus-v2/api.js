@@ -139,6 +139,84 @@ function nexusAvisoDeSessao(texto) {
   }, NEXUS_ESPERA_ERRO_DA_TELA_MS);
 }
 
+/* Notas neste aparelho (revisão do Argos no PR 24). Sem o «sim» confirmado
+   pelo servidor, nenhuma cópia do texto da nota fica guardada: a cópia do
+   dia perde a nota e o rascunho do registro (check-in e dia difícil) sai.
+   NEXUS_CHAVE_ESCOLHA_NOTA guarda só a escolha («yes»), nunca texto. */
+var NEXUS_CHAVE_ESCOLHA_NOTA = "nexus_v2_escolha_nota";
+var NEXUS_CHAVE_RASCUNHO_NOTA = "nexus_v2_rascunho_checkin";
+
+function nexusEsquecerNotasLocais() {
+  try {
+    var bruto = localStorage.getItem("nexus_v2_hoje");
+    if (bruto) {
+      var cache = JSON.parse(bruto);
+      if (cache && typeof cache === "object" && cache.nota) {
+        cache.nota = "";
+        localStorage.setItem("nexus_v2_hoje", JSON.stringify(cache));
+      }
+    }
+  } catch (erroCache) {}
+  try {
+    sessionStorage.removeItem(NEXUS_CHAVE_RASCUNHO_NOTA);
+  } catch (erroRascunho) {}
+}
+
+/* Guarda a escolha lida do servidor. Qualquer coisa que não seja «yes»
+   esquece as cópias locais da nota. */
+function nexusLembrarEscolhaNota(valor) {
+  try {
+    if (valor === "yes") sessionStorage.setItem(NEXUS_CHAVE_ESCOLHA_NOTA, "yes");
+    else sessionStorage.removeItem(NEXUS_CHAVE_ESCOLHA_NOTA);
+  } catch (erro) {}
+  if (valor !== "yes") nexusEsquecerNotasLocais();
+}
+
+/* O rascunho do texto da nota só pode ficar com o «sim» confirmado nesta aba. */
+function nexusPodeGuardarRascunhoDaNota() {
+  try {
+    return sessionStorage.getItem(NEXUS_CHAVE_ESCOLHA_NOTA) === "yes";
+  } catch (erro) {
+    return false;
+  }
+}
+
+/* Estado do aviso neste aparelho: "permitido", "pendente" (ainda não
+   pedido), "bloqueado" ou "sem-suporte". */
+function nexusEstadoDoAviso() {
+  if (typeof window === "undefined" || !("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return "sem-suporte";
+  if (Notification.permission === "granted") return "permitido";
+  if (Notification.permission === "denied") return "bloqueado";
+  return "pendente";
+}
+
+function nexusBytesDaChave(base64) {
+  var limpo = String(base64 || "").trim();
+  var padding = "=".repeat((4 - (limpo.length % 4)) % 4);
+  var base = (limpo + padding).replace(/-/g, "+").replace(/_/g, "/");
+  var cru = atob(base);
+  var saida = new Uint8Array(cru.length);
+  for (var i = 0; i < cru.length; i++) saida[i] = cru.charCodeAt(i);
+  return saida;
+}
+
+/* Inscreve este aparelho para receber avisos (só com a permissão dada).
+   Não liga os lembretes: isso é a escolha da pessoa (PUT reminders). */
+async function nexusInscreverAvisos() {
+  if (nexusEstadoDoAviso() !== "permitido") return false;
+  var chave = await NexusApi.chaveVapid();
+  var publica = chave.ok && chave.dados && typeof chave.dados.publicKey === "string" ? chave.dados.publicKey : "";
+  if (!publica) return false;
+  var registro = await navigator.serviceWorker.register("sw.js");
+  var inscricao = await registro.pushManager.getSubscription();
+  if (!inscricao) {
+    inscricao = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: nexusBytesDaChave(publica) });
+  }
+  if (!inscricao || typeof inscricao.toJSON !== "function") return false;
+  var resultado = await NexusApi.inscreverNotificacao(inscricao.toJSON());
+  return !!resultado.ok;
+}
+
 async function nexusLerJson(resposta) {
   try {
     return await resposta.json();
