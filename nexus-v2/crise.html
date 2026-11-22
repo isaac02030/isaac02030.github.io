@@ -45,6 +45,9 @@
   <main class="tela-crise" id="conteudo">
     <div class="crise">
       <h1 class="crise-titulo" id="titulo" tabindex="-1">Você não está sozinho nisso</h1>
+      <!-- Só depois de uma denúncia com crise no comentário (?de=denuncia): a frase
+           aprovada vem de comunidade-textos.js. Vazio no resto, sem mudar a tela. -->
+      <p class="linha-missao" id="linha-denuncia" hidden></p>
       <p class="linha-missao">Esta tela não guarda nada sobre você.</p>
       <p class="aviso-saude">O Nexus não é um serviço de saúde. Se estiver em risco de vida agora, ligue para a emergência.</p>
 
@@ -149,7 +152,21 @@
     </div>
   </main>
   <script src="abas.js"></script>
+  <script src="comunidade-textos.js"></script>
   <script>
+    (function () {
+      var linha = document.getElementById("linha-denuncia");
+      var de = "";
+      try {
+        de = new URLSearchParams(location.search).get("de") || "";
+      } catch (erro) {
+        de = "";
+      }
+      if (linha && de === "denuncia" && window.NexusComunidade) {
+        linha.textContent = window.NexusComunidade.TEXTOS.denunciaCrise;
+        linha.hidden = false;
+      }
+    })();
     (function () {
       var idioma = "";
       try {

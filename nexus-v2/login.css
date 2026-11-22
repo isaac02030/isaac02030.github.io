@@ -65,3 +65,64 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Data de nascimento: três campos lado a lado (dia, mês, ano), com rótulo visível.
+   O ano é mais largo (4 dígitos). */
+.campo-data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.campo-data legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.data-partes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: var(--space-3);
+}
+
+.data-parte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.data-parte label {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.data-parte input {
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* Tela do menor de 18: título, uma frase e um botão. Sem ícone, sem cor de alarme. */
+#vista-menor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+#vista-menor[hidden] {
+  display: none;
+}
+
+#vista-menor .cabecalho {
+  margin-bottom: 0;
+}
+
+.texto-menor {
+  color: var(--text);
+}

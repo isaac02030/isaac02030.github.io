@@ -1,0 +1,446 @@
+/* Comunidade (leitura), folha de denúncia, aviso do post escondido e área da equipe.
+   Visual novo do Hoje: papel liso, sem cartão com sombra, sem linhas de fundo.
+   Sem animação nem transição nestas telas (denúncia e crise ficam calmas).
+   Nada de vermelho em fundo cheio: --danger só no texto e no contorno de «Apagar». */
+
+body:has(.tela-comunidade) {
+  background-image: none;
+}
+
+.tela-comunidade {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-top: calc(var(--space-5) + var(--safe-top));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--space-5));
+  overflow-wrap: break-word;
+}
+
+.tela-comunidade *,
+.folha,
+.folha *,
+.confirmacao,
+.confirmacao * {
+  transition: none;
+  animation: none;
+}
+
+.comunidade-titulo {
+  margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.tela-comunidade .vista {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.carregando-texto,
+.vazio-texto,
+.aviso-texto {
+  margin: 0;
+  font: var(--text-body);
+  text-wrap: pretty;
+}
+
+.carregando-texto {
+  color: var(--text-muted);
+}
+
+.vazio-texto,
+.aviso-texto {
+  color: var(--text);
+}
+
+/* Avisos de erro calmos: sem vermelho. O ícone e a frase dizem o que houve.
+   (Na base, .alerta-falha usa --danger; aqui ele fica só em «Apagar».) */
+.tela-comunidade .alerta-falha,
+.folha .alerta-falha,
+.confirmacao .alerta-falha {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn-grande {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* ---------- Lista de comunidades ---------- */
+
+.lista-comunidades {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.link-comunidade {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  color: var(--text);
+  font: var(--text-label);
+  text-decoration: none;
+}
+
+.link-comunidade:hover {
+  color: var(--accent-standout);
+}
+
+/* ---------- Posts ---------- */
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Um post por linha do caderno: separados por um traço, sem cartão. */
+.post {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0 var(--space-2);
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.post:first-child {
+  padding-top: 0;
+}
+
+.post-autor {
+  margin: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.post-texto {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.post-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target);
+}
+
+.post-data {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* «Denunciar»: texto pequeno e discreto, no canto do rodapé, área de toque 44×44. */
+.btn-denunciar {
+  margin-left: auto;
+  font: var(--text-small);
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.post-denunciado {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0 0 0 auto;
+  padding: var(--space-2) 0;
+  font: var(--text-small);
+  color: var(--text);
+}
+
+.post-denunciado .icone {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--success);
+}
+
+/* Aviso ao autor: cartão neutro com borda, no lugar do corpo. Não é vermelho. */
+.cartao-escondido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.cartao-escondido .icone {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+
+.escondido-textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.escondido-textos p {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.escondido-textos .escondido-titulo {
+  font: var(--text-label);
+}
+
+/* ---------- Folha de denúncia (diálogo de baixo) ---------- */
+
+.folha,
+.confirmacao {
+  box-sizing: border-box;
+  max-width: 30rem;
+  max-height: calc(100dvh - var(--space-5));
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+.folha {
+  width: 100%;
+  margin: auto auto 0;
+  padding-bottom: calc(var(--space-5) + var(--safe-bottom));
+  border-bottom: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.confirmacao {
+  width: min(100% - 2 * var(--space-4), 26rem);
+  border-radius: var(--radius-lg);
+}
+
+.folha::backdrop,
+.confirmacao::backdrop {
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+
+.folha .formulario {
+  gap: var(--space-4);
+}
+
+.motivos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.folha-titulo {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  font: var(--text-title);
+  color: var(--text);
+}
+
+/* Cada motivo: linha inteira tocável, 56 px. */
+.motivo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  font: var(--text-body);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.motivo:first-of-type {
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.motivo input {
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.folha .campo label .opcional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.folha textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  caret-color: var(--text);
+  resize: vertical;
+}
+
+.folha-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.folha-botoes .btn {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* Sem motivo escolhido, «Enviar denúncia» fica apagado (e não envia).
+   Enquanto envia, o botão continua com a cor dele (aria-busy). */
+.btn-primario:disabled:not([aria-busy="true"]) {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+/* ---------- Área da equipe ---------- */
+
+.escondidos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.escondido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.escondido:first-child {
+  padding-top: 0;
+}
+
+.rotulo-prioridade,
+.alerta-repetido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text);
+}
+
+.rotulo-prioridade {
+  font: var(--text-label);
+}
+
+.alerta-repetido {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font: var(--text-body);
+}
+
+.rotulo-prioridade .icone,
+.alerta-repetido .icone {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.escondido-trecho {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.denuncias-rotulo {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.denuncias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: calc(var(--space-2) * -1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.denuncias li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.denuncia-motivo {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.denuncia-comentario {
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.escondido-acoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(8rem, 40%), 1fr));
+  gap: var(--space-3);
+}
+
+.escondido-acoes .btn {
+  min-height: 48px;
+}
+
+/* Apagar: só texto e contorno em --danger, nunca fundo vermelho. */
+.btn-perigo {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.pergunta {
+  margin: 0 0 var(--space-4);
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.confirmacao .alerta {
+  margin-bottom: var(--space-4);
+}

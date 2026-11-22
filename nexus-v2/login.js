@@ -171,6 +171,12 @@ function mensagemDaApi(modo, resultado) {
       texto: "Esse e-mail ou nome já está em uso. Se for você, tente entrar."
     };
   }
+  if (modo === "cadastro" && (erro === TEXTOS_IDADE().DO_SERVIDOR.dataFalta || erro === TEXTOS_IDADE().DO_SERVIDOR.dataInvalida)) {
+    return { onde: "data", tipo: "falha", texto: TEXTOS_IDADE().TEXTOS.dataErro };
+  }
+  if (modo === "cadastro" && resultado.status === 503) {
+    return { onde: "topo", tipo: "falha", texto: TEXTOS_IDADE().TEXTOS.cadastroIndisponivel };
+  }
   if (erro === "Password deve ter pelo menos 6 caracteres.") {
     return {
       onde: "senha",
@@ -195,13 +201,75 @@ function mensagemDaApi(modo, resultado) {
 function mostrarVista(qual, moverFoco) {
   var entrar = document.getElementById("vista-entrar");
   var cadastro = document.getElementById("vista-cadastro");
+  var menor = document.getElementById("vista-menor");
   var eCadastro = qual === "cadastro";
-  entrar.hidden = eCadastro;
+  var eMenor = qual === "menor";
+  entrar.hidden = eCadastro || eMenor;
   cadastro.hidden = !eCadastro;
-  document.title = eCadastro ? "Criar conta — Nexus" : "Entrar — Nexus";
+  menor.hidden = !eMenor;
+  if (eMenor) document.title = TEXTOS_IDADE().TEXTOS.menorTitulo + " — Nexus";
+  else document.title = eCadastro ? "Criar conta — Nexus" : "Entrar — Nexus";
   if (moverFoco) {
-    document.getElementById(eCadastro ? "titulo-cadastro" : "titulo-entrar").focus();
+    document.getElementById(eMenor ? "titulo-menor" : (eCadastro ? "titulo-cadastro" : "titulo-entrar")).focus();
   }
+}
+
+/* O texto da idade vem de comunidade-textos.js (num lugar só). */
+function TEXTOS_IDADE() {
+  return window.NexusComunidade;
+}
+
+var CAMPOS_DATA = ["cadastro-dia", "cadastro-mes", "cadastro-ano"];
+
+function camposDaData() {
+  return CAMPOS_DATA.map(function (id) {
+    return document.getElementById(id);
+  });
+}
+
+/* Erro de forma da data: borda e aria-invalid nos três campos, frase uma vez só. */
+function definirErroDaData(texto) {
+  var aviso = document.getElementById("cadastro-data-erro");
+  camposDaData().forEach(function (campo) {
+    if (texto) campo.setAttribute("aria-invalid", "true");
+    else campo.removeAttribute("aria-invalid");
+  });
+  aviso.hidden = !texto;
+  aviso.textContent = texto || "";
+}
+
+/* Primeiro campo da data que está vazio ou incompleto (para o foco). */
+function campoDaDataParaCorrigir() {
+  var campos = camposDaData();
+  for (var i = 0; i < campos.length; i++) {
+    var valor = campos[i].value.trim();
+    if (!valor || valor.length < (i === 2 ? 4 : 1) || /\D/.test(valor)) return campos[i];
+  }
+  return campos[0];
+}
+
+/* Só números; ao completar o campo, o foco passa sozinho ao próximo. */
+function ligarCamposDaData() {
+  camposDaData().forEach(function (campo) {
+    campo.addEventListener("input", function () {
+      var limpo = campo.value.replace(/\D/g, "").slice(0, Number(campo.getAttribute("maxlength")) || 4);
+      if (limpo !== campo.value) campo.value = limpo;
+      if (campo.getAttribute("aria-invalid") === "true") definirErroDaData("");
+      var proximo = campo.getAttribute("data-proximo");
+      if (proximo && limpo.length === Number(campo.getAttribute("maxlength"))) {
+        document.getElementById(proximo).focus();
+      }
+    });
+  });
+}
+
+/* Nada do cadastro fica na tela depois do 403: campos limpos, senha apagada. */
+function limparCadastro(form) {
+  form.querySelectorAll("input").forEach(function (campo) {
+    campo.value = "";
+  });
+  limparErros(form);
+  limparSenhas(form);
 }
 
 function aoTrocarDeVista() {
@@ -209,6 +277,7 @@ function aoTrocarDeVista() {
   limparErros(document.getElementById("form-cadastro"));
   limparSenhas(document.getElementById("form-entrar"));
   limparSenhas(document.getElementById("form-cadastro"));
+  definirErroDaData("");
   mostrarVista(location.hash === "#criar-conta" ? "cadastro" : "entrar", true);
 }
 
@@ -288,17 +357,22 @@ async function enviarCadastro(form) {
   else if (senha.value.length < 6) textoSenha = "A senha precisa ter pelo menos 6 caracteres.";
   var textoConfirma = "";
   if (!textoSenha && senha.value !== confirma.value) textoConfirma = "As duas senhas não são iguais.";
+  var partes = camposDaData();
+  var nascimento = TEXTOS_IDADE().dataDeNascimento(partes[0].value, partes[1].value, partes[2].value);
+  var textoData = nascimento ? "" : TEXTOS_IDADE().TEXTOS.dataErro;
 
   definirErro(nome, erroNome, textoNome);
   definirErro(email, erroEmail, textoEmail);
   definirErro(senha, erroSenha, textoSenha);
   definirErro(confirma, erroConfirma, textoConfirma);
-  if (textoNome || textoEmail || textoSenha || textoConfirma) {
+  definirErroDaData(textoData);
+  if (textoNome || textoEmail || textoSenha || textoConfirma || textoData) {
     focarPrimeiro([
       { campo: nome, texto: textoNome },
       { campo: email, texto: textoEmail },
       { campo: senha, texto: textoSenha },
-      { campo: confirma, texto: textoConfirma }
+      { campo: confirma, texto: textoConfirma },
+      { campo: campoDaDataParaCorrigir(), texto: textoData }
     ]);
     return;
   }
@@ -314,11 +388,21 @@ async function enviarCadastro(form) {
     var resultado = await NexusApi.cadastrar({
       username: nome.value.trim(),
       email: email.value.trim(),
-      password: senha.value
+      password: senha.value,
+      birth_date: nascimento
     });
     if (!resultado.ok) {
+      /* 403 do servidor: menor de 18. Nada foi guardado; a tela troca por inteiro. */
+      if (resultado.status === 403 && resultado.dados && resultado.dados.under_age === true) {
+        limparCadastro(form);
+        mostrarVista("menor", true);
+        return;
+      }
       var aviso = mensagemDaApi("cadastro", resultado);
-      if (aviso.onde === "senha") {
+      if (aviso.onde === "data") {
+        definirErroDaData(aviso.texto);
+        partes[0].focus();
+      } else if (aviso.onde === "senha") {
         definirErro(senha, erroSenha, aviso.texto);
         senha.focus();
       } else {
@@ -348,6 +432,7 @@ function atualizarBarra() {
 }
 
 function iniciar() {
+  TEXTOS_IDADE().aplicar(document);
   var formEntrar = document.getElementById("form-entrar");
   var formCadastro = document.getElementById("form-cadastro");
 
@@ -370,6 +455,7 @@ function iniciar() {
   limparAoDigitar(document.getElementById("cadastro-email"), document.getElementById("cadastro-email-erro"));
   limparAoDigitar(document.getElementById("cadastro-senha"), document.getElementById("cadastro-senha-erro"));
   limparAoDigitar(document.getElementById("cadastro-confirma"), document.getElementById("cadastro-confirma-erro"));
+  ligarCamposDaData();
 
   mostrarVista(location.hash === "#criar-conta" ? "cadastro" : "entrar", false);
   window.addEventListener("hashchange", aoTrocarDeVista);
