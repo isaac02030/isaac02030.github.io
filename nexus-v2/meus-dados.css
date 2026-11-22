@@ -244,3 +244,14 @@
   width: 100%;
   min-height: 48px;
 }
+
+/* E-mail de privacidade: link sublinhado, alvo de 44 px de altura. */
+.link-email {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  color: var(--accent-standout);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}

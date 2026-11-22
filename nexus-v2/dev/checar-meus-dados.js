@@ -43,7 +43,7 @@ var ESPERADOS = {
   perguntaTitulo: "Guardar suas notas?",
   excluidaTitulo: "Sua conta foi excluída",
   senhaRotulo: "Digite sua senha para confirmar",
-  falarTexto: "Dúvidas ou pedidos sobre seus dados? Escreva para [E-MAIL DE PRIVACIDADE]."
+  falarTexto: "Dúvidas ou pedidos sobre seus dados? Escreva para {email}."
 };
 if (T) {
   Object.keys(ESPERADOS).forEach(function (k) {
@@ -65,9 +65,16 @@ if (/news/.test(semComentarios(mdJs))) falhas.push("meus-dados.js não pode mexe
 });
 if (!/id="notas-estado" data-texto-dados="desligado"/.test(md) || !/id="lembretes-estado" data-texto-dados="desligado"/.test(md)) falhas.push("o estado do interruptor precisa estar em texto, não só na cor");
 if (!/data-texto-dados="desligarApaga"/.test(md)) falhas.push("falta «Desligar apaga as notas já guardadas.»");
-if (!/data-texto-dados="falarTexto"/.test(md)) falhas.push("falta o contato de privacidade com o marcador");
+if (!/id="falar-texto"/.test(md) || !/D\.texto\("falarTexto"\)\.split\("\{email\}"\)/.test(mdJs) || !/link\.href = "mailto:" \+ email/.test(mdJs)) falhas.push("falta o contato de privacidade com link mailto:");
+/* O e-mail de privacidade vem só de dados-textos.js (contatoEmail) e nenhum marcador sobra. */
+if (!T || !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(T.contatoEmail || "")) falhas.push("dados-textos.js: falta o e-mail de privacidade (contatoEmail)");
+["meus-dados.html", "meus-dados.js", "dados-textos.js", "conta-excluida.html", "termos.html", "privacidade.html"].forEach(function (nome) {
+  if (/\[(E-MAIL|NOME)[^\]]*\]/.test(ler(nome))) falhas.push(nome + ": sobrou marcador entre colchetes");
+});
 ["meus-dados.html", "meus-dados.js", "dados-textos.js", "conta-excluida.html", "checkin.html"].forEach(function (nome) {
-  if (/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/.test(ler(nome))) falhas.push(nome + ": há endereço de e-mail no repositório público");
+  /* Só o e-mail de privacidade, e só em dados-textos.js. */
+  var enderecos = ler(nome).match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/g) || [];
+  if (enderecos.some(function (e) { return nome !== "dados-textos.js" || !T || e !== T.contatoEmail; })) falhas.push(nome + ": e-mail fora do lugar (só o de privacidade, em dados-textos.js)");
   if (/urso/i.test(semComentarios(ler(nome)))) falhas.push(nome + ": sem urso nestas telas");
 });
 /* Interruptor só muda depois do servidor; nada de «Pronto» antes. */

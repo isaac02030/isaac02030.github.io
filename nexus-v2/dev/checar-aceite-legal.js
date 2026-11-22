@@ -141,9 +141,14 @@ if (envioR.indexOf('mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.falhaA
 if (L && L.TEXTOS.reaceiteTexto !== "Para continuar, leia e aceite as versões novas. Elas valem a partir de " + L.DATA_VERSAO + ".") falhas.push("o texto da reaceitação não usa a data de vigência da fonte única");
 
 /* ---------- Páginas de Termos e Privacidade ---------- */
-var PROIBIDAS = ["isaac", "pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
+var PROIBIDAS = ["pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
   "aviso interno", "apagar antes de publicar", "testers", "pr 26", "legal/", ".md", "ver lacunas", "proposta do", "a aprovar", "urso", "[conferir"];
-var MARCADORES = ["[E-MAIL DE PRIVACIDADE]", "[NOME DO RESPONSÁVEL]"];
+/* Desde 22/11 não sobra nenhum marcador: o e-mail de privacidade é o de
+   dados-textos.js (contatoEmail), o mesmo de Meus dados. */
+var MARCADORES = [];
+var janelaDados = {};
+vm.runInNewContext(ler("dados-textos.js"), { window: janelaDados, document: { querySelectorAll: function () { return []; } } });
+var CONTATO = janelaDados.NexusDados ? janelaDados.NexusDados.TEXTOS.contatoEmail : "";
 ["termos.html", "privacidade.html"].forEach(function (nome) {
   var html = ler(nome);
   if (!/<html lang="pt-BR">/.test(html)) falhas.push(nome + ": falta lang pt-BR");
@@ -152,7 +157,9 @@ var MARCADORES = ["[E-MAIL DE PRIVACIDADE]", "[NOME DO RESPONSÁVEL]"];
   if (/api\.js|login\.js|nexus_v2_token/.test(html)) falhas.push(nome + ": a página não pode depender de login");
   if (/<form|type="checkbox"|<button/.test(html)) falhas.push(nome + ": a página de leitura não tem botão de aceitar");
   if (/https?:\/\//.test(html)) falhas.push(nome + ": não carrega nada de fora");
-  if (/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/.test(html)) falhas.push(nome + ": há um endereço de e-mail no repositório público");
+  var enderecos = html.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/g) || [];
+  if (!enderecos.length || enderecos.some(function (e) { return e !== CONTATO; })) falhas.push(nome + ": o único e-mail é o de privacidade (dados-textos.js)");
+  if (html.indexOf('<a href="mailto:' + CONTATO + '">' + CONTATO + "</a>") === -1) falhas.push(nome + ": o e-mail de privacidade é um link mailto:");
   if (!/<a class="voltar" id="voltar" href="index\.html">Voltar<\/a>/.test(html)) falhas.push(nome + ": falta «Voltar» (sem JavaScript, leva ao início)");
   var texto = html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<!--[\s\S]*?-->/g, " ").replace(/<[^>]+>/g, " ").toLowerCase();
   PROIBIDAS.forEach(function (p) {
@@ -163,7 +170,7 @@ var MARCADORES = ["[E-MAIL DE PRIVACIDADE]", "[NOME DO RESPONSÁVEL]"];
   (html.replace(/<script[\s\S]*?<\/script>/g, "").match(/\[[^\]]*\]/g) || []).forEach(function (c) {
     if (MARCADORES.indexOf(c) === -1) falhas.push(nome + ": sobrou colchete " + c);
   });
-  if (html.indexOf("[E-MAIL DE PRIVACIDADE]") === -1) falhas.push(nome + ": o marcador [E-MAIL DE PRIVACIDADE] precisa ficar visível");
+  if (/\[(E-MAIL|NOME)[^\]]*\]/.test(html)) falhas.push(nome + ": sobrou marcador entre colchetes");
   /* Índice: cada link aponta para um h2 que existe. */
   var alvos = (html.match(/<li><a href="#(secao-\d+)">/g) || []).map(function (l) { return l.match(/#(secao-\d+)/)[1]; });
   if (!alvos.length) falhas.push(nome + ": falta o índice «Neste texto»");

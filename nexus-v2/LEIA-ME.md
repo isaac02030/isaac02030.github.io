@@ -280,7 +280,7 @@ A checagem é `node nexus-v2/dev/checar-comunidade.js`.
 
 - Cadastro: caixa «Li e aceito os Termos de uso e a Política de privacidade.», sempre desmarcada, com os links «Ler os Termos de uso» e «Ler a Política de privacidade». O envio manda `terms_version` e `privacy_version` (as duas «beta-1», em `legal-textos.js`, iguais às do servidor). Ao abrir um dos textos e voltar, o que já foi escrito continua (a senha, não).
 - Reaceitação: quando o login ou o `/me` trazem `user.legal.needs_acceptance: true`, a tela «Atualizamos os termos e a privacidade» abre em `index.html#aceitar-termos` (POST `/api/users/me/legal-acceptance`). As outras telas conferem isso uma vez por aba (`api.js`).
-- `termos.html` e `privacidade.html` abrem sem login e sem internet. São geradas a partir dos textos do conselho, sem as notas internas; não edite à mão. Os marcadores `[E-MAIL DE PRIVACIDADE]` e `[NOME DO RESPONSÁVEL]` ficam visíveis até o dono do projeto decidir.
+- `termos.html` e `privacidade.html` abrem sem login e sem internet. São geradas a partir dos textos do conselho, sem as notas internas; não edite à mão. O e-mail de privacidade e o nome do responsável entraram por decisão do dono do projeto (22/11); o e-mail vem de `dados-textos.js` (`contatoEmail`), o mesmo de Meus dados.
 - Em todas as chamadas com login (`api.js`): 401 `session_ended` limpa a sessão deste aparelho (o tema fica) e volta a «Entrar» com «Sessão encerrada. Entre de novo.»; 503 `auth_unavailable` mostra «Não foi possível conferir sua sessão agora. Tente de novo em instantes.» no topo, sem apagar nada.
 - Mock: `reaceitar@exemplo.com`, `aceite-antigo@exemplo.com`, `aceite-falha@exemplo.com`, `termos-mudaram@exemplo.com`, `sessao-encerrada@exemplo.com` e `sessao-indisponivel@exemplo.com` (detalhes no topo de `dev/mock-api.js`).
 
@@ -289,7 +289,7 @@ A checagem é `node nexus-v2/dev/checar-aceite-legal.js`.
 ## Seus dados: nota, Meus dados, lembretes e excluir conta
 
 - Check-in: no primeiro registro, a pergunta «Guardar suas notas?» com duas respostas iguais (POST ou DELETE `/api/users/me/note-consent`). «Não guardar» não espera o servidor. Depois, uma linha sob a nota diz se ela será guardada. Sem `note_saved`, a nota sai da cópia do dia e o Hoje não mostra «Ver a nota de hoje».
-- Ajustes › Meus dados (`meus-dados.html`): aceites com versão e data, interruptores «Guardar minhas notas» (desligar apaga as notas já guardadas) e «Lembretes do registro diário». O de novidades fica escondido até existir envio. Contato com o marcador `[E-MAIL DE PRIVACIDADE]`. Excluir conta com senha; depois, tudo o que é `nexus_v2_*` sai do aparelho e abre `conta-excluida.html`.
+- Ajustes › Meus dados (`meus-dados.html`): aceites com versão e data, interruptores «Guardar minhas notas» (desligar apaga as notas já guardadas) e «Lembretes do registro diário». O de novidades fica escondido até existir envio. Contato com o e-mail de privacidade (`contatoEmail` em `dados-textos.js`), com link `mailto:`. Excluir conta com senha; depois, tudo o que é `nexus_v2_*` sai do aparelho e abre `conta-excluida.html`.
 - Começo da missão: a caixa «Quero receber lembretes do meu registro diário neste aparelho.» liga os lembretes (PUT `reminders: true`). Permitir o aviso no navegador, sozinho, não liga nada.
 - Textos em `dados-textos.js`. Mock: `primeira-vez@exemplo.com`, `escolha-falha@exemplo.com`, `nao-guarda@exemplo.com`, `avisos-falha@exemplo.com`, `excluir-falha@exemplo.com`, senhas `errada` e `muitas` (detalhes no topo de `dev/mock-api.js`).
 
