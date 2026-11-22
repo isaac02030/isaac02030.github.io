@@ -70,7 +70,11 @@
     carregarSemRede: "Sem internet. Seus dados não puderam ser abertos.",
     tentarDeNovo: "Tentar de novo",
     falarTitulo: "Falar sobre seus dados",
-    falarTexto: "Dúvidas ou pedidos sobre seus dados? Escreva para [E-MAIL DE PRIVACIDADE].",
+    /* {email} vira um link mailto: com o contato abaixo (meus-dados.js). */
+    falarTexto: "Dúvidas ou pedidos sobre seus dados? Escreva para {email}.",
+    /* Contato de privacidade (decisão do dono do projeto, 22/11). Fonte única:
+       as páginas termos.html e privacidade.html são geradas com o mesmo. */
+    contatoEmail: "nexusatendimento10@gmail.com",
     /* Prazo da Política de privacidade, seção 1. */
     falarPrazo: "Respondemos em até 15 dias.",
 

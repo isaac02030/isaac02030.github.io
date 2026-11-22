@@ -3,7 +3,7 @@
    - Interruptores: «Guardar minhas notas» (PR 27: desligar apaga as notas
      já guardadas) e «Lembretes do registro diário» (PR 29). O de novidades
      fica escondido até existir envio (decisão de 22/11).
-   - Falar sobre seus dados: o marcador do e-mail, nunca um endereço real.
+   - Falar sobre seus dados: o e-mail de privacidade (dados-textos.js), com link.
    - Excluir conta com senha (PR 26). Depois de excluir: apaga tudo o que é
      nexus_v2_* deste aparelho e abre «Sua conta foi excluída».
    Nada aparece como salvo antes de o servidor confirmar. */
@@ -328,8 +328,21 @@ async function enviarExclusao(evento) {
   }
 }
 
+/* «… Escreva para {email}.»: o endereço vira link mailto:, visível e copiável. */
+function pintarContato() {
+  var p = document.getElementById("falar-texto");
+  var email = D.texto("contatoEmail");
+  var partes = D.texto("falarTexto").split("{email}");
+  var link = document.createElement("a");
+  link.className = "link-email";
+  link.href = "mailto:" + email;
+  link.textContent = email;
+  p.replaceChildren(document.createTextNode(partes[0] || ""), link, document.createTextNode(partes[1] || ""));
+}
+
 function iniciar() {
   D.aplicar(document);
+  pintarContato();
   document.getElementById("voltar").href = "ajustes.html" + buscaTema();
   document.querySelectorAll(".link-ler").forEach(function (link) {
     link.href = link.getAttribute("href").split("?")[0] + buscaTema();
