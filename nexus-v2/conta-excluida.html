@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sua conta foi excluída — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <!-- Tela pública e calma, depois da exclusão (spec da Clara, seção 3).
+       Sem «sentimos sua falta», sem pedido de motivo, sem oferta para ficar. -->
+  <script>
+    (function () {
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="meus-dados.css">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+</head>
+<body>
+  <main class="pagina" id="conteudo">
+    <div class="cartao meus-dados excluida">
+      <h1 class="titulo" id="titulo" tabindex="-1" data-texto-dados="excluidaTitulo"></h1>
+      <p class="secao-texto" data-texto-dados="excluidaTexto"></p>
+      <a class="link-ler" id="link-politica" href="privacidade.html" data-texto-dados="lerPolitica"></a>
+      <a class="btn btn-primario" id="link-inicio" href="index.html" data-texto-dados="voltarInicio"></a>
+    </div>
+  </main>
+  <script src="dados-textos.js"></script>
+  <script>
+    (function () {
+      window.NexusDados.aplicar(document);
+      var busca = "";
+      try {
+        var tema = new URLSearchParams(location.search).get("tema");
+        if (tema === "claro" || tema === "escuro" || tema === "sistema") busca = "?tema=" + tema;
+      } catch (erro) {}
+      document.getElementById("link-politica").href = "privacidade.html" + busca;
+      document.getElementById("link-inicio").href = "index.html" + busca;
+      document.getElementById("titulo").focus();
+    })();
+  </script>
+</body>
+</html>

@@ -141,6 +141,8 @@ function lerRascunho() {
 }
 
 function guardarRascunho(id, dia, nota) {
+  /* Sem o «sim» confirmado nesta aba, a frase não fica no aparelho (api.js). */
+  if (!nexusPodeGuardarRascunhoDaNota()) return;
   try {
     sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
       mission_id: id,

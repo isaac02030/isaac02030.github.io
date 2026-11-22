@@ -333,6 +333,8 @@ function iniciar() {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", atualizarBarra);
   window.addEventListener("pageshow", irParaEntrarSeSemSessao);
 
+  if (window.NexusDados) NexusDados.aplicar(document);
+  document.getElementById("link-meus-dados").href = "meus-dados.html" + buscaTema();
   NexusAbas.iniciar("ajustes");
 }
 

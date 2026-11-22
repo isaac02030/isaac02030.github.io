@@ -139,3 +139,21 @@ textarea[aria-invalid="true"]:focus-visible {
   outline: 2px solid var(--danger);
   outline-offset: -1px;
 }
+
+/* Pergunta da nota: duas respostas iguais (largura total, 48 px, contorno,
+   nenhuma cheia), empilhadas com 12 px. */
+.respostas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.respostas .btn {
+  width: 100%;
+  min-height: 48px;
+}
+
+.link-como {
+  align-self: flex-start;
+  padding-inline: 0;
+}

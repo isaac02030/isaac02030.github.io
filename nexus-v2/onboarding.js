@@ -336,7 +336,7 @@ function aplicarTextosDosDias() {
 function tituloDoPasso(numero) {
   if (numero === 2) return "O seu contrato — Nexus";
   if (numero === 3) return NexusDias.TEXTOS.titulo + " — Nexus";
-  if (numero === 4) return "Quando te lembramos? — Nexus";
+  if (numero === 4) return "Quando lembramos você? — Nexus";
   return "O que você quer cumprir? — Nexus";
 }
 
@@ -367,6 +367,15 @@ function aplicarAviso() {
   var ok = document.getElementById("aviso-ok");
   var recusa = document.getElementById("aviso-recusado");
   var botao = document.getElementById("btn-aviso");
+  /* Sem a caixa marcada, nada de pedido nem de aviso sobre permissão. */
+  var quer = document.getElementById("quero-lembretes").checked;
+  if (!quer) {
+    ok.hidden = true;
+    botao.hidden = true;
+    recusa.hidden = true;
+    recusa.textContent = "";
+    return;
+  }
   ok.hidden = permissao !== "granted";
   botao.hidden = permissao === "granted";
   if (permissao === "denied") {
@@ -421,16 +430,6 @@ function guardarLembreteLocal(hora) {
   }
 }
 
-function urlBase64ParaBytes(base64) {
-  var limpo = String(base64 || "").trim();
-  var padding = "=".repeat((4 - (limpo.length % 4)) % 4);
-  var base = (limpo + padding).replace(/-/g, "+").replace(/_/g, "/");
-  var cru = atob(base);
-  var saida = new Uint8Array(cru.length);
-  for (var i = 0; i < cru.length; i++) saida[i] = cru.charCodeAt(i);
-  return saida;
-}
-
 function comTempo(promessa, ms) {
   return Promise.race([
     promessa,
@@ -440,24 +439,10 @@ function comTempo(promessa, ms) {
   ]);
 }
 
-/* Só corre depois que a missão existe. Falha aqui não desfaz a missão. */
+/* Só corre depois que a missão existe. Falha aqui não desfaz a missão.
+   A inscrição fica em api.js (nexusInscreverAvisos), a mesma de Meus dados. */
 async function inscreverSeAceito() {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-  var chave = await NexusApi.chaveVapid();
-  var publica = chave.ok && chave.dados && typeof chave.dados.publicKey === "string" ? chave.dados.publicKey : "";
-  if (!publica) return;
-  var registro = await navigator.serviceWorker.register("sw.js");
-  var existente = await registro.pushManager.getSubscription();
-  var inscricao = existente;
-  if (!inscricao) {
-    inscricao = await registro.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ParaBytes(publica)
-    });
-  }
-  if (!inscricao || typeof inscricao.toJSON !== "function") return;
-  await NexusApi.inscreverNotificacao(inscricao.toJSON());
+  await nexusInscreverAvisos();
 }
 
 function travarPasso4(ligado) {
@@ -612,7 +597,8 @@ async function criarAMissao(opcoes) {
     focarGrupoDias();
     return;
   }
-  var querAviso = "Notification" in window && Notification.permission === "granted";
+  /* Inscrição do aparelho só com a caixa marcada (sem ela, nada de aviso). */
+  var querAviso = document.getElementById("quero-lembretes").checked && "Notification" in window && Notification.permission === "granted";
   var textoHora = querAviso && !estado.reminder_time ? "Escolha o horário do lembrete." : "";
   definirErro(horario, erroHorario, textoHora);
 
@@ -664,6 +650,16 @@ async function criarAMissao(opcoes) {
         await comTempo(inscreverSeAceito(), LIMITE_AVISO_MS);
       } catch (erroAviso) {
         /* A missão já existe. O aviso pode ser ligado depois. */
+      }
+    }
+    /* Lembretes: só com a confirmação marcada (PUT reminders: true). Sem ela,
+       nada liga, mesmo com o aviso permitido. Falha aqui não desfaz a missão:
+       a escolha pode ser feita depois em Ajustes › Meus dados. */
+    if (document.getElementById("quero-lembretes").checked) {
+      try {
+        await NexusApi.mudarLembretes(true);
+      } catch (erroEscolha) {
+        /* Segue para o Hoje. */
       }
     }
     if (estado.reminder_time) {
@@ -733,7 +729,9 @@ function iniciar() {
     aplicarDias(NexusDias.UTEIS);
     lerCampos();
   });
+  if (window.NexusDados) NexusDados.aplicar(document);
   document.getElementById("btn-aviso").addEventListener("click", pedirAviso);
+  document.getElementById("quero-lembretes").addEventListener("change", aplicarAviso);
 
   document.querySelectorAll("[data-voltar]").forEach(function (botao) {
     botao.addEventListener("click", function () {

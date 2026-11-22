@@ -139,6 +139,9 @@ Object.keys(APROVADOS).forEach(function (chave) {
   var frase = APROVADOS[chave];
   if (frase.length < 18) return;
   outros.forEach(function (nome) {
+    /* Exceção única (revisão do Argos no PR 24): «Isso não dá para desfazer.»
+       fecha também o texto da exclusão de conta, em dados-textos.js. */
+    if (nome === "dados-textos.js" && frase === "Isso não dá para desfazer.") return;
     if (semComentarios(ler(nome)).indexOf(frase) !== -1) falhas.push("«" + frase + "» repetida em " + nome + " (o texto fica só em comunidade-textos.js)");
   });
 });
@@ -267,7 +270,7 @@ if (!/de === "denuncia" && window\.NexusComunidade[\s\S]*TEXTOS\.denunciaCrise/.
 ["comunidade-textos.js", "comunidade.html", "comunidade.css", "comunidade.js", "equipe.html", "equipe.js"].forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v27"') === -1) falhas.push("o cache não está em nexus-v2-v27");
+if (sw.indexOf('CACHE = "nexus-v2-v28"') === -1) falhas.push("o cache não está em nexus-v2-v28");
 
 /* A pasta antiga não muda neste trabalho. */
 if (!fs.existsSync(path.join(raiz, "..", "nexus"))) falhas.push("a pasta nexus/ sumiu");

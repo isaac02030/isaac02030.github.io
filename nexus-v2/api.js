@@ -139,6 +139,84 @@ function nexusAvisoDeSessao(texto) {
   }, NEXUS_ESPERA_ERRO_DA_TELA_MS);
 }
 
+/* Notas neste aparelho (revisão do Argos no PR 24). Sem o «sim» confirmado
+   pelo servidor, nenhuma cópia do texto da nota fica guardada: a cópia do
+   dia perde a nota e o rascunho do registro (check-in e dia difícil) sai.
+   NEXUS_CHAVE_ESCOLHA_NOTA guarda só a escolha («yes»), nunca texto. */
+var NEXUS_CHAVE_ESCOLHA_NOTA = "nexus_v2_escolha_nota";
+var NEXUS_CHAVE_RASCUNHO_NOTA = "nexus_v2_rascunho_checkin";
+
+function nexusEsquecerNotasLocais() {
+  try {
+    var bruto = localStorage.getItem("nexus_v2_hoje");
+    if (bruto) {
+      var cache = JSON.parse(bruto);
+      if (cache && typeof cache === "object" && cache.nota) {
+        cache.nota = "";
+        localStorage.setItem("nexus_v2_hoje", JSON.stringify(cache));
+      }
+    }
+  } catch (erroCache) {}
+  try {
+    sessionStorage.removeItem(NEXUS_CHAVE_RASCUNHO_NOTA);
+  } catch (erroRascunho) {}
+}
+
+/* Guarda a escolha lida do servidor. Qualquer coisa que não seja «yes»
+   esquece as cópias locais da nota. */
+function nexusLembrarEscolhaNota(valor) {
+  try {
+    if (valor === "yes") sessionStorage.setItem(NEXUS_CHAVE_ESCOLHA_NOTA, "yes");
+    else sessionStorage.removeItem(NEXUS_CHAVE_ESCOLHA_NOTA);
+  } catch (erro) {}
+  if (valor !== "yes") nexusEsquecerNotasLocais();
+}
+
+/* O rascunho do texto da nota só pode ficar com o «sim» confirmado nesta aba. */
+function nexusPodeGuardarRascunhoDaNota() {
+  try {
+    return sessionStorage.getItem(NEXUS_CHAVE_ESCOLHA_NOTA) === "yes";
+  } catch (erro) {
+    return false;
+  }
+}
+
+/* Estado do aviso neste aparelho: "permitido", "pendente" (ainda não
+   pedido), "bloqueado" ou "sem-suporte". */
+function nexusEstadoDoAviso() {
+  if (typeof window === "undefined" || !("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return "sem-suporte";
+  if (Notification.permission === "granted") return "permitido";
+  if (Notification.permission === "denied") return "bloqueado";
+  return "pendente";
+}
+
+function nexusBytesDaChave(base64) {
+  var limpo = String(base64 || "").trim();
+  var padding = "=".repeat((4 - (limpo.length % 4)) % 4);
+  var base = (limpo + padding).replace(/-/g, "+").replace(/_/g, "/");
+  var cru = atob(base);
+  var saida = new Uint8Array(cru.length);
+  for (var i = 0; i < cru.length; i++) saida[i] = cru.charCodeAt(i);
+  return saida;
+}
+
+/* Inscreve este aparelho para receber avisos (só com a permissão dada).
+   Não liga os lembretes: isso é a escolha da pessoa (PUT reminders). */
+async function nexusInscreverAvisos() {
+  if (nexusEstadoDoAviso() !== "permitido") return false;
+  var chave = await NexusApi.chaveVapid();
+  var publica = chave.ok && chave.dados && typeof chave.dados.publicKey === "string" ? chave.dados.publicKey : "";
+  if (!publica) return false;
+  var registro = await navigator.serviceWorker.register("sw.js");
+  var inscricao = await registro.pushManager.getSubscription();
+  if (!inscricao) {
+    inscricao = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: nexusBytesDaChave(publica) });
+  }
+  if (!inscricao || typeof inscricao.toJSON !== "function") return false;
+  var resultado = await NexusApi.inscreverNotificacao(inscricao.toJSON());
+  return !!resultado.ok;
+}
+
 async function nexusLerJson(resposta) {
   try {
     return await resposta.json();
@@ -279,6 +357,33 @@ var NexusApi = {
       terms_version: dados.terms_version,
       privacy_version: dados.privacy_version
     });
+  },
+  /* Nota do check-in (PR 27 do servidor). GET devolve { note_consent:
+     "yes" | "no" | null, decided_at, version }. POST com { consent: true }
+     liga; DELETE grava «não» e apaga as notas já guardadas (notes_deleted).
+     Sem a migração 007: GET null, POST e DELETE 503. */
+  escolhaDaNota: function () {
+    return nexusPedir("/api/users/me/note-consent", null, { metodo: "GET", auth: true });
+  },
+  guardarNotas: function () {
+    return nexusPedir("/api/users/me/note-consent", { consent: true }, { metodo: "POST", auth: true });
+  },
+  naoGuardarNotas: function () {
+    return nexusPedir("/api/users/me/note-consent", null, { metodo: "DELETE", auth: true });
+  },
+  /* Lembretes e novidades (PR 29). GET { reminders: { choice, decided_at },
+     news: {...} }; PUT só com true/false de verdade. O site só mexe nos
+     lembretes: o interruptor de novidades fica escondido (decisão de 22/11). */
+  escolhasDeAvisos: function () {
+    return nexusPedir("/api/users/me/notification-preferences", null, { metodo: "GET", auth: true });
+  },
+  mudarLembretes: function (ligado) {
+    return nexusPedir("/api/users/me/notification-preferences", { reminders: ligado === true }, { metodo: "PUT", auth: true });
+  },
+  /* DELETE /api/users/me com { password } (PR 26). 200 { deleted: true };
+     403 wrong_password ou admin_account; 400 password_required; 429. */
+  excluirConta: function (senha) {
+    return nexusPedir("/api/users/me", { password: senha }, { metodo: "DELETE", auth: true });
   },
   /* POST /api/users/me/legal-acceptance com as versões que a tela mostrou.
      200 { legal }; 400 legal_acceptance_required ou legal_version_outdated;
