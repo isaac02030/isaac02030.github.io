@@ -89,3 +89,87 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Botão principal do Dia 30 com degradê (ponto de luz 1; regra do PR 27). */
+.dia-30 .btn-primario.btn-luz {
+  background: var(--grad);
+  box-shadow: var(--glow-btn);
+}
+
+/* Urso contente a 140 px, só no escuro (ponto de luz 4). */
+.urso-dia30 {
+  align-self: center;
+  width: 140px;
+  height: auto;
+  filter: var(--glow-urso);
+}
+
+.contagem {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Legenda dos estados que existem (forma, não só cor). */
+.legenda-trilha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.legenda-trilha li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legenda-trilha i {
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+}
+
+.legenda-trilha .lf,
+.legenda-trilha .ld {
+  border-color: transparent;
+  background: var(--trilha-a);
+}
+
+.legenda-trilha .ld::after {
+  content: "";
+  position: absolute;
+  inset: 4.5px;
+  border-radius: 50%;
+  background: var(--ponto-dificil);
+}
+
+.legenda-trilha .ll {
+  border-style: dotted;
+  border-color: var(--text-muted);
+}
+
+.legenda-trilha .lx {
+  border-color: var(--text-muted);
+}
+
+.legenda-trilha .lx::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--text-muted);
+  transform: rotate(-35deg);
+}

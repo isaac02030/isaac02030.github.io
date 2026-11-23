@@ -130,6 +130,8 @@
    - fim-30            (fim-30@exemplo.com)          dia 31, 30 check-ins
    - fim-27            (fim-27@exemplo.com)          dia 31, 27 check-ins
    - fim-status        (fim-status@exemplo.com)      status completed no dia 12
+   - fim-misto                                       dia 31 com faltas, difíceis e dias livres (trilha)
+   - trilha-dia1, trilha-meio, trilha-feito          Hoje com a trilha de luz (dia 1; dia 14 com falta e livre)
    - extend-erro       (extend-erro@exemplo.com)     o POST /extend responde 500
    - inativa           (inativa@exemplo.com)         a missão não está ativa
    - sem-porque        o porquê vem vazio
@@ -439,6 +441,12 @@ var CENARIOS = {
   /* diasRelativos: dias da missão contados a partir do dia da semana de hoje
      (0 = hoje). Os feitos são os dias da missão antes de hoje; o primeiro é difícil. */
   "dia-livre": { dia: 10, diasRelativos: [1, 3, 5], feitos: [], dificeis: [], restantes: 3 },
+  /* Trilha de luz (prints e checagem). livres: dias que caem em dia livre
+     (o mesmo dia da semana a cada 7). Sem feitos automáticos. */
+  "trilha-dia1": { dia: 1, feitos: [], dificeis: [], restantes: 4 },
+  "trilha-meio": { dia: 14, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13], dificeis: [6], restantes: 3 },
+  "trilha-feito": { dia: 14, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13, 14], dificeis: [6], restantes: 3 },
+  "fim-misto": { dia: 31, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24, 25, 27, 28, 29, 30], dificeis: [6, 20], restantes: 2 },
   "semana-livre": { dia: 10, diasRelativos: [0, 2, 4], feitos: [], dificeis: [], restantes: 3 },
   /* Ana é um nome de exemplo. Não é uma pessoa real. Os dias também são fictícios. */
   solo: { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
@@ -925,9 +933,14 @@ function montarCenario(nome, usuario) {
       return (((semanaHoje - 1 + o) % 7) + 7) % 7 + 1;
     }).sort(function (a, b) { return a - b; });
   }
+  if (Array.isArray(spec.livres)) {
+    var semanaDoDia1 = (((semanaDe(new Date()) - 1 - (dia - 1)) % 7) + 7) % 7 + 1;
+    var foraDaMissao = spec.livres.map(function (n) { return (((semanaDoDia1 - 1 + n - 1) % 7) + 7) % 7 + 1; });
+    diasDaSemana = [1, 2, 3, 4, 5, 6, 7].filter(function (w) { return foraDaMissao.indexOf(w) === -1; });
+  }
   if (extra && feitos.indexOf(extra.day) === -1) feitos.push(extra.day);
   var dificeis = Array.isArray(spec.dificeis) ? spec.dificeis.slice() : [];
-  if (diasDaSemana) {
+  if (diasDaSemana && !Array.isArray(spec.livres)) {
     var semanaDia1 = (((semanaDe(new Date()) - 1 - (dia - 1)) % 7) + 7) % 7 + 1;
     var primeiro = true;
     for (var n = 1; n < dia; n++) {

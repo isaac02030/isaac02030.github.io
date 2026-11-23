@@ -61,7 +61,8 @@ ordem.forEach(function (peca) {
   else ultimo = i;
 });
 if (!/<h1[^>]*id="titulo-hoje"[^>]*tabindex="-1"[^>]*>Hoje<\/h1>/.test(html)) falhas.push("o h1 Hoje não recebe foco");
-if (!/<div class="regua" id="regua" aria-hidden="true">/.test(html)) falhas.push("a régua precisa ser aria-hidden");
+/* Trilha de luz (PR da trilha): um resumo só para o leitor (checar-trilha.js). */
+if (!/<ol class="trilha30" id="regua" role="img"><\/ol>/.test(html)) falhas.push("a trilha é role=img com um resumo só");
 if (html.indexOf('class="spinner"') !== -1) falhas.push("o carregando não pode ter nada girando");
 if (html.indexOf("Abrindo o dia…") === -1) falhas.push("falta «Abrindo o dia…»");
 if (html.indexOf("Você ainda não tem missão. Comece a primeira.") === -1 || html.indexOf(">Começar uma missão<") === -1) {
@@ -100,8 +101,9 @@ var jsSemComentario = js.replace(/\/\*[\s\S]*?\*\//g, "");
 if (jsSemComentario.indexOf("/score") !== -1 || jsSemComentario.indexOf("placarDa") !== -1) falhas.push("o Hoje não pode chamar o placar");
 
 /* Medidas da spec. */
-if (!/grid-template-columns:\s*repeat\(15,\s*16px\)/.test(css) || !/\.regua\s*\{[^}]*gap:\s*6px/.test(css)) {
-  falhas.push("a régua não tem 15 marcas de 16px com vão de 6px");
+var trilhaCss = ler("trilha.css");
+if (!/grid-template-columns:\s*repeat\(9,\s*minmax\(28px,\s*35px\)\)\s*22px/.test(trilhaCss) || !/\.trilha30 i\s*\{[^}]*width:\s*22px/.test(trilhaCss)) {
+  falhas.push("a trilha tem 10 colunas: quadrado de 22px e vão de até 13px (6px no mínimo)");
 }
 if (!/\.acao-fixa \.btn\s*\{[^}]*min-height:\s*48px/.test(css)) falhas.push("o botão principal não tem 48px");
 if (!/\.acao-fixa\s*\{[^}]*bottom:\s*calc\(var\(--altura-abas\) \+ var\(--safe-bottom\)\)/.test(css)) {
@@ -117,7 +119,7 @@ if (/@keyframes|animation:/.test(css)) falhas.push("o Hoje não deve ter animaç
 /* Revisão da Clara e do Argos no PR 15. */
 if (!/--surface-2:\s*#E3E8E1;[\s\S]*--surface-2:\s*#E3E8E1;/.test(tokens) || /#EBE4D8/i.test(tokens)) falhas.push("--surface-2 claro precisa ser #E3E8E1 nos dois blocos");
 if (!/\.cartao-missao\s*\{[^}]*box-shadow:\s*none/.test(css) || tokens.indexOf("--borda-cartao: #C5CDC6;") === -1) falhas.push("o cartão da missão no claro tem borda #C5CDC6 e sem sombra");
-if (!/\.regua-dia\.falta::after\s*\{[^}]*width:\s*8px/.test(css) || !/\.regua-dia\.falta\s*\{[^}]*border-color:\s*var\(--text-muted\)/.test(css)) falhas.push("o dia perdido precisa do traço de 8px e da borda --text-muted");
+if (!/\.trilha30 \.s-x i::after\s*\{[^}]*transform:\s*rotate\(-35deg\)/.test(trilhaCss) || !/\.trilha30 \.s-x i\s*\{[^}]*border-color:\s*var\(--text-muted\)/.test(trilhaCss)) falhas.push("a falta tem o traço na diagonal e a borda --text-muted");
 if (js.indexOf('"Sem internet. O registro') !== -1) falhas.push("o alerta repete «Sem internet» da faixa");
 var trechoRede = js.slice(js.indexOf("function semRedeAgora"), js.indexOf("function icone"));
 if (trechoRede.indexOf("hostDeDesenvolvimento()") === -1 || js.indexOf('host === "[::1]"') === -1) falhas.push("?rede=off precisa ficar só em localhost, 127.0.0.1 e [::1]");

@@ -85,6 +85,16 @@
   --sel-fundo: var(--accent);
   --sel-texto: var(--accent-text);
   --sel-borda: 1px;
+  --trilha-a: var(--accent);
+  --trilha-b: var(--accent);
+  --fio-futuro: #CBD3C9;
+  --fio-dim: 0.35;
+  --ponta-cor: var(--accent);
+  --ponto-dificil: var(--bg);
+  --glow-fio: none;
+  --glow-hoje: none;
+  --glow-ponta: 0 0 0 3px var(--bg);
+  --glow-fim: none;
   color-scheme: light;
 }
 
@@ -129,6 +139,17 @@
     --sel-fundo: var(--surface);
     --sel-texto: var(--text);
     --sel-borda: 2px;
+    /* Trilha de luz (spec da Clara): aqua → ciano, halo curto no fio. */
+    --trilha-a: #2DF2D0;
+    --trilha-b: #3DD8FF;
+    --fio-futuro: var(--border-soft);
+    --fio-dim: 0.38;
+    --ponta-cor: #3DD8FF;
+    --ponto-dificil: #021013;
+    --glow-fio: 0 0 8px rgba(45, 242, 208, 0.55);
+    --glow-hoje: var(--glow-2);
+    --glow-ponta: 0 0 14px 3px rgba(61, 216, 255, 0.65);
+    --glow-fim: 0 0 0 1px rgba(45, 242, 208, 0.6), 0 0 22px rgba(45, 242, 208, 0.45), 0 0 48px rgba(61, 216, 255, 0.22);
   }
 }
 
@@ -170,6 +191,17 @@
   --sel-fundo: var(--surface);
   --sel-texto: var(--text);
   --sel-borda: 2px;
+  /* Trilha de luz (spec da Clara): aqua → ciano, halo curto no fio. */
+  --trilha-a: #2DF2D0;
+  --trilha-b: #3DD8FF;
+  --fio-futuro: var(--border-soft);
+  --fio-dim: 0.38;
+  --ponta-cor: #3DD8FF;
+  --ponto-dificil: #021013;
+  --glow-fio: 0 0 8px rgba(45, 242, 208, 0.55);
+  --glow-hoje: var(--glow-2);
+  --glow-ponta: 0 0 14px 3px rgba(61, 216, 255, 0.65);
+  --glow-fim: 0 0 0 1px rgba(45, 242, 208, 0.6), 0 0 22px rgba(45, 242, 208, 0.45), 0 0 48px rgba(61, 216, 255, 0.22);
 }
 
 [data-theme="light"] {
@@ -189,6 +221,16 @@
   --sel-fundo: var(--accent);
   --sel-texto: var(--accent-text);
   --sel-borda: 1px;
+  --trilha-a: var(--accent);
+  --trilha-b: var(--accent);
+  --fio-futuro: #CBD3C9;
+  --fio-dim: 0.35;
+  --ponta-cor: var(--accent);
+  --ponto-dificil: var(--bg);
+  --glow-fio: none;
+  --glow-hoje: none;
+  --glow-ponta: 0 0 0 3px var(--bg);
+  --glow-fim: none;
   --bg: var(--papel);
   --surface: #FFFFFF;
   --surface-2: #E3E8E1;
@@ -226,5 +268,11 @@
     --glow-btn: none;
     --glow-aba: none;
     --glow-urso: none;
+    --glow-fio: none;
+    --glow-hoje: none;
+    --glow-ponta: none;
+    --glow-fim: none;
+    --trilha-a: var(--text);
+    --trilha-b: var(--text);
   }
 }

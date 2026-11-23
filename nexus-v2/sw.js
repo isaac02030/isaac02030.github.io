@@ -41,6 +41,8 @@ var ARQUIVOS = [
   "./api.js",
   "./nota-limite.js",
   "./dias-da-missao.js",
+  "./trilha.js",
+  "./trilha.css",
   "./comunidade-textos.js",
   "./comunidade.html",
   "./comunidade.css",

@@ -89,7 +89,10 @@ if (escuro.pauta !== "transparent") falhas.push("no escuro, as linhas do caderno
 if (!/@media \(prefers-contrast: more\), \(forced-colors: active\)/.test(tokens)) falhas.push("mais contraste: sem halo e sem degradê");
 
 /* ---------- A luz só nos 4 pontos ---------- */
-var PERMITIDOS = [".btn-luz", ".btn-luz:hover", ".logo-fita", ".regua-dia.feito,\n.regua-dia.dificil", ".regua-dia.hoje", ".urso-hoje", '.aba[aria-current="page"]::before'];
+/* Trilha de luz (uma luz só: fio, hoje, ponta e o último do Dia 30). */
+var PERMITIDOS = [".btn-luz", ".btn-luz:hover", ".logo-fita", ".urso-hoje", '.aba[aria-current="page"]::before',
+  ".trilha30 .lk-on::after", ".trilha30 .e-hoje i", ".trilha30 .ponta-esq::before,\n.trilha30 .ponta-dir::before", ".trilha30 .ultimo i",
+  ".dia-30 .btn-primario.btn-luz", ".urso-dia30"];
 fs.readdirSync(raiz).filter(function (n) { return /\.css$/.test(n) && n !== "tokens.css"; }).forEach(function (nome) {
   var css = semComentarios(ler(nome));
   var re = /([^{}]+)\{([^{}]*)\}/g, m;

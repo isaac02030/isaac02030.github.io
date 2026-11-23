@@ -187,8 +187,10 @@ var hoje = semComentarios(ler("hoje.js"));
 var hojeCss = ler("hoje.css");
 if (hoje.indexOf("sequencia.today_is_mission_day === false") === -1) falhas.push("o Hoje precisa ler today_is_mission_day");
 if (!/if \(modelo\.diaLivre === true\) return;/.test(hoje)) falhas.push("no dia livre não há botão de registrar");
-if (!/else if \(ehLivre\(dia\)\) marca\.classList\.add\("livre"\);\s*else if \(dia < hoje\) marca\.classList\.add\("falta"\);/.test(hoje)) falhas.push("o dia livre não pode virar falta na régua");
-if (!/\.regua-dia\.livre,\s*\.regua-dia\.livre\.hoje\s*\{[^}]*border-style:\s*dotted;[^}]*border-color:\s*var\(--text-muted\);[^}]*background:\s*transparent/.test(hojeCss)) falhas.push("o dia livre na régua é pontilhado em --text-muted, sem preenchimento");
+/* Trilha de luz: o dia livre vem antes da falta (trilha.js) e é pontilhado. */
+var trilhaJs = ler("trilha.js");
+if (!/else if \(ehLivre\(dia\)\) estado = "l";\s*else if \(dia < hoje\) estado = "x";/.test(trilhaJs) || !/ehLivre: livreDe\(modelo\)/.test(hoje)) falhas.push("o dia livre não pode virar falta na trilha");
+if (!/\.trilha30 \.s-l i\s*\{[^}]*border-style:\s*dotted;[^}]*border-color:\s*var\(--text-muted\);/.test(ler("trilha.css"))) falhas.push("o dia livre na trilha é pontilhado em --text-muted, sem preenchimento");
 var missaoCss = ler("missao.css");
 if (!/\.marca-plano\.livre\s*\{[^}]*border-style:\s*dotted/.test(missaoCss)) falhas.push("o dia livre na Missão é pontilhado");
 var missaoJs = semComentarios(ler("missao.js"));

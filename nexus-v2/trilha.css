@@ -1,0 +1,192 @@
+/* Trilha de luz dos 30 dias (spec da Clara, visual/spec-trilha-de-luz.md).
+   3 linhas de 10: quadrado de 22 px, vão de 13 px (337 px de largura).
+   Em caixa mais estreita (cartão do Dia 30), o vão encolhe até 6 px e o fio
+   acompanha; o quadrado nunca encolhe.
+   Cores e luz vêm dos tokens --trilha-* e --glow-* (tokens.css): no escuro,
+   aqua → ciano com halo; no claro, pinho sem brilho. Sem animação. */
+
+.trilha30 {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  display: grid;
+  /* Cada coluna = quadrado (22) + vão (6 a 13); a última é só o quadrado. */
+  grid-template-columns: repeat(9, minmax(28px, 35px)) 22px;
+  column-gap: 0;
+  row-gap: 14px;
+}
+
+.trilha30 .c {
+  position: relative;
+  height: 22px;
+}
+
+/* O quadrado. Futuro: só contorno (≥ 3:1 nos dois temas). */
+.trilha30 i {
+  display: block;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+/* O fio até o próximo dia (só dentro da linha). Futuro: hairline decorativa. */
+.trilha30 .c::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: var(--fio-futuro);
+}
+
+.trilha30 .lk-fim::after {
+  display: none;
+}
+
+/* Fio aceso: dia cumprido ligado ao seguinte. */
+.trilha30 .lk-on::after {
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+  box-shadow: var(--glow-fio);
+}
+
+/* Fio a 38% (35% no claro): passa por um dia livre sem cobrar, ou aponta para amanhã. */
+.trilha30 .lk-dim::after {
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+  opacity: var(--fio-dim);
+}
+
+/* Falta: o fio some dos dois lados (um buraco na trilha). */
+.trilha30 .lk-off::after {
+  background: var(--fio-futuro);
+}
+
+/* Feito e difícil: cheios no degradê (pinho no claro). */
+.trilha30 .s-f i,
+.trilha30 .s-d i {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+}
+
+/* Difícil: ponto escuro no centro (dia difícil é dia cumprido). */
+.trilha30 .s-d i::after {
+  content: "";
+  position: absolute;
+  inset: 6.5px;
+  border-radius: 50%;
+  background: var(--ponto-dificil);
+}
+
+/* Dia livre: contorno pontilhado, sem preenchimento. */
+.trilha30 .s-l i {
+  border-style: dotted;
+  border-color: var(--text-muted);
+  background: var(--bg);
+}
+
+/* Falta: contorno com um traço na diagonal. Nunca vermelho. */
+.trilha30 .s-x i {
+  border-color: var(--text-muted);
+}
+
+.trilha30 .s-x i::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 1px;
+  background: var(--text-muted);
+  transform: rotate(-35deg);
+}
+
+/* Hoje: contorno duplo com halo (escuro). */
+.trilha30 .e-hoje i {
+  border-color: var(--accent);
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: var(--glow-hoje);
+}
+
+/* A ponta acesa: antes do registro, à esquerda de hoje; depois, à direita. */
+.trilha30 .ponta-esq::before,
+.trilha30 .ponta-dir::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--ponta-cor);
+  box-shadow: var(--glow-ponta);
+}
+
+/* Centro do vão: 50% da coluna ± 6 px (35 px de coluna → -11,5 e 23,5). */
+.trilha30 .ponta-esq::before {
+  left: calc(-50% + 6px);
+}
+
+.trilha30 .ponta-dir::before {
+  left: calc(50% + 6px);
+}
+
+/* Dia 30: o último quadrado recebe o único halo maior da tela. */
+.trilha30 .ultimo i {
+  box-shadow: var(--glow-fim);
+}
+
+/* Mais contraste: sem halo e sem degradê; fio aceso em --text de 3 px,
+   feitos em --text, futuro com contorno de 2 px. As formas continuam. */
+@media (prefers-contrast: more) {
+  .trilha30 .lk-on::after,
+  .trilha30 .lk-dim::after {
+    height: 3px;
+    margin-top: -1.5px;
+    background: var(--text);
+  }
+
+  .trilha30 .s-f i,
+  .trilha30 .s-d i,
+  .trilha30 .ponta-esq::before,
+  .trilha30 .ponta-dir::before {
+    background: var(--text);
+  }
+
+  .trilha30 i {
+    border-width: 2px;
+  }
+}
+
+/* Cores do sistema: nada depende de cor; o buraco da falta continua buraco. */
+@media (forced-colors: active) {
+  .trilha30 i {
+    border-color: CanvasText;
+  }
+
+  /* Primeiro o fio apagado; depois o aceso, que vence pela ordem. */
+  .trilha30 .c::after {
+    background: Canvas;
+  }
+
+  .trilha30 .s-f i,
+  .trilha30 .s-d i,
+  .trilha30 .lk-on::after,
+  .trilha30 .lk-dim::after,
+  .trilha30 .ponta-esq::before,
+  .trilha30 .ponta-dir::before {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+}

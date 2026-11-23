@@ -528,88 +528,27 @@ function lerCache() {
   }
 }
 
-function palavraDeContagem(n, um, outros) {
-  return n + " " + (n === 1 ? um : outros);
-}
-
-/* Cada dia entra uma vez: difícil, senão cumprido, senão falta.
-   Falta é só dia passado. Hoje sem registro e o futuro ficam de fora da conta. */
-function rotuloDasMarcas(modelo) {
-  var duracao = modelo.duracao;
-  var hoje = modelo.dia;
-  var feitos = {};
-  var dificeis = {};
-  var temDificeis = Array.isArray(modelo.dificeis);
-  (modelo.feitos || []).forEach(function (dia) {
-    if (dia >= 1 && dia <= duracao) feitos[dia] = true;
-  });
-  if (temDificeis) {
-    modelo.dificeis.forEach(function (dia) {
-      if (dia >= 1 && dia <= duracao) dificeis[dia] = true;
-    });
-  }
-  var nCumprido = 0;
-  var nDificil = 0;
-  var nFalta = 0;
-  var nLivre = 0;
-  var ehLivre = livreDe(modelo);
-  var dia;
-  for (dia = 1; dia <= duracao; dia++) {
-    var dificil = temDificeis && !!dificeis[dia];
-    var feito = !!feitos[dia];
-    if (dificil) nDificil += 1;
-    else if (feito) nCumprido += 1;
-    else if (ehLivre(dia)) nLivre += 1;
-    else if (dia < hoje) nFalta += 1;
-  }
-  var frase = "Dia " + hoje + " de " + duracao + ": "
-    + palavraDeContagem(nCumprido, "cumprido", "cumpridos") + ", "
-    + palavraDeContagem(nDificil, "difícil", "difíceis") + ", "
-    + palavraDeContagem(nFalta, "falta", "faltas");
-  if (nLivre > 0) frase += ", " + palavraDeContagem(nLivre, "dia livre", "dias livres");
-  return frase;
-}
-
-/* Régua de marcas, 15 por linha. Cada marca é aria-hidden;
-   o mesmo fato vai em texto escondido ao lado de «Dia X de 30». */
+/* Trilha de luz (trilha.js): 3 linhas de 10, fio entre os dias e a ponta
+   em hoje. O leitor de tela ouve um resumo só, no aria-label da trilha; a
+   linha «Dia X de 30» fica visível acima. */
 function pintarRegua(modelo, idRegua, idDia) {
   var caixa = document.getElementById(idRegua);
   var linha = document.getElementById(idDia);
   if (!caixa || !linha) return;
   var duracao = modelo.duracao;
   var hoje = modelo.dia;
-  var feitos = {};
-  var dificeis = {};
-  var temDificeis = Array.isArray(modelo.dificeis);
-  (modelo.feitos || []).forEach(function (dia) { feitos[dia] = true; });
-  if (temDificeis) {
-    modelo.dificeis.forEach(function (dia) { dificeis[dia] = true; });
-  }
-
-  var ehLivre = livreDe(modelo);
-  var visivel = document.createElement("span");
-  visivel.textContent = modelo.diaLivre === true
+  linha.textContent = modelo.diaLivre === true
     ? NexusDias.preencher(NexusDias.TEXTOS.linhaDoDiaLivre, { dia: hoje, total: duracao })
     : "Dia " + hoje + " de " + duracao;
-  var escondido = document.createElement("span");
-  escondido.className = "saltar";
-  escondido.textContent = ". " + rotuloDasMarcas(modelo).replace(/^Dia \d+ de \d+: /, "") + ".";
-  linha.replaceChildren(visivel, escondido);
-
-  caixa.setAttribute("aria-hidden", "true");
-  caixa.replaceChildren();
-  for (var dia = 1; dia <= duracao; dia++) {
-    var marca = document.createElement("span");
-    marca.className = "regua-dia";
-    var dificil = temDificeis && !!dificeis[dia];
-    var feito = !!feitos[dia];
-    if (dificil) marca.classList.add("dificil");
-    else if (feito) marca.classList.add("feito");
-    else if (ehLivre(dia)) marca.classList.add("livre");
-    else if (dia < hoje) marca.classList.add("falta");
-    if (dia === hoje) marca.classList.add("hoje");
-    caixa.appendChild(marca);
-  }
+  var dificeis = Array.isArray(modelo.dificeis) ? modelo.dificeis : [];
+  NexusTrilha.pintar(caixa, {
+    duracao: duracao,
+    hoje: hoje,
+    feitos: modelo.feitos || [],
+    dificeis: dificeis,
+    ehLivre: livreDe(modelo),
+    hojeFeito: modelo.hojeFeito === true
+  });
 }
 
 function hojeEhDificil(modelo) {
