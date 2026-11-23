@@ -264,14 +264,19 @@ body:has(.tela-comeco) {
   visibility: hidden;
 }
 
+/* Dia escolhido: no claro, cheio como sempre; no escuro neon, fundo escuro,
+   borda aqua de 2 px e a marca em aqua (tokens --sel-*), sem competir com o
+   botão principal. */
 .dia input:checked + .dia-caixa {
   border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-text);
+  border-width: var(--sel-borda);
+  background: var(--sel-fundo);
+  color: var(--sel-texto);
 }
 
 .dia input:checked + .dia-caixa .dia-visto {
   visibility: visible;
+  color: var(--accent);
 }
 
 .dia input:focus-visible + .dia-caixa {

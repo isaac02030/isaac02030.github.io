@@ -148,6 +148,19 @@ fs.readdirSync(raiz).filter(function (n) { return /\.html$/.test(n); }).forEach(
 var hojeJs = ler("hoje.js");
 if ((hojeJs.match(/btn-luz/g) || []).length !== 1) falhas.push("hoje.js: o botão de luz é só o «Registrar o dia» do Hoje");
 
+/* Regra do botão principal (revisão da Clara, PR 27): plano em Dia difícil e
+   Missão; com degradê em Hoje, Check-in, Entrar, Cadastro, Contrato e Dia 30. */
+["dia-dificil.html", "missao.html", "dia-dificil.js", "missao.js"].forEach(function (nome) {
+  if (/btn-luz/.test(semComentarios(ler(nome)))) falhas.push(nome + ": o principal é plano aqui");
+});
+[["checkin.html", 1], ["index.html", 2], ["onboarding.html", 4], ["dia-30.html", 1]].forEach(function (par) {
+  if ((semComentarios(ler(par[0])).match(/btn-luz/g) || []).length !== par[1]) falhas.push(par[0] + ": o principal tem degradê (um por vista)");
+});
+/* Seleção sem aqua cheio no escuro; no claro, como sempre. */
+if (escuro["sel-fundo"] !== "var(--surface)" || escuro["sel-borda"] !== "2px") falhas.push("no escuro, o dia escolhido tem fundo escuro e borda aqua de 2 px");
+if (claro["sel-fundo"] !== "var(--accent)" || claro["sel-borda"] !== "1px") falhas.push("no claro, o dia escolhido continua cheio");
+if (!/\.dia input:checked \+ \.dia-caixa \{[\s\S]*?background: var\(--sel-fundo\);/.test(ler("onboarding.css"))) falhas.push("onboarding.css: o dia escolhido usa os tokens --sel-*");
+
 /* ---------- Logo, ícones, theme-color e cache ---------- */
 ["index.html", "onboarding.html", "offline.html", "recuperacao.html"].forEach(function (nome) {
   var html = ler(nome);

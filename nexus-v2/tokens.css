@@ -82,6 +82,9 @@
   --glow-urso: none;
   --pauta: color-mix(in srgb, var(--border) 22%, transparent);
   --aba-luz: transparent;
+  --sel-fundo: var(--accent);
+  --sel-texto: var(--accent-text);
+  --sel-borda: 1px;
   color-scheme: light;
 }
 
@@ -121,6 +124,11 @@
     /* O caderno (linhas de pauta) sai no preto: a identidade do escuro é a trilha. */
     --pauta: transparent;
     --aba-luz: var(--grad);
+    /* Seleção (dias da missão): fundo escuro, borda aqua e a marca; o aqua
+       cheio fica só no botão principal (revisão da Clara, PR 27). */
+    --sel-fundo: var(--surface);
+    --sel-texto: var(--text);
+    --sel-borda: 2px;
   }
 }
 
@@ -159,6 +167,9 @@
   /* O caderno (linhas de pauta) sai no preto: a identidade do escuro é a trilha. */
   --pauta: transparent;
   --aba-luz: var(--grad);
+  --sel-fundo: var(--surface);
+  --sel-texto: var(--text);
+  --sel-borda: 2px;
 }
 
 [data-theme="light"] {
@@ -175,6 +186,9 @@
   --glow-urso: none;
   --pauta: color-mix(in srgb, var(--border) 22%, transparent);
   --aba-luz: transparent;
+  --sel-fundo: var(--accent);
+  --sel-texto: var(--accent-text);
+  --sel-borda: 1px;
   --bg: var(--papel);
   --surface: #FFFFFF;
   --surface-2: #E3E8E1;

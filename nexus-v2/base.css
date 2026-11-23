@@ -459,6 +459,9 @@ input:-webkit-autofill {
 /* ---------- Modo escuro neon (spec da Clara, 23/11) ----------
    Ponto de luz 1: o botão principal, UM por tela (classe .btn-luz). No claro,
    --grad é o acento plano e --glow-btn é none: o botão fica como sempre foi.
+   Regra (revisão da Clara, PR 27): Dia difícil e Missão têm o principal
+   PLANO (sem .btn-luz); Hoje, Check-in, Entrar, Cadastro, Contrato e Dia 30
+   têm o principal com degradê.
    Telas sóbrias (crise, erro, denúncia, equipe, exclusão, consentimentos,
    termos) nunca usam .btn-luz (dev/checar-neon.js). */
 .btn-luz {
