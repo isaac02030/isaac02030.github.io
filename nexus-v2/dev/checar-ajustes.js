@@ -38,8 +38,17 @@ if (/type\s*=\s*"checkbox"|role\s*=\s*"switch"/i.test(semComentario)) {
   falhas.push("há um interruptor na tela");
 }
 
-var textoIphone = "No iPhone, o aviso só chega se o Nexus estiver na Tela de Início. No Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início” (iOS 16.4 ou posterior).";
-if (html.indexOf(textoIphone) === -1) falhas.push("o texto de instalar no iPhone mudou");
+/* Instrução do iPhone numa chave só (dados-textos.js), em 3 passos, igual no
+   começo da missão (revisão da Clara). Negado: o parágrafo longo repetido. */
+var passosIphone = '<p data-texto-dados="iphoneIntro"></p>';
+["iphonePasso1", "iphonePasso2", "iphonePasso3"].forEach(function (k) { passosIphone += '<li data-texto-dados="' + k + '"></li>'; });
+[html, ler("onboarding.html")].forEach(function (pagina, i) {
+  var limpa = pagina.replace(/\s+/g, "").replace(/<olclass="passos-iphone">|<\/ol>/g, "");
+  if (limpa.indexOf(passosIphone.replace(/\s+/g, "")) === -1) falhas.push((i ? "onboarding" : "ajustes") + ": a instrução do iPhone não usa a chave única em 3 passos");
+  if (/toque em Compartilhar e depois em/.test(pagina)) falhas.push("negado: o parágrafo longo do iPhone ainda está repetido na página");
+});
+var dadosTextos = ler("dados-textos.js");
+if (dadosTextos.indexOf('iphonePasso3: "Toque em “Adicionar à Tela de Início”."') === -1 || dadosTextos.indexOf("iOS 16.4") === -1) falhas.push("faltam os textos do iPhone em dados-textos.js");
 if (html.indexOf("Horário do lembrete") === -1) falhas.push("falta o horário do lembrete");
 if (html.indexOf("Sair da conta?") === -1) falhas.push("falta a pergunta Sair da conta?");
 if (html.indexOf(">Conta<") === -1) falhas.push("o bloco da saída deve se chamar Conta");
@@ -96,7 +105,7 @@ if (api.indexOf("caminhoComCenario(\"/api/users/me/reminder\")") === -1) {
   falhas.push("o lembrete não repassa o cenário ao mock");
 }
 
-if (sw.indexOf('CACHE = "nexus-v2-v32"') === -1) falhas.push("o cache não está em nexus-v2-v32");
+if (sw.indexOf('CACHE = "nexus-v2-v33"') === -1) falhas.push("o cache não está em nexus-v2-v33");
 if (sw.indexOf("./ajustes.css") === -1 || sw.indexOf("./ajustes.js") === -1) {
   falhas.push("o cache não inclui os arquivos novos de Ajustes");
 }

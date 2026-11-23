@@ -33,7 +33,7 @@ var TEXTO_FAIXA_REDE = "Sem internet. Mostrando o que o aparelho guardou.";
 var TEXTO_REGISTRO_OFF = "O registro não foi enviado. Tente de novo quando a conexão voltar.";
 var TEXTO_PENDENTE = "Ainda não registrou o dia.";
 var TEXTO_FEITO = "Registro feito. Palavra cumprida hoje.";
-var TEXTO_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
+var TEXTO_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e você o cumpriu.";
 var DESENHO_REDE = "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18";
 var ciclo = 0;
 
@@ -788,7 +788,9 @@ function pintarDia(modelo, semRede) {
   var dificeis = document.getElementById("linha-dificeis");
   if (!livre && typeof modelo.restantes === "number" && modelo.restantes > 0) {
     dificeis.hidden = false;
-    dificeis.textContent = "Dias difíceis: restam " + modelo.restantes + " de 4.";
+    dificeis.textContent = modelo.restantes === 1
+      ? "Ainda dá para usar 1 dia difícil nesta missão."
+      : "Ainda dá para usar " + modelo.restantes + " dias difíceis nesta missão.";
   } else {
     dificeis.hidden = true;
     dificeis.textContent = "";

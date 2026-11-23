@@ -52,7 +52,7 @@
     /* Área da equipe. */
     soEquipe: "Esta área é só da equipe.",
     prioridadeAlta: "Perigoso, conferir primeiro",
-    alertaRepetido: "Atenção: quem ajudou a esconder este post escondeu vários posts hoje. Confira se a denúncia é justa.",
+    alertaRepetido: "Atenção: quem escondeu este post escondeu vários hoje. Confira se a denúncia é justa.",
     restaurar: "Restaurar",
     apagar: "Apagar",
     /* Confirmações: título curto + explicação em corpo normal (revisão da Clara).

@@ -65,7 +65,7 @@ var APROVADOS = {
   escondidoEquipe: "Uma pessoa da equipe vai conferir. Ninguém além de você vê este post.",
   soEquipe: "Esta área é só da equipe.",
   prioridadeAlta: "Perigoso, conferir primeiro",
-  alertaRepetido: "Atenção: quem ajudou a esconder este post escondeu vários posts hoje. Confira se a denúncia é justa.",
+  alertaRepetido: "Atenção: quem escondeu este post escondeu vários hoje. Confira se a denúncia é justa.",
   restaurar: "Restaurar",
   apagar: "Apagar",
   apagarTitulo: "Apagar este post para sempre?",
@@ -270,7 +270,7 @@ if (!/de === "denuncia" && window\.NexusComunidade[\s\S]*TEXTOS\.denunciaCrise/.
 ["comunidade-textos.js", "comunidade.html", "comunidade.css", "comunidade.js", "equipe.html", "equipe.js"].forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v32"') === -1) falhas.push("o cache não está em nexus-v2-v32");
+if (sw.indexOf('CACHE = "nexus-v2-v33"') === -1) falhas.push("o cache não está em nexus-v2-v33");
 
 /* A pasta antiga não muda neste trabalho. */
 if (!fs.existsSync(path.join(raiz, "..", "nexus"))) falhas.push("a pasta nexus/ sumiu");
