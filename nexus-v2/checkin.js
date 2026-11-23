@@ -24,12 +24,11 @@ var CAMPOS_DE_CRISE_NA_RESPOSTA = ["crisis"];
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
 var TEXTO_VAZIO = "Antes de registrar, escreva uma nota curta do que fez.";
-/* Dica sem número (revisão do Zé). O mínimo de 8 e 12 continua no servidor e
-   aqui; a pessoa só vê o erro se a frase for curta demais. */
-var TEXTO_ESTUDO = "Escreva uma frase curta sobre o que você praticou.";
-var TEXTO_ACADEMIA = "Escreva uma frase curta sobre o que você fez.";
+/* Sem dica e sem número (revisões do Zé e da Clara): o rótulo do campo já
+   orienta. O mínimo de 8 e 12 continua no servidor e aqui; a pessoa só vê o
+   erro, colado ao campo, se a frase for curta demais. */
 var TEXTO_CURTA_ESTUDO = "Essa nota ficou curta demais. Conte um pouco mais do que você praticou.";
-var TEXTO_CURTA_ACADEMIA = "Essa nota ficou curta demais. Conte um pouco mais do que você fez.";
+var TEXTO_CURTA_ACADEMIA = "Essa nota ficou curta demais. Conte um pouco mais do que você treinou.";
 var TEXTO_INATIVA = "Esta missão não está ativa.";
 var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
@@ -268,8 +267,8 @@ function lerCache() {
 
 function regraDaNota(missao) {
   var categoria = missao && missao.category;
-  if (categoria === "fitness") return { minimo: 8, ajuda: TEXTO_ACADEMIA, curta: TEXTO_CURTA_ACADEMIA };
-  if (categoria === "aprendizagem") return { minimo: 12, ajuda: TEXTO_ESTUDO, curta: TEXTO_CURTA_ESTUDO };
+  if (categoria === "fitness") return { minimo: 8, ajuda: "", curta: TEXTO_CURTA_ACADEMIA };
+  if (categoria === "aprendizagem") return { minimo: 12, ajuda: "", curta: TEXTO_CURTA_ESTUDO };
   return { minimo: 1, ajuda: "", curta: "" };
 }
 

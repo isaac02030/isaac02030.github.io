@@ -26,8 +26,8 @@ paginas.forEach(function (n) { tudo[n] = semComentarios(ler(n)); });
 
 /* 1. Trocas do Zé: o novo está lá, o antigo não volta. */
 var TROCAS = [
-  ["checkin.js", "Uma frase chega. Diga o que praticou (pelo menos 12 caracteres).", "Escreva uma frase curta sobre o que você praticou."],
-  ["checkin.js", "Uma frase chega (pelo menos 8 caracteres).", "Escreva uma frase curta sobre o que você fez."],
+  ["checkin.js", "Uma frase chega. Diga o que praticou (pelo menos 12 caracteres).", "Essa nota ficou curta demais. Conte um pouco mais do que você praticou."],
+  ["checkin.js", "Uma frase chega (pelo menos 8 caracteres).", "Essa nota ficou curta demais. Conte um pouco mais do que você treinou."],
   ["hoje.js", "Dias difíceis: restam ", "Ainda dá para usar "],
   ["hoje.html", "Que tal começar a primeira?", "Você ainda não tem missão. Comece a primeira."],
   ["missao.html", "Que tal começar a primeira?", "Você ainda não tem missão. Comece a primeira."],
@@ -51,7 +51,7 @@ TROCAS.forEach(function (t) {
 
 /* 2. O mínimo de 8 e 12: a tela não mostra o número; o erro só vem com frase curta. */
 var checkin = ler("checkin.js");
-var trechos = ["TEXTO_VAZIO", "TEXTO_ESTUDO", "TEXTO_ACADEMIA", "TEXTO_CURTA_ESTUDO", "TEXTO_CURTA_ACADEMIA"].map(function (nome) {
+var trechos = ["TEXTO_VAZIO", "TEXTO_CURTA_ESTUDO", "TEXTO_CURTA_ACADEMIA"].map(function (nome) {
   var m = checkin.match(new RegExp("var " + nome + " = [^\\n]+"));
   return m ? m[0] : "";
 }).join("\n");
@@ -68,16 +68,20 @@ if (typeof caixa.teste !== "function") {
 } else {
   ["fitness", "aprendizagem"].forEach(function (cat) {
     var r = caixa.regra({ category: cat });
-    if (/\d/.test(r.ajuda) || /caracteres/.test(r.ajuda) || /\d/.test(r.curta)) falhas.push(cat + ": a dica ou o erro mostra número ou «caracteres»");
+    if (r.ajuda !== "") falhas.push(cat + ": negado: sem dica no check-in (o rótulo orienta; o erro só vem se faltar)");
+    if (/\d/.test(r.curta) || /caracteres/.test(r.curta)) falhas.push(cat + ": o erro mostra número ou «caracteres»");
   });
   if (caixa.regra({ category: "fitness" }).minimo !== 8 || caixa.regra({ category: "aprendizagem" }).minimo !== 12) falhas.push("o mínimo de 8 e 12 caracteres mudou (a regra fica)");
-  if (caixa.teste("fitness", "fui sim") !== "Essa nota ficou curta demais. Conte um pouco mais do que você fez.") falhas.push("negado: 7 caracteres na academia têm de dar o erro de frase curta");
+  if (caixa.teste("fitness", "fui sim") !== "Essa nota ficou curta demais. Conte um pouco mais do que você treinou.") falhas.push("negado: 7 caracteres na academia têm de dar o erro de frase curta");
   if (caixa.teste("fitness", "treinei!") !== "") falhas.push("8 caracteres na academia passam sem erro");
   if (caixa.teste("aprendizagem", "li um texto") !== "Essa nota ficou curta demais. Conte um pouco mais do que você praticou.") falhas.push("negado: 11 caracteres no estudo têm de dar o erro de frase curta");
   if (caixa.teste("aprendizagem", "li um texto.") !== "") falhas.push("12 caracteres no estudo passam sem erro");
   if (caixa.teste("outra", "x") !== "") falhas.push("sem categoria, qualquer frase passa");
 }
 if (!/if \(categoria === "fitness"\) return TEXTO_CURTA_ACADEMIA;/.test(checkin)) falhas.push("o erro de prova curta do servidor usa o texto de frase curta, sem número");
+if (/Escreva uma frase curta sobre/.test(tudo["checkin.js"])) falhas.push("negado: a dica repetida do check-in voltou");
+var checkinHtml = ler("checkin.html");
+if (!/<textarea id="nota"[^>]*><\/textarea>\s*(<!--[^>]*-->\s*)?<p id="nota-erro" class="erro-campo" role="alert" hidden><\/p>/.test(checkinHtml)) falhas.push("check-in: o erro fica colado ao campo, logo abaixo dele, com role=alert");
 
 /* 3. Termos e Privacidade: um negrito por parágrafo, curto. Exceções: o aviso
    de que não é serviço de saúde e a linha dos números de ajuda (não mexemos). */
@@ -88,7 +92,7 @@ function blocos(html) {
 ["termos.html", "privacidade.html"].forEach(function (nome) {
   var html = ler(nome);
   blocos(html).forEach(function (b) {
-    if (/188 \(CVV\)/.test(b) && /^<li/.test(b)) return;
+    if (/<strong>188<\/strong> \(CVV\)/.test(b) && /^<li/.test(b)) return;
     var fortes = b.match(/<strong>[^<]*<\/strong>/g) || [];
     if (/^<(ul|ol)/.test(b)) return;
     if (fortes.length > 1 && !/<li>/.test(b.slice(4))) falhas.push(nome + ": mais de um negrito no mesmo parágrafo: " + b.replace(/<[^>]+>/g, "").slice(0, 70));
@@ -101,7 +105,10 @@ function blocos(html) {
   if (/: o que ele faz|: o que isso significa|Consentimento separado|sem promessa de resultado/.test(html)) falhas.push(nome + ": título com a fórmula repetida «Assunto: o que…»");
 });
 var termos = ler("termos.html");
-if (termos.indexOf("<strong>188 (CVV)</strong>") === -1 || termos.indexOf("<strong>SNS 24, 808 24 24 24, opção 4</strong>") === -1) falhas.push("negado: os números de ajuda dos Termos não podem mudar");
+["<strong>188</strong> (CVV)", "<strong>192</strong> (SAMU)", "<strong>112</strong> (risco de vida)", "Suicídio (<strong>1411</strong>)", "SNS 24, <strong>808 24 24 24, opção 4</strong>"].forEach(function (n) {
+  if (termos.indexOf(n) === -1) falhas.push("termos: número de ajuda sem mudança e com negrito só no número: falta «" + n + "»");
+});
+if (/<strong>[^<]*(CVV|SAMU|Linha Nacional)[^<]*<\/strong>/.test(termos)) falhas.push("negado: o negrito dos números de ajuda não pega o nome inteiro");
 if (!/<h2 id="secao-8">8\. Sem garantia de resultado<\/h2>/.test(termos)) falhas.push("termos: título da seção 8 é «Sem garantia de resultado»");
 
 /* 4. Aspas de um tipo só no que a pessoa vê: “ ”, nunca « ». */
