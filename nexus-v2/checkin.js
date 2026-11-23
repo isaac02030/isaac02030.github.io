@@ -24,8 +24,12 @@ var CAMPOS_DE_CRISE_NA_RESPOSTA = ["crisis"];
 var CHAVE_CACHE = "nexus_v2_hoje";
 var CHAVE_RASCUNHO = "nexus_v2_rascunho_checkin";
 var TEXTO_VAZIO = "Antes de registrar, escreva uma nota curta do que fez.";
-var TEXTO_ESTUDO = "Uma frase chega. Diga o que praticou (pelo menos 12 caracteres).";
-var TEXTO_ACADEMIA = "Uma frase chega (pelo menos 8 caracteres).";
+/* Dica sem número (revisão do Zé). O mínimo de 8 e 12 continua no servidor e
+   aqui; a pessoa só vê o erro se a frase for curta demais. */
+var TEXTO_ESTUDO = "Escreva uma frase curta sobre o que você praticou.";
+var TEXTO_ACADEMIA = "Escreva uma frase curta sobre o que você fez.";
+var TEXTO_CURTA_ESTUDO = "Essa nota ficou curta demais. Conte um pouco mais do que você praticou.";
+var TEXTO_CURTA_ACADEMIA = "Essa nota ficou curta demais. Conte um pouco mais do que você fez.";
 var TEXTO_INATIVA = "Esta missão não está ativa.";
 var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
@@ -264,18 +268,18 @@ function lerCache() {
 
 function regraDaNota(missao) {
   var categoria = missao && missao.category;
-  if (categoria === "fitness") return { minimo: 8, ajuda: TEXTO_ACADEMIA };
-  if (categoria === "aprendizagem") return { minimo: 12, ajuda: TEXTO_ESTUDO };
-  return { minimo: 1, ajuda: "" };
+  if (categoria === "fitness") return { minimo: 8, ajuda: TEXTO_ACADEMIA, curta: TEXTO_CURTA_ACADEMIA };
+  if (categoria === "aprendizagem") return { minimo: 12, ajuda: TEXTO_ESTUDO, curta: TEXTO_CURTA_ESTUDO };
+  return { minimo: 1, ajuda: "", curta: "" };
 }
 
 function ajudaDoErroDeProva(erro, missao) {
   var tipo = ERROS_NOTA_CURTA[erro];
   if (!tipo) return "";
   var categoria = missao && missao.category;
-  if (categoria === "fitness") return TEXTO_ACADEMIA;
-  if (categoria === "aprendizagem") return TEXTO_ESTUDO;
-  return tipo === "academia" ? TEXTO_ACADEMIA : TEXTO_ESTUDO;
+  if (categoria === "fitness") return TEXTO_CURTA_ACADEMIA;
+  if (categoria === "aprendizagem") return TEXTO_CURTA_ESTUDO;
+  return tipo === "academia" ? TEXTO_CURTA_ACADEMIA : TEXTO_CURTA_ESTUDO;
 }
 
 function respostaIndicaCrise(dados) {
@@ -609,7 +613,7 @@ function validarNota() {
   /* Rascunho antigo posto por código pode passar do maxlength. */
   if (window.NexusNota && NexusNota.passou(texto)) return TEXTO_LONGA;
   var regra = regraDaNota(missaoAtual);
-  if (texto.length < regra.minimo) return regra.ajuda || TEXTO_VAZIO;
+  if (texto.length < regra.minimo) return regra.curta || TEXTO_VAZIO;
   return "";
 }
 

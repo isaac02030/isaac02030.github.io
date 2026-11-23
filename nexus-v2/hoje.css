@@ -208,6 +208,8 @@ body:has(.tela-hoje) {
 .titulo-missao {
   margin: 0;
   font: var(--text-title);
+  /* Título em 600: o mínimo do dia é o ponto mais pesado (revisão da Clara). */
+  font-weight: 600;
   color: var(--text);
 }
 

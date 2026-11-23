@@ -55,7 +55,7 @@ if (!/id="alerta" class="alerta" role="alert"/.test(html) || !/id="alerta-erro" 
   "Para marcar o dia difícil, confirme que fez o mínimo do contrato e tente de novo.",
   "Sem internet. Tente de novo quando a conexão voltar. O que você escreveu continua aqui.",
   "Não foi possível registrar agora. Tente de novo.",
-  "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu."
+  "Dia difícil registrado. O mínimo de hoje era pequeno, e você o cumpriu."
 ].forEach(function (frase) {
   if (js.indexOf(frase) === -1) falhas.push("falta a frase «" + frase + "»");
 });
@@ -168,7 +168,7 @@ if (/::after\s*\{[^}]*background:\s*var\(--accent\)/.test(css)) falhas.push("tra
 if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(textoTela)) falhas.push("emoji na tela");
 
 /* ---------- Cache ---------- */
-if (sw.indexOf('CACHE = "nexus-v2-v31"') === -1) falhas.push("o cache não está em nexus-v2-v31");
+if (sw.indexOf('CACHE = "nexus-v2-v33"') === -1) falhas.push("o cache não está em nexus-v2-v33");
 ["./dia-dificil.html", "./dia-dificil.css", "./dia-dificil.js"].forEach(function (arquivo) {
   if (sw.indexOf('"' + arquivo + '"') === -1) falhas.push("o cache não guarda " + arquivo);
 });

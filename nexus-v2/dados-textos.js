@@ -103,6 +103,12 @@
     lerPolitica: "Ler a Política de privacidade",
     voltarInicio: "Voltar ao início",
 
+    /* Instrução do iPhone: a mesma em Ajustes e no começo da missão (revisão da Clara). */
+    iphoneIntro: "No iPhone (iOS 16.4 ou mais novo), o aviso só chega com o Nexus na Tela de Início:",
+    iphonePasso1: "Abra o Nexus no Safari.",
+    iphonePasso2: "Toque em Compartilhar.",
+    iphonePasso3: "Toque em “Adicionar à Tela de Início”.",
+
     /* Começo da missão, passo do aviso (decisão do PR 29). */
     querLembretes: "Quero receber lembretes do meu registro diário neste aparelho."
   };

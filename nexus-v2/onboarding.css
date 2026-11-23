@@ -333,3 +333,13 @@ body:has(.tela-comeco) {
   min-width: 0;
   flex: 1 1 auto;
 }
+
+/* Instrução do iPhone: um passo por linha (revisão da Clara). */
+.passos-iphone {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.25em;
+}
+
+.passos-iphone li + li {
+  margin-top: var(--space-1);
+}

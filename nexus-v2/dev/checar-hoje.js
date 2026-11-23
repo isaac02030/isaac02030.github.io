@@ -33,7 +33,7 @@ if (tokens.indexOf('url("fonts/Figtree-Variable.woff2") format("woff2")') === -1
   falhas.push("o @font-face não usa o arquivo variável com pesos 400 a 700");
 }
 if (sw.indexOf('"./fonts/Figtree-Variable.woff2"') === -1) falhas.push("o cache não guarda a fonte");
-if (sw.indexOf('CACHE = "nexus-v2-v31"') === -1) falhas.push("o cache não está em nexus-v2-v31");
+if (sw.indexOf('CACHE = "nexus-v2-v33"') === -1) falhas.push("o cache não está em nexus-v2-v33");
 
 /* Nenhum arquivo do v2 pede fonte ou estilo a outro site. */
 fs.readdirSync(raiz).forEach(function (nome) {
@@ -64,7 +64,7 @@ if (!/<h1[^>]*id="titulo-hoje"[^>]*tabindex="-1"[^>]*>Hoje<\/h1>/.test(html)) fa
 if (!/<div class="regua" id="regua" aria-hidden="true">/.test(html)) falhas.push("a régua precisa ser aria-hidden");
 if (html.indexOf('class="spinner"') !== -1) falhas.push("o carregando não pode ter nada girando");
 if (html.indexOf("Abrindo o dia…") === -1) falhas.push("falta «Abrindo o dia…»");
-if (html.indexOf("Ainda não há missões. Que tal começar a primeira?") === -1 || html.indexOf(">Começar uma missão<") === -1) {
+if (html.indexOf("Você ainda não tem missão. Comece a primeira.") === -1 || html.indexOf(">Começar uma missão<") === -1) {
   falhas.push("falta o estado vazio");
 }
 if (!/id="faixa-rede" role="status"/.test(html)) falhas.push("a faixa de sem internet precisa de role=status");
@@ -75,7 +75,7 @@ if (!/id="estado" aria-live="polite"/.test(html)) falhas.push("o estado precisa 
 [
   "Ainda não registrou o dia.",
   "Registro feito. Palavra cumprida hoje.",
-  "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.",
+  "Dia difícil registrado. O mínimo de hoje era pequeno, e você o cumpriu.",
   "Sem internet. Mostrando o que o aparelho guardou.",
   "O registro não foi enviado. Tente de novo quando a conexão voltar.",
   "Não foi possível abrir o dia. Tente de novo.",

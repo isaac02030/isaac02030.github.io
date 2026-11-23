@@ -14,7 +14,7 @@
    A tela não fecha sozinha. */
 
 var FRASE_CUMPRIU = "Registro feito. O mínimo de hoje estava escrito, e você cumpriu.";
-var FRASE_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e valeu.";
+var FRASE_DIFICIL = "Dia difícil registrado. O mínimo de hoje era pequeno, e você o cumpriu.";
 var FRASE_VOLTA = "Você voltou. O ciclo continua.";
 var CHAVE_PASSO = "nexus_v2_passo_grande_irmao";
 var CHAVE_USUARIO = "nexus_v2_user";

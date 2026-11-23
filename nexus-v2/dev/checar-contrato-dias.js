@@ -207,7 +207,7 @@ if (ler("missao.html").indexOf('data-texto-dias="legendaLivre"') === -1) falhas.
 });
 
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v31"') === -1) falhas.push("o cache não está em nexus-v2-v31");
+if (sw.indexOf('CACHE = "nexus-v2-v33"') === -1) falhas.push("o cache não está em nexus-v2-v33");
 if (sw.indexOf('"./dias-da-missao.js"') === -1) falhas.push("o cache não guarda dias-da-missao.js");
 
 /* Marcas de página gerada por IA (regra 11). */
