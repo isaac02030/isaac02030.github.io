@@ -204,7 +204,7 @@ if (!/\/\\\/crise\\\.html\$\/\.test\(url\.pathname\)/.test(sw)) falhas.push("o c
 
 /* Regra 11 e acessibilidade no CSS novo. */
 var baseCss = ler("base.css");
-[["legal.css", legalCss], ["login.css", ler("login.css").slice(ler("login.css").indexOf("/* Aceite dos termos"))], ["base.css (caixa)", baseCss.slice(baseCss.indexOf("/* Caixa de marcar desenhada"))]].forEach(function (par) {
+[["legal.css", legalCss], ["login.css", ler("login.css").slice(ler("login.css").indexOf("/* Aceite dos termos"))], ["base.css (caixa)", baseCss.slice(baseCss.indexOf("/* Caixa de marcar desenhada"), baseCss.indexOf("/* ---------- Modo escuro neon") > baseCss.indexOf("/* Caixa de marcar desenhada") ? baseCss.indexOf("/* ---------- Modo escuro neon") : undefined)]].forEach(function (par) {
   var c = par[1];
   if (/gradient/i.test(c)) falhas.push(par[0] + ": sem gradiente");
   if (/box-shadow:(?!\s*(inset|none))/.test(c)) falhas.push(par[0] + ": sem sombra");

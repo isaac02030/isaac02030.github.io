@@ -23,7 +23,7 @@ body {
     to bottom,
     transparent 0,
     transparent 31px,
-    color-mix(in srgb, var(--border) 22%, transparent) 32px
+    var(--pauta) 32px
   );
 }
 
@@ -278,7 +278,7 @@ input:-webkit-autofill {
   margin-bottom: auto;
   flex-shrink: 0;
   padding: var(--space-5);
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -409,7 +409,7 @@ input:-webkit-autofill {
 
 /* A caixa. Contorno medido (22/11, revisão da Clara), mínimo 3:1:
    claro #7A756C: 4,58:1 no cartão branco e 3,68:1 no preenchimento #E3E8E1;
-   escuro #9A948A: 5,45:1 no cartão #221F1B e 4,99:1 no preenchimento #2A2621.
+   escuro (neon, 23/11) #6F8A8C: 5,25:1 no cartão #0B0E10 e 4,76:1 no preenchimento #141A1D.
    Marcada: acento 7,57:1 (claro) e 6,71:1 (escuro) no cartão. */
 .caixa-aceite label::before {
   content: "";
@@ -454,4 +454,61 @@ input:-webkit-autofill {
 .caixa-aceite input:focus-visible + label::before {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ---------- Modo escuro neon (spec da Clara, 23/11) ----------
+   Ponto de luz 1: o botão principal, UM por tela (classe .btn-luz). No claro,
+   --grad é o acento plano e --glow-btn é none: o botão fica como sempre foi.
+   Telas sóbrias (crise, erro, denúncia, equipe, exclusão, consentimentos,
+   termos) nunca usam .btn-luz (dev/checar-neon.js). */
+.btn-luz {
+  background: var(--grad);
+  color: var(--accent-text);
+  border-color: transparent;
+  box-shadow: var(--glow-btn);
+}
+
+.btn-luz:hover {
+  background: var(--grad);
+}
+
+/* Logo v2 (fita em N): a versão neon no escuro, a clara no claro. */
+.so-escuro {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .so-escuro {
+    display: revert;
+  }
+
+  :root:not([data-theme="light"]) .so-claro {
+    display: none;
+  }
+}
+
+[data-theme="dark"] .so-escuro {
+  display: revert;
+}
+
+[data-theme="dark"] .so-claro {
+  display: none;
+}
+
+.marca.marca-logo {
+  line-height: 0;
+}
+
+.marca.marca-logo::after {
+  display: none;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  overflow: visible;
+}
+
+.logo-fita {
+  filter: var(--glow-urso);
 }

@@ -653,7 +653,16 @@ function pintarEstado(modelo) {
   el.replaceChildren(icone(DESENHO_CIRCULO), texto);
 }
 
+/* Urso de luz: firme antes do registro, contente com o dia feito. */
+function pintarUrso(modelo) {
+  var urso = document.getElementById("urso-hoje");
+  if (!urso) return;
+  var arquivo = modelo && modelo.hojeFeito ? "icons/urso-contente.svg" : "icons/urso-firme.svg";
+  if (urso.getAttribute("src") !== arquivo) urso.setAttribute("src", arquivo);
+}
+
 function pintarAcao(modelo, semRede) {
+  pintarUrso(modelo);
   var acoes = document.getElementById("acoes");
   var nota = document.getElementById("nota-hoje");
   acoes.replaceChildren();
@@ -685,7 +694,8 @@ function pintarAcao(modelo, semRede) {
     return;
   }
   var link = document.createElement("a");
-  link.className = "btn btn-primario";
+  /* Ponto de luz 1: o botão principal do Hoje. */
+  link.className = "btn btn-primario btn-luz";
   link.id = "btn-registrar";
   link.href = "checkin.html" + NexusAbas.busca(["tema", "cenario", "ia"]);
   link.textContent = "Registrar o dia";
@@ -940,7 +950,7 @@ function atualizarBarra() {
   var tema = document.documentElement.getAttribute("data-theme");
   var escuro = tema === "dark" || (tema !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   var meta = document.getElementById("cor-da-barra");
-  if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+  if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
 }
 
 function iniciar() {

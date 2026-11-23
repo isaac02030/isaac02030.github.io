@@ -33,7 +33,7 @@
       else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
       var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       var meta = document.getElementById("cor-da-barra");
-      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
     })();
   </script>
   <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -105,7 +105,7 @@
             <p id="nota-erro" class="erro-campo" role="alert" hidden></p>
           </div>
           <div id="alerta" class="alerta" role="alert" hidden></div>
-          <button type="submit" class="btn btn-primario" id="btn-registrar" data-texto="Registrar o dia" data-carregando="Registrando…" aria-busy="false">
+          <button type="submit" class="btn btn-primario btn-luz" id="btn-registrar" data-texto="Registrar o dia" data-carregando="Registrando…" aria-busy="false">
             <span class="btn-rotulo">Registrar o dia</span>
             <span class="spinner" hidden aria-hidden="true"></span>
           </button>

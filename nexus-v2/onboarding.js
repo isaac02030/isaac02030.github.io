@@ -701,7 +701,7 @@ function atualizarBarra() {
   var tema = document.documentElement.getAttribute("data-theme");
   var escuro = tema === "dark" || (tema !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   var meta = document.getElementById("cor-da-barra");
-  if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+  if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
 }
 
 function iniciar() {
