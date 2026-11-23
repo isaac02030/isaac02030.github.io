@@ -134,6 +134,10 @@ var luzesHoje = [/class="trilha30" id="regua"/, /urso-hoje/, /abas/].filter(func
 if (luzesHoje !== 4) falhas.push("o Hoje tem 4 luzes: trilha, botão, aba e urso (veio " + luzesHoje + ")");
 if (/trilha30/.test(semComentarios(ler("checkin.html") + ler("dia-dificil.html") + ler("crise.html") + ler("meus-dados.html")))) falhas.push("negado: check-in, dia difícil e telas sóbrias não mostram a trilha");
 
+/* O último texto do Hoje nunca fica sob o botão fixo (a 200% também): o fim
+   da tela reserva abas + botão + respiro. */
+if (!/padding-bottom: calc\(var\(--altura-abas\) \+ var\(--safe-bottom\) \+ var\(--altura-botao\) \+ var\(--space-5\) \+ var\(--space-4\) \+ var\(--space-4\)\);/.test(ler("hoje.css"))) falhas.push("o fim do Hoje reserva espaço para abas, botão e respiro");
+
 var sw = ler("sw.js");
 ["./trilha.js", "./trilha.css"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);

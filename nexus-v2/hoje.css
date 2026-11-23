@@ -25,9 +25,11 @@ body:has(.tela-hoje) {
   padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
   padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
   /* Espaço para a barra de abas e para o botão fixo acima dela.
-     O botão cresce com o texto: 12 + 1,3rem + 12 + bordas, nunca menos de 48px. */
+     O botão cresce com o texto: 12 + 1,3rem + 12 + bordas, nunca menos de 48px.
+     Com a trilha de 3 linhas, o fim rolado ganha mais um respiro (revisão da
+     Clara do PR 28): a 200%, o último texto fica bem acima do botão. */
   --altura-botao: max(48px, calc(26px + 1.3rem));
-  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--altura-botao) + var(--space-5) + var(--space-4));
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--altura-botao) + var(--space-5) + var(--space-4) + var(--space-4));
   overflow-wrap: break-word;
 }
 
