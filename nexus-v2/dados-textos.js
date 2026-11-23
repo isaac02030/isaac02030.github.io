@@ -44,6 +44,7 @@
     lembretesBloqueados: "O navegador bloqueou os avisos. Libere nas configurações do aparelho.",
     /* Estado real do aparelho com os lembretes ligados (revisão da Clara). */
     ligadoSemPermissao: "Ligado, mas este aparelho ainda não permitiu avisos.",
+    ligadoBloqueado: "Ligado, mas o navegador bloqueou os avisos",
     permitirAvisos: "Permitir avisos neste aparelho",
     /* NOVO: aparelho que não recebe avisos do navegador. */
     lembretesSemSuporte: "Este navegador não mostra avisos. No iPhone, só funciona com o Nexus na Tela de Início.",

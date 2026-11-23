@@ -191,6 +191,24 @@ if (!/var quer = document\.getElementById\("quero-lembretes"\)\.checked;\s*if \(
 if (!/var querAviso = document\.getElementById\("quero-lembretes"\)\.checked &&/.test(obJs)) falhas.push("a inscrição do aparelho só com a caixa marcada");
 if (/te lembramos/.test(ob + obJs)) falhas.push("o título usa «você»: «Quando lembramos você?»");
 
+/* ---------- Acabamento (fila do PR 25) ---------- */
+/* Dia difícil: a mesma linha de apoio do check-in, com os textos aprovados. */
+var dd = ler("dia-dificil.html");
+var ddJs = ler("dia-dificil.js");
+if (!/<p id="nota-guarda" class="dica" hidden><\/p>/.test(dd)) falhas.push("dia difícil: falta a linha de apoio sobre guardar a nota (começa escondida)");
+if (dd.indexOf('<script src="dados-textos.js"></script>') === -1) falhas.push("dia difícil: falta dados-textos.js");
+if (!/NexusApi\.escolhaDaNota\(\)/.test(ddJs) || !/NexusDados\.texto\(escolhaNota === "yes" \? "apoioSim" : "apoioNao"\)/.test(ddJs)) falhas.push("dia difícil: a linha usa a escolha lida no servidor e os textos do check-in");
+if (!/linha\.hidden = true;/.test(ddJs.slice(ddJs.indexOf("function pintarApoioDaNota")))) falhas.push("negado: sem saber a escolha, a linha do dia difícil não aparece");
+if (/perguntaTitulo|btn-guardar-notas/.test(dd + ddJs)) falhas.push("dia difícil: sem a pergunta (ela fica no check-in)");
+/* Lembretes bloqueados: o rótulo diz isso. */
+if (!T || T.ligadoBloqueado !== "Ligado, mas o navegador bloqueou os avisos") falhas.push("falta «Ligado, mas o navegador bloqueou os avisos»");
+if (!/nexusEstadoDoAviso\(\) === "bloqueado"\) estadoTexto = D\.texto\("ligadoBloqueado"\)/.test(mdJs)) falhas.push("lembretes bloqueados: o rótulo diz que o navegador bloqueou");
+/* E-mail: o ponto final fica junto do endereço, numa linha própria com respiro. */
+if (!/linha\.append\(link, document\.createTextNode\(partes\[1\] \|\| ""\)\)/.test(mdJs)) falhas.push("o ponto final fica na mesma linha do e-mail");
+var linkCss = cssMd.slice(cssMd.indexOf(".link-email {"), cssMd.indexOf("}", cssMd.indexOf(".link-email {")));
+if (!/display: inline;/.test(linkCss)) falhas.push("o link do e-mail é inline (caixa atômica deixa o «.» sozinho)");
+if (!/\.linha-email \{[\s\S]*?padding-block: var\(--space-3\);/.test(cssMd)) falhas.push("a linha do e-mail tem respiro para o anel de foco");
+
 /* ---------- Cache ---------- */
 var sw = ler("sw.js");
 ["./dados-textos.js", "./meus-dados.html", "./meus-dados.css", "./meus-dados.js", "./conta-excluida.html"].forEach(function (a) {

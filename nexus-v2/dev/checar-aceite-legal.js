@@ -141,7 +141,7 @@ if (envioR.indexOf('mostrarAviso(alerta, "neutro", TEXTOS_LEGAIS().TEXTOS.falhaA
 if (L && L.TEXTOS.reaceiteTexto !== "Para continuar, leia e aceite as versões novas. Elas valem a partir de " + L.DATA_VERSAO + ".") falhas.push("o texto da reaceitação não usa a data de vigência da fonte única");
 
 /* ---------- Páginas de Termos e Privacidade ---------- */
-var PROIBIDAS = ["pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
+var PROIBIDAS = ["isaac", "pirro", "dédalo", "maestro", "lacuna", "conferir:", "conferir com", "conferir de novo", "desconhecido", "decidir:", "hipótese",
   "aviso interno", "apagar antes de publicar", "testers", "pr 26", "legal/", ".md", "ver lacunas", "proposta do", "a aprovar", "urso", "[conferir"];
 /* Desde 22/11 não sobra nenhum marcador: o e-mail de privacidade é o de
    dados-textos.js (contatoEmail), o mesmo de Meus dados. */
@@ -149,6 +149,12 @@ var MARCADORES = [];
 var janelaDados = {};
 vm.runInNewContext(ler("dados-textos.js"), { window: janelaDados, document: { querySelectorAll: function () { return []; } } });
 var CONTATO = janelaDados.NexusDados ? janelaDados.NexusDados.TEXTOS.contatoEmail : "";
+/* Nome do responsável (decisão do dono do projeto, 22/11): lido da própria
+   página, nunca escrito aqui. É a única menção permitida; a expressão exata
+   sai do texto antes da lista de palavras internas. */
+var RESPONSAVEL = ((ler("termos.html").match(/Quem responde pelo Nexus: ([^,<]+),/) || [])[1] || "").trim();
+if (!RESPONSAVEL) falhas.push("termos.html: falta o responsável na seção 1");
+if (RESPONSAVEL && ler("privacidade.html").indexOf("<p>" + RESPONSAVEL + " (pessoa física) é o responsável") === -1) falhas.push("privacidade.html: o responsável não é o mesmo dos Termos");
 ["termos.html", "privacidade.html"].forEach(function (nome) {
   var html = ler(nome);
   if (!/<html lang="pt-BR">/.test(html)) falhas.push(nome + ": falta lang pt-BR");
@@ -161,7 +167,9 @@ var CONTATO = janelaDados.NexusDados ? janelaDados.NexusDados.TEXTOS.contatoEmai
   if (!enderecos.length || enderecos.some(function (e) { return e !== CONTATO; })) falhas.push(nome + ": o único e-mail é o de privacidade (dados-textos.js)");
   if (html.indexOf('<a href="mailto:' + CONTATO + '">' + CONTATO + "</a>") === -1) falhas.push(nome + ": o e-mail de privacidade é um link mailto:");
   if (!/<a class="voltar" id="voltar" href="index\.html">Voltar<\/a>/.test(html)) falhas.push(nome + ": falta «Voltar» (sem JavaScript, leva ao início)");
-  var texto = html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<!--[\s\S]*?-->/g, " ").replace(/<[^>]+>/g, " ").toLowerCase();
+  var texto = html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<!--[\s\S]*?-->/g, " ").replace(/<[^>]+>/g, " ");
+  if (RESPONSAVEL) texto = texto.split(RESPONSAVEL).join(" ");
+  texto = texto.toLowerCase();
   PROIBIDAS.forEach(function (p) {
     if (texto.indexOf(p) !== -1) falhas.push(nome + ": sobrou texto interno «" + p + "»");
   });

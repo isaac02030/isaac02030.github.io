@@ -395,7 +395,26 @@ function textoApoio(sequencia) {
   return inicio + uso + " Restam " + restam + ". " + TEXTO_SEGUIDOS_REGRA;
 }
 
+/* «Esta nota (não) será guardada…»: os textos aprovados do check-in. */
+var escolhaNota = "desconhecida";
+
+function pintarApoioDaNota() {
+  var linha = document.getElementById("nota-guarda");
+  var campo = document.getElementById("nota");
+  if (escolhaNota === "yes" || escolhaNota === "no") {
+    linha.textContent = NexusDados.texto(escolhaNota === "yes" ? "apoioSim" : "apoioNao");
+    linha.hidden = false;
+  } else {
+    linha.textContent = "";
+    linha.hidden = true;
+  }
+  var ids = (campo.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (id) { return id && id !== "nota-guarda"; });
+  if (!linha.hidden) ids.push("nota-guarda");
+  campo.setAttribute("aria-describedby", ids.join(" "));
+}
+
 function preencherForma(missao, sequencia, semRede) {
+  pintarApoioDaNota();
   document.getElementById("apoio").textContent = textoApoio(sequencia);
   var minimo = typeof missao.daily_minimum === "string" ? missao.daily_minimum : "";
   var bloco = document.getElementById("bloco-minimo");
@@ -498,8 +517,19 @@ async function carregar() {
 
   var respostas = await Promise.all([
     NexusApi.obterMissao(resumo.id),
-    NexusApi.sequenciaDaMissao(resumo.id)
+    NexusApi.sequenciaDaMissao(resumo.id),
+    NexusApi.escolhaDaNota()
   ]);
+  /* A frase do dia difícil também é nota: o servidor só guarda com o «sim».
+     Aqui não há pergunta (ela fica no check-in); só a linha de apoio.
+     Sem resposta ainda (null), a frase não é guardada: vale «não». */
+  var escolha = respostas[2];
+  if (escolha && escolha.ok && escolha.dados) {
+    escolhaNota = escolha.dados.note_consent === "yes" ? "yes" : "no";
+  } else {
+    escolhaNota = "desconhecida";
+  }
+  if (escolhaNota !== "desconhecida") nexusLembrarEscolhaNota(escolhaNota);
   if (meu !== ciclo) return;
   if (!respostas[0].ok || !respostas[1].ok) {
     var falha = respostas[0].semRede ? respostas[0] : respostas[1];

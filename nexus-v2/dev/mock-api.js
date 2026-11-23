@@ -560,7 +560,8 @@ var VERSAO_TERMOS = "beta-1";
 var VERSAO_PRIVACIDADE = "beta-1";
 var MSG_ACEITE_CADASTRO = "Para criar a conta, marque que você leu e aceita os termos e a política de privacidade.";
 var MSG_ACEITE_REACEITE = "Para continuar, marque que você leu e aceita os termos e a política de privacidade.";
-var MSG_VERSAO_ANTIGA = "Os termos ou a política de privacidade mudaram. Recarregue a página para ver a versão atual e aceite de novo.";
+/* Igual ao servidor (PR 30 do servidor): o mesmo texto do site. */
+var MSG_VERSAO_ANTIGA = "Os termos ou a política de privacidade mudaram. Atualize a página (ou feche e abra o app) para ver a versão atual e aceite de novo.";
 var MSG_SESSAO_ENCERRADA = "Sessão encerrada. Entre de novo.";
 var MSG_SESSAO_INDISPONIVEL = "Não foi possível conferir sua sessão agora. Tente de novo em instantes.";
 
