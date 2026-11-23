@@ -173,7 +173,10 @@ if (!/\.carta\s*\{[^}]*border:\s*2px solid transparent;[^}]*border-radius:\s*var
 if (!/\.previa\s*\{[^}]*border-radius:\s*var\(--radius-lg\);[^}]*background:\s*var\(--surface-2\)/.test(css)) falhas.push("a prévia precisa de raio 16 e fundo --surface-2");
 if (!/\.dia-caixa\s*\{[^}]*min-height:\s*56px/.test(css)) falhas.push("cada dia precisa de 56px de altura");
 if (!/max\(44px, 2\.5rem\)/.test(css)) falhas.push("cada dia precisa de pelo menos 44px de largura");
-if (!/\.dia input:checked \+ \.dia-caixa\s*\{[^}]*background:\s*var\(--accent\);[^}]*color:\s*var\(--accent-text\)/.test(css)) falhas.push("o dia marcado é preenchido no acento com o texto em --accent-text");
+/* No claro, --sel-fundo/--sel-texto são o acento e --accent-text (cheio, como
+   sempre); no escuro neon, fundo escuro e borda aqua (checar-neon.js). */
+if (!/\.dia input:checked \+ \.dia-caixa\s*\{[^}]*background:\s*var\(--sel-fundo\);[^}]*color:\s*var\(--sel-texto\)/.test(css)) falhas.push("o dia marcado usa --sel-fundo e --sel-texto");
+if (!/--sel-fundo: var\(--accent\);\n  --sel-texto: var\(--accent-text\);/.test(ler("tokens.css"))) falhas.push("no claro, o dia marcado é preenchido no acento com o texto em --accent-text");
 if (!/\.dia input:focus-visible \+ \.dia-caixa\s*\{[^}]*outline:\s*2px solid[^}]*outline-offset:\s*2px/.test(css)) falhas.push("o foco do dia é um anel de 2px afastado 2");
 if (!/var\(--dur-fast\)/.test(css) || /transform|scale\(/.test(css)) falhas.push("o toque muda a cor em 150ms, sem escala");
 if (/\.dias-erro\s*\{[^}]*--danger/.test(css)) falhas.push("o aviso dos dias não usa vermelho");
@@ -204,7 +207,7 @@ if (ler("missao.html").indexOf('data-texto-dias="legendaLivre"') === -1) falhas.
 });
 
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v30"') === -1) falhas.push("o cache não está em nexus-v2-v30");
+if (sw.indexOf('CACHE = "nexus-v2-v31"') === -1) falhas.push("o cache não está em nexus-v2-v31");
 if (sw.indexOf('"./dias-da-missao.js"') === -1) falhas.push("o cache não guarda dias-da-missao.js");
 
 /* Marcas de página gerada por IA (regra 11). */

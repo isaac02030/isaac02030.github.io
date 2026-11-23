@@ -130,10 +130,12 @@ body:has(.tela-hoje) {
   background: transparent;
 }
 
+/* Ponto de luz 2 (neon): no escuro, os feitos são o rastro (degradê) e o
+   «hoje» ganha halo. No claro, --grad é o acento plano e o halo é none. */
 .regua-dia.feito,
 .regua-dia.dificil {
   border-color: var(--accent);
-  background: var(--accent);
+  background: var(--grad);
 }
 
 /* Ponto em contraste com o acento: branco no claro, escuro no escuro. */
@@ -170,6 +172,7 @@ body:has(.tela-hoje) {
   border-color: var(--accent);
   outline: 1.5px solid var(--accent);
   outline-offset: 2px;
+  box-shadow: var(--glow-2);
 }
 
 /* Dia livre: contorno pontilhado fino em --text-muted, sem preenchimento e sem
@@ -434,4 +437,21 @@ body:has(.tela-hoje) {
 
 .marca-miolo.dificil.feito {
   background: linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
+}
+
+/* Ponto de luz 4: o urso de luz, só no Hoje e só no escuro (rascunho da
+   Clara, usado como está). Decorativo: aria-hidden. Nunca nas telas sóbrias. */
+.urso-hoje {
+  position: absolute;
+  top: calc(var(--space-3) + var(--safe-top));
+  right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  width: 76px;
+  height: auto;
+  pointer-events: none;
+  filter: var(--glow-urso);
+}
+
+/* O urso fica no topo, ao lado do título «Hoje» (spec: 76 px, uma vez). */
+.tela-hoje {
+  position: relative;
 }

@@ -33,7 +33,7 @@
       else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
       var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       var meta = document.getElementById("cor-da-barra");
-      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
     })();
   </script>
   <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -71,6 +71,9 @@
     </section>
 
     <section class="vista" id="vista-dia" hidden>
+      <!-- Ponto de luz 4: o urso de luz (rascunho da Clara), só aqui e só no escuro.
+           Decorativo. Nunca nas telas de erro, crise, consentimento ou exclusão. -->
+      <img class="urso-hoje so-escuro" id="urso-hoje" src="icons/urso-firme.svg" alt="" aria-hidden="true" width="76" height="85">
       <div id="aviso-volta" class="alerta" role="status" aria-live="polite" aria-atomic="true" hidden></div>
       <p class="dia-numero" id="dia-numero"></p>
       <div class="regua" id="regua" aria-hidden="true"></div>

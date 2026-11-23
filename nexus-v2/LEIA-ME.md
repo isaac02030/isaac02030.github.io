@@ -294,3 +294,13 @@ A checagem é `node nexus-v2/dev/checar-aceite-legal.js`.
 - Textos em `dados-textos.js`. Mock: `primeira-vez@exemplo.com`, `escolha-falha@exemplo.com`, `nao-guarda@exemplo.com`, `avisos-falha@exemplo.com`, `excluir-falha@exemplo.com`, senhas `errada` e `muitas` (detalhes no topo de `dev/mock-api.js`).
 
 A checagem é `node nexus-v2/dev/checar-meus-dados.js`.
+
+## Modo escuro neon (23/11)
+
+- Só o escuro mudou (`tokens.css`): fundo `#000000`, aqua `#2DF2D0` e ciano `#3DD8FF`. O claro continua o caderno quente.
+- Luz (degradê e halo) só em 4 pontos por tela: o botão principal (`.btn-luz`, um por tela), a régua dos 30 dias, a barrinha da aba ativa e o urso do Hoje. No claro, esses pontos ficam planos.
+- Telas sóbrias, sem luz nem urso: crise, erros e 503, denúncia, equipe, exclusão, consentimentos, Meus dados, Termos e Privacidade.
+- Logo v2 (fita em N) no cabeçalho: versão clara no claro, neon no escuro (sóbria nas telas de erro e de consentimento). Ícones do PWA gerados do símbolo; `theme-color` #000 no escuro.
+- O urso (`icons/urso-*.svg`) é rascunho da Clara, usado como está.
+
+A checagem é `node nexus-v2/dev/checar-neon.js` (contraste AA medido e casos negados).

@@ -44,8 +44,29 @@
 }
 
 .aba[aria-current="page"] {
+  position: relative;
   color: var(--accent);
   font-weight: 700;
+}
+
+/* Ponto de luz 3 (modo escuro neon): barrinha de luz em cima da aba ativa.
+   No claro, --aba-luz é transparente e --glow-aba é none. */
+.aba[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 22%;
+  right: 22%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--aba-luz);
+  box-shadow: var(--glow-aba);
+}
+
+/* No escuro, a barra das abas fica no preto, com divisória decorativa. */
+.abas {
+  background: var(--bg);
+  border-top-color: var(--border-soft);
 }
 
 .icone-aba {

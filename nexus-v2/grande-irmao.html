@@ -33,7 +33,7 @@
       else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
       var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       var meta = document.getElementById("cor-da-barra");
-      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
 
       /* Não abre sozinha. Só depois do check-in, do dia difícil, ou com um mock na URL. */
       var params;

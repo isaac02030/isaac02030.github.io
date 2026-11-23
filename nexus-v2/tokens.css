@@ -69,53 +69,126 @@
   --border: #7A756C;
   --theme-color: #0B5F52;
   --shadow: var(--shadow-1);
+  /* No claro, os pontos de luz são planos (o caderno quente não muda). */
+  --card-border: var(--border);
+  --border-soft: var(--border);
+  --neon-aqua: var(--accent);
+  --neon-cyan: var(--accent);
+  --grad: var(--accent);
+  --glow-1: none;
+  --glow-2: none;
+  --glow-btn: none;
+  --glow-aba: none;
+  --glow-urso: none;
+  --pauta: color-mix(in srgb, var(--border) 22%, transparent);
+  --aba-luz: transparent;
+  --sel-fundo: var(--accent);
+  --sel-texto: var(--accent-text);
+  --sel-borda: 1px;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #161411;
-    --surface: #221F1B;
-    --surface-2: #2A2621;
-    --borda-cartao: #9A948A;
-    --text: #F4EFE6;
-    --text-muted: #B0AAA0;
-    --accent: #3CB8A4;
-    --accent-text: #161411;
-    --accent-standout: #3CB8A4;
-    --success: #3DCA86;
-    --success-fill: #3DCA86;
-    --success-text: #161411;
+    /* Modo escuro neon (decisões de 23/11; spec da Clara, visual/spec-modo-escuro-neon.md).
+       Contraste medido em dev/checar-neon.js (AA). */
+    --bg: #000000;
+    --surface: #0B0E10;
+    --surface-2: #141A1D;
+    --borda-cartao: #1E2A2C;
+    --card-border: #1E2A2C;
+    --border-soft: #1E2A2C;
+    --text: #F2F6F4;
+    --text-muted: #A9B6B5;
+    --accent: #2DF2D0;
+    --accent-text: #021013;
+    --accent-standout: #2DF2D0;
+    --success: #2DF2D0;
+    --success-fill: #2DF2D0;
+    --success-text: #021013;
     --danger: #FF8A80;
-    --border: #9A948A;
-    --theme-color: #161411;
+    --border: #6F8A8C;
+    --theme-color: #000000;
     --shadow: var(--shadow-0);
+    /* Os 4 pontos de luz (orçamento por tela): botão principal, trilha e
+       «hoje», aba ativa e urso. Só eles usam --grad e --glow-*. */
+    --neon-aqua: #2DF2D0;
+    --neon-cyan: #3DD8FF;
+    --grad: linear-gradient(100deg, #2DF2D0 0%, #3DD8FF 100%);
+    --glow-1: 0 0 14px rgba(45, 242, 208, 0.28);
+    --glow-2: 0 0 0 1px rgba(45, 242, 208, 0.6), 0 0 18px rgba(45, 242, 208, 0.32), 0 0 44px rgba(61, 216, 255, 0.16);
+    --glow-btn: 0 0 26px rgba(45, 242, 208, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    --glow-aba: 0 0 12px 1px rgba(45, 242, 208, 0.6);
+    --glow-urso: drop-shadow(0 0 4px rgba(45, 242, 208, 0.45)) drop-shadow(0 0 10px rgba(61, 216, 255, 0.18));
+    /* O caderno (linhas de pauta) sai no preto: a identidade do escuro é a trilha. */
+    --pauta: transparent;
+    --aba-luz: var(--grad);
+    /* Seleção (dias da missão): fundo escuro, borda aqua e a marca; o aqua
+       cheio fica só no botão principal (revisão da Clara, PR 27). */
+    --sel-fundo: var(--surface);
+    --sel-texto: var(--text);
+    --sel-borda: 2px;
   }
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #161411;
-  --surface: #221F1B;
-  --surface-2: #2A2621;
-  --borda-cartao: #9A948A;
-  --text: #F4EFE6;
-  --text-muted: #B0AAA0;
-  --accent: #3CB8A4;
-  --accent-text: #161411;
-  --accent-standout: #3CB8A4;
-  --success: #3DCA86;
-  --success-fill: #3DCA86;
-  --success-text: #161411;
+  /* Modo escuro neon (decisões de 23/11; spec da Clara, visual/spec-modo-escuro-neon.md).
+     Contraste medido em dev/checar-neon.js (AA). */
+  --bg: #000000;
+  --surface: #0B0E10;
+  --surface-2: #141A1D;
+  --borda-cartao: #1E2A2C;
+  --card-border: #1E2A2C;
+  --border-soft: #1E2A2C;
+  --text: #F2F6F4;
+  --text-muted: #A9B6B5;
+  --accent: #2DF2D0;
+  --accent-text: #021013;
+  --accent-standout: #2DF2D0;
+  --success: #2DF2D0;
+  --success-fill: #2DF2D0;
+  --success-text: #021013;
   --danger: #FF8A80;
-  --border: #9A948A;
-  --theme-color: #161411;
+  --border: #6F8A8C;
+  --theme-color: #000000;
   --shadow: var(--shadow-0);
+  /* Os 4 pontos de luz (orçamento por tela): botão principal, trilha e
+     «hoje», aba ativa e urso. Só eles usam --grad e --glow-*. */
+  --neon-aqua: #2DF2D0;
+  --neon-cyan: #3DD8FF;
+  --grad: linear-gradient(100deg, #2DF2D0 0%, #3DD8FF 100%);
+  --glow-1: 0 0 14px rgba(45, 242, 208, 0.28);
+  --glow-2: 0 0 0 1px rgba(45, 242, 208, 0.6), 0 0 18px rgba(45, 242, 208, 0.32), 0 0 44px rgba(61, 216, 255, 0.16);
+  --glow-btn: 0 0 26px rgba(45, 242, 208, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --glow-aba: 0 0 12px 1px rgba(45, 242, 208, 0.6);
+  --glow-urso: drop-shadow(0 0 4px rgba(45, 242, 208, 0.45)) drop-shadow(0 0 10px rgba(61, 216, 255, 0.18));
+  /* O caderno (linhas de pauta) sai no preto: a identidade do escuro é a trilha. */
+  --pauta: transparent;
+  --aba-luz: var(--grad);
+  --sel-fundo: var(--surface);
+  --sel-texto: var(--text);
+  --sel-borda: 2px;
 }
 
 [data-theme="light"] {
   color-scheme: light;
+  --card-border: var(--border);
+  --border-soft: var(--border);
+  --neon-aqua: var(--accent);
+  --neon-cyan: var(--accent);
+  --grad: var(--accent);
+  --glow-1: none;
+  --glow-2: none;
+  --glow-btn: none;
+  --glow-aba: none;
+  --glow-urso: none;
+  --pauta: color-mix(in srgb, var(--border) 22%, transparent);
+  --aba-luz: transparent;
+  --sel-fundo: var(--accent);
+  --sel-texto: var(--accent-text);
+  --sel-borda: 1px;
   --bg: var(--papel);
   --surface: #FFFFFF;
   --surface-2: #E3E8E1;
@@ -139,5 +212,19 @@
     --dur-fast: 0ms;
     --dur: 0ms;
     --dur-slow: 0ms;
+  }
+}
+
+/* Mais contraste ou cores do sistema: sem halo e sem degradê (spec, seção 2). */
+@media (prefers-contrast: more), (forced-colors: active) {
+  :root,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --grad: var(--accent);
+    --glow-1: none;
+    --glow-2: none;
+    --glow-btn: none;
+    --glow-aba: none;
+    --glow-urso: none;
   }
 }

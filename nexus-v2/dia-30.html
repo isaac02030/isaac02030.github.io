@@ -33,7 +33,7 @@
       else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
       var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       var meta = document.getElementById("cor-da-barra");
-      if (meta) meta.setAttribute("content", escuro ? "#161411" : "#0B5F52");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
     })();
   </script>
   <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -72,7 +72,7 @@
         <p class="ritmo" id="ritmo"></p>
         <div id="aviso-continuar" class="alerta" role="alert" hidden></div>
         <div class="acoes">
-          <button type="button" class="btn btn-primario" id="btn-continuar">Continuar mais 36 dias</button>
+          <button type="button" class="btn btn-primario btn-luz" id="btn-continuar">Continuar mais 36 dias</button>
           <!-- TODO: quando existir a rota de encerrar, voltar o rótulo para «Encerrar esta missão» e pedir confirmação de uma frase, como em Sair da conta. -->
           <button type="button" class="btn btn-secundario" id="btn-agora">Agora não</button>
         </div>
