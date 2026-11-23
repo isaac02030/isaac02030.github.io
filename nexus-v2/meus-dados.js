@@ -109,6 +109,7 @@ function pintarInterruptor(qual, ligado, salvando) {
   /* Lembretes ligados num aparelho que ainda não permitiu avisos: dizer isso. */
   if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "pendente") estadoTexto = D.texto("ligadoSemPermissao");
   if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "bloqueado") estadoTexto = D.texto("ligadoBloqueado");
+  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "sem-suporte") estadoTexto = D.texto("ligadoSemSuporte");
   texto.textContent = salvando ? D.texto("salvando") : estadoTexto;
   if (qual === "lembretes") pintarAparelho();
 }

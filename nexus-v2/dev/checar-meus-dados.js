@@ -203,6 +203,9 @@ if (/perguntaTitulo|btn-guardar-notas/.test(dd + ddJs)) falhas.push("dia difíci
 /* Lembretes bloqueados: o rótulo diz isso. */
 if (!T || T.ligadoBloqueado !== "Ligado, mas o navegador bloqueou os avisos") falhas.push("falta «Ligado, mas o navegador bloqueou os avisos»");
 if (!/nexusEstadoDoAviso\(\) === "bloqueado"\) estadoTexto = D\.texto\("ligadoBloqueado"\)/.test(mdJs)) falhas.push("lembretes bloqueados: o rótulo diz que o navegador bloqueou");
+/* Sem suporte: o rótulo diz isso, e a frase de baixo explica o iPhone. */
+if (!T || T.ligadoSemSuporte !== "Ligado, mas este navegador não mostra avisos" || T.lembretesSemSuporte !== "No iPhone, só funciona com o Nexus adicionado à Tela de Início.") falhas.push("faltam os textos do estado sem suporte");
+if (!/nexusEstadoDoAviso\(\) === "sem-suporte"\) estadoTexto = D\.texto\("ligadoSemSuporte"\)/.test(mdJs)) falhas.push("negado: sem suporte, o rótulo não pode dizer só «Ligado»");
 /* E-mail: o ponto final fica junto do endereço, numa linha própria com respiro. */
 if (!/linha\.append\(link, document\.createTextNode\(partes\[1\] \|\| ""\)\)/.test(mdJs)) falhas.push("o ponto final fica na mesma linha do e-mail");
 var linkCss = cssMd.slice(cssMd.indexOf(".link-email {"), cssMd.indexOf("}", cssMd.indexOf(".link-email {")));
