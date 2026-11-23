@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="hoje.css">
   <link rel="stylesheet" href="dia-30.css">
+  <link rel="stylesheet" href="trilha.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -66,8 +67,13 @@
       </section>
 
       <section class="vista" id="vista-fim" hidden>
+        <!-- Urso contente (rascunho da Clara), só no escuro e decorativo. -->
+        <img class="urso-dia30 so-escuro" src="icons/urso-contente.svg" alt="" aria-hidden="true" width="140" height="157">
         <h1 class="titulo" id="titulo" tabindex="-1">Os 30 dias chegaram ao fim</h1>
-        <div class="marcas" id="marcas" role="img"></div>
+        <!-- A trilha inteira e real (com faltas e dias livres); um resumo só para o leitor de tela. -->
+        <ol class="trilha30" id="marcas" role="img"></ol>
+        <p class="contagem" id="contagem"></p>
+        <ul class="legenda-trilha" id="legenda" aria-hidden="true"></ul>
         <p class="fato" id="fato"></p>
         <p class="ritmo" id="ritmo"></p>
         <div id="aviso-continuar" class="alerta" role="alert" hidden></div>
@@ -81,6 +87,8 @@
   </main>
   <script src="api.js"></script>
   <script src="abas.js"></script>
+  <script src="dias-da-missao.js"></script>
+  <script src="trilha.js"></script>
   <script src="dia-30.js"></script>
 </body>
 </html>

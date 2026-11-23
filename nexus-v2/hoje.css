@@ -107,82 +107,8 @@ body:has(.tela-hoje) {
   color: var(--text);
 }
 
-/* 2 linhas de 15. Cada marca tem 16px e vão de 6px.
-   Feito: quadrado cheio. Dia difícil: cheio com ponto no meio.
-   Ainda por fazer: só contorno. Dia passado sem registro: contorno com traço.
-   Hoje: contorno duplo. A régua é aria-hidden; o texto do dia diz o mesmo. */
-.regua {
-  display: grid;
-  grid-template-columns: repeat(15, 16px);
-  gap: 6px;
-  justify-content: start;
-  margin: 0;
-  padding: 4px;
-}
-
-.regua-dia {
-  position: relative;
-  box-sizing: border-box;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--border);
-  border-radius: 3px;
-  background: transparent;
-}
-
-/* Ponto de luz 2 (neon): no escuro, os feitos são o rastro (degradê) e o
-   «hoje» ganha halo. No claro, --grad é o acento plano e o halo é none. */
-.regua-dia.feito,
-.regua-dia.dificil {
-  border-color: var(--accent);
-  background: var(--grad);
-}
-
-/* Ponto em contraste com o acento: branco no claro, escuro no escuro. */
-.regua-dia.dificil::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: var(--accent-text);
-}
-
-.regua-dia.falta::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8px;
-  height: 2px;
-  margin: -1px 0 0 -4px;
-  border-radius: 1px;
-  background: var(--text-muted);
-}
-
-/* Dia perdido: contorno mais escuro que o dos dias futuros, além do traço. */
-.regua-dia.falta {
-  border-color: var(--text-muted);
-}
-
-.regua-dia.hoje {
-  border-color: var(--accent);
-  outline: 1.5px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: var(--glow-2);
-}
-
-/* Dia livre: contorno pontilhado fino em --text-muted, sem preenchimento e sem
-   o traço da falta. Hoje num dia livre mantém o pontilhado e ganha o anel de hoje. */
-.regua-dia.livre,
-.regua-dia.livre.hoje {
-  border-style: dotted;
-  border-color: var(--text-muted);
-  background: transparent;
-}
+/* A régua virou a trilha de luz (trilha.css): 3 linhas de 10, fio entre os
+   dias, ponta acesa em hoje. É uma das 4 luzes do Hoje. */
 
 .linha-proximo {
   margin: 0;
