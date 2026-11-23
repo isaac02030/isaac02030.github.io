@@ -63,9 +63,27 @@ function icone(caminho) {
 var DESENHOS = {
   falha: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16.5h.01",
   rede: "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18",
-  ok: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9",
-  tres: "M5 12h.01M12 12h.01M19 12h.01"
+  ok: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"
 };
+
+/* «…» das opções: três pontos cheios de 4,5 px (revisão da Clara do PR 30).
+   Cor --text-muted: 6,29:1 sobre o papel (claro) e 10,05:1 sobre o preto
+   (escuro), acima de 3:1 para ícone. */
+function iconeTresPontos() {
+  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "icone");
+  [5, 12, 19].forEach(function (x) {
+    var ponto = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ponto.setAttribute("cx", String(x));
+    ponto.setAttribute("cy", "12");
+    ponto.setAttribute("r", "2.25");
+    ponto.setAttribute("fill", "currentColor");
+    svg.appendChild(ponto);
+  });
+  return svg;
+}
 
 function mostrarAviso(el, tipo, texto) {
   var paragrafo = document.createElement("p");
@@ -158,7 +176,7 @@ function botaoOpcoes(mensagem) {
   botao.className = "btn-opcoes";
   botao.setAttribute("aria-haspopup", "dialog");
   botao.setAttribute("aria-label", X.preencher(TX.opcoes, { hora: horaDe(mensagem.created_at) }));
-  botao.appendChild(icone(DESENHOS.tres));
+  botao.appendChild(iconeTresPontos());
   botao.addEventListener("click", function () {
     abrirOpcoes(mensagem, botao);
   });
@@ -312,6 +330,12 @@ function atualizarCampo() {
   campo.style.height = Math.min(campo.scrollHeight + 2, 52 * 2.4) + "px";
 }
 
+function mostrarAvisoDoEnvio(texto) {
+  var aviso = document.getElementById("aviso-envio");
+  if (texto) mostrarAviso(aviso, "neutro", texto);
+  else esconderAviso(aviso);
+}
+
 function mostrarErroDoCampo(texto) {
   var erro = document.getElementById("erro-mensagem");
   var campo = document.getElementById("campo-mensagem");
@@ -389,6 +413,7 @@ async function enviar(textoRepetido) {
     return;
   }
   mostrarErroDoCampo("");
+  mostrarAvisoDoEnvio("");
   enviando = true;
   if (typeof textoRepetido !== "string") campo.value = "";
   atualizarCampo();
@@ -426,7 +451,9 @@ async function enviar(textoRepetido) {
   if (!document.querySelector("#fio .mensagem")) document.getElementById("fio-vazio").hidden = false;
   campo.value = texto;
   atualizarCampo();
-  mostrarErroDoCampo(textoDoErro(resultado));
+  /* 400 é do que foi escrito (erro do campo); o resto é aviso neutro do servidor. */
+  if (resultado.status === 400) mostrarErroDoCampo(textoDoErro(resultado));
+  else mostrarAvisoDoEnvio(textoDoErro(resultado));
   campo.focus();
 }
 
@@ -640,7 +667,16 @@ function ligar() {
   });
 }
 
+/* Texto grande (200%): o cabeçalho encolhe para caber mais mensagens. */
+function ajustarTextoGrande() {
+  var tamanho = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  document.body.classList.toggle("texto-grande", tamanho >= 24);
+}
+
 function iniciar() {
+  ajustarTextoGrande();
+  window.addEventListener("resize", ajustarTextoGrande);
+  if (typeof ResizeObserver === "function") new ResizeObserver(ajustarTextoGrande).observe(document.documentElement);
   /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). */
   window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   var id = parametro("missao");

@@ -86,6 +86,8 @@
 
       <form class="compositor" id="form-mensagem" method="post" action="#enviar" novalidate>
         <label class="compositor-rotulo" for="campo-mensagem" data-texto-chat="campoRotulo"></label>
+        <!-- Avisos do servidor (limite da hora, sem acesso, falha): caixa neutra com ícone, não erro de campo. -->
+        <div id="aviso-envio" class="alerta" role="alert" hidden></div>
         <textarea id="campo-mensagem" name="content" rows="1" autocomplete="off" autocapitalize="sentences" aria-describedby="contador-mensagem erro-mensagem"></textarea>
         <div class="compositor-linha">
           <p class="contador" id="contador-mensagem">0 de 280</p>

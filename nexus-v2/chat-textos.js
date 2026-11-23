@@ -51,7 +51,8 @@
 
     /* Bloquear */
     bloquearTitulo: "Bloquear esta pessoa?",
-    bloquearTexto: "Você não verá mais as mensagens desta pessoa e ela não verá as suas. A missão continua.",
+    /* Depois do bloqueio a missão fica em Solo (revisão da Clara do PR 30). */
+    bloquearTexto: "Você não verá mais as mensagens desta pessoa e ela não verá as suas. A missão continua só com você.",
     bloquearTextoSaida: "Você não verá mais as mensagens desta pessoa e ela não verá as suas. Esta missão é da outra pessoa: ao bloquear, você sai dela e fica sem missão.",
     bloquearConfirmar: "Bloquear",
     bloqueando: "Bloqueando…",
@@ -67,7 +68,9 @@
     mensagemNova: "Mensagem nova de {nome}.",
 
     /* Tela de ajuda, quando o envio é barrado */
-    criseLinha: "Sua mensagem não foi enviada. Se você está passando por um momento difícil, há quem possa ajudar agora.",
+    /* O MESMO texto aprovado no servidor (PR 32), num lugar só no site. Se o dono
+       do projeto aprovar a versão da Clara, muda aqui e no servidor juntos. */
+    criseLinha: "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.",
     voltarConversa: "Voltar à conversa",
 
     /* Área da equipe */

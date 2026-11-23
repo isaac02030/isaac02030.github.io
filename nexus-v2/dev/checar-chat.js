@@ -75,9 +75,16 @@ if (/\bvisto\b|«visto»|Visto/.test(semComentarios(tudo).replace(/\/\/.*$/gm, "
 if (/Que tal|Claro!|Aqui está|[\u{1F300}-\u{1FAFF}]/u.test(semComentarios(ler("chat-textos.js")))) falhas.push("negado: sinais de texto de IA ou emoji nos textos do chat");
 ["Ainda não há mensagens. Escreva a primeira.", "Sem internet. A mensagem não foi enviada.", "Enviando…", "Enviada",
   "Mensagem nova de {nome}.", "Bloquear esta pessoa?", "Abrir a conversa",
-  "Sua mensagem não foi enviada. Se você está passando por um momento difícil, há quem possa ajudar agora."
+  "A missão continua só com você."
 ].forEach(function (t) {
   if (ler("chat-textos.js").indexOf(t) === -1) falhas.push("falta o texto aprovado/proposto: «" + t + "»");
+});
+
+/* Crise: o MESMO texto aprovado no servidor, num lugar só (revisão da Clara do PR 30). */
+var CRISE_SERVIDOR = "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.";
+if (X.TEXTOS.criseLinha !== CRISE_SERVIDOR) falhas.push("a linha de crise do chat é a mesma do servidor");
+["conversa.js", "conversa.html", "crise.html", "hoje.js", "missao.js"].forEach(function (n) {
+  if (ler(n).indexOf("Sua mensagem não foi enviada") !== -1) falhas.push("negado: o texto de crise do chat fica só em chat-textos.js (achado em " + n + ")");
 });
 
 /* ---------- Envio ---------- */
@@ -122,6 +129,13 @@ baloes.forEach(function (regra) {
   if (/gradient|box-shadow|--grad|--glow/.test(regra)) falhas.push("negado: balão sem degradê nem halo: " + regra.slice(0, 40));
 });
 if (/@keyframes|animation:\s*(?!none)[a-z]/.test(css)) falhas.push("negado: sem animação no chat");
+
+/* Revisão da Clara do PR 30. */
+var desativado = (css.match(/\.tela-conversa \.btn-enviar\[aria-disabled="true"\]\s*\{[^}]*\}/) || [""])[0];
+if (!/box-shadow:\s*none/.test(desativado) || !/background:\s*var\(--surface-2\)/.test(desativado) || !/color:\s*var\(--text-muted\)/.test(desativado)) falhas.push("negado: «Enviar» desativado é neutro e sem halo");
+if (!/function iconeTresPontos\(\)/.test(js) || !/ponto\.setAttribute\("r", "2\.25"\)/.test(js) || /DESENHOS\.tres/.test(js)) falhas.push("o «…» tem pontos cheios, visíveis");
+if (!/\.texto-grande \.missao-conversa \{\s*display: none;/.test(css)) falhas.push("a 200%, o subtítulo some");
+if (!/if \(resultado\.status === 400\) mostrarErroDoCampo\(textoDoErro\(resultado\)\);\s*else mostrarAvisoDoEnvio\(textoDoErro\(resultado\)\);/.test(js) || !/mostrarAviso\(aviso, "neutro", texto\)/.test(js)) falhas.push("negado: o 429 é caixa neutra, não erro de campo");
 
 /* ---------- Missão e Hoje ---------- */
 if (ler("missao.html").indexOf('id="bloco-conversa" hidden') === -1) falhas.push("«Abrir a conversa» começa escondido (só com par)");
