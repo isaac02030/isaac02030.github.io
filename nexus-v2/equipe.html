@@ -74,6 +74,15 @@
       <div id="status-acao" class="alerta alerta-ok" role="status" hidden></div>
       <ol class="escondidos" id="escondidos"></ol>
       <p class="vazio-texto" id="lista-vazia" data-texto-comunidade="adminVazio" hidden></p>
+
+      <!-- Chat do Duo/Rival: mensagens denunciadas. Só trecho, motivo e comentário;
+           nunca quem denunciou nem os nomes de quem conversa (PR 35 do servidor). -->
+      <section class="secao-chat" id="secao-chat" aria-labelledby="titulo-chat" hidden>
+        <h2 class="secao-chat-titulo" id="titulo-chat" data-texto-chat="equipeTitulo"></h2>
+        <div id="alerta-chat" class="alerta" role="status" hidden></div>
+        <ol class="escondidos" id="denuncias-chat"></ol>
+        <p class="vazio-texto" id="chat-vazio" data-texto-chat="equipeVazio" hidden></p>
+      </section>
     </section>
   </main>
 
@@ -90,6 +99,7 @@
 
   <nav class="abas" id="abas" aria-label="Seções"></nav>
   <script src="comunidade-textos.js"></script>
+  <script src="chat-textos.js"></script>
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="equipe.js"></script>

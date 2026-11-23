@@ -9,7 +9,7 @@
    Nada aparece como salvo antes de o servidor confirmar. */
 
 var D = window.NexusDados;
-var estado = { notas: false, lembretes: false, ocupado: {} };
+var estado = { notas: false, lembretes: false, mensagens: false, ocupado: {} };
 
 function semRedeAgora() {
   var rede = "";
@@ -107,9 +107,11 @@ function pintarInterruptor(qual, ligado, salvando) {
   botao.setAttribute("aria-busy", salvando ? "true" : "false");
   var estadoTexto = D.texto(ligado ? "ligado" : "desligado");
   /* Lembretes ligados num aparelho que ainda não permitiu avisos: dizer isso. */
-  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "pendente") estadoTexto = D.texto("ligadoSemPermissao");
-  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "bloqueado") estadoTexto = D.texto("ligadoBloqueado");
-  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "sem-suporte") estadoTexto = D.texto("ligadoSemSuporte");
+  /* O mesmo vale para os avisos de mensagens (spec do chat, seção 4). */
+  var deAviso = qual === "lembretes" || qual === "mensagens";
+  if (deAviso && ligado && nexusEstadoDoAviso() === "pendente") estadoTexto = D.texto("ligadoSemPermissao");
+  if (deAviso && ligado && nexusEstadoDoAviso() === "bloqueado") estadoTexto = D.texto("ligadoBloqueado");
+  if (deAviso && ligado && nexusEstadoDoAviso() === "sem-suporte") estadoTexto = D.texto("ligadoSemSuporte");
   texto.textContent = salvando ? D.texto("salvando") : estadoTexto;
   if (qual === "lembretes") pintarAparelho();
 }
@@ -165,8 +167,11 @@ async function carregar() {
   nexusLembrarEscolhaNota(estado.notas ? "yes" : "no");
   var avisos = r[2].dados || {};
   estado.lembretes = !!(avisos.reminders && avisos.reminders.choice === "yes");
+  /* Só «yes» liga. null (nunca escolheu, ou servidor sem a migração 010) = desligado. */
+  estado.mensagens = !!(avisos.messages && avisos.messages.choice === "yes");
   pintarInterruptor("notas", estado.notas, false);
   pintarInterruptor("lembretes", estado.lembretes, false);
+  pintarInterruptor("mensagens", estado.mensagens, false);
   mostrarVista("dados");
 }
 
@@ -211,12 +216,14 @@ async function alternar(qual, confirmado) {
   pintarInterruptor(qual, estado[qual], true);
   var resultado;
   if (qual === "notas") resultado = queroLigar ? await NexusApi.guardarNotas() : await NexusApi.naoGuardarNotas();
+  else if (qual === "mensagens") resultado = await NexusApi.mudarAvisosDeMensagem(queroLigar);
   else resultado = await NexusApi.mudarLembretes(queroLigar);
   estado.ocupado[qual] = false;
   if (resultado.sessaoEncerrada) return;
+  var chaveServidor = qual === "mensagens" ? "messages" : "reminders";
   var confirmou = resultado.ok && (qual === "notas"
     ? resultado.dados && resultado.dados.note_consent === (queroLigar ? "yes" : "no")
-    : resultado.dados && resultado.dados.reminders && resultado.dados.reminders.choice === (queroLigar ? "yes" : "no"));
+    : resultado.dados && resultado.dados[chaveServidor] && resultado.dados[chaveServidor].choice === (queroLigar ? "yes" : "no"));
   if (!confirmou) {
     pintarInterruptor(qual, estado[qual], false);
     mostrarAviso(aviso, "falha", resultado.semRede ? D.texto("salvarSemRede") : D.texto("salvarErro"));
@@ -230,7 +237,8 @@ async function alternar(qual, confirmado) {
     /* O servidor apagou as notas guardadas: nenhuma cópia fica no aparelho. */
     nexusLembrarEscolhaNota("no");
     chave = resultado.dados.notes_deleted > 0 ? "notasDesligouApagou" : "notasDesligou";
-  } else chave = queroLigar ? "lembretesLigou" : "lembretesDesligou";
+  } else if (qual === "mensagens") chave = queroLigar ? "mensagensLigou" : "mensagensDesligou";
+  else chave = queroLigar ? "lembretesLigou" : "lembretesDesligou";
   if (qual === "notas" && queroLigar) nexusLembrarEscolhaNota("yes");
   mostrarAviso(aviso, "ok", D.texto(chave));
 }
@@ -357,6 +365,7 @@ function iniciar() {
   document.getElementById("btn-tentar").addEventListener("click", carregar);
   document.getElementById("sw-notas").addEventListener("click", function () { tocarInterruptor("notas"); });
   document.getElementById("sw-lembretes").addEventListener("click", function () { tocarInterruptor("lembretes"); });
+  document.getElementById("sw-mensagens").addEventListener("click", function () { tocarInterruptor("mensagens"); });
   document.getElementById("btn-permitir-avisos").addEventListener("click", permitirAvisos);
   document.getElementById("btn-cancelar-desligar").addEventListener("click", function () { fecharDialogoDesligar(false); });
   document.getElementById("btn-confirmar-desligar").addEventListener("click", function () { fecharDialogoDesligar(true); });

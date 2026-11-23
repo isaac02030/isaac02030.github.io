@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Conversa — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="comunidade.css">
+  <link rel="stylesheet" href="conversa.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
+  <!-- Conversa do Duo/Rival (spec da Clara, visual/spec-chat-duo.md). Mora na Missão:
+       a aba Missão fica ativa. Sem urso, sem «visto», sem «digitando». Luz: só o
+       botão «Enviar» e a barrinha da aba (2 de 4). -->
+  <main class="pagina-com-abas tela-conversa" id="conteudo">
+    <noscript>
+      <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir a conversa.</p>
+    </noscript>
+
+    <div class="topo-conversa">
+      <a class="btn btn-texto voltar-conversa" id="voltar" href="missao.html" data-texto-chat="voltar"></a>
+      <h1 class="titulo-conversa" id="titulo" tabindex="-1" data-texto-chat="tituloSemNome"></h1>
+      <p class="missao-conversa" id="missao-linha" hidden></p>
+    </div>
+
+    <section class="vista" id="vista-carregando" aria-live="polite">
+      <p class="carregando-texto" data-texto-chat="abrindo"></p>
+    </section>
+
+    <section class="vista" id="vista-erro" hidden>
+      <div id="alerta-abrir" class="alerta" role="alert"></div>
+      <button type="button" class="btn btn-secundario" id="btn-tentar" data-texto-chat="tentarDeNovo"></button>
+    </section>
+
+    <!-- Sem Duo/Rival ativo: a conversa não abre. -->
+    <section class="vista" id="vista-sem-par" hidden>
+      <p class="aviso-texto" data-texto-chat="semPar"></p>
+      <a class="btn btn-secundario" id="link-missao" href="missao.html" data-texto-chat="voltarMissao"></a>
+    </section>
+
+    <section class="vista vista-conversa" id="vista-conversa" hidden>
+      <div id="aviso-conversa" class="alerta" role="status" hidden></div>
+      <!-- As recebidas são anunciadas com calma; o foco nunca é roubado. -->
+      <ol class="fio" id="fio" role="log" aria-live="polite" aria-relevant="additions" data-rotulo-chat="mensagens"></ol>
+      <p class="fio-vazio" id="fio-vazio" data-texto-chat="vazio" hidden></p>
+      <button type="button" class="btn btn-texto ir-novas" id="ir-novas" data-texto-chat="irParaNovas" hidden></button>
+
+      <form class="compositor" id="form-mensagem" method="post" action="#enviar" novalidate>
+        <label class="compositor-rotulo" for="campo-mensagem" data-texto-chat="campoRotulo"></label>
+        <textarea id="campo-mensagem" name="content" rows="1" autocomplete="off" autocapitalize="sentences" aria-describedby="contador-mensagem erro-mensagem"></textarea>
+        <div class="compositor-linha">
+          <p class="contador" id="contador-mensagem">0 de 280</p>
+          <button type="submit" class="btn btn-primario btn-luz btn-enviar" id="btn-enviar" aria-disabled="true" data-texto-chat="enviar"></button>
+        </div>
+        <p class="erro-campo" id="erro-mensagem" role="alert" hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <!-- Opções de uma mensagem da outra pessoa (folha de baixo; Esc fecha). -->
+  <dialog class="folha" id="folha-opcoes" aria-labelledby="titulo-opcoes">
+    <h2 class="folha-titulo" id="titulo-opcoes" data-texto-chat="opcoesTitulo"></h2>
+    <div class="opcoes-lista">
+      <button type="button" class="opcao" id="opcao-denunciar" data-texto-chat="denunciarMensagem"></button>
+      <button type="button" class="opcao" id="opcao-bloquear" data-texto-chat="bloquear"></button>
+    </div>
+    <div class="folha-botoes">
+      <button type="button" class="btn btn-secundario" id="btn-fechar-opcoes" data-texto-chat="cancelar"></button>
+    </div>
+  </dialog>
+
+  <!-- Denúncia de uma mensagem: os mesmos 5 motivos e o comentário de até 280 da denúncia de posts. -->
+  <dialog class="folha" id="folha-denuncia" aria-labelledby="titulo-denuncia">
+    <form class="formulario" id="form-denuncia" method="post" action="#denunciar" novalidate>
+      <fieldset class="motivos" id="motivos">
+        <legend class="folha-titulo" id="titulo-denuncia" data-texto-comunidade="denunciaTitulo"></legend>
+      </fieldset>
+      <div class="campo">
+        <label for="detalhes"><span data-texto-comunidade="explicarRotulo"></span> <span class="opcional" data-texto-comunidade="explicarOpcional"></span></label>
+        <textarea id="detalhes" name="details" rows="3" maxlength="280" aria-describedby="detalhes-contador detalhes-aviso"></textarea>
+        <p class="contador" id="detalhes-contador">0 de 280</p>
+        <p class="so-leitor" id="detalhes-aviso" aria-live="polite"></p>
+      </div>
+      <div id="alerta-denuncia" class="alerta" role="alert" hidden></div>
+      <div class="folha-botoes">
+        <button type="submit" class="btn btn-primario" id="btn-enviar-denuncia" aria-busy="false" disabled>
+          <span class="btn-rotulo" data-texto-comunidade="enviarDenuncia"></span>
+        </button>
+        <button type="button" class="btn btn-secundario" id="btn-cancelar-denuncia" data-texto-comunidade="cancelar"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Bloquear: «Cancelar» primeiro e com o foco; «Bloquear» em contorno, nunca cheio. -->
+  <dialog class="confirmacao" id="dialogo-bloquear" aria-labelledby="titulo-bloquear" aria-describedby="texto-bloquear">
+    <h2 class="pergunta" id="titulo-bloquear" data-texto-chat="bloquearTitulo"></h2>
+    <p class="explica" id="texto-bloquear"></p>
+    <div id="alerta-bloquear" class="alerta" role="alert" hidden></div>
+    <div class="folha-botoes">
+      <button type="button" class="btn btn-primario" id="btn-cancelar-bloquear" data-texto-chat="cancelar"></button>
+      <button type="button" class="btn btn-contorno-perigo" id="btn-confirmar-bloquear" aria-busy="false"><span class="btn-rotulo" data-texto-chat="bloquearConfirmar"></span></button>
+    </div>
+  </dialog>
+
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="comunidade-textos.js"></script>
+  <script src="chat-textos.js"></script>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="nota-limite.js"></script>
+  <script src="conversa.js"></script>
+</body>
+</html>

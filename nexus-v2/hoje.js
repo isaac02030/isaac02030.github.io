@@ -885,6 +885,27 @@ async function carregar() {
     return;
   }
   abrirModelo(modelo, false);
+  pintarMensagemNova(missao, meu);
+}
+
+/* Chat: «Mensagem nova de [apelido].» só quando a outra pessoa escreveu
+   depois da última vez que a conversa foi aberta neste aparelho. Sem par,
+   sem mensagem nova ou com erro: nada aparece (Hoje fica igual). */
+async function pintarMensagemNova(missao, meu) {
+  var linha = document.getElementById("linha-mensagem");
+  var X = window.NexusChat;
+  linha.hidden = true;
+  linha.textContent = "";
+  if (!X || !X.temPar(missao) || semRedeAgora()) return;
+  var lista = await NexusApi.listarMensagens(missao.id);
+  if (meu !== ciclo || !lista.ok || !lista.dados || !Array.isArray(lista.dados.messages)) return;
+  if (X.contarNovas(missao.id, lista.dados.messages) < 1) return;
+  var nome = X.nomeDoOutro(missao);
+  if (!nome) return;
+  var extra = NexusAbas.busca(["tema", "cenario", "rede"]);
+  linha.href = "conversa.html" + (extra ? extra + "&" : "?") + "missao=" + encodeURIComponent(missao.id);
+  linha.textContent = X.preencher(X.TEXTOS.mensagemNova, { nome: nome });
+  linha.hidden = false;
 }
 
 function atualizarBarra() {

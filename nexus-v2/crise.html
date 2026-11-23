@@ -153,6 +153,7 @@
   </main>
   <script src="abas.js"></script>
   <script src="comunidade-textos.js"></script>
+  <script src="chat-textos.js"></script>
   <script>
     (function () {
       var linha = document.getElementById("linha-denuncia");
@@ -164,6 +165,12 @@
       }
       if (linha && de === "denuncia" && window.NexusComunidade) {
         linha.textContent = window.NexusComunidade.TEXTOS.denunciaCrise;
+        linha.hidden = false;
+      }
+      /* Chat (spec do chat, seção 2): a mensagem não foi enviada. Só esta
+         linha acima dos números; os números e o resto da tela não mudam. */
+      if (linha && de === "chat" && window.NexusChat) {
+        linha.textContent = window.NexusChat.TEXTOS.criseLinha;
         linha.hidden = false;
       }
     })();
@@ -189,6 +196,21 @@
     }
     /* A missão pede login: quem não está logado volta para a entrada. */
     if (voltar) voltar.href = (logado ? "missao.html" : "./") + NexusAbas.busca(["tema", "cenario", "rede"]);
+    /* Vindo do chat: «Voltar à conversa» (o campo de lá volta vazio). */
+    (function () {
+      var params;
+      try {
+        params = new URLSearchParams(location.search);
+      } catch (erro) {
+        return;
+      }
+      var doChat = params.get("de") === "chat" || params.get("volta") === "conversa";
+      var missao = params.get("missao") || "";
+      if (!voltar || !logado || !doChat || !/^[1-9]\d{0,9}$/.test(missao) || !window.NexusChat) return;
+      var extra = NexusAbas.busca(["tema", "cenario", "rede"]);
+      voltar.href = "conversa.html" + (extra ? extra + "&" : "?") + "missao=" + missao;
+      voltar.textContent = window.NexusChat.TEXTOS.voltarConversa;
+    })();
     NexusAbas.focar(document.getElementById("titulo"));
     NexusAbas.concluirRolagem();
     if ("serviceWorker" in navigator) {

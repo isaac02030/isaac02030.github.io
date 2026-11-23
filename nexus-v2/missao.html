@@ -54,6 +54,8 @@
       </noscript>
 
       <p class="sobretitulo" id="sobretitulo" tabindex="-1">Sua missão</p>
+      <!-- Depois de bloquear no chat: «Pessoa bloqueada.» (só depois do servidor). -->
+      <div id="aviso-missao" class="alerta" role="status" hidden></div>
 
       <section class="vista" id="vista-carregando" aria-live="polite">
         <p class="carregando">
@@ -100,6 +102,12 @@
         </section>
         <div id="aviso-placar" class="alerta alerta-rede" role="status" hidden></div>
 
+        <!-- Chat do Duo/Rival: a conversa mora aqui (spec da Clara). Só com par ativo. -->
+        <div class="bloco-conversa" id="bloco-conversa" hidden>
+          <a class="btn btn-secundario" id="btn-conversa" href="conversa.html" data-texto-chat="abrirConversa"></a>
+          <p class="novas-conversa" id="novas-conversa" hidden></p>
+        </div>
+
         <div class="convites" id="convites">
           <button type="button" class="btn btn-secundario" id="btn-duo">Convidar para Duo</button>
           <button type="button" class="btn btn-secundario" id="btn-rival">Convidar para Rival</button>
@@ -135,6 +143,7 @@
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="dias-da-missao.js"></script>
+  <script src="chat-textos.js"></script>
   <script>
     (function () {
       var host = location.hostname;

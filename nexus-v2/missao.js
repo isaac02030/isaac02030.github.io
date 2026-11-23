@@ -320,7 +320,9 @@ function mostrarAviso(el, tipo, textoAviso) {
   paragrafo.textContent = textoAviso;
   var desenho = tipo === "rede"
     ? "M12 20h.01M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 4.2-2.2M19 12.6a10 10 0 0 0-2-.9M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-11.2-3.7M3 3l18 18"
-    : "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16.5h.01";
+    : (tipo === "ok"
+      ? "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.6 2.6L16.5 9"
+      : "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5M12 16.5h.01");
   el.className = "alerta alerta-" + tipo;
   el.replaceChildren(icone(desenho), paragrafo);
   el.hidden = false;
@@ -456,6 +458,49 @@ function pintar(modelo) {
     campo.value = "";
   }
   document.getElementById("aviso-copia").textContent = "";
+}
+
+/* Chat do Duo/Rival: «Abrir a conversa» só com par ativo. «2 novas» conta,
+   neste aparelho, as mensagens da outra pessoa depois da última vez que a
+   conversa foi aberta (não é «visto»: nada disso vai ao servidor). */
+var cicloConversa = 0;
+async function pintarConversa(modelo, missao) {
+  var meu = ++cicloConversa;
+  var bloco = document.getElementById("bloco-conversa");
+  var novas = document.getElementById("novas-conversa");
+  var X = window.NexusChat;
+  novas.hidden = true;
+  novas.textContent = "";
+  var ativa = modelo.status === "active" || modelo.status === "";
+  if (!X || !missao || !X.temPar(missao) || !ativa) {
+    bloco.hidden = true;
+    return;
+  }
+  bloco.hidden = false;
+  var extra = NexusAbas.busca(["tema", "cenario", "rede"]);
+  document.getElementById("btn-conversa").href = "conversa.html" + (extra ? extra + "&" : "?") + "missao=" + encodeURIComponent(modelo.id);
+  if (semRedeAgora()) return;
+  var lista = await NexusApi.listarMensagens(modelo.id);
+  if (meu !== cicloConversa || !lista.ok || !lista.dados || !Array.isArray(lista.dados.messages)) return;
+  var n = X.contarNovas(modelo.id, lista.dados.messages);
+  if (n > 0) {
+    novas.textContent = n === 1 ? X.TEXTOS.nova : X.preencher(X.TEXTOS.novas, { n: n });
+    novas.hidden = false;
+  }
+}
+
+/* «Pessoa bloqueada.»: a conversa já confirmou com o servidor antes de vir para cá. */
+function avisoDeBloqueio() {
+  var marca = "";
+  try {
+    marca = sessionStorage.getItem("nexus_v2_aviso_missao") || "";
+    sessionStorage.removeItem("nexus_v2_aviso_missao");
+  } catch (erro) {
+    marca = "";
+  }
+  if (marca === "bloqueio" && window.NexusChat) {
+    mostrarAviso(document.getElementById("aviso-missao"), "ok", window.NexusChat.TEXTOS.bloqueada);
+  }
 }
 
 function abrirModelo(modelo) {
@@ -700,6 +745,7 @@ async function carregar() {
   aplicarLink(base);
   guardarCache(base);
   abrirModelo(base);
+  pintarConversa(base, missao);
 }
 
 function atualizarBarra() {
@@ -718,6 +764,8 @@ function aplicarTextosDosDias() {
 
 function iniciar() {
   aplicarTextosDosDias();
+  if (window.NexusChat) window.NexusChat.aplicar(document);
+  avisoDeBloqueio();
   window.NEXUS_CENARIO = cenarioDaPagina();
   NexusAbas.montar("missao");
   document.getElementById("btn-tentar").addEventListener("click", carregar);

@@ -113,6 +113,17 @@
               <p class="dica" id="lembretes-sem-suporte" data-texto-dados="lembretesSemSuporte" hidden></p>
               <button type="button" class="btn btn-secundario btn-bloco" id="btn-permitir-avisos" data-texto-dados="permitirAvisos" hidden></button>
             </li>
+            <!-- Aviso de mensagem nova do chat (migração 010): desligado até o servidor dizer «sim». -->
+            <li class="linha-interruptor">
+              <button type="button" class="interruptor" id="sw-mensagens" role="switch" aria-checked="false" aria-labelledby="mensagens-rotulo" aria-describedby="mensagens-estado mensagens-apoio">
+                <span class="interruptor-textos">
+                  <span class="interruptor-rotulo" id="mensagens-rotulo" data-texto-dados="mensagensRotulo"></span>
+                  <span class="interruptor-estado" id="mensagens-estado" data-texto-dados="desligado"></span>
+                </span>
+                <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+              </button>
+              <p class="dica" id="mensagens-apoio" data-texto-dados="mensagensApoio"></p>
+            </li>
             <!-- Novidades por e-mail: escondido de propósito até existir envio (decisão de 22/11, PR 29). -->
           </ul>
         </section>
