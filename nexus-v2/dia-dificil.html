@@ -88,6 +88,8 @@
           <p id="nota-contador" class="contador">0 de 280</p>
           <p id="nota-limite-aviso" class="so-leitor" aria-live="polite"></p>
           <p id="nota-ajuda" class="dica">Pode deixar em branco.</p>
+          <!-- Mesma linha do check-in (escolha lida no servidor); sem saber, não aparece. -->
+          <p id="nota-guarda" class="dica" hidden></p>
         </div>
         <div id="alerta" class="alerta" role="alert" hidden></div>
         <button type="submit" class="btn btn-primario btn-grande" id="btn-registrar" data-texto="Fiz o mínimo" data-carregando="Registrando…" aria-busy="false">
@@ -105,6 +107,7 @@
       <a class="btn btn-texto link-ajuda" id="link-ajuda" href="crise.html">Precisa de ajuda agora?</a>
     </footer>
   </main>
+  <script src="dados-textos.js"></script>
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="nota-limite.js"></script>

@@ -245,13 +245,23 @@
   min-height: 48px;
 }
 
-/* E-mail de privacidade: link sublinhado, alvo de 44 px de altura. */
+/* E-mail de privacidade numa linha própria, com o ponto final colado (o link
+   é inline, sem caixa atômica, então não há quebra antes do «.»). O espaço
+   acima e abaixo dá o alvo de 44 px e afasta o anel de foco da linha de cima. */
+.linha-email {
+  display: block;
+  padding-block: var(--space-3);
+}
+
 .link-email {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target);
+  display: inline;
+  padding-block: 12px;
   color: var(--accent-standout);
   text-decoration: underline;
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
+}
+
+.link-email:focus-visible {
+  outline-offset: 2px;
 }

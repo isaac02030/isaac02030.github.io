@@ -108,6 +108,8 @@ function pintarInterruptor(qual, ligado, salvando) {
   var estadoTexto = D.texto(ligado ? "ligado" : "desligado");
   /* Lembretes ligados num aparelho que ainda não permitiu avisos: dizer isso. */
   if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "pendente") estadoTexto = D.texto("ligadoSemPermissao");
+  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "bloqueado") estadoTexto = D.texto("ligadoBloqueado");
+  if (qual === "lembretes" && ligado && nexusEstadoDoAviso() === "sem-suporte") estadoTexto = D.texto("ligadoSemSuporte");
   texto.textContent = salvando ? D.texto("salvando") : estadoTexto;
   if (qual === "lembretes") pintarAparelho();
 }
@@ -337,7 +339,12 @@ function pintarContato() {
   link.className = "link-email";
   link.href = "mailto:" + email;
   link.textContent = email;
-  p.replaceChildren(document.createTextNode(partes[0] || ""), link, document.createTextNode(partes[1] || ""));
+  /* O endereço e o ponto final ficam juntos numa linha própria (não sobra
+     «.» sozinho a 200%); a linha dá respiro ao anel de foco. */
+  var linha = document.createElement("span");
+  linha.className = "linha-email";
+  linha.append(link, document.createTextNode(partes[1] || ""));
+  p.replaceChildren(document.createTextNode((partes[0] || "").replace(/\s+$/, "")), linha);
 }
 
 function iniciar() {
