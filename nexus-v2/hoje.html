@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
   <link rel="stylesheet" href="hoje.css">
+  <link rel="stylesheet" href="trilha.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -76,7 +77,8 @@
       <img class="urso-hoje so-escuro" id="urso-hoje" src="icons/urso-firme.svg" alt="" aria-hidden="true" width="76" height="85">
       <div id="aviso-volta" class="alerta" role="status" aria-live="polite" aria-atomic="true" hidden></div>
       <p class="dia-numero" id="dia-numero"></p>
-      <div class="regua" id="regua" aria-hidden="true"></div>
+      <!-- Trilha de luz: um resumo só para o leitor de tela (role="img"). -->
+      <ol class="trilha30" id="regua" role="img"></ol>
       <article class="cartao-missao" aria-labelledby="titulo-missao">
         <h2 class="titulo-missao" id="titulo-missao"></h2>
         <div id="bloco-minimo">
@@ -97,7 +99,7 @@
 
     <section class="vista" id="vista-recuperacao" aria-labelledby="titulo-recuperacao" hidden>
       <p class="dia-numero" id="dia-numero-recuperacao"></p>
-      <div class="regua" id="regua-recuperacao" aria-hidden="true"></div>
+      <ol class="trilha30" id="regua-recuperacao" role="img"></ol>
       <h1 class="hoje-titulo" id="titulo-recuperacao" tabindex="-1">Hoje ainda dá para voltar</h1>
       <p class="fato-falta" id="fato-falta" hidden></p>
       <p class="calor" id="calor"></p>
@@ -109,6 +111,7 @@
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="dias-da-missao.js"></script>
+  <script src="trilha.js"></script>
   <script src="hoje.js"></script>
 </body>
 </html>

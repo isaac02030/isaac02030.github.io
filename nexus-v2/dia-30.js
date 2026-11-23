@@ -17,6 +17,9 @@ var TEXTO_ERRO_CONTINUAR = "Não foi possível abrir os próximos 36 dias. Tente
 var TEXTO_SEM_REDE = "Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.";
 var TEXTO_CUMPRIU = "Palavra cumprida neste ciclo.";
 var TEXTO_FALHAS = "Houve falhas, e você chegou ao fim mesmo assim.";
+/* Trilha (spec da Clara, seção 8): a segunda frase diz só o que é verdade. */
+var TEXTO_UMA_FALTA = "Houve uma falta, e você chegou ao fim mesmo assim.";
+var TEXTO_FALTAS = "Houve {n} faltas, e você chegou ao fim mesmo assim.";
 var TEXTO_CONTINUAR = "Continuar mais 36 dias";
 var TEXTO_ABRINDO = "Abrindo…";
 var ciclo = 0;
@@ -241,7 +244,9 @@ function guardarCache(modelo) {
       duracao: modelo.duracao,
       registrados: modelo.registrados,
       dias: modelo.dias,
-      dificeis: modelo.dificeis
+      dificeis: modelo.dificeis,
+      diasSemana: modelo.diasSemana || null,
+      semanaDia1: typeof modelo.semanaDia1 === "number" ? modelo.semanaDia1 : null
     }));
   } catch (erro) {}
 }
@@ -293,48 +298,62 @@ function lerCache() {
   return lerCacheProprio() || lerCacheDoHoje();
 }
 
-/* A mesma grade do Hoje: feito preenchido, falta com o traço.
-   Um nome só, para o leitor. As marcas não recebem foco. */
+/* A trilha inteira e real (trilha.js): com as faltas e os dias livres.
+   O último quadrado recebe o único halo maior da tela. */
+function dadosDaTrilha(modelo) {
+  var duracao = modelo.duracao;
+  var daMissao = NexusDias.verificador(modelo.diasSemana || null, modelo.semanaDia1);
+  return {
+    duracao: duracao,
+    hoje: duracao + 1,
+    feitos: modelo.dias || [],
+    dificeis: Array.isArray(modelo.dificeis) ? modelo.dificeis : [],
+    ehLivre: function (dia) { return !daMissao(dia); },
+    hojeFeito: true
+  };
+}
+
+function plural(n, um, outros) {
+  return n + " " + (n === 1 ? um : outros);
+}
+
 function pintarGrade(modelo) {
   var caixa = document.getElementById("marcas");
-  if (!caixa) return;
-  var duracao = modelo.duracao;
-  var feitos = {};
-  var dificeis = {};
-  var temDificeis = Array.isArray(modelo.dificeis);
-  (modelo.dias || []).forEach(function (dia) { feitos[dia] = true; });
-  if (temDificeis) {
-    modelo.dificeis.forEach(function (dia) {
-      if (dia >= 1 && dia <= duracao) dificeis[dia] = true;
-    });
-  }
-  caixa.className = "marcas";
-  caixa.setAttribute("role", "img");
-  caixa.setAttribute("aria-label", modelo.registrados + " de " + duracao + " dias registrados");
-  caixa.removeAttribute("tabindex");
-  caixa.replaceChildren();
-  for (var dia = 1; dia <= duracao; dia++) {
-    var marca = document.createElement("span");
-    marca.className = "marca-dia";
-    marca.setAttribute("aria-hidden", "true");
-    var miolo = document.createElement("span");
-    miolo.className = "marca-miolo";
-    miolo.setAttribute("aria-hidden", "true");
-    var feito = !!feitos[dia];
-    var dificil = temDificeis && !!dificeis[dia];
-    if (dificil) miolo.classList.add("dificil");
-    if (feito) miolo.classList.add("feito");
-    else if (!dificil) miolo.classList.add("falta");
-    marca.appendChild(miolo);
-    caixa.appendChild(marca);
-  }
+  if (!caixa) return null;
+  var dados = dadosDaTrilha(modelo);
+  NexusTrilha.pintar(caixa, dados);
+  var n = NexusTrilha.contagem(dados);
+  /* «26 feitos · 2 difíceis · 2 livres · 1 falta»: só o que existe. */
+  var partes = [plural(n.feitos, "feito", "feitos")];
+  if (n.dificeis) partes.push(plural(n.dificeis, "difícil", "difíceis"));
+  if (n.livres) partes.push(plural(n.livres, "livre", "livres"));
+  if (n.faltas) partes.push(plural(n.faltas, "falta", "faltas"));
+  document.getElementById("contagem").textContent = partes.join(" · ");
+  /* Legenda: só os estados que aparecem na trilha. */
+  var itens = [["lf", "Feito", n.feitos], ["ld", "Dia difícil", n.dificeis], ["ll", "Dia livre", n.livres], ["lx", "Falta", n.faltas]];
+  var legenda = document.getElementById("legenda");
+  legenda.replaceChildren.apply(legenda, itens.filter(function (i) { return i[2] > 0; }).map(function (i) {
+    var li = document.createElement("li");
+    var marca = document.createElement("i");
+    marca.className = i[0];
+    li.append(marca, document.createTextNode(i[1]));
+    return li;
+  }));
+  return n;
+}
+
+function textoDoRitmo(faltas) {
+  if (!faltas) return TEXTO_CUMPRIU;
+  if (faltas === 1) return TEXTO_UMA_FALTA;
+  return TEXTO_FALTAS.replace("{n}", String(faltas));
 }
 
 function pintarFim(modelo) {
   modeloAtual = modelo;
-  pintarGrade(modelo);
+  var n = pintarGrade(modelo);
   document.getElementById("fato").textContent = textoDoFato(modelo.registrados, modelo.duracao);
-  document.getElementById("ritmo").textContent = modelo.registrados >= modelo.duracao ? TEXTO_CUMPRIU : TEXTO_FALHAS;
+  /* Dia livre não é falta: a frase segue a contagem real da trilha. */
+  document.getElementById("ritmo").textContent = n ? textoDoRitmo(n.faltas) : (modelo.registrados >= modelo.duracao ? TEXTO_CUMPRIU : TEXTO_FALHAS);
   esconderAviso(document.getElementById("aviso-continuar"));
   var botao = document.getElementById("btn-continuar");
   botao.disabled = false;
@@ -411,7 +430,10 @@ function modeloDe(missao, progresso) {
     duracao: duracao,
     registrados: resumo.registrados,
     dias: resumo.dias,
-    dificeis: resumo.dificeis
+    dificeis: resumo.dificeis,
+    /* Dias da missão (dias livres na trilha). Sem escolha, todo dia é da missão. */
+    diasSemana: Array.isArray(missao.mission_weekdays) ? missao.mission_weekdays : null,
+    semanaDia1: NexusDias.diaDaSemana(missao.started_at)
   };
 }
 
