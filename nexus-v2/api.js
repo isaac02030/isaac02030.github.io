@@ -380,6 +380,36 @@ var NexusApi = {
   mudarLembretes: function (ligado) {
     return nexusPedir("/api/users/me/notification-preferences", { reminders: ligado === true }, { metodo: "PUT", auth: true });
   },
+  /* Aviso de mensagem nova do chat (migração 010 do servidor). Antes dela,
+     GET devolve messages: null e o PUT responde 503. */
+  mudarAvisosDeMensagem: function (ligado) {
+    return nexusPedir("/api/users/me/notification-preferences", { messages: ligado === true }, { metodo: "PUT", auth: true });
+  },
+  /* Chat do Duo/Rival (PRs 32 a 35 do servidor). */
+  /* GET /api/messages/:missionId → { mission_id, messages: [...] }: só o par
+     atual; sem par ativo, a lista vem vazia. 403 sem acesso. */
+  listarMensagens: function (missaoId) {
+    return nexusPedir(caminhoComCenario("/api/messages/" + encodeURIComponent(missaoId)), null, { metodo: "GET", auth: true });
+  },
+  /* POST /api/messages com { mission_id, content }. 201 { message }; 200 com
+     crisis: true (não foi enviada; a tela abre a ajuda); 400, 403, 429. */
+  enviarMensagem: function (missaoId, texto) {
+    return nexusPedir(caminhoComCenario("/api/messages"), { mission_id: missaoId, content: texto }, { metodo: "POST", auth: true });
+  },
+  /* POST /api/messages/:messageId/report com { reason, details? }. */
+  denunciarMensagem: function (mensagemId, motivo, detalhes) {
+    var corpo = { reason: motivo };
+    if (typeof detalhes === "string" && detalhes.trim()) corpo.details = detalhes.trim();
+    return nexusPedir(caminhoComCenario("/api/messages/" + encodeURIComponent(mensagemId) + "/report"), corpo, { metodo: "POST", auth: true });
+  },
+  /* POST /api/messages/:missionId/block: encerra o par e impede um novo. */
+  bloquearPar: function (missaoId) {
+    return nexusPedir(caminhoComCenario("/api/messages/" + encodeURIComponent(missaoId) + "/block"), null, { metodo: "POST", auth: true });
+  },
+  /* Só admin: denúncias do chat (trecho, motivo e comentário, sem nomes). */
+  denunciasDoChat: function () {
+    return nexusPedir(caminhoComCenario("/api/messages/admin/reports"), null, { metodo: "GET", auth: true });
+  },
   /* DELETE /api/users/me com { password } (PR 26). 200 { deleted: true };
      403 wrong_password ou admin_account; 400 password_required; 429. */
   excluirConta: function (senha) {

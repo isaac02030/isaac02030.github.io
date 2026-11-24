@@ -221,6 +221,29 @@
    - DELETE /api/communities/admin/posts/:id → { deleted: true }; não existe → 404
    - ?cenario=equipe-vazia (lista vazia), equipe-indisponivel (503), equipe-erro-acao (500 na ação)
 
+   Chat do Duo/Rival (PRs 32 a 35 do servidor; ?cenario= na página):
+   - GET /api/messages/:missionId → { mission_id, messages } (só com par ativo;
+     sem par, lista vazia; missão de outra pessoa → 403)
+   - POST /api/messages { mission_id, content } → 201 { message }; vazio ou
+     não texto → 400; acima de 280 → 400; sem par → 400
+   - POST /api/messages/:id/report { reason, details? } → 201; motivo fora da lista → 400
+   - POST /api/messages/:missionId/block → 200 { blocked: true }; depois disso a
+     missão do cenário fica em Solo
+   - GET /api/messages/admin/reports → só admin@exemplo.com; os outros → 403
+   O mock não lê a mensagem para achar crise: o sinal vem só do cenário.
+   - chat               Duo com Ana, 3 mensagens de exemplo
+   - chat-vazio         Duo com Ana, sem mensagens
+   - chat-sem-par       Solo (a conversa não abre)
+   - chat-parceiro      Duo na missão da Ana (bloquear avisa que você sai da missão)
+   - chat-crise         o envio responde crisis: true (nada é gravado)
+   - chat-429           o envio responde 429 (limite da hora)
+   - chat-lento         o envio espera 8 segundos e grava
+   - chat-erro / chat-503   abrir a conversa responde 500 / 503
+   - chat-denuncia-409 / chat-denuncia-erro / chat-denuncia-crise
+   - chat-bloqueio-erro / chat-bloqueio-503
+   - equipe-chat-503    a lista de denúncias do chat responde 503
+   Avisos de mensagem: GET/PUT /api/users/me/notification-preferences com «messages».
+
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.
    Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
@@ -336,6 +359,21 @@ function faixaDeDias(ate, pular) {
 }
 
 var CENARIOS = {
+  /* Chat (base: Duo com Ana, dia 5). */
+  "chat": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2, 3], chat: true },
+  "chat-vazio": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true, chatVazio: true },
+  "chat-sem-par": { dia: 5, feitos: [1, 2, 3, 4], chat: true },
+  "chat-parceiro": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2, 3], chat: true, souParceiro: true },
+  "chat-crise": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-429": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-lento": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-erro": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-503": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-denuncia-409": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-denuncia-erro": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-denuncia-crise": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-bloqueio-erro": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
+  "chat-bloqueio-503": { dia: 5, feitos: [1, 2, 3, 4], modo: "parceiro", parNome: "Ana", parFeitos: [1, 2], chat: true },
   "nao-registrado": { dia: 4, feitos: [1, 3], dificeis: [1, 2], restantes: 2 },
   registrado: { dia: 4, feitos: [1, 3, 4], dificeis: [1, 2], restantes: 2, nota: "Li a página combinada." },
   "dificil-hoje": { dia: 4, feitos: [1, 3, 4], dificeis: [2, 4], restantes: 2, nota: "Li meia página, devagar." },
@@ -491,6 +529,107 @@ function chavePublicaVapid() {
 
 var CHAVE_PUBLICA = chavePublicaVapid();
 
+/* ---------- Chat do Duo/Rival (só teste local) ---------- */
+var chatMensagens = {};
+var chatBloqueados = {};
+var chatDenuncias = [];
+var chatProximoId = 100;
+var CHAT_MOTIVOS = ["perigoso", "ofensa", "improprio", "spam", "outro"];
+var CHAT_CRISE = "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.";
+
+function horaDeHoje(h, m) {
+  var d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d.toISOString();
+}
+
+function mensagensDoChat(email, nome, usuario, pacote) {
+  var chave = email + "|" + nome;
+  if (!chatMensagens[chave]) {
+    var spec = CENARIOS[nome] || {};
+    var par = (pacote && pacote.mission && (spec.souParceiro ? pacote.mission.user_name : pacote.mission.partner_name)) || "Ana";
+    chatMensagens[chave] = spec.chatVazio ? [] : [
+      { id: 1, mission_id: 7, sender_name: par, content: "Li as duas páginas antes do almoço. E você?", created_at: horaDeHoje(9, 12) },
+      { id: 2, mission_id: 7, sender_name: usuario.username, content: "Ainda não. Leio à noite.", created_at: horaDeHoje(9, 20) },
+      { id: 3, mission_id: 7, sender_name: par, content: "Combinado. Me conta depois.", created_at: horaDeHoje(9, 21) }
+    ];
+  }
+  return chatMensagens[chave];
+}
+
+function temParNoChat(missao) {
+  return !!missao && (missao.mode === "parceiro" || missao.mode === "rival") && !!missao.partner_name && missao.status === "active";
+}
+
+function responderChat(req, url, corpo) {
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var email = acesso.email;
+  var usuario = usuarios[email];
+  var cenario = nomeDoCenario(req);
+  var pacote = cenario && CENARIOS[cenario] ? montarCenario(cenario, usuario) : null;
+  var missao = pacote && pacote.mission ? pacote.mission : null;
+
+  if (url === "/api/messages/admin/reports" && req.method === "GET") {
+    if (email !== "admin@exemplo.com") return { status: 403, dados: { error: "Esta area esta disponivel apenas para o admin." } };
+    if (cenario === "equipe-chat-503") return { status: 503, dados: { error: "A moderação do chat ainda não está disponível: falta aplicar a migração 011." } };
+    var exemplo = [{ id: 1, message_id: 3, excerpt: "Combinado. Me conta depois.", reason: "spam", reason_label: "Propaganda ou spam", details: null, created_at: horaDeHoje(9, 30) }];
+    return { status: 200, dados: { reports: chatDenuncias.concat(exemplo) } };
+  }
+
+  var conversa = url.match(/^\/api\/messages\/(\d+)$/);
+  if (conversa && req.method === "GET") {
+    if (cenario === "chat-erro") return { status: 500, dados: { error: "Erro ao obter mensagens." } };
+    if (cenario === "chat-503") return { status: 503, dados: { error: "Esta parte ainda não está disponível." } };
+    if (!missao || String(missao.id) !== conversa[1]) return { status: 403, dados: { error: "Sem acesso a esta missao." } };
+    var lista = temParNoChat(missao) ? mensagensDoChat(email, cenario, usuario, pacote) : [];
+    return { status: 200, dados: { mission_id: Number(conversa[1]), messages: lista } };
+  }
+
+  if (url === "/api/messages" && req.method === "POST") {
+    var conteudo = corpo && corpo.content;
+    if (cenario === "chat-crise") return { status: 200, dados: { sent: false, crisis: true, crisis_level: "alto", message: CHAT_CRISE } };
+    if (conteudo != null && typeof conteudo !== "string") return { status: 400, dados: { error: "A mensagem precisa ser um texto. Escreva de novo e envie." } };
+    var texto = (conteudo || "").trim();
+    if (!texto || !corpo.mission_id) return { status: 400, dados: { error: "mission_id e content sao obrigatorios." } };
+    if (Array.from(texto).length > 280) return { status: 400, dados: { error: "A mensagem passou de 280 caracteres. Encurte um pouco e envie de novo." } };
+    if (!missao || String(missao.id) !== String(corpo.mission_id)) return { status: 403, dados: { error: "Sem acesso a esta missao." } };
+    if (!temParNoChat(missao)) return { status: 400, dados: { error: "A conversa só funciona enquanto o Duo ou o Rival estiver ativo." } };
+    if (cenario === "chat-429") return { status: 429, dados: { error: "Você enviou muitas mensagens nesta hora. Espere um pouco e envie de novo.", limit: 20, period: "hour" } };
+    var nova = { id: chatProximoId++, mission_id: missao.id, sender_name: usuario.username, content: texto, created_at: new Date().toISOString() };
+    var gravar = function () {
+      mensagensDoChat(email, cenario, usuario, pacote).push(nova);
+      return { status: 201, dados: { message: nova } };
+    };
+    if (cenario === "chat-lento") return new Promise(function (r) { setTimeout(function () { r(gravar()); }, 8000); });
+    return gravar();
+  }
+
+  var denuncia = url.match(/^\/api\/messages\/(\d+)\/report$/);
+  if (denuncia && req.method === "POST") {
+    if (cenario === "chat-denuncia-crise") return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+    if (!corpo || CHAT_MOTIVOS.indexOf(corpo.reason) === -1) return { status: 400, dados: { error: "Escolha um dos motivos da lista e envie de novo." } };
+    if (cenario === "chat-denuncia-409") return { status: 409, dados: { error: "Você já denunciou esta mensagem. Uma denúncia por pessoa já basta, obrigado.", already_reported: true } };
+    if (cenario === "chat-denuncia-erro") return { status: 500, dados: { error: "Não deu para enviar a denúncia agora. Tente de novo daqui a pouco." } };
+    var alvo = (chatMensagens[email + "|" + cenario] || []).find(function (m) { return String(m.id) === denuncia[1]; });
+    if (!alvo) return { status: 404, dados: { error: "Mensagem não encontrada nesta conversa." } };
+    if (alvo.sender_name === usuario.username) return { status: 400, dados: { error: "Você não pode denunciar a sua própria mensagem." } };
+    chatDenuncias.push({ id: chatDenuncias.length + 10, message_id: alvo.id, excerpt: alvo.content, reason: corpo.reason, details: typeof corpo.details === "string" ? corpo.details : null, created_at: new Date().toISOString() });
+    return { status: 201, dados: { reported: true, message: "Obrigado. Sua denúncia foi registrada." } };
+  }
+
+  var bloqueio = url.match(/^\/api\/messages\/(\d+)\/block$/);
+  if (bloqueio && req.method === "POST") {
+    if (cenario === "chat-bloqueio-erro") return { status: 500, dados: { error: "Não deu para bloquear agora. Tente de novo daqui a pouco." } };
+    if (cenario === "chat-bloqueio-503") return { status: 503, dados: { error: "O bloqueio ainda não está disponível. Tente de novo mais tarde." } };
+    if (!missao || String(missao.id) !== bloqueio[1]) return { status: 403, dados: { error: "Sem acesso a esta missao." } };
+    if (!temParNoChat(missao)) return { status: 400, dados: { error: "Você só pode bloquear a pessoa que está no seu par agora." } };
+    chatBloqueados[email + "|" + cenario] = true;
+    return { status: 200, dados: { blocked: true, message: "Pronto. O par foi encerrado e vocês não vão ser juntados de novo. A conversa sumiu para os dois." } };
+  }
+  return { status: 404, dados: { error: "Não encontrado." } };
+}
+
 function enviar(res, status, dados) {
   var corpo = JSON.stringify(dados);
   res.writeHead(status, {
@@ -630,7 +769,11 @@ function avisosDe(usuario) {
   var um = function (valor, em) {
     return { choice: valor === true ? "yes" : (valor === false ? "no" : null), decided_at: valor == null ? null : em };
   };
-  return { reminders: um(usuario.lembretes, usuario.lembretesEm), news: um(usuario.novidades, usuario.novidadesEm) };
+  return {
+    reminders: um(usuario.lembretes, usuario.lembretesEm),
+    news: um(usuario.novidades, usuario.novidadesEm),
+    messages: um(usuario.avisosMensagem, usuario.avisosMensagemEm)
+  };
 }
 
 /* Rotas de dados da pessoa (PR 26, 27 e 29). Devolve null se não é daqui. */
@@ -671,12 +814,13 @@ function responderDados(req, url, corpo) {
   if (avisos && metodo === "PUT") {
     var chaves = corpo && typeof corpo === "object" ? Object.keys(corpo) : [];
     var valido = chaves.length > 0 && chaves.every(function (k) {
-      return (k === "reminders" || k === "news") && typeof corpo[k] === "boolean";
+      return (k === "reminders" || k === "news" || k === "messages") && typeof corpo[k] === "boolean";
     });
     if (!valido) return { status: 400, dados: { error: "Escolha não reconhecida. Toque de novo no interruptor.", code: "preferences_invalid" } };
     if (email === "avisos-falha@exemplo.com") return { status: 500, dados: { error: "Não foi possível salvar. Tente de novo." } };
     if (typeof corpo.reminders === "boolean") { usuario.lembretes = corpo.reminders; usuario.lembretesEm = agora; }
     if (typeof corpo.news === "boolean") { usuario.novidades = corpo.news; usuario.novidadesEm = agora; }
+    if (typeof corpo.messages === "boolean") { usuario.avisosMensagem = corpo.messages; usuario.avisosMensagemEm = agora; }
     return { status: 200, dados: avisosDe(usuario) };
   }
   if (excluir) {
@@ -989,6 +1133,17 @@ function montarCenario(nome, usuario) {
     pair_started_at: partner ? inicio : null
   });
   if (spec.aguardando) mission.pending_invite = spec.aguardando;
+  /* Chat: depois de bloquear, o par acabou (a missão fica em Solo). */
+  if (chatBloqueados[usuario.email + "|" + nome]) {
+    mission.mode = "solo";
+    mission.partner_id = null;
+    mission.partner_name = null;
+    mission.pair_started_at = null;
+  } else if (spec.souParceiro && partner) {
+    /* Duo na missão da outra pessoa: ela é a dona, eu sou o par. */
+    mission.user_name = partner.name;
+    mission.partner_name = usuario.username;
+  }
   if (diasDaSemana) mission.mission_weekdays = diasDaSemana;
   var extraDias = extensoes[usuario.email + "|" + nome] || 0;
   if (extraDias > 0) {
@@ -1897,6 +2052,17 @@ var servidor = http.createServer(function (req, res) {
   }
 
   var url = req.url.split("?")[0];
+  if (url === "/api/messages" || url.indexOf("/api/messages/") === 0) {
+    var leituraChat = req.method === "POST" ? lerCorpo(req) : Promise.resolve({});
+    leituraChat.then(function (corpo) {
+      return responderChat(req, url, corpo);
+    }).then(function (resultado) {
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 400, { error: "A mensagem precisa ser um texto. Escreva de novo e envie." });
+    });
+    return;
+  }
   if (url === "/api/users/me/note-consent" || url === "/api/users/me/notification-preferences" || (url === "/api/users/me" && req.method === "DELETE")) {
     var leituraDados = (req.method === "GET") ? Promise.resolve({}) : lerCorpo(req);
     leituraDados.then(function (corpo) {

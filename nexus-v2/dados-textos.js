@@ -63,6 +63,11 @@
     /* NOVOS (mesmo molde dos de cima). */
     lembretesLigou: "Pronto. Você ligou os lembretes.",
     lembretesDesligou: "Pronto. Você desligou os lembretes.",
+    /* Aviso de mensagem do chat (spec do chat, seção 4): começa desligado. */
+    mensagensRotulo: "Avisos de mensagens do chat",
+    mensagensApoio: "O aviso não mostra o que foi escrito. Só diz que há mensagem nova.",
+    mensagensLigou: "Pronto. Você ligou os avisos de mensagens.",
+    mensagensDesligou: "Pronto. Você desligou os avisos de mensagens.",
     salvarErro: "Não foi possível salvar. Tente de novo.",
     salvarSemRede: "Sem internet. A mudança não foi salva.",
     carregarAvisosErro: "Não foi possível carregar suas escolhas de avisos. Tente de novo.",

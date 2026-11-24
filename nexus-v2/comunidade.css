@@ -463,3 +463,17 @@ body:has(.tela-comunidade) {
 .confirmacao .alerta {
   margin-bottom: var(--space-4);
 }
+
+/* Área da equipe: denúncias de mensagens do chat (só leitura). */
+.secao-chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.secao-chat-titulo {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}

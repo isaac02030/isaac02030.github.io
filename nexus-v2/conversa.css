@@ -1,0 +1,315 @@
+/* Conversa do Duo/Rival (spec da Clara, visual/spec-chat-duo.md; maquete 6).
+   Balões PLANOS: os meus em --accent chapado (aqua no escuro, pinho no claro)
+   com texto --accent-text; os da outra pessoa em --surface-2 com borda fina.
+   Sem degradê, sem halo e sem sombra nos balões. Luz na tela: só o botão
+   «Enviar» (.btn-luz) e a barrinha da aba Missão. Sem animação. */
+
+.tela-conversa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-top: calc(var(--space-4) + var(--safe-top));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom));
+  overflow-wrap: break-word;
+}
+
+.tela-conversa *,
+.tela-conversa *::before,
+.tela-conversa *::after {
+  animation: none;
+  transition: none;
+}
+
+.topo-conversa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.voltar-conversa {
+  margin-left: calc(var(--space-2) * -1);
+}
+
+.titulo-conversa {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.missao-conversa {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.tela-conversa .vista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.vista-conversa {
+  flex: 1 1 auto;
+}
+
+/* ---------- O fio ---------- */
+.fio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fio-vazio {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.separador-dia {
+  align-self: center;
+  margin: var(--space-1) 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 80%;
+}
+
+.mensagem.minha {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.mensagem.dela {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.balao {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font: 400 1.0625rem/1.4 var(--font);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.minha .balao {
+  border: 1.5px solid transparent;
+  border-bottom-right-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.dela .balao {
+  border: 1px solid var(--border-soft);
+  border-bottom-left-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Falha no envio: o balão vira contorno, sem preenchimento. */
+.minha.falhou .balao {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.mensagem-pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0 var(--space-3);
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.dela .mensagem-pe {
+  justify-content: flex-start;
+}
+
+.minha.falhou .mensagem-pe {
+  color: var(--text);
+}
+
+/* «…» de 44 px, mesmo com o ícone de 20. */
+.btn-opcoes {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--target);
+  min-height: var(--target);
+  margin: calc(var(--space-3) * -1) 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* 20 px no tamanho normal; cresce com o texto grande. */
+.btn-opcoes .icone {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tentar-de-novo {
+  min-height: var(--target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Texto grande: sem o subtítulo e com o título um passo menor. */
+.texto-grande .missao-conversa {
+  display: none;
+}
+
+.texto-grande .titulo-conversa {
+  font: var(--text-label);
+  font-size: 1.125rem;
+}
+
+.ir-novas {
+  align-self: center;
+}
+
+/* ---------- Campo (fica visível no pé, sem cobrir o fio) ---------- */
+.compositor {
+  position: sticky;
+  bottom: calc(var(--altura-abas) + var(--safe-bottom));
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 calc(var(--space-5) * -1);
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg);
+}
+
+.compositor-rotulo {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.compositor textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  max-height: calc(4 * 1.45em + 26px);
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  caret-color: var(--text);
+  resize: none;
+  overflow-y: auto;
+}
+
+.compositor-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.compositor .contador {
+  margin: 0;
+  text-align: start;
+}
+
+/* Passou de 280: o contador fica em --danger, em texto (não corta o que foi escrito). */
+.compositor .contador.passou {
+  color: var(--danger);
+}
+
+.btn-enviar {
+  width: auto;
+  min-width: 132px;
+  min-height: 48px;
+}
+
+/* Desativado (campo vazio): neutro e sem halo (revisão da Clara do PR 30).
+   --text-muted sobre --surface-2: 5,76:1 (claro) e 8,40:1 (escuro). */
+.tela-conversa .btn-enviar[aria-disabled="true"] {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ---------- Opções e bloquear ---------- */
+.opcoes-lista {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-4);
+}
+
+.opcao {
+  min-height: 56px;
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  background: transparent;
+  color: var(--text);
+  font: var(--text-body);
+  text-align: start;
+  cursor: pointer;
+}
+
+.opcao:first-child {
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.confirmacao .pergunta {
+  margin: 0 0 var(--space-2);
+  font: var(--text-title);
+}
+
+.confirmacao .explica {
+  margin: 0 0 var(--space-4);
+  font: var(--text-body);
+}
+
+/* «Bloquear»: contorno e texto --danger, nunca cheio. */
+.btn-contorno-perigo {
+  border: 1.5px solid var(--danger);
+  background: transparent;
+  color: var(--danger);
+}
+
+/* Mais contraste: sem halo nem degradê no botão (como a trilha). */
+@media (prefers-contrast: more) {
+  .tela-conversa .btn-luz {
+    background: var(--accent);
+    box-shadow: none;
+  }
+}

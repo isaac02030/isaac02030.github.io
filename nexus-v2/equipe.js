@@ -214,6 +214,69 @@ function pintarLista(dados) {
   focarTitulo();
 }
 
+/* ---------- Denúncias do chat (só leitura) ---------- */
+var cicloChat = 0;
+
+function itemDoChat(denuncia) {
+  var item = document.createElement("li");
+  item.className = "escondido";
+  if (denuncia.reason === "perigoso") {
+    item.classList.add("prioridade-alta");
+    item.appendChild(linhaComIcone("rotulo-prioridade", DESENHOS.prioridade, T.prioridadeAlta));
+  }
+  var texto = document.createElement("p");
+  texto.className = "escondido-trecho";
+  texto.textContent = trecho(denuncia.excerpt);
+  item.appendChild(texto);
+  var lista = document.createElement("ul");
+  lista.className = "denuncias";
+  var linha = document.createElement("li");
+  linha.className = "denuncia";
+  var motivo = document.createElement("span");
+  motivo.className = "denuncia-motivo";
+  motivo.textContent = rotuloDoMotivo(denuncia.reason) || rotuloDoMotivo("outro");
+  linha.appendChild(motivo);
+  if (typeof denuncia.details === "string" && denuncia.details.trim()) {
+    var comentario = document.createElement("q");
+    comentario.className = "denuncia-comentario";
+    comentario.textContent = denuncia.details.trim();
+    linha.appendChild(comentario);
+  }
+  lista.appendChild(linha);
+  item.appendChild(lista);
+  return item;
+}
+
+async function carregarChat() {
+  var meu = ++cicloChat;
+  var X = window.NexusChat;
+  var secao = document.getElementById("secao-chat");
+  var lista = document.getElementById("denuncias-chat");
+  var alerta = document.getElementById("alerta-chat");
+  var vazio = document.getElementById("chat-vazio");
+  if (!X) return;
+  secao.hidden = false;
+  lista.replaceChildren();
+  vazio.hidden = true;
+  esconderAviso(alerta);
+  if (semRedeAgora()) return mostrarAviso(alerta, "rede", T.semRede);
+  var resultado = await NexusApi.denunciasDoChat();
+  if (meu !== cicloChat) return;
+  if (!resultado.ok) {
+    if (resultado.semRede) return mostrarAviso(alerta, "rede", T.semRede);
+    if (resultado.status === 403) {
+      secao.hidden = true;
+      return;
+    }
+    return mostrarAviso(alerta, "falha", resultado.status === 503 ? X.TEXTOS.equipeIndisponivel : X.TEXTOS.equipeErro);
+  }
+  var denuncias = resultado.dados && Array.isArray(resultado.dados.reports) ? resultado.dados.reports : [];
+  denuncias.filter(function (d) { return d && d.id != null; }).forEach(function (d) {
+    lista.appendChild(itemDoChat(d));
+  });
+  vazio.hidden = lista.children.length > 0;
+}
+
 /* ---------- Confirmação ---------- */
 
 function definirOcupado(ligado) {
@@ -318,7 +381,11 @@ async function carregar() {
   }
   var resultado = await NexusApi.postsEscondidos();
   if (meu !== ciclo) return;
-  if (resultado.ok) return pintarLista(resultado.dados);
+  if (resultado.ok) {
+    pintarLista(resultado.dados);
+    carregarChat();
+    return;
+  }
   if (resultado.semRede) return abrirAviso("rede", T.semRede);
   if (sessaoVencida(resultado)) return irParaEntrada();
   if (resultado.status === 403) return abrirNegado();
@@ -330,6 +397,7 @@ function iniciar() {
   /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
   window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
+  if (window.NexusChat) window.NexusChat.aplicar(document);
   document.getElementById("btn-tentar").addEventListener("click", carregar);
   ligarConfirmacao();
   NexusAbas.iniciar(null);

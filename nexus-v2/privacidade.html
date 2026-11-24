@@ -53,11 +53,12 @@
           <li><a href="#secao-7">7. Com quem os dados passam (operadores)</a></li>
           <li><a href="#secao-8">8. Por quanto tempo guardamos (beta-1)</a></li>
           <li><a href="#secao-9">9. Como excluir sua conta</a></li>
-          <li><a href="#secao-10">10. Seus direitos</a></li>
-          <li><a href="#secao-11">11. Segurança</a></li>
-          <li><a href="#secao-12">12. Guardado no seu aparelho</a></li>
-          <li><a href="#secao-13">13. Menores</a></li>
-          <li><a href="#secao-14">14. Mudanças</a></li>
+          <li><a href="#secao-10">9-A. O chat do Duo e do Rival</a></li>
+          <li><a href="#secao-11">10. Seus direitos</a></li>
+          <li><a href="#secao-12">11. Segurança</a></li>
+          <li><a href="#secao-13">12. Guardado no seu aparelho</a></li>
+          <li><a href="#secao-14">13. Menores</a></li>
+          <li><a href="#secao-15">14. Mudanças</a></li>
       </ul>
     </nav>
     <p class="cruzado"><a href="termos.html">Ler também os Termos de uso</a></p>
@@ -77,19 +78,21 @@
 <li><p class="linha-titulo">Check-in: dia, feito ou não, dia difícil</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Acompanhar a missão, pontos e recuperação. No Duo, seu parceiro vê se você fez ou não fez, se foi dia difícil e os pontos; <strong>nunca a nota</strong></dd></dl></li>
 <li><p class="linha-titulo">Nota do check-in (texto até 280 caracteres)</p><dl><dt>De onde vem</dt><dd>Você, <strong>só se consentir</strong> (seção 5)</dd><dt>Para quê</dt><dd>Registrar o que você fez. É só sua: nem o parceiro do Duo nem a IA a recebem</dd></dl></li>
 <li><p class="linha-titulo">Sua escolha sobre guardar notas (sim/não, com data)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Saber se podemos guardar a nota</dd></dl></li>
-<li><p class="linha-titulo">Mensagens do chat do Duo</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Conversar com seu parceiro</dd></dl></li>
+<li><p class="linha-titulo">Mensagens do chat do Duo ou do Rival (até 280 caracteres cada)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Conversar com seu parceiro. Ver a seção 9-A</dd></dl></li>
+<li><p class="linha-titulo">Bloqueio do parceiro</p><dl><dt>De onde vem</dt><dd>Você, se bloquear</dd><dt>Para quê</dt><dd>Encerrar o par e esconder a conversa</dd></dl></li>
+<li><p class="linha-titulo">Denúncia de mensagem: trecho, motivo e comentário</p><dl><dt>De onde vem</dt><dd>Você, se denunciar</dd><dt>Para quê</dt><dd>A equipe analisar o caso. A equipe não vê quem denunciou</dd></dl></li>
 <li><p class="linha-titulo">Contato da “Porta Aberta” (opcional)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Trocar contato com o parceiro ao fim da missão, só se os dois abrirem</dd></dl></li>
 <li><p class="linha-titulo">Horário do lembrete e fuso</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Enviar o lembrete na hora certa</dd></dl></li>
-<li><p class="linha-titulo">Suas escolhas de avisos: lembrete e novidades (cada uma com data)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Só enviar o que você ligou</dd></dl></li>
+<li><p class="linha-titulo">Suas escolhas de avisos: lembrete, novidades e mensagem nova do chat (cada uma com data)</p><dl><dt>De onde vem</dt><dd>Você</dd><dt>Para quê</dt><dd>Só enviar o que você ligou</dd></dl></li>
 <li><p class="linha-titulo">Inscrição de notificação (endereço do navegador e chaves de criptografia)</p><dl><dt>De onde vem</dt><dd>Seu navegador, <strong>se você permitir</strong></dd><dt>Para quê</dt><dd>Enviar lembretes</dd></dl></li>
 <li><p class="linha-titulo">Registro de avisos enviados (quem, qual missão, tipo, dia)</p><dl><dt>De onde vem</dt><dd>O servidor</dd><dt>Para quê</dt><dd>Não repetir o mesmo aviso</dd></dl></li>
 <li><p class="linha-titulo">Denúncias e posts da comunidade</p><dl><dt>De onde vem</dt><dd>Você, <strong>se a Comunidade estiver ligada</strong></dd><dt>Para quê</dt><dd>Moderação</dd></dl></li>
 </ul>
-<p><strong>O que NÃO guardamos:</strong> o texto que dispara o alerta de crise; a data de nascimento; o corpo dos seus pedidos nos registros do servidor (o código evita escrever isso no log).</p>
+<p><strong>O que NÃO guardamos:</strong> o texto que dispara o alerta de crise (nem no chat); a data de nascimento; o corpo dos seus pedidos nos registros do servidor (o código evita escrever isso no log).</p>
 <h2 id="secao-3">3. O filtro de crise</h2>
-<p>Quando você escreve a nota do check-in, uma prova escrita da missão, a pergunta ao assistente, os campos livres do contrato que vão ao assistente (e um post ou comentário de denúncia da Comunidade), o servidor passa o texto por uma lista de frases de crise <strong>na memória</strong>. Se o texto acende o alerta:</p>
-<ul><li>o texto é <strong>descartado</strong>: não vai para o banco, não vai para os registros do servidor e não vai para a IA (nada é enviado à OpenAI);</li><li>o check-in conta normalmente, sem penalidade;</li><li>você vê os contatos de ajuda (no assistente: “Sua pergunta não foi enviada ao assistente. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.”).</li></ul>
-<p>Não avisamos seu parceiro, nem ninguém, por causa de um alerta. Não guardamos nem o fato de que houve alerta. O filtro foi feito a partir de fontes públicas de prevenção e ainda será revisado por um profissional de saúde mental. Ele erra para os dois lados. Hoje o chat do Duo <strong>não passa por esse filtro</strong>.</p>
+<p>Quando você escreve a nota do check-in, uma prova escrita da missão, uma mensagem do chat, a pergunta ao assistente, os campos livres do contrato que vão ao assistente (e um post ou comentário de denúncia da Comunidade), o servidor passa o texto por uma lista de frases de crise <strong>na memória</strong>. Se o texto acende o alerta:</p>
+<ul><li>o texto é <strong>descartado</strong>: não vai para o banco, não vai para os registros do servidor e não vai para a IA (nada é enviado à OpenAI);</li><li>o check-in conta normalmente, sem penalidade;</li><li>você vê os contatos de ajuda (no assistente: “Sua pergunta não foi enviada ao assistente. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.”; no chat: “Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.”).</li></ul>
+<p>No chat, com alerta, a mensagem não é enviada nem guardada, e seu parceiro não sabe de nada. Não avisamos seu parceiro, nem ninguém, por causa de um alerta. Não guardamos nem o fato de que houve alerta. O filtro foi feito a partir de fontes públicas de prevenção e ainda será revisado por um profissional de saúde mental. Ele erra para os dois lados: pode deixar passar uma frase de crise e pode barrar uma frase comum.</p>
 <h2 id="secao-4">4. Dados de saúde</h2>
 <p>O que você escreve numa nota pode revelar sua saúde (cansaço, humor, tristeza). A lei trata isso como <strong>dado sensível</strong>. Por isso:</p>
 <ul><li>Você <strong>não é obrigado</strong> a escrever nada sensível. O check-in funciona sem nota.</li><li>A nota só é guardada com o <strong>seu consentimento separado</strong> (seção 5).</li><li>Não usamos a nota para propaganda, nem para decidir nada sobre você.</li></ul>
@@ -100,6 +103,7 @@
 <p>São duas escolhas diferentes, ambas <strong>desligadas por padrão</strong>, cada uma com o seu interruptor:</p>
 <ol><li><strong>Lembrete do meu check-in.</strong> Um aviso no horário que você escolheu. Só liga quando você confirma, na tela do aviso, “Quero receber lembretes do meu registro diário neste aparelho”. Permitir as notificações no navegador, sozinho, não liga nada. O navegador também pede a sua permissão. É serviço, não propaganda.</li><li><strong>Novidades do Nexus (marketing).</strong> Novidades, convites para voltar, ofertas. Em Portugal, marketing eletrônico a pessoa física exige consentimento prévio. No beta-1 não enviamos nenhuma, e o interruptor fica escondido no site até existir envio. Só ligaremos se você marcar.</li></ol>
 <p>Como retirar: Ajustes, desligue o interruptor; vale na hora. Você também pode bloquear as notificações no navegador. Guardamos a data e a versão de cada escolha.</p>
+<p>O aviso de mensagem nova do chat é uma terceira escolha, também desligada por padrão, com interruptor próprio em Ajustes (seção 9-A).</p>
 <h2 id="secao-7">7. Com quem os dados passam (operadores)</h2>
 <ul class="tabela-legal">
 <li><p class="linha-titulo">Railway (hospedagem do servidor e do banco)</p><dl><dt>Para quê</dt><dd>Guarda o banco e roda o servidor</dd><dt>Onde</dt><dd>—</dd></dl></li>
@@ -117,7 +121,8 @@
 <li><p class="linha-titulo">Check-ins (feito, dia difícil)</p><dl><dt>Prazo</dt><dd>Igual à missão</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
 <li><p class="linha-titulo">Nota do check-in</p><dl><dt>Prazo</dt><dd>Até o fim da missão + 12 meses, ou até você desligar “Guardar notas” (<strong>desligar apaga as notas já guardadas</strong>) ou apagar a conta</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
 <li><p class="linha-titulo">Texto de crise e prova escrita sem consentimento</p><dl><dt>Prazo</dt><dd><strong>Não são guardados</strong></dd><dt>Como acaba</dt><dd>n/a</dd></dl></li>
-<li><p class="linha-titulo">Mensagens do Duo</p><dl><dt>Prazo</dt><dd>Até o fim da missão + 12 meses, ou até apagar a conta</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
+<li><p class="linha-titulo">Mensagens do chat (Duo e Rival)</p><dl><dt>Prazo</dt><dd>Até a conta ou a missão sair. Bloquear <strong>não apaga</strong> nada: a conversa some para os dois, mas as mensagens continuam no banco</dd><dt>Como acaba</dt><dd>Exclusão com a conta ou com a missão</dd></dl></li>
+<li><p class="linha-titulo">Bloqueios e denúncias de mensagem</p><dl><dt>Prazo</dt><dd>Saem com a conta</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
 <li><p class="linha-titulo">Contato da Porta Aberta</p><dl><dt>Prazo</dt><dd>Até você apagar ou o fim da missão + 12 meses</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
 <li><p class="linha-titulo">Inscrição de push</p><dl><dt>Prazo</dt><dd>Até você desligar, ou apagar a conta, ou o navegador recusar (410)</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
 <li><p class="linha-titulo">Registro de avisos enviados</p><dl><dt>Prazo</dt><dd>90 dias</dd><dt>Como acaba</dt><dd>Exclusão</dd></dl></li>
@@ -129,21 +134,25 @@
 </ul>
 <h2 id="secao-9">9. Como excluir sua conta</h2>
 <ol><li><strong>No app:</strong> Ajustes, “Excluir minha conta”. Pedimos sua senha de novo e uma confirmação. A exclusão é na hora: não há prazo de espera nem volta. (Um prazo de arrependimento pode vir numa versão futura.) Muitas tentativas erradas de senha bloqueiam o pedido por 15 minutos. A conta de administração não pode ser apagada por esse caminho.</li><li><strong>Por e-mail:</strong> escreva a <a href="mailto:nexusatendimento10@gmail.com">nexusatendimento10@gmail.com</a>. Respondemos em até 15 dias. Atenção: o seu e-mail fica na nossa caixa de entrada; podemos apagá-lo depois de atender.</li></ol>
-<p><strong>O que apagamos, na hora:</strong> conta, e-mail, contratos e missões, check-ins, notas, mensagens, contato da Porta Aberta, inscrições de push, registros de avisos, suas escolhas de consentimento e aceite, seus posts e as denúncias ligadas a esses posts.</p>
+<p><strong>O que apagamos, na hora:</strong> conta, e-mail, contratos e missões, check-ins, notas, mensagens, bloqueios e denúncias de mensagem que você fez, contato da Porta Aberta, inscrições de push, registros de avisos, suas escolhas de consentimento e aceite, seus posts e as denúncias ligadas a esses posts.</p>
 <p><strong>O que fica:</strong> nada sobre o seu pedido. Não guardamos registro de que você pediu para sair, nem a prova de que aceitou os termos (ela some com a conta). Isso nos deixa sem prova se alguém contestar depois.</p>
 <p><strong>No Duo:</strong></p>
 <ul><li><strong>Se você é o dono da missão:</strong> a missão passa para o seu parceiro, que mantém os check-ins dele (e as notas dele, se ele guardou). Só os seus dados são apagados (os textos do seu contrato saem e o título vira “Missão sem título”). Se não houver parceiro, a missão é apagada inteira.</li><li><strong>Se você é o parceiro:</strong> a missão do dono continua, agora como Solo. Seus dados são apagados.</li><li>O que seu parceiro já viu (como as mensagens do chat) não conseguimos desfazer.</li></ul>
+<p>-</p>
 <p><strong>Comunidade:</strong> se você criou uma comunidade, ela continua, sem autor.</p>
 <p><strong>Backups:</strong> hoje não temos rotina de 30 dias, então não prometemos quando os seus dados somem das cópias de segurança. Se um backup for restaurado, uma conta apagada poderia voltar; ainda não existe rotina para impedir isso.</p>
-<h2 id="secao-10">10. Seus direitos</h2>
+<h2 id="secao-10">9-A. O chat do Duo e do Rival</h2>
+<ul><li>Cada mensagem tem até 280 caracteres. O limite é de 20 mensagens por hora e 200 por dia.</li><li>Com alerta de crise, a mensagem não é enviada nem guardada e seu parceiro não sabe (seção 3).</li><li>O aviso de mensagem nova vem desligado. Se você ligar, o texto é sempre “Você tem uma mensagem nova.”, sem nome nem trecho, no máximo 1 por dia por conversa.</li><li>Bloquear o parceiro encerra o par e a conversa some para os dois. Nada é apagado do banco. A conversa também some quando o par acaba por outro motivo. No Duo da mesma missão, se quem bloqueia é o parceiro, ele sai da missão do dono e fica sem missão; a tela avisa antes.</li><li>Denunciar uma mensagem: a equipe vê o trecho, o motivo e o seu comentário, sem saber quem denunciou. A equipe só lê o que for denunciado.</li><li>As mensagens ficam guardadas até a sua conta ou a missão sair. As denúncias e os bloqueios saem com a conta.</li></ul>
+<p>-</p>
+<h2 id="secao-11">10. Seus direitos</h2>
 <p>Você pode pedir: confirmar se tratamos seus dados; ver e receber uma cópia; corrigir; apagar; limitar ou se opor; portar; saber com quem compartilhamos; <strong>retirar qualquer consentimento</strong> sem prejuízo; e rever decisões automáticas (não tomamos nenhuma). Escreva a <a href="mailto:nexusatendimento10@gmail.com">nexusatendimento10@gmail.com</a>. Se não resolvermos, você pode reclamar à ANPD (Brasil) ou à CNPD (Portugal).</p>
-<h2 id="secao-11">11. Segurança</h2>
+<h2 id="secao-12">11. Segurança</h2>
 <p>Senha embaralhada (bcrypt); conexão com o banco cifrada (TLS) em produção; o app do servidor usa um usuário de banco sem poder de apagar tabelas; cópias de segurança cifradas. Sua sessão fica guardada no seu aparelho por até 7 dias, até você sair. Nenhum sistema é 100% seguro. Se houver vazamento que ofereça risco a você, avisamos você e a autoridade no prazo da lei (72 h para a autoridade na UE).</p>
-<h2 id="secao-12">12. Guardado no seu aparelho</h2>
+<h2 id="secao-13">12. Guardado no seu aparelho</h2>
 <p>O app guarda no navegador só o que ele precisa para funcionar: sessão (token), uma cópia do estado do dia (que pode incluir o título da missão, o porquê e a nota), preferências (tema e horário do lembrete) e arquivos do app para abrir offline. <strong>Sem rastreadores e sem anúncios.</strong> Ao sair, limpamos a sessão.</p>
-<h2 id="secao-13">13. Menores</h2>
+<h2 id="secao-14">13. Menores</h2>
 <p>O Nexus é só para maiores de 18. Se descobrirmos uma conta de menor, bloqueamos e apagamos.</p>
-<h2 id="secao-14">14. Mudanças</h2>
+<h2 id="secao-15">14. Mudanças</h2>
 <p>Cada versão tem número e data. Se mudar algo que importe, pedimos <strong>novo aceite</strong> (o app mostra a versão nova e pede seu aceite antes de você continuar) e novo consentimento quando o uso dos dados mudar.</p>
     </div>
     <footer class="rodape-legal">
