@@ -181,7 +181,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).for
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v34"') === -1) falhas.push("o cache não está em nexus-v2-v34");
+if (sw.indexOf('CACHE = "nexus-v2-v35"') === -1) falhas.push("o cache não está em nexus-v2-v35");
 ["./icons/urso-firme.svg", "./icons/urso-contente.svg"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });

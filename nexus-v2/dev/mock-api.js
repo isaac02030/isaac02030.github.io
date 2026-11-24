@@ -535,7 +535,7 @@ var chatBloqueados = {};
 var chatDenuncias = [];
 var chatProximoId = 100;
 var CHAT_MOTIVOS = ["perigoso", "ofensa", "improprio", "spam", "outro"];
-var CHAT_CRISE = "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.";
+var CHAT_CRISE = "Sua mensagem não foi enviada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo.";
 
 function horaDeHoje(h, m) {
   var d = new Date();
@@ -607,7 +607,7 @@ function responderChat(req, url, corpo) {
 
   var denuncia = url.match(/^\/api\/messages\/(\d+)\/report$/);
   if (denuncia && req.method === "POST") {
-    if (cenario === "chat-denuncia-crise") return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+    if (cenario === "chat-denuncia-crise") return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
     if (!corpo || CHAT_MOTIVOS.indexOf(corpo.reason) === -1) return { status: 400, dados: { error: "Escolha um dos motivos da lista e envie de novo." } };
     if (cenario === "chat-denuncia-409") return { status: 409, dados: { error: "Você já denunciou esta mensagem. Uma denúncia por pessoa já basta, obrigado.", already_reported: true } };
     if (cenario === "chat-denuncia-erro") return { status: 500, dados: { error: "Não deu para enviar a denúncia agora. Tente de novo daqui a pouco." } };
@@ -1927,7 +1927,7 @@ async function denunciarMock(email, slug, postId, corpo, cenario) {
   var motivo = corpo && corpo.reason;
   var crise = cenario === "denuncia-crise" || cenario === "denuncia-crise-nao-enviada";
   if (cenario === "denuncia-crise-nao-enviada") {
-    return { status: 200, dados: { reported: false, crisis: true, crisis_level: "alto", message: "Sua denúncia não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+    return { status: 200, dados: { reported: false, crisis: true, crisis_level: "alto", message: "Sua denúncia não foi enviada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
   }
   if (MOTIVOS_DENUNCIA.indexOf(motivo) === -1) return { status: 400, dados: { error: "Escolha um dos motivos da lista e envie de novo." } };
   if (!crise && corpo.details != null) {
@@ -1951,7 +1951,7 @@ async function denunciarMock(email, slug, postId, corpo, cenario) {
   /* O comentário não é guardado neste mock (nem com crise). */
   denunciasFeitas[chave] = { reason: motivo };
   if (crise) {
-    return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Parece que você está passando por um momento difícil. Veja os contatos de ajuda." } };
+    return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
   }
   return { status: 201, dados: { reported: true, message: "Obrigado. Sua denúncia foi registrada." } };
 }
@@ -2001,7 +2001,7 @@ async function responderComunidade(req, caminho, corpo) {
 
   if (!ehAdulto(email)) {
     if (cenario === "idade-crise" && metodo === "POST") {
-      return { status: 200, dados: { saved: false, crisis: true, crisis_level: "alto", message: "Nada foi enviado. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.", code: "adult_confirmation_required" } };
+      return { status: 200, dados: { saved: false, crisis: true, crisis_level: "alto", message: "Nada foi enviado. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo.", code: "adult_confirmation_required" } };
     }
     return { status: 403, dados: corpoSemIdade() };
   }

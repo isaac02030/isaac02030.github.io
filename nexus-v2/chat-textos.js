@@ -70,7 +70,7 @@
     /* Tela de ajuda, quando o envio é barrado */
     /* O MESMO texto aprovado no servidor (PR 32), num lugar só no site. Se o dono
        do projeto aprovar a versão da Clara, muda aqui e no servidor juntos. */
-    criseLinha: "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.",
+    criseLinha: "Sua mensagem não foi enviada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo.",
     voltarConversa: "Voltar à conversa",
 
     /* Área da equipe */

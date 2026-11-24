@@ -81,7 +81,7 @@ if (/Que tal|Claro!|Aqui está|[\u{1F300}-\u{1FAFF}]/u.test(semComentarios(ler("
 });
 
 /* Crise: o MESMO texto aprovado no servidor, num lugar só (revisão da Clara do PR 30). */
-var CRISE_SERVIDOR = "Sua mensagem não foi enviada. Parece que você está passando por um momento difícil. Veja os contatos de ajuda.";
+var CRISE_SERVIDOR = "Sua mensagem não foi enviada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo.";
 if (X.TEXTOS.criseLinha !== CRISE_SERVIDOR) falhas.push("a linha de crise do chat é a mesma do servidor");
 ["conversa.js", "conversa.html", "crise.html", "hoje.js", "missao.js"].forEach(function (n) {
   if (ler(n).indexOf("Sua mensagem não foi enviada") !== -1) falhas.push("negado: o texto de crise do chat fica só em chat-textos.js (achado em " + n + ")");
@@ -164,7 +164,7 @@ var sw = ler("sw.js");
 ["./conversa.html", "./conversa.css", "./conversa.js", "./chat-textos.js"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v34"') === -1) falhas.push("o cache não está em nexus-v2-v34");
+if (sw.indexOf('CACHE = "nexus-v2-v35"') === -1) falhas.push("o cache não está em nexus-v2-v35");
 
 if (falhas.length) {
   console.log("FALHOU:\n- " + falhas.join("\n- "));

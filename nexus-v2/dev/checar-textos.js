@@ -122,6 +122,13 @@ paginas.forEach(function (n) {
 if (!/\.pergunta \{\s*font: var\(--text-label\);\s*font-size: 1\.1875rem;/.test(ler("checkin.css"))) falhas.push("check-in: «Você cumpriu?» pesa mais que o rótulo do campo");
 if (!/\.titulo-missao \{[^}]*font-weight: 600;/.test(ler("hoje.css"))) falhas.push("Hoje: o título da missão fica em 600 (o mínimo é o mais pesado)");
 
+/* 5b. Avisos de crise (decisão de 24/11): fim condicional, sem «Parece que». */
+var FIM_CRISE = "Se você está passando por um momento difícil, veja os contatos de ajuda abaixo.";
+if (ler("chat-textos.js").indexOf("Sua mensagem não foi enviada. " + FIM_CRISE) === -1) falhas.push("a linha de crise do chat tem o texto novo exato");
+paginas.concat(["dev/mock-api.js"]).forEach(function (n) {
+  if (ler(n).indexOf("Parece que você está passando") !== -1) falhas.push("negado: «Parece que você está passando…» voltou em " + n);
+});
+
 /* 6. Fecho seco: nada de «Parabéns» nem «jornada» no fim. */
 ["dia-30.html", "dia-30.js", "conta-excluida.html"].forEach(function (n) {
   if (/Parabéns|jornada/i.test(tudo[n] || "")) falhas.push("negado: " + n + " com fecho de efeito");
