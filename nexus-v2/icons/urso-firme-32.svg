@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Urso do Nexus, firme">
+<title>Urso do Nexus, firme</title>
+<style>
+  .traco { fill: url(#aqua); }
+  .miolo { fill: #000000; }
+  @media (prefers-color-scheme: light) {
+    .traco { fill: #0B5F52; }
+  }
+</style>
+<defs>
+  <linearGradient id="aqua" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="32">
+    <stop offset="0" stop-color="#2DF2D0"/>
+    <stop offset="1" stop-color="#3DD8FF"/>
+  </linearGradient>
+</defs>
+<path class="miolo" d="M4 4h4v1h-4zM20 4h4v1h-4zM4 5h4v1h-4zM20 5h4v1h-4zM4 6h4v1h-4zM20 6h4v1h-4zM4 7h4v1h-4zM20 7h4v1h-4zM6 12h16v1h-16zM6 13h16v1h-16zM4 14h2v1h-2zM10 14h8v1h-8zM22 14h2v1h-2zM4 15h2v1h-2zM10 15h8v1h-8zM22 15h2v1h-2zM4 16h2v1h-2zM10 16h8v1h-8zM22 16h2v1h-2zM4 17h2v1h-2zM10 17h8v1h-8zM22 17h2v1h-2zM4 18h20v1h-20zM4 19h20v1h-20zM4 20h8v1h-8zM16 20h8v1h-8zM4 21h8v1h-8zM16 21h8v1h-8zM4 22h6v1h-6zM18 22h6v1h-6zM4 23h6v1h-6zM18 23h6v1h-6zM6 24h16v1h-16zM6 25h16v1h-16zM8 26h12v1h-12zM8 27h12v1h-12z"/>
+<path class="traco" d="M4 2h4v1h-4zM20 2h4v1h-4zM4 3h4v1h-4zM20 3h4v1h-4zM2 4h2v1h-2zM8 4h2v1h-2zM18 4h2v1h-2zM24 4h2v1h-2zM2 5h2v1h-2zM8 5h2v1h-2zM18 5h2v1h-2zM24 5h2v1h-2zM2 6h2v1h-2zM8 6h2v1h-2zM18 6h2v1h-2zM24 6h2v1h-2zM2 7h2v1h-2zM8 7h2v1h-2zM18 7h2v1h-2zM24 7h2v1h-2zM4 8h4v1h-4zM20 8h4v1h-4zM4 9h4v1h-4zM20 9h4v1h-4zM6 10h16v1h-16zM6 11h16v1h-16zM4 12h2v1h-2zM22 12h2v1h-2zM4 13h2v1h-2zM22 13h2v1h-2zM2 14h2v1h-2zM6 14h4v1h-4zM18 14h4v1h-4zM24 14h2v1h-2zM2 15h2v1h-2zM6 15h4v1h-4zM18 15h4v1h-4zM24 15h2v1h-2zM2 16h2v1h-2zM6 16h4v1h-4zM18 16h4v1h-4zM24 16h2v1h-2zM2 17h2v1h-2zM6 17h4v1h-4zM18 17h4v1h-4zM24 17h2v1h-2zM2 18h2v1h-2zM24 18h2v1h-2zM2 19h2v1h-2zM24 19h2v1h-2zM2 20h2v1h-2zM12 20h4v1h-4zM24 20h2v1h-2zM2 21h2v1h-2zM12 21h4v1h-4zM24 21h2v1h-2zM2 22h2v1h-2zM10 22h8v1h-8zM24 22h2v1h-2zM2 23h2v1h-2zM10 23h8v1h-8zM24 23h2v1h-2zM4 24h2v1h-2zM22 24h2v1h-2zM4 25h2v1h-2zM22 25h2v1h-2zM6 26h2v1h-2zM20 26h2v1h-2zM6 27h2v1h-2zM20 27h2v1h-2zM8 28h12v1h-12zM8 29h12v1h-12z"/>
+</svg>

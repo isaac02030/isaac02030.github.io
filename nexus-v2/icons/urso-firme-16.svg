@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Urso do Nexus, firme">
+<title>Urso do Nexus, firme</title>
+<style>
+  .traco { fill: url(#aqua); }
+  .miolo { fill: #000000; }
+  @media (prefers-color-scheme: light) {
+    .traco { fill: #0B5F52; }
+  }
+</style>
+<defs>
+  <linearGradient id="aqua" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="16">
+    <stop offset="0" stop-color="#2DF2D0"/>
+    <stop offset="1" stop-color="#3DD8FF"/>
+  </linearGradient>
+</defs>
+<path class="miolo" d="M2 2h2v1h-2zM10 2h2v1h-2zM2 3h2v1h-2zM10 3h2v1h-2zM3 6h8v1h-8zM2 7h1v1h-1zM5 7h4v1h-4zM11 7h1v1h-1zM2 8h1v1h-1zM5 8h4v1h-4zM11 8h1v1h-1zM2 9h10v1h-10zM2 10h4v1h-4zM8 10h4v1h-4zM2 11h3v1h-3zM9 11h3v1h-3zM3 12h8v1h-8zM4 13h6v1h-6z"/>
+<path class="traco" d="M2 1h2v1h-2zM10 1h2v1h-2zM1 2h1v1h-1zM4 2h1v1h-1zM9 2h1v1h-1zM12 2h1v1h-1zM1 3h1v1h-1zM4 3h1v1h-1zM9 3h1v1h-1zM12 3h1v1h-1zM2 4h2v1h-2zM10 4h2v1h-2zM3 5h8v1h-8zM2 6h1v1h-1zM11 6h1v1h-1zM1 7h1v1h-1zM3 7h2v1h-2zM9 7h2v1h-2zM12 7h1v1h-1zM1 8h1v1h-1zM3 8h2v1h-2zM9 8h2v1h-2zM12 8h1v1h-1zM1 9h1v1h-1zM12 9h1v1h-1zM1 10h1v1h-1zM6 10h2v1h-2zM12 10h1v1h-1zM1 11h1v1h-1zM5 11h4v1h-4zM12 11h1v1h-1zM2 12h1v1h-1zM11 12h1v1h-1zM3 13h1v1h-1zM10 13h1v1h-1zM4 14h6v1h-6z"/>
+</svg>

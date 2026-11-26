@@ -211,7 +211,7 @@ if (!/if \(modelo\.diaLivre === true\) mostrarLinha\("minimo", NexusDias\.TEXTOS
 });
 
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v41"') === -1) falhas.push("o cache não está em nexus-v2-v41");
+if (sw.indexOf('CACHE = "nexus-v2-v42"') === -1) falhas.push("o cache não está em nexus-v2-v42");
 if (sw.indexOf('"./dias-da-missao.js"') === -1) falhas.push("o cache não guarda dias-da-missao.js");
 if (sw.indexOf('"./registro-dias.js"') === -1) falhas.push("o cache não guarda registro-dias.js");
 ["hoje.html", "missao.html"].forEach(function (nome) {
