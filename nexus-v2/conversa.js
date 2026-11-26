@@ -15,6 +15,8 @@ var missaoId = null;
 var missaoAtual = null;
 var ciclo = 0;
 var enviando = false;
+var abrindoConversa = false;
+var falhasAoAbrir = 0;
 var mensagemDaFolha = null;
 var botaoDaFolha = null;
 var vistas = {};
@@ -223,33 +225,70 @@ function irParaOFim() {
 }
 
 /* ---------- Abrir ---------- */
-function abrirErro(tipo, texto) {
-  mostrarAviso(document.getElementById("alerta-abrir"), tipo, texto);
+function ocuparBotaoTentar() {
+  var botao = document.getElementById("btn-tentar");
+  botao.setAttribute("aria-disabled", "true");
+  botao.textContent = TX.abrindo;
+}
+
+function soltarBotaoTentar() {
+  var botao = document.getElementById("btn-tentar");
+  botao.setAttribute("aria-disabled", "false");
+  botao.textContent = TX.tentarDeNovo;
+}
+
+function abrirErro(tipo, texto, segunda) {
+  var link = document.getElementById("link-voltar-erro");
+  link.hidden = !segunda;
   mostrarVista("erro");
-  focarTitulo();
+  mostrarAviso(document.getElementById("alerta-abrir"), tipo, texto);
+  soltarBotaoTentar();
+  if (segunda) NexusAbas.focar(document.getElementById("btn-tentar"));
+  else focarTitulo();
+}
+
+function falhaAoAbrir() {
+  falhasAoAbrir += 1;
+  var segunda = falhasAoAbrir >= 2;
+  abrirErro("neutro", segunda ? TX.erroAbrirDeNovo : TX.erroAbrir, segunda);
 }
 
 async function carregar() {
+  if (abrindoConversa) return;
   var meu = ++ciclo;
+  abrindoConversa = true;
+  ocuparBotaoTentar();
   mostrarVista("carregando");
+  function parar() {
+    if (meu === ciclo) abrindoConversa = false;
+  }
   if (!missaoId) {
+    parar();
     mostrarVista("sem-par");
     focarTitulo();
     return;
   }
-  if (semRedeAgora()) return abrirErro("rede", TX.semRedeAbrir);
+  /* Sem internet: não chama o servidor. Não abre de novo sozinho quando a rede volta. */
+  if (semRedeAgora()) {
+    parar();
+    return abrirErro("rede", TX.semRedeAbrir);
+  }
 
   var missaoRes = await NexusApi.obterMissao(missaoId);
   if (meu !== ciclo) return;
-  if (missaoRes.sessaoEncerrada) return;
+  if (missaoRes.sessaoEncerrada) {
+    parar();
+    return;
+  }
   if (!missaoRes.ok) {
+    parar();
     if (missaoRes.semRede) return abrirErro("rede", TX.semRedeAbrir);
     if (missaoRes.status === 403 || missaoRes.status === 404) {
       mostrarVista("sem-par");
       focarTitulo();
       return;
     }
-    return abrirErro("falha", TX.erroAbrir);
+    return falhaAoAbrir();
   }
   missaoAtual = missaoRes.dados || {};
   var nome = X.nomeDoOutro(missaoAtual);
@@ -257,6 +296,7 @@ async function carregar() {
 
   /* Sem Duo/Rival ativo, a conversa não abre (nem pede as mensagens). */
   if (!X.temPar(missaoAtual)) {
+    parar();
     mostrarVista("sem-par");
     focarTitulo();
     return;
@@ -264,20 +304,26 @@ async function carregar() {
 
   var lista = await NexusApi.listarMensagens(missaoId);
   if (meu !== ciclo) return;
-  if (lista.sessaoEncerrada) return;
+  if (lista.sessaoEncerrada) {
+    parar();
+    return;
+  }
   if (!lista.ok) {
+    parar();
     if (lista.semRede) return abrirErro("rede", TX.semRedeAbrir);
-    if (lista.status === 503) return abrirErro("falha", TC.indisponivel);
+    if (lista.status === 503) return abrirErro("neutro", TC.indisponivel);
     if (lista.status === 403) {
       mostrarVista("sem-par");
       focarTitulo();
       return;
     }
-    return abrirErro("falha", TX.erroAbrir);
+    return falhaAoAbrir();
   }
   var mensagens = lista.dados && Array.isArray(lista.dados.messages) ? lista.dados.messages : [];
   pintarFio(mensagens);
   X.marcarVista(missaoId, mensagens);
+  falhasAoAbrir = 0;
+  parar();
   mostrarVista("conversa");
   atualizarCampo();
   focarTitulo();
@@ -618,7 +664,11 @@ async function confirmarBloqueio() {
 
 /* ---------- Início ---------- */
 function ligar() {
-  document.getElementById("btn-tentar").addEventListener("click", carregar);
+  document.getElementById("btn-tentar").addEventListener("click", function () {
+    var botao = document.getElementById("btn-tentar");
+    if (abrindoConversa || botao.getAttribute("aria-disabled") === "true") return;
+    carregar();
+  });
   var campo = document.getElementById("campo-mensagem");
   campo.addEventListener("input", function () {
     if (X.tamanho(campo.value.trim()) <= X.LIMITE) mostrarErroDoCampo("");
@@ -686,6 +736,7 @@ function iniciar() {
   document.getElementById("fio").setAttribute("aria-label", TX.mensagens);
   document.getElementById("voltar").href = "missao.html" + busca();
   document.getElementById("link-missao").href = "missao.html" + busca();
+  document.getElementById("link-voltar-erro").href = "missao.html" + busca();
   NexusAbas.montar("missao");
   ligar();
   carregar();
