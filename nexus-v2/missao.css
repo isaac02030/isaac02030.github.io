@@ -352,11 +352,45 @@
 .dia-a-dia summary {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  width: fit-content;
+  max-width: 100%;
+  min-width: 48px;
   min-height: 48px;
   padding: 0 var(--space-1);
   cursor: pointer;
   color: var(--text);
   font: var(--text-label);
+  list-style: none;
+}
+
+.dia-a-dia summary::-webkit-details-marker {
+  display: none;
+}
+
+.dia-a-dia summary::marker {
+  content: "";
+}
+
+/* Mesmo chevron das listas (Ajustes): traço, ponta redonda. No escuro, --accent é o aqua.
+   Fechada aponta para o lado; aberta gira 90° e aponta para a lista. */
+.dia-a-dia summary .seta {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  color: var(--accent);
+  transition: transform var(--dur-fast) ease;
+}
+
+.dia-a-dia[open] summary .seta {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dia-a-dia summary .seta {
+    transition: none;
+  }
 }
 
 .dia-a-dia summary:focus-visible {
