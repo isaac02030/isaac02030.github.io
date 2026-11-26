@@ -71,9 +71,11 @@ function aplicarTextos() {
   });
 }
 
-/* O token sai da barra de endereço (não fica no histórico nem em favorito). */
+/* O token sai da barra de endereço (não fica no histórico nem em favorito).
+   Vindo do login, ele estava só nesta aba (sessionStorage) e sai de lá agora. */
 function lerTokenEApagar() {
-  var token = V.tokenDoFragmento(location.hash);
+  var token = V.tokenDoFragmento(location.hash) || V.pendente();
+  V.apagarPendente();
   if (location.hash) {
     try {
       history.replaceState(null, "", location.pathname + location.search);
@@ -113,7 +115,8 @@ async function carregar() {
   document.getElementById("de-quem").textContent = V.preencher(rival ? TV.deQuemRival : TV.deQuemDuo, { nome: nome });
   var desafio = document.getElementById("desafio");
   var titulo = typeof conviteAtual.title === "string" ? conviteAtual.title.trim() : "";
-  desafio.textContent = titulo ? V.preencher(TV.desafio, { titulo: titulo }) : "";
+  desafio.textContent = titulo ? V.preencher(rival ? TV.desafio : TV.missaoDuo, { titulo: titulo }) : "";
+  document.getElementById("ve").textContent = nome ? V.preencher(rival ? TV.veRival : TV.veDuo, { nome: nome }) : "";
   desafio.hidden = !titulo;
   document.getElementById("pontos").hidden = !rival;
   var explica = document.getElementById("explica");
@@ -150,6 +153,7 @@ async function aceitar() {
   if (res.sessaoEncerrada) return;
   if (res.ok && res.dados && res.dados.accepted === true) {
     tokenAtual = "";
+    V.apagarPendente();
     var texto = V.DO_SERVIDOR.indexOf(res.dados.message) !== -1 ? res.dados.message : "";
     aviso(document.getElementById("aviso-feito"), texto);
     mostrarVista("feito");
@@ -157,6 +161,12 @@ async function aceitar() {
     return;
   }
   aviso(alerta, res.semRede ? TV.semRedeAceitar : V.textoDoErro(res));
+  /* Recusa definitiva (18+, bloqueio, usado, vencido, já em par): sem botão
+     «Aceitar» convidando a tentar de novo. Sem internet e falha do servidor: fica. */
+  if (!res.semRede && res.status > 0 && res.status < 500 && res.status !== 429) {
+    document.getElementById("btn-aceitar").hidden = true;
+    tokenAtual = "";
+  }
 }
 
 function iniciar() {
@@ -164,6 +174,10 @@ function iniciar() {
   tokenAtual = lerTokenEApagar();
   aplicarTextos();
   document.getElementById("link-entrar").href = "./" + busca();
+  document.getElementById("link-entrar").addEventListener("click", function () {
+    V.guardarParaOLogin(tokenAtual);
+  });
+  document.getElementById("link-agora-nao").href = "hoje.html" + busca();
   document.getElementById("link-missao").href = "missao.html" + busca();
   document.getElementById("link-missao-erro").href = "missao.html" + busca();
   document.getElementById("btn-aceitar").addEventListener("click", aceitar);

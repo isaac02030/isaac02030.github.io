@@ -18,7 +18,7 @@
     cancelando: "Cancelando…",
     apoioDuo: "Quem abrir o link entra nesta missão com você.",
     apoioRival: "Quem abrir o link vira seu rival, cada um na própria missão.",
-    validade: "Vale até {data}. Só pode ser usado uma vez.",
+    validade: "Vale até {data} (hora de Lisboa). Só pode ser usado uma vez.",
     semRedeCriar: "Sem internet. O convite não pode ser criado agora.",
     semRedeCancelar: "Sem internet. O convite não foi cancelado.",
     textoCompartilhar: "Convite para o Nexus",
@@ -31,14 +31,22 @@
     deQuemDuo: "{nome} chamou você para um Duo.",
     deQuemRival: "{nome} chamou você para ser Rival.",
     desafio: "Desafio: {titulo}",
+    missaoDuo: "Missão: {titulo}",
     explicaDuo: "No Duo, vocês cumprem a mesma missão juntos.",
-    explicaRivalMinha: "Sua missão “{titulo}” passa a valer no Rival.",
-    explicaRivalNova: "Você começa uma missão nova com o mesmo desafio.",
-    pontos: "No Rival, cada dia cumprido vale 10 pontos.",
+    /* Revisão da Clara do PR 36: no Rival, dizer antes que aceitar muda a missão. */
+    explicaRivalMinha: "Ao aceitar, sua missão “{titulo}” passa a valer no Rival.",
+    explicaRivalNova: "Ao aceitar, você começa uma missão nova com o mesmo desafio.",
+    /* O que a outra pessoa passa a ver (igual à Privacidade: se fez, o dia
+       difícil e os pontos; nunca a nota). */
+    veDuo: "{nome} vai ver se você cumpriu cada dia e se foi dia difícil. Não vê as suas notas.",
+    veRival: "{nome} vai ver se você cumpriu cada dia, se foi dia difícil e os seus pontos. Não vê as suas notas.",
+    pontos: "No Rival, cada dia cumprido vale 10 pontos, e o dia difícil também. O dia livre não pontua.",
     aceitar: "Aceitar convite",
+    agoraNao: "Agora não",
     aceitando: "Aceitando…",
     irParaMissao: "Ir para a missão",
-    entrarPrimeiro: "Para aceitar, entre na sua conta e abra o link de novo.",
+    /* O convite volta sozinho depois de entrar (o token fica só nesta aba durante o login). */
+    entrarPrimeiro: "Para aceitar, entre na sua conta. Depois de entrar, o convite abre de novo.",
     entrar: "Entrar",
     semRede: "Sem internet. O convite não abriu.",
     semRedeAceitar: "Sem internet. O convite não foi aceito.",
@@ -46,7 +54,7 @@
     /* Placar do Rival (Missão) */
     pontosDe: "{n} pontos",
     umPonto: "1 ponto",
-    regraPontos: "10 pontos por dia cumprido."
+    regraPontos: "10 pontos por dia cumprido. O dia difícil conta; o dia livre não."
   };
 
   /* Erros do servidor aprovados no PR 38: a tela mostra a frase dele. */
@@ -108,13 +116,38 @@
     return ERRO;
   }
 
+  /* A validade sempre na hora de Lisboa (como em Meus dados), qualquer que
+     seja o fuso do aparelho. */
   function validade(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return "";
-    var dois = function (n) { return (n < 10 ? "0" : "") + n; };
-    return preencher(TEXTOS.validade, {
-      data: dois(d.getDate()) + "/" + dois(d.getMonth() + 1) + " às " + dois(d.getHours()) + ":" + dois(d.getMinutes())
-    });
+    var partes = {};
+    try {
+      new Intl.DateTimeFormat("pt-PT", {
+        timeZone: "Europe/Lisbon", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false
+      }).formatToParts(d).forEach(function (p) { partes[p.type] = p.value; });
+    } catch (erro) {
+      return "";
+    }
+    return preencher(TEXTOS.validade, { data: partes.day + "/" + partes.month + " às " + partes.hour + ":" + partes.minute });
+  }
+
+  /* Token guardado SÓ nesta aba, SÓ durante o login, e apagado ao voltar. */
+  var CHAVE_PENDENTE = "nexus_v2_convite_pendente";
+  function guardarParaOLogin(token) {
+    if (!tokenValido(token)) return;
+    try { sessionStorage.setItem(CHAVE_PENDENTE, token); } catch (erro) {}
+  }
+  function pendente() {
+    try {
+      var t = sessionStorage.getItem(CHAVE_PENDENTE) || "";
+      return tokenValido(t) ? t : "";
+    } catch (erro) {
+      return "";
+    }
+  }
+  function apagarPendente() {
+    try { sessionStorage.removeItem(CHAVE_PENDENTE); } catch (erro) {}
   }
 
   function textoPontos(n) {
@@ -130,6 +163,9 @@
     tokenDoFragmento: tokenDoFragmento,
     textoDoErro: textoDoErro,
     validade: validade,
-    textoPontos: textoPontos
+    textoPontos: textoPontos,
+    guardarParaOLogin: guardarParaOLogin,
+    pendente: pendente,
+    apagarPendente: apagarPendente
   };
 })();

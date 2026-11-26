@@ -141,6 +141,12 @@ function temMissaoAtiva(dados) {
 
 /* Sem missão ativa, o começo. Com missão, o Hoje. */
 async function seguirDepoisDaSessao(alerta) {
+  /* Convite aberto antes de entrar: volta para ele (o token está só nesta aba;
+     a página do convite o apaga ao abrir). */
+  if (window.NexusConvite && window.NexusConvite.pendente()) {
+    location.href = "aceitar-convite.html" + location.search;
+    return true;
+  }
   var lista = await NexusApi.listarMissoes();
   if (!lista.ok) {
     if (lista.semRede) mostrarAviso(alerta, "rede", TEXTO_SEM_REDE);

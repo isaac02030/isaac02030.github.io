@@ -66,3 +66,9 @@
   width: 100%;
   min-height: 48px;
 }
+
+.botoes-convite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

@@ -56,6 +56,7 @@
     <!-- Sem login: uma frase e o caminho para entrar. Nada vai ao servidor. -->
     <section class="vista" id="vista-entrar" hidden>
       <p class="texto-convite" data-texto-convite="entrarPrimeiro"></p>
+      <!-- Ao tocar em «Entrar», o token fica só nesta aba até a pessoa voltar. -->
       <a class="btn btn-secundario" id="link-entrar" href="./" data-texto-convite="entrar"></a>
     </section>
 
@@ -68,11 +69,16 @@
       <p class="de-quem" id="de-quem"></p>
       <p class="desafio" id="desafio" hidden></p>
       <p class="texto-convite" id="explica"></p>
+      <p class="texto-convite" id="ve"></p>
       <p class="texto-convite apoio-pontos" id="pontos" data-texto-convite="pontos" hidden></p>
       <div id="alerta-aceitar" class="alerta alerta-neutro" role="alert" hidden></div>
-      <button type="button" class="btn btn-primario btn-luz" id="btn-aceitar" aria-busy="false">
-        <span class="btn-rotulo" data-texto-convite="aceitar"></span>
-      </button>
+      <div class="botoes-convite">
+        <button type="button" class="btn btn-primario btn-luz" id="btn-aceitar" aria-busy="false">
+          <span class="btn-rotulo" data-texto-convite="aceitar"></span>
+        </button>
+        <!-- «Agora não» com o mesmo peso: não gasta o convite. -->
+        <a class="btn btn-secundario" id="link-agora-nao" href="hoje.html" data-texto-convite="agoraNao"></a>
+      </div>
     </section>
 
     <section class="vista" id="vista-feito" hidden>

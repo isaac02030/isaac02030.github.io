@@ -1,7 +1,8 @@
 /* Confere o convite por link (Duo e Rival) e o placar do Rival em pontos.
    Casos negados: o token nunca vai na URL do servidor; o placar não aparece
    no Duo; sem login, a página de aceitar pede login e não chama o servidor;
-   o token não fica guardado no aparelho.
+   o token não fica guardado no aparelho (só nesta aba, durante o login,
+   e some ao voltar); sem «Aceitar» depois de uma recusa definitiva.
    Rode na raiz do repositório: node nexus-v2/dev/checar-convite.js */
 
 var fs = require("fs");
@@ -92,9 +93,58 @@ if (/urso/.test(htmlAceitar)) falhas.push("negado: sem urso na página de aceita
 if (!/name="referrer" content="no-referrer"/.test(ler("aceitar-convite.html"))) falhas.push("a página de aceitar não manda referrer");
 
 /* ---------- O token não fica no aparelho ---------- */
+if (/localStorage/.test(semComentarios(ler("convite.js")))) falhas.push("negado: convite.js não usa o localStorage");
+if (/localStorage\.(setItem|removeItem)/.test(semComentarios(ler("aceitar-convite.js")))) falhas.push("negado: a página de aceitar só lê a sessão no localStorage, não grava");
+if (/localStorage[^;]*convite|convite[^;]*localStorage/i.test(semComentarios(ler("login.js")))) falhas.push("negado: o convite nunca vai para o localStorage no login");
+/* Só a aba, só durante o login: um setItem, em convite.js, na chave do convite pendente. */
+var gravacoes = [];
 ["convite.js", "aceitar-convite.js"].forEach(function (n) {
-  if (/localStorage\.setItem|sessionStorage\.setItem/.test(semComentarios(ler(n)))) falhas.push("negado: " + n + " não guarda nada no aparelho");
+  (semComentarios(ler(n)).match(/sessionStorage\.setItem\([^)]*\)/g) || []).forEach(function (g) { gravacoes.push(n + ": " + g); });
 });
+/* login.js tem outras chaves da aba (rascunho do cadastro, aceite): nenhuma é o convite. */
+(semComentarios(ler("login.js")).match(/(session|local)Storage\.setItem\([^,]*/g) || []).forEach(function (g) {
+  if (/CONVITE|convite|PENDENTE|token/i.test(g) && !/nexus_v2_token|CHAVE_TOKEN/.test(g)) gravacoes.push("login.js: " + g);
+});
+if (gravacoes.length !== 1 || gravacoes[0] !== "convite.js: sessionStorage.setItem(CHAVE_PENDENTE, token)") falhas.push("negado: só o convite pendente vai para o sessionStorage: " + gravacoes.join(" | "));
+var aba = {};
+var abaStorage = { getItem: function (k) { return k in aba ? aba[k] : null; }, setItem: function (k, v) { aba[k] = String(v); }, removeItem: function (k) { delete aba[k]; } };
+var localTocado = false;
+var localFalso = { getItem: function () { localTocado = true; return null; }, setItem: function () { localTocado = true; }, removeItem: function () { localTocado = true; } };
+var janela2 = {};
+vm.runInNewContext(ler("convite.js"), { window: janela2, sessionStorage: abaStorage, localStorage: localFalso, location: { origin: "https://site.exemplo", pathname: "/" } });
+var V2 = janela2.NexusConvite;
+V2.guardarParaOLogin("curto");
+if (Object.keys(aba).length) falhas.push("negado: token inválido não vai para a aba");
+V2.guardarParaOLogin(TOKEN);
+if (aba.nexus_v2_convite_pendente !== TOKEN || V2.pendente() !== TOKEN) falhas.push("o token fica na aba durante o login");
+V2.apagarPendente();
+if (Object.keys(aba).length || V2.pendente() !== "") falhas.push("o token some da aba ao voltar");
+aba.nexus_v2_convite_pendente = "lixo";
+if (V2.pendente() !== "") falhas.push("negado: valor inválido na aba não vira token");
+if (localTocado) falhas.push("negado: o convite nunca toca no localStorage");
+var lerToken = trecho(aceitar, "function lerTokenEApagar(", "\n}\n");
+if (!/V\.pendente\(\);\s*V\.apagarPendente\(\);/.test(lerToken)) falhas.push("a página de aceitar apaga o token da aba assim que abre");
+var aceitarFn = trecho(aceitar, "async function aceitar(", "function iniciar(");
+if (!/accepted === true\) \{\s*tokenAtual = "";\s*V\.apagarPendente\(\);/.test(aceitarFn)) falhas.push("depois de aceitar, o token some da aba");
+var iniciarFn = trecho(aceitar, "function iniciar(", "\n}\n");
+if (!/link-entrar"\)\.addEventListener\("click", function \(\) \{\s*V\.guardarParaOLogin\(tokenAtual\);/.test(iniciarFn)) falhas.push("o token só vai para a aba ao tocar em Entrar");
+var login = semComentarios(ler("login.js"));
+var seguir = trecho(login, "async function seguirDepoisDaSessao(", "NexusApi.listarMissoes");
+if (!/NexusConvite\.pendente\(\)\) \{\s*location\.href = "aceitar-convite\.html" \+ location\.search;/.test(seguir)) falhas.push("depois de entrar, o convite pendente abre de novo");
+if (ler("index.html").indexOf('<script src="convite.js"></script>') === -1) falhas.push("a entrada carrega convite.js");
+
+/* ---------- Recusa definitiva: sem «Aceitar» ---------- */
+if (!/res\.status < 500 && res\.status !== 429\) \{\s*document\.getElementById\("btn-aceitar"\)\.hidden = true;/.test(aceitarFn)) falhas.push("negado: depois de 403 (18+ ou bloqueio), 409 ou 410, o botão Aceitar some");
+if (!/id="link-agora-nao" href="hoje\.html"/.test(htmlAceitar)) falhas.push("«Agora não» ao lado de Aceitar, indo para Hoje");
+if (/NexusApi/.test(trecho(iniciarFn, "link-agora-nao", "\n"))) falhas.push("negado: «Agora não» não chama o servidor");
+if (V.TEXTOS.agoraNao !== "Agora não") falhas.push("texto «Agora não»");
+if (!/^Ao aceitar, /.test(V.TEXTOS.explicaRivalMinha) || !/^Ao aceitar, /.test(V.TEXTOS.explicaRivalNova)) falhas.push("no Rival, diz antes que aceitar muda a missão");
+if (!/Não vê as suas notas\.$/.test(V.TEXTOS.veDuo) || !/os seus pontos\. Não vê as suas notas\.$/.test(V.TEXTOS.veRival)) falhas.push("a prévia diz o que a outra pessoa vê (e nunca a nota)");
+if (V.TEXTOS.missaoDuo !== "Missão: {titulo}") falhas.push("no Duo é «Missão:»");
+if (!/dia difícil também\. O dia livre não pontua\./.test(V.TEXTOS.pontos)) falhas.push("o dia difícil conta 10 e o dia livre não");
+if (!/\(hora de Lisboa\)/.test(V.validade("2026-07-01T22:30:00Z")) || V.validade("2026-07-01T22:30:00Z").indexOf("01/07 às 23:30") === -1) falhas.push("a validade vem na hora de Lisboa: " + V.validade("2026-07-01T22:30:00Z"));
+if (V.validade("2026-01-10T23:30:00Z").indexOf("10/01 às 23:30") === -1) falhas.push("a validade no inverno (Lisboa = UTC): " + V.validade("2026-01-10T23:30:00Z"));
+if (V.validade("lixo") !== "") falhas.push("negado: data inválida não vira validade");
 var missao = ler("missao.js");
 if (!/var link = "";\s*try \{\s*localStorage\.setItem\(CHAVE_CACHE/.test(missao)) falhas.push("negado: o link do convite não fica na cópia da Missão");
 if (!/var NEXUS_CONVITE_POR_LINK = true;/.test(missao)) falhas.push("o convite por link está ligado");
@@ -109,7 +159,15 @@ if (caixa.linhas({ scores: { eu: 3, ana: 2 } }, "eu", "ana") !== null) falhas.pu
 if (!/rival: temPar && modo === "rival" && ativa,/.test(missao)) falhas.push("o placar é só do Rival ativo");
 var carregarMissao = trecho(missao, "async function carregar(", "function atualizarBarra(");
 if (!/if \(base\.rival\) \{\s*var placar = await NexusApi\.placarDaMissao/.test(carregarMissao)) falhas.push("negado: no Duo, o placar nem é pedido");
-if (ler("missao.html").indexOf('data-texto-convite="regraPontos"') === -1 || V.TEXTOS.regraPontos !== "10 pontos por dia cumprido.") falhas.push("o placar diz «10 pontos por dia cumprido.»");
+if (ler("missao.html").indexOf('data-texto-convite="regraPontos"') === -1 || V.TEXTOS.regraPontos !== "10 pontos por dia cumprido. O dia difícil conta; o dia livre não.") falhas.push("o placar diz a regra dos pontos");
+var css = semComentarios(ler("missao.css"));
+var placarCss = trecho(css, ".placar {", "}");
+if (/border|background/.test(placarCss)) falhas.push("negado: o placar não é cartão dentro de cartão");
+if (!/\.placar-linha \+ \.placar-linha \{\s*border-top: 1px solid var\(--border-soft\);/.test(css)) falhas.push("o placar tem divisória entre as duas linhas");
+if (/placar[^{]*(ganh|perd|lider|frente)/i.test(css) || /placar-(ganhando|perdendo)/.test(missao)) falhas.push("negado: sem cor de ganhando/perdendo no placar");
+var htmlMissao = ler("missao.html");
+if (!/id="aviso-copia" role="status"/.test(htmlMissao)) falhas.push("«Link copiado.» num role=status");
+if (!/id="btn-compartilhar"/.test(htmlMissao) || V.TEXTOS.compartilhar !== "Compartilhar" || V.TEXTOS.copiado !== "Link copiado.") falhas.push("Compartilhar e «Link copiado.»");
 
 /* ---------- Cache ---------- */
 var sw = ler("sw.js");
@@ -123,5 +181,5 @@ function terminar() {
     console.log("FALHOU:\n- " + falhas.join("\n- "));
     process.exit(1);
   }
-  console.log("ok: convite por link (token no corpo e no fragmento, login, nada guardado) e placar do Rival em pontos, com casos negados");
+  console.log("ok: convite por link (token no corpo e no fragmento, login, token só na aba durante o login, sem Aceitar após recusa) e placar do Rival em pontos, com casos negados");
 }
