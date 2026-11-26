@@ -193,7 +193,7 @@ A tela lê sem internet: os arquivos entram no cache `nexus-v2-v20`.
 
 Quando o dia passou de `duration_days`, ou quando o status da missão é `completed`, o Hoje abre `dia-30.html`. Antes disso, essa tela volta para o Hoje. É uma tela de fechamento: não tem a barra de abas. Ao abrir, o foco vai para o título. O número de dias sai dos check-ins `completed` desta pessoa, do mesmo jeito que o Hoje conta. Não há placar e não há Porta Aberta.
 
-Entre o título e o fato fica a mesma grade do Hoje, só para leitura. O nome único para o leitor é «N de 30 dias registrados». O dia sem registro usa o traço da falta. A frase logo abaixo do fato usa a cor do texto, peso 600 e o tamanho do corpo. Se o número bate com a duração, a frase é «Palavra cumprida neste ciclo.» Se faltou dia, «Houve falhas, e você chegou ao fim mesmo assim.»
+Entre o título e o fato fica a mesma grade do Hoje, só para leitura. O nome único para o leitor é «N de 30 dias registrados». O dia sem registro usa o traço diagonal. A frase logo abaixo do fato usa a cor do texto, peso 600 e o tamanho do corpo. Se o número bate com a duração, a frase é «Palavra cumprida neste ciclo.» Se houve dia sem registro, a frase diz quantos: «Houve 1 dia sem registro, e você chegou ao fim mesmo assim.» ou «Houve {n} dias sem registro, e você chegou ao fim mesmo assim.» Sem a contagem, fica «Houve dias sem registro, e você chegou ao fim mesmo assim.»
 
 «Continuar mais 36 dias» chama `POST /api/missions/:id/extend` com `{ days: 36 }`. O botão fica desabilitado enquanto o pedido não volta, para um toque duplo não abrir duas vezes. Essa rota ainda não existe no servidor de verdade. O mock só responde em `localhost`, `127.0.0.1` ou `[::1]`. Fora disso, ou se a resposta falhar, a tela diz «Não foi possível abrir os próximos 36 dias. Tente de novo.» e não segue. Sem internet: «Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.» Os dois avisos são um alerta. O texto fica na tela se a pessoa tocar de novo antes da resposta.
 
@@ -202,7 +202,7 @@ Entre o título e o fato fica a mesma grade do Hoje, só para leitura. O nome ú
 No mock, com a sessão já gravada:
 
 - `dia-30.html?cenario=fim-30` — 30 de 30, «Palavra cumprida neste ciclo.»
-- `dia-30.html?cenario=fim-27` — 27 de 30, «Houve falhas, e você chegou ao fim mesmo assim.»
+- `dia-30.html?cenario=fim-27` — 27 de 30, «Houve 3 dias sem registro, e você chegou ao fim mesmo assim.»
 - `dia-30.html?cenario=fim-status` — status `completed` ainda no dia 12
 - `dia-30.html?cenario=extend-erro` — o continuar responde erro
 - `dia-30.html?cenario=nao-registrado` — ainda não é o fim; volta para o Hoje

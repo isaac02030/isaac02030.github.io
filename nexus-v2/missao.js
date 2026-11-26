@@ -17,6 +17,9 @@ var TEXTO_CONVITE_FORA = "O convite por link ainda não está disponível.";
 var TEXTO_PLACAR_OFF = "Sem internet. Este placar é o último que ficou neste aparelho.";
 var TEXTO_PLACAR_SEM = "Sem internet. O placar aparece quando a conexão voltar.";
 var TEXTO_PLACAR_ERRO = "Não foi possível abrir o placar agora.";
+var TEXTO_RASTRO_ERRO = "Não foi possível abrir os dias da missão. Tente de novo.";
+var TEXTO_RASTRO_OFF = "Sem internet. Estes são os dias que ficaram neste aparelho.";
+var TEXTO_RASTRO_SEM = "Sem internet. Os dias aparecem quando a conexão voltar.";
 var TEXTO_COPIA_ERRO = "Não foi possível copiar. Selecione o link e copie à mão.";
 var TEXTO_ABANDONO_OFF = "Sem internet. A missão continua. Tente de novo quando a conexão voltar.";
 var TEXTO_ABANDONO_ERRO = "Não foi possível abandonar agora. A missão continua.";
@@ -25,6 +28,9 @@ var TEXTO_SOLO_FEITO = "A missão foi encerrada. O registro do dia parou.";
 var MS_DIA = 24 * 60 * 60 * 1000;
 var ciclo = 0;
 var modeloAtual = null;
+var missaoAtual = null;
+var sequenciaAtual = null;
+var diasAbrindo = false;
 var abandonando = false;
 var abandonoCancelado = false;
 
@@ -245,10 +251,34 @@ function linkSeguro(valor) {
   return url;
 }
 
+function numerosGuardados(lista) {
+  if (!Array.isArray(lista)) return null;
+  var saida = [];
+  lista.forEach(function (item) {
+    var n = Number(item);
+    if (!isFinite(n) || n < 1 || n > 96) return;
+    n = Math.floor(n);
+    if (saida.indexOf(n) === -1) saida.push(n);
+  });
+  return saida;
+}
+
 function guardarCache(modelo) {
   if (!modelo || modelo.id == null) return;
   /* O link de exemplo não fica gravado. Um link de verdade, quando a rota existir, fica. */
   var link = cenarioDaPagina() === "link-fake" ? "" : linkSeguro(modelo.link);
+  /* Se os dias falharam agora, não apaga os números que já estavam neste aparelho. */
+  var feitos = Array.isArray(modelo.feitos) ? modelo.feitos : null;
+  var dificeis = Array.isArray(modelo.dificeis) ? modelo.dificeis : null;
+  var hojeFeito = modelo.hojeFeito === true;
+  if (feitos == null) {
+    var anterior = lerCache();
+    if (anterior && String(anterior.id) === String(modelo.id) && Array.isArray(anterior.feitos)) {
+      feitos = anterior.feitos;
+      dificeis = Array.isArray(anterior.dificeis) ? anterior.dificeis : [];
+      hojeFeito = anterior.hojeFeito === true;
+    }
+  }
   try {
     localStorage.setItem(CHAVE_CACHE, JSON.stringify({
       versao: 2,
@@ -270,6 +300,9 @@ function guardarCache(modelo) {
       diasSemana: Array.isArray(modelo.diasSemana) ? modelo.diasSemana : null,
       semanaDia1: typeof modelo.semanaDia1 === "number" ? modelo.semanaDia1 : null,
       diaLivre: modelo.diaLivre === true,
+      feitos: feitos,
+      dificeis: dificeis,
+      hojeFeito: hojeFeito,
       mostrarConvite: modelo.mostrarConvite === true,
       linhas: modelo.linhas || null,
       link: link
@@ -285,7 +318,12 @@ function lerCache() {
     if (!dados || (dados.versao !== 1 && dados.versao !== 2) || dados.id == null) return null;
     dados.linhas = sanitizarLinhas(dados.linhas);
     dados.link = linkSeguro(dados.link);
+    dados.feitos = numerosGuardados(dados.feitos);
+    dados.dificeis = numerosGuardados(dados.dificeis);
+    dados.hojeFeito = dados.hojeFeito === true;
     dados.avisoPlacar = "";
+    dados.avisoRastro = "";
+    dados.rastroErro = false;
     if (dados.link) dados.mostrarConvite = false;
     return dados;
   } catch (erro) {
@@ -380,28 +418,212 @@ function mostrarLinha(id, valor) {
   el.textContent = "";
 }
 
-/* Os dias da missão, quando a pessoa escolheu de 3 a 6. É o plano dos 30 dias:
-   dia da missão com contorno, dia livre com contorno pontilhado, hoje com anel.
-   O que foi feito ou faltou fica no Hoje. A régua é aria-hidden; a linha diz os dias. */
-function pintarPlanoDias(modelo) {
-  var bloco = document.getElementById("plano-dias");
-  var caixa = document.getElementById("regua-plano");
+/* A linha dos dias da semana fica. A régua saiu: o rastro já mostra o dia livre. */
+function pintarDiasDaSemana(modelo) {
+  var linha = document.getElementById("dias-linha");
   var dias = NexusDias.daMissao(modelo.diasSemana);
-  if (!dias || typeof modelo.semanaDia1 !== "number" || typeof modelo.duracao !== "number") {
-    bloco.hidden = true;
-    caixa.replaceChildren();
+  if (!dias || typeof modelo.semanaDia1 !== "number") {
+    linha.hidden = true;
+    linha.textContent = "";
     return;
   }
-  document.getElementById("dias-linha").textContent = NexusDias.TEXTOS.rotuloPrevia + ": " + NexusDias.resumo(dias);
-  var daMissao = NexusDias.verificador(dias, modelo.semanaDia1);
-  var pecas = [];
-  for (var dia = 1; dia <= modelo.duracao; dia++) {
-    var marca = document.createElement("span");
-    marca.className = "marca-plano" + (daMissao(dia) ? "" : " livre") + (dia === modelo.dia ? " hoje" : "");
-    pecas.push(marca);
+  linha.hidden = false;
+  linha.textContent = NexusDias.TEXTOS.rotuloPrevia + ": " + NexusDias.resumo(dias);
+}
+
+function rastroCabe(modelo) {
+  if (!modelo || modelo.status === "completed") return false;
+  if (typeof modelo.dia !== "number" || typeof modelo.duracao !== "number") return false;
+  if (modelo.dia < 1 || modelo.duracao < 1 || modelo.dia > modelo.duracao) return false;
+  return true;
+}
+
+function dadosDoRastro(modelo) {
+  if (!rastroCabe(modelo) || !Array.isArray(modelo.feitos)) return null;
+  return {
+    duracao: modelo.duracao,
+    hoje: modelo.dia,
+    feitos: modelo.feitos,
+    dificeis: Array.isArray(modelo.dificeis) ? modelo.dificeis : [],
+    ehLivre: NexusRegistro.livreDe(modelo),
+    hojeFeito: modelo.hojeFeito === true
+  };
+}
+
+function textoContagem(n) {
+  var partes = [n.feitos + " " + (n.feitos === 1 ? "feito" : "feitos")];
+  if (n.dificeis) partes.push(n.dificeis + " " + (n.dificeis === 1 ? "difícil" : "difíceis"));
+  if (n.livres) partes.push(n.livres + " " + (n.livres === 1 ? "livre" : "livres"));
+  if (n.faltas) partes.push(n.faltas + " sem registro");
+  return partes.join(" · ");
+}
+
+function rotuloDoDia(item) {
+  if (item.hoje && (item.estado === "f" || item.estado === "d")) return "hoje, registrado";
+  if (item.estado === "h") return "hoje, ainda sem registro";
+  if (item.estado === "d") return "dia difícil";
+  if (item.estado === "l") return "dia livre";
+  if (item.estado === "x") return "sem registro";
+  if (item.estado === "f") return "feito";
+  return "";
+}
+
+function linhasDoDiaADia(dados) {
+  var linhas = [];
+  var futuroA = null;
+  var futuroB = null;
+  NexusTrilha.estados(dados).forEach(function (item) {
+    if (item.dia > dados.hoje) {
+      if (futuroA == null) futuroA = item.dia;
+      futuroB = item.dia;
+      return;
+    }
+    var rotulo = rotuloDoDia(item);
+    if (rotulo) linhas.push("Dia " + item.dia + ": " + rotulo);
+  });
+  if (futuroA != null) {
+    if (futuroA === futuroB) linhas.push("Dia " + futuroA + ": ainda por vir");
+    else linhas.push("Dias " + futuroA + " a " + futuroB + ": ainda por vir");
   }
-  caixa.replaceChildren.apply(caixa, pecas);
+  return linhas;
+}
+
+function definirDiasAbrindo(ligado) {
+  var botao = document.getElementById("btn-dias");
+  diasAbrindo = ligado === true;
+  botao.textContent = diasAbrindo ? "Abrindo…" : "Tentar de novo";
+  botao.setAttribute("aria-disabled", diasAbrindo ? "true" : "false");
+  botao.setAttribute("aria-busy", diasAbrindo ? "true" : "false");
+}
+
+function mostrarAvisoRastro(textoAviso, alerta) {
+  var aviso = document.getElementById("aviso-rastro");
+  aviso.className = "alerta alerta-neutro";
+  aviso.setAttribute("role", alerta ? "alert" : "status");
+  aviso.textContent = textoAviso;
+  aviso.hidden = !textoAviso;
+}
+
+function pintarRastro(modelo) {
+  var bloco = document.getElementById("bloco-rastro");
+  var caixa = document.getElementById("trilha-missao");
+  var contagem = document.getElementById("contagem-rastro");
+  var legenda = document.getElementById("legenda-rastro");
+  var detalhes = document.getElementById("dia-a-dia");
+  var lista = document.getElementById("lista-dias");
+  var botao = document.getElementById("btn-dias");
+  if (!rastroCabe(modelo)) {
+    bloco.hidden = true;
+    return;
+  }
   bloco.hidden = false;
+  var dados = dadosDoRastro(modelo);
+  if (!dados) {
+    caixa.hidden = true;
+    caixa.replaceChildren();
+    contagem.hidden = true;
+    contagem.textContent = "";
+    legenda.hidden = true;
+    legenda.replaceChildren();
+    detalhes.hidden = true;
+    detalhes.open = false;
+    lista.replaceChildren();
+    mostrarAvisoRastro(modelo.avisoRastro || "", modelo.rastroErro === true);
+    botao.hidden = modelo.rastroErro !== true;
+    if (!botao.hidden) definirDiasAbrindo(false);
+    return;
+  }
+  botao.hidden = true;
+  definirDiasAbrindo(false);
+  mostrarAvisoRastro(modelo.avisoRastro || "", false);
+  caixa.hidden = false;
+  NexusTrilha.pintar(caixa, dados);
+  var n = NexusTrilha.contagem(dados);
+  contagem.hidden = false;
+  contagem.textContent = textoContagem(n);
+  var temHoje = NexusTrilha.estados(dados).some(function (item) { return item.hoje; });
+  var itens = [
+    ["lf", "Feito", n.feitos],
+    ["ld", "Dia difícil", n.dificeis],
+    ["ll", "Dia livre", n.livres],
+    ["lx", "Sem registro", n.faltas],
+    ["lh", "Hoje", temHoje ? 1 : 0]
+  ];
+  var pecas = itens.filter(function (item) { return item[2] > 0; }).map(function (item) {
+    var li = document.createElement("li");
+    var marca = document.createElement("i");
+    marca.className = item[0];
+    li.appendChild(marca);
+    li.appendChild(document.createTextNode(item[1]));
+    return li;
+  });
+  legenda.replaceChildren.apply(legenda, pecas);
+  legenda.hidden = pecas.length === 0;
+  var linhas = linhasDoDiaADia(dados).map(function (frase) {
+    var li = document.createElement("li");
+    li.textContent = frase;
+    return li;
+  });
+  lista.replaceChildren.apply(lista, linhas);
+  detalhes.open = false;
+  detalhes.hidden = linhas.length === 0;
+}
+
+function aplicarDias(modelo, missao, progresso, sequencia) {
+  var meus = NexusRegistro.checkinsMeus(missao, progresso);
+  var hojeFeito = !!(sequencia && sequencia.today_done);
+  modelo.hojeFeito = hojeFeito;
+  modelo.feitos = NexusRegistro.diasFeitos(meus, modelo.dia, hojeFeito);
+  var dificeis = NexusRegistro.lerDiasDificeis(sequencia, missao, meus);
+  modelo.dificeis = Array.isArray(dificeis) ? dificeis : [];
+  modelo.rastroErro = false;
+  modelo.avisoRastro = "";
+}
+
+function aplicarRastroGuardado(modelo) {
+  var guardado = lerCache();
+  modelo.rastroErro = false;
+  if (guardado && String(guardado.id) === String(modelo.id) && Array.isArray(guardado.feitos)) {
+    modelo.feitos = guardado.feitos;
+    modelo.dificeis = Array.isArray(guardado.dificeis) ? guardado.dificeis : [];
+    modelo.hojeFeito = guardado.hojeFeito === true;
+    modelo.avisoRastro = TEXTO_RASTRO_OFF;
+    return;
+  }
+  modelo.feitos = null;
+  modelo.dificeis = null;
+  modelo.hojeFeito = false;
+  modelo.avisoRastro = TEXTO_RASTRO_SEM;
+}
+
+async function tentarDias() {
+  if (!modeloAtual || !missaoAtual || diasAbrindo) return;
+  if (semRedeAgora()) {
+    aplicarRastroGuardado(modeloAtual);
+    pintarRastro(modeloAtual);
+    return;
+  }
+  definirDiasAbrindo(true);
+  var progresso = await NexusApi.progressoDaMissao(modeloAtual.id);
+  if (!modeloAtual) return;
+  definirDiasAbrindo(false);
+  if (progresso.ok) {
+    aplicarDias(modeloAtual, missaoAtual, progresso.dados, sequenciaAtual);
+    guardarCache(modeloAtual);
+    pintarRastro(modeloAtual);
+    return;
+  }
+  if (progresso.semRede) {
+    aplicarRastroGuardado(modeloAtual);
+    pintarRastro(modeloAtual);
+    return;
+  }
+  modeloAtual.feitos = null;
+  modeloAtual.dificeis = null;
+  modeloAtual.hojeFeito = false;
+  modeloAtual.rastroErro = true;
+  modeloAtual.avisoRastro = TEXTO_RASTRO_ERRO;
+  pintarRastro(modeloAtual);
 }
 
 function pintar(modelo) {
@@ -422,7 +644,8 @@ function pintar(modelo) {
   else mostrarLinha("minimo", modelo.minimo ? "O mínimo de hoje: " + modelo.minimo : "");
   mostrarLinha("porque", modelo.porque ? "Porque: " + modelo.porque : "");
   document.getElementById("frase-solo").hidden = modelo.fraseSolo !== true;
-  pintarPlanoDias(modelo);
+  pintarDiasDaSemana(modelo);
+  pintarRastro(modelo);
 
   var placar = document.getElementById("placar");
   var avisoPlacar = document.getElementById("aviso-placar");
@@ -521,6 +744,8 @@ function abrirOffline() {
   }
   if (guardado.rival && guardado.linhas) guardado.avisoPlacar = TEXTO_PLACAR_OFF;
   else if (guardado.rival) guardado.avisoPlacar = TEXTO_PLACAR_SEM;
+  if (Array.isArray(guardado.feitos)) guardado.avisoRastro = TEXTO_RASTRO_OFF;
+  else guardado.avisoRastro = TEXTO_RASTRO_SEM;
   if (guardado.link) guardado.mostrarConvite = false;
   else guardado.mostrarConvite = guardado.temPar !== true;
   abrirModelo(guardado);
@@ -682,6 +907,8 @@ function aoCopiar() {
 async function carregar() {
   var meu = ++ciclo;
   modeloAtual = null;
+  missaoAtual = null;
+  sequenciaAtual = null;
   fecharConfirmacao();
   mostrarVista("carregando");
   if (semRedeAgora()) {
@@ -706,10 +933,12 @@ async function carregar() {
   /* A sequência só diz se hoje é dia livre. Se ela falhar, a tela abre como antes. */
   var pedidos = await Promise.all([
     NexusApi.obterMissao(resumo.id),
-    NexusApi.sequenciaDaMissao(resumo.id)
+    NexusApi.sequenciaDaMissao(resumo.id),
+    NexusApi.progressoDaMissao(resumo.id)
   ]);
   var missaoRes = pedidos[0];
   var sequenciaRes = pedidos[1];
+  var progressoRes = pedidos[2];
   if (meu !== ciclo) return;
   if (!missaoRes.ok) {
     if (missaoRes.semRede) abrirOffline();
@@ -723,7 +952,18 @@ async function carregar() {
   }
 
   var base = modeloBase(missao);
-  base.diaLivre = !!(sequenciaRes && sequenciaRes.ok && sequenciaRes.dados && sequenciaRes.dados.today_is_mission_day === false);
+  missaoAtual = missao;
+  sequenciaAtual = sequenciaRes && sequenciaRes.ok ? sequenciaRes.dados : null;
+  base.diaLivre = !!(sequenciaAtual && sequenciaAtual.today_is_mission_day === false);
+  if (progressoRes.ok) aplicarDias(base, missao, progressoRes.dados, sequenciaAtual);
+  else if (progressoRes.semRede) aplicarRastroGuardado(base);
+  else {
+    base.feitos = null;
+    base.dificeis = null;
+    base.hojeFeito = false;
+    base.rastroErro = true;
+    base.avisoRastro = TEXTO_RASTRO_ERRO;
+  }
   if (base.rival) {
     var placar = await NexusApi.placarDaMissao(missao.id);
     if (meu !== ciclo) return;
@@ -769,6 +1009,10 @@ function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
   NexusAbas.montar("missao");
   document.getElementById("btn-tentar").addEventListener("click", carregar);
+  document.getElementById("btn-dias").addEventListener("click", function () {
+    if (diasAbrindo) return;
+    tentarDias();
+  });
   document.getElementById("btn-duo").addEventListener("click", function () { aoConvidar("duo"); });
   document.getElementById("btn-rival").addEventListener("click", function () { aoConvidar("rival"); });
   document.getElementById("btn-copiar").addEventListener("click", aoCopiar);

@@ -20,6 +20,7 @@ var falhasAoAbrir = 0;
 var mensagemDaFolha = null;
 var botaoDaFolha = null;
 var vistas = {};
+var chipsDispensados = false;
 
 function hostDeDesenvolvimento() {
   var host = location.hostname;
@@ -326,6 +327,7 @@ async function carregar() {
   parar();
   mostrarVista("conversa");
   atualizarCampo();
+  mostrarChipsSeCouber();
   focarTitulo();
   irParaOFim();
 }
@@ -360,6 +362,37 @@ async function atualizarEmSilencio() {
   X.marcarVista(missaoId, lista.dados.messages);
   if (perto) irParaOFim();
   else document.getElementById("ir-novas").hidden = false;
+}
+
+/* Frases prontas: só com ?apoio=1. O toque preenche o campo e não envia.
+   Somem ao digitar, ao preencher ou ao enviar, e não voltam nesta abertura. */
+function esconderChips() {
+  chipsDispensados = true;
+  var grupo = document.getElementById("frases-prontas");
+  if (grupo) grupo.hidden = true;
+}
+
+function mostrarChipsSeCouber() {
+  var grupo = document.getElementById("frases-prontas");
+  var campo = document.getElementById("campo-mensagem");
+  if (!grupo) return;
+  if (parametro("apoio") !== "1" || chipsDispensados || (campo && campo.value.length > 0)) {
+    grupo.hidden = true;
+    return;
+  }
+  grupo.hidden = false;
+  grupo.setAttribute("aria-label", TX.frasesProntas);
+}
+
+function usarFrase(botao) {
+  if (chipsDispensados || !botao) return;
+  var campo = document.getElementById("campo-mensagem");
+  campo.value = botao.textContent;
+  esconderChips();
+  atualizarCampo();
+  campo.focus();
+  var fim = campo.value.length;
+  try { campo.setSelectionRange(fim, fim); } catch (erro) {}
 }
 
 /* ---------- Campo e envio ---------- */
@@ -460,6 +493,7 @@ async function enviar(textoRepetido) {
   }
   mostrarErroDoCampo("");
   mostrarAvisoDoEnvio("");
+  esconderChips();
   enviando = true;
   if (typeof textoRepetido !== "string") campo.value = "";
   atualizarCampo();
@@ -671,9 +705,16 @@ function ligar() {
   });
   var campo = document.getElementById("campo-mensagem");
   campo.addEventListener("input", function () {
+    if (!chipsDispensados) esconderChips();
     if (X.tamanho(campo.value.trim()) <= X.LIMITE) mostrarErroDoCampo("");
     atualizarCampo();
   });
+  var chips = document.querySelectorAll(".chip-frase");
+  for (var c = 0; c < chips.length; c++) {
+    chips[c].addEventListener("click", function (evento) {
+      usarFrase(evento.currentTarget);
+    });
+  }
   document.getElementById("form-mensagem").addEventListener("submit", function (evento) {
     evento.preventDefault();
     enviar();

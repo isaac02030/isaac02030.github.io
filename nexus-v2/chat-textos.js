@@ -62,6 +62,13 @@
     bloquearSemRede: "Sem internet. O bloqueio não foi feito.",
     bloquearIndisponivel: "O bloqueio ainda não está disponível. Tente de novo mais tarde.",
 
+    /* Apoio depois do registro (Duo). O chip só preenche o campo; quem envia é a pessoa. */
+    escreverPara: "Escrever para {apelido}",
+    frasesProntas: "Frases prontas",
+    fraseForca: "Força hoje.",
+    fraseJunto: "Estou na missão com você.",
+    fraseFirme: "Bom ver você firme.",
+
     /* Missão e Hoje */
     abrirConversa: "Abrir a conversa",
     novas: "{n} novas",

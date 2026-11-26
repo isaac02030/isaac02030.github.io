@@ -62,7 +62,7 @@ if (api.indexOf('"/extend"') === -1 && api.indexOf("\"/extend\"") === -1) {
 }
 if (api.indexOf("days: 36") === -1) falhas.push("o corpo não manda days: 36");
 if (api.indexOf("/continue-solo") !== -1) falhas.push("api.js reutiliza continue-solo");
-if (sw.indexOf('CACHE = "nexus-v2-v37"') === -1) falhas.push("o cache não está em nexus-v2-v37");
+if (sw.indexOf('CACHE = "nexus-v2-v39"') === -1) falhas.push("o cache não está em nexus-v2-v39");
 if (sw.indexOf("./dia-30.html") === -1 || sw.indexOf("./dia-30.css") === -1 || sw.indexOf("./dia-30.js") === -1) {
   falhas.push("o cache não inclui a tela do fim");
 }
