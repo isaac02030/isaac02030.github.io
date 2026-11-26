@@ -6,7 +6,8 @@
    true: pedirConvite passa a falar com a rota nova. Enquanto o corpo dela
    estiver vazio, o aviso de indisponível continua. */
 
-var NEXUS_CONVITE_POR_LINK = false;
+/* Ligado com o convite por link do servidor (PR 38). */
+var NEXUS_CONVITE_POR_LINK = true;
 
 var CHAVE_CACHE = "nexus_v2_missao";
 var CHAVE_USUARIO = "nexus_v2_user";
@@ -180,31 +181,44 @@ function aplicarLink(base) {
   base.avisoPlacar = "";
 }
 
-/* A rota nova entra nesta função. Hoje ela não pede nada. */
+/* Convite por link (PR 38 do servidor). Devolve { link, convite } ou { erro }. */
 function pedirConvite(tipo) {
-  if (NEXUS_CONVITE_POR_LINK !== true) {
+  if (NEXUS_CONVITE_POR_LINK !== true || !modeloAtual || modeloAtual.id == null) {
     return Promise.resolve({ indisponivel: true, tipo: tipo });
   }
-  return Promise.resolve({ indisponivel: true, tipo: tipo });
+  return NexusApi.criarConvite(modeloAtual.id, tipo).then(function (resultado) {
+    var C = window.NexusConvite;
+    var dados = resultado && resultado.dados;
+    if (resultado && resultado.ok && dados && C.tokenValido(dados.token) && dados.invite) {
+      return {
+        link: C.linkDoConvite(dados.token),
+        convite: { id: dados.invite.id, tipo: dados.invite.kind === "rival" ? "rival" : "duo", vence: dados.invite.expires_at }
+      };
+    }
+    if (resultado && resultado.sessaoEncerrada) return { erro: "" };
+    if (resultado && resultado.semRede) return { erro: TEXTO_CONVITE_OFF };
+    return { erro: C.textoDoErro(resultado) };
+  });
 }
 
-function lerDias(scores, nome) {
-  if (!nome || !scores || typeof scores !== "object") return null;
-  if (!Object.prototype.hasOwnProperty.call(scores, nome)) return null;
-  var n = Number(scores[nome]);
+function lerPontos(pontos, nome) {
+  if (!nome || !pontos || typeof pontos !== "object") return null;
+  if (!Object.prototype.hasOwnProperty.call(pontos, nome)) return null;
+  var n = Number(pontos[nome]);
   if (!isFinite(n) || n < 0) return null;
   return Math.floor(n);
 }
 
+/* Placar do Rival em pontos (points do /score, PR 37). Sem points: sem placar. */
 function linhasDoPlacar(dados, meuNome, nomePar) {
-  if (!dados || typeof dados.scores !== "object" || !dados.scores) return null;
+  if (!dados || typeof dados.points !== "object" || !dados.points) return null;
   if (!meuNome || !nomePar || meuNome === nomePar) return null;
-  var meu = lerDias(dados.scores, meuNome);
-  var par = lerDias(dados.scores, nomePar);
+  var meu = lerPontos(dados.points, meuNome);
+  var par = lerPontos(dados.points, nomePar);
   if (meu == null || par == null) return null;
   return [
-    { eu: true, dias: meu },
-    { eu: false, nome: nomePar, dias: par }
+    { eu: true, pontos: meu },
+    { eu: false, nome: nomePar, pontos: par }
   ];
 }
 
@@ -225,22 +239,23 @@ function escolherMissao(lista) {
   return null;
 }
 
-function diasDaLinha(item) {
-  var dias = item ? Number(item.dias) : NaN;
-  if (!isFinite(dias) || dias < 0) return null;
-  return Math.floor(dias);
+function pontosDaLinha(item) {
+  var pontos = item ? Number(item.pontos) : NaN;
+  if (!isFinite(pontos) || pontos < 0) return null;
+  return Math.floor(pontos);
 }
 
+/* Cópia guardada do placar: só em pontos (uma cópia antiga, em dias, é descartada). */
 function sanitizarLinhas(lista) {
   if (!Array.isArray(lista) || lista.length !== 2) return null;
-  var da = diasDaLinha(lista[0]);
-  var db = diasDaLinha(lista[1]);
+  var da = pontosDaLinha(lista[0]);
+  var db = pontosDaLinha(lista[1]);
   if (da == null || db == null) return null;
   var nomePar = lista[1] && typeof lista[1].nome === "string" ? lista[1].nome.trim() : "";
   if (!nomePar) return null;
   return [
-    { eu: true, dias: da },
-    { eu: false, nome: nomePar, dias: db }
+    { eu: true, pontos: da },
+    { eu: false, nome: nomePar, pontos: db }
   ];
 }
 
@@ -265,8 +280,6 @@ function numerosGuardados(lista) {
 
 function guardarCache(modelo) {
   if (!modelo || modelo.id == null) return;
-  /* O link de exemplo não fica gravado. Um link de verdade, quando a rota existir, fica. */
-  var link = cenarioDaPagina() === "link-fake" ? "" : linkSeguro(modelo.link);
   /* Se os dias falharam agora, não apaga os números que já estavam neste aparelho. */
   var feitos = Array.isArray(modelo.feitos) ? modelo.feitos : null;
   var dificeis = Array.isArray(modelo.dificeis) ? modelo.dificeis : null;
@@ -279,6 +292,8 @@ function guardarCache(modelo) {
       hojeFeito = anterior.hojeFeito === true;
     }
   }
+  /* O link do convite não fica gravado no aparelho: o token aparece uma vez. */
+  var link = "";
   try {
     localStorage.setItem(CHAVE_CACHE, JSON.stringify({
       versao: 2,
@@ -400,7 +415,7 @@ function pintarPlacar(linhas) {
     nome.textContent = linha.eu ? "Você" : linha.nome;
     var dias = document.createElement("span");
     dias.className = "placar-dias";
-    dias.textContent = textoDias(linha.dias);
+    dias.textContent = window.NexusConvite.textoPontos(linha.pontos);
     item.appendChild(nome);
     item.appendChild(dias);
     lista.appendChild(item);
@@ -671,6 +686,7 @@ function pintar(modelo) {
     avisoConvite.textContent = "";
   }
 
+  pintarConvite(modelo);
   var bloco = document.getElementById("bloco-link");
   var campo = document.getElementById("campo-link");
   if (modelo.link) {
@@ -847,21 +863,92 @@ function confirmarAbandono() {
   });
 }
 
+/* Apoio, validade, compartilhar e cancelar do convite real (o de exemplo não tem). */
+function pintarConvite(modelo) {
+  var C = window.NexusConvite;
+  var convite = modelo && modelo.convite;
+  var apoio = document.getElementById("apoio-link");
+  var validade = document.getElementById("validade-link");
+  var cancelar = document.getElementById("btn-cancelar-convite");
+  var compartilhar = document.getElementById("btn-compartilhar");
+  if (!convite || !C) {
+    validade.hidden = true;
+    cancelar.hidden = true;
+    compartilhar.hidden = true;
+    return;
+  }
+  apoio.textContent = convite.tipo === "rival" ? C.TEXTOS.apoioRival : C.TEXTOS.apoioDuo;
+  validade.textContent = C.validade(convite.vence);
+  validade.hidden = !validade.textContent;
+  cancelar.hidden = false;
+  compartilhar.hidden = !(navigator.share && typeof navigator.share === "function");
+}
+
+var criandoConvite = false;
 function aoConvidar(tipo) {
   var aviso = document.getElementById("aviso-convite");
+  if (criandoConvite) return;
   if (semRedeAgora()) {
     aviso.textContent = TEXTO_CONVITE_OFF;
     return;
   }
+  criandoConvite = true;
+  ["btn-duo", "btn-rival"].forEach(function (id) { document.getElementById(id).setAttribute("aria-busy", "true"); });
+  aviso.textContent = window.NexusConvite ? window.NexusConvite.TEXTOS.criando : "";
   pedirConvite(tipo).then(function (resultado) {
+    criandoConvite = false;
+    ["btn-duo", "btn-rival"].forEach(function (id) { document.getElementById(id).setAttribute("aria-busy", "false"); });
     if (resultado && typeof resultado.link === "string" && resultado.link && modeloAtual) {
+      aviso.textContent = "";
       modeloAtual.link = resultado.link;
+      modeloAtual.convite = resultado.convite || null;
       modeloAtual.mostrarConvite = false;
       pintar(modeloAtual);
+      NexusAbas.focar(document.getElementById("campo-link"));
       return;
     }
-    aviso.textContent = TEXTO_CONVITE_FORA;
+    aviso.textContent = resultado && typeof resultado.erro === "string" ? resultado.erro : TEXTO_CONVITE_FORA;
   });
+}
+
+var cancelandoConvite = false;
+function aoCancelarConvite() {
+  var C = window.NexusConvite;
+  var aviso = document.getElementById("aviso-copia");
+  var botao = document.getElementById("btn-cancelar-convite");
+  if (cancelandoConvite || !modeloAtual || !modeloAtual.convite) return;
+  if (semRedeAgora()) {
+    aviso.textContent = C.TEXTOS.semRedeCancelar;
+    return;
+  }
+  cancelandoConvite = true;
+  botao.textContent = C.TEXTOS.cancelando;
+  botao.setAttribute("aria-busy", "true");
+  NexusApi.cancelarConvite(modeloAtual.convite.id).then(function (resultado) {
+    cancelandoConvite = false;
+    botao.textContent = C.TEXTOS.cancelar;
+    botao.setAttribute("aria-busy", "false");
+    if (resultado.sessaoEncerrada) return;
+    if (resultado.ok && resultado.dados && resultado.dados.canceled === true) {
+      modeloAtual.link = "";
+      modeloAtual.convite = null;
+      modeloAtual.mostrarConvite = true;
+      pintar(modeloAtual);
+      var avisoConvite = document.getElementById("aviso-convite");
+      avisoConvite.textContent = typeof resultado.dados.message === "string" && C.DO_SERVIDOR.indexOf(resultado.dados.message) !== -1
+        ? resultado.dados.message
+        : "";
+      NexusAbas.focar(document.getElementById("btn-duo"));
+      return;
+    }
+    aviso.textContent = resultado.semRede ? C.TEXTOS.semRedeCancelar : C.textoDoErro(resultado);
+  });
+}
+
+function aoCompartilhar() {
+  var url = document.getElementById("campo-link").value;
+  if (!url || !navigator.share) return;
+  navigator.share({ title: window.NexusConvite.TEXTOS.textoCompartilhar, url: url }).catch(function () {});
 }
 
 function copiarPeloCampo() {
@@ -1016,6 +1103,12 @@ function iniciar() {
   document.getElementById("btn-duo").addEventListener("click", function () { aoConvidar("duo"); });
   document.getElementById("btn-rival").addEventListener("click", function () { aoConvidar("rival"); });
   document.getElementById("btn-copiar").addEventListener("click", aoCopiar);
+  document.getElementById("btn-cancelar-convite").addEventListener("click", aoCancelarConvite);
+  document.getElementById("btn-compartilhar").addEventListener("click", aoCompartilhar);
+  document.querySelectorAll("[data-texto-convite]").forEach(function (el) {
+    var chave = el.getAttribute("data-texto-convite");
+    if (window.NexusConvite && Object.prototype.hasOwnProperty.call(window.NexusConvite.TEXTOS, chave)) el.textContent = window.NexusConvite.TEXTOS[chave];
+  });
   document.getElementById("btn-abandonar").addEventListener("click", abrirConfirmacao);
   document.getElementById("btn-continuar").addEventListener("click", avancarConfirmacao);
   document.getElementById("btn-confirmar").addEventListener("click", confirmarAbandono);

@@ -168,7 +168,7 @@ if (/::after\s*\{[^}]*background:\s*var\(--accent\)/.test(css)) falhas.push("tra
 if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(textoTela)) falhas.push("emoji na tela");
 
 /* ---------- Cache ---------- */
-if (sw.indexOf('CACHE = "nexus-v2-v39"') === -1) falhas.push("o cache não está em nexus-v2-v39");
+if (sw.indexOf('CACHE = "nexus-v2-v40"') === -1) falhas.push("o cache não está em nexus-v2-v40");
 ["./dia-dificil.html", "./dia-dificil.css", "./dia-dificil.js"].forEach(function (arquivo) {
   if (sw.indexOf('"' + arquivo + '"') === -1) falhas.push("o cache não guarda " + arquivo);
 });

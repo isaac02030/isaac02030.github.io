@@ -262,6 +262,17 @@
      desbloqueio-lento (espera e só então desbloqueia)
    Os apelidos daqui são de teste. Pessoa Leste e Pessoa Oeste não são gente real.
 
+   Convite por link (PR 38 do servidor; ?cenario= na página):
+   - POST /api/invites { mission_id, kind } → 201 { invite, token } (token de teste)
+   - DELETE /api/invites/:id → { canceled: true }
+   - POST /api/invites/preview { token } e /accept { token, mission_id? }
+     (o token vai no corpo; o mock recusa token na URL)
+   - convite-rival      a prévia é de Rival
+   - convite-usado / convite-vencido / convite-cancelado / convite-proprio
+   - convite-em-par / convite-bloqueado / convite-menor / convite-503
+   - convite-cancelar-erro   o cancelamento responde 500
+   Placar: /score devolve também points (10 por dia, como o PR 37).
+
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.
    Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
@@ -555,6 +566,73 @@ function chavePublicaVapid() {
 }
 
 var CHAVE_PUBLICA = chavePublicaVapid();
+
+/* ---------- Convite por link (só teste local) ---------- */
+var convitesMock = [];
+var CONVITE_TEXTOS = {
+  criado: "Convite criado. O link vale por 7 dias e só pode ser usado uma vez.",
+  usado: "Este convite já foi usado.",
+  naoEncontrado: "Convite não encontrado. Confira o link.",
+  vencido: "Este convite venceu. Peça um novo a quem convidou.",
+  cancelado: "Este convite foi cancelado. Peça um novo a quem convidou.",
+  proprio: "Você não pode aceitar o seu próprio convite.",
+  emPar: "Você já está num Duo ou Rival ativo. Saia dele antes de aceitar outro convite.",
+  bloqueado: "Não foi possível aceitar este convite.",
+  menor: "O Duo e o Rival são só para maiores de 18 anos.",
+  indisponivel: "O convite ainda não está disponível. Tente de novo mais tarde.",
+  erro: "Não deu para concluir agora. Tente de novo daqui a pouco.",
+  soSolo: "Só dá para convidar numa missão Solo ativa."
+};
+
+function tokenDeTeste() {
+  return crypto.randomBytes(32).toString("base64url");
+}
+
+function responderConvite(req, url, corpo) {
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var cenario = nomeDoCenario(req);
+  if (/token=/.test(req.url)) return { status: 400, dados: { error: "O token vai no corpo, nunca na URL." } };
+  if (cenario === "convite-503") return { status: 503, dados: { error: CONVITE_TEXTOS.indisponivel } };
+  var agora = Date.now();
+
+  if (url === "/api/invites" && req.method === "POST") {
+    if (!corpo || (corpo.kind !== "duo" && corpo.kind !== "rival")) return { status: 400, dados: { error: "Escolha Duo ou Rival." } };
+    if (cenario === "convite-nao-solo") return { status: 409, dados: { error: CONVITE_TEXTOS.soSolo } };
+    var token = tokenDeTeste();
+    var convite = { id: convitesMock.length + 1, kind: corpo.kind, token: token, dono: acesso.email, expires_at: new Date(agora + 7 * MS_DIA).toISOString(), cancelado: false };
+    convitesMock.push(convite);
+    return { status: 201, dados: { invite: { id: convite.id, kind: convite.kind, expires_at: convite.expires_at }, token: token, message: CONVITE_TEXTOS.criado } };
+  }
+  var cancelar = url.match(/^\/api\/invites\/(\d+)$/);
+  if (cancelar && req.method === "DELETE") {
+    if (cenario === "convite-cancelar-erro") return { status: 500, dados: { error: CONVITE_TEXTOS.erro } };
+    var alvo = convitesMock.find(function (c) { return String(c.id) === cancelar[1] && c.dono === acesso.email; });
+    if (!alvo) return { status: 404, dados: { error: CONVITE_TEXTOS.naoEncontrado } };
+    alvo.cancelado = true;
+    return { status: 200, dados: { canceled: true, message: "Convite cancelado." } };
+  }
+  if ((url === "/api/invites/preview" || url === "/api/invites/accept") && req.method === "POST") {
+    var t = corpo && typeof corpo.token === "string" ? corpo.token : "";
+    if (!/^[A-Za-z0-9_-]{43}$/.test(t)) return { status: 404, dados: { error: CONVITE_TEXTOS.naoEncontrado } };
+    if (cenario === "convite-usado") return { status: 409, dados: { error: CONVITE_TEXTOS.usado } };
+    if (cenario === "convite-vencido") return { status: 410, dados: { error: CONVITE_TEXTOS.vencido } };
+    if (cenario === "convite-cancelado") return { status: 410, dados: { error: CONVITE_TEXTOS.cancelado } };
+    if (cenario === "convite-proprio") return { status: 400, dados: { error: CONVITE_TEXTOS.proprio } };
+    var achado = convitesMock.find(function (c) { return c.token === t; });
+    if (achado && achado.cancelado) return { status: 410, dados: { error: CONVITE_TEXTOS.cancelado } };
+    var tipo = achado ? achado.kind : (cenario === "convite-rival" ? "rival" : "duo");
+    if (url === "/api/invites/preview") {
+      return { status: 200, dados: { invite: { kind: tipo, owner_name: "Ana", title: "Ler uma página por dia", category: "aprendizagem", expires_at: new Date(agora + 6 * MS_DIA).toISOString() } } };
+    }
+    if (cenario === "convite-em-par") return { status: 409, dados: { error: CONVITE_TEXTOS.emPar } };
+    if (cenario === "convite-bloqueado") return { status: 403, dados: { error: CONVITE_TEXTOS.bloqueado } };
+    if (cenario === "convite-menor") return { status: 403, dados: { error: CONVITE_TEXTOS.menor, code: "adult_confirmation_required", adult_confirmation_required: true } };
+    if (achado) achado.cancelado = true;
+    return { status: 200, dados: { accepted: true, kind: tipo, mission_id: 7, message: tipo === "rival" ? "Pronto. Vocês agora estão em Rival." : "Pronto. Vocês agora estão em Duo." } };
+  }
+  return { status: 404, dados: { error: "Não encontrado." } };
+}
 
 /* ---------- Chat do Duo/Rival (só teste local) ---------- */
 var chatMensagens = {};
@@ -1651,10 +1729,15 @@ function corpoDoPlacar(missao, progresso, email) {
   var leader = "Empate!";
   if (diasDono > diasPar) leader = missao.user_name;
   else if (diasPar > diasDono) leader = missao.partner_name;
+  /* Pontos do Rival (PR 37): 10 por dia cumprido. */
+  var points = {};
+  Object.keys(scores).forEach(function (k) { points[k] = scores[k] * 10; });
   return {
     mission_id: missao.id,
     mode: missao.mode,
     scores: scores,
+    points: points,
+    points_per_day: 10,
     leader: leader,
     my_streak: sequenciaAtual(meus && meus.checkins, numeroDoDia(missao.started_at))
   };
@@ -2178,6 +2261,17 @@ var servidor = http.createServer(function (req, res) {
   }
 
   var url = req.url.split("?")[0];
+  if (url === "/api/invites" || url.indexOf("/api/invites/") === 0) {
+    var leituraConvite = req.method === "POST" ? lerCorpo(req) : Promise.resolve({});
+    leituraConvite.then(function (corpo) {
+      return responderConvite(req, url, corpo);
+    }).then(function (resultado) {
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 400, { error: "Convite não encontrado. Confira o link." });
+    });
+    return;
+  }
   if (url === "/api/messages" || url.indexOf("/api/messages/") === 0) {
     var leituraChat = req.method === "POST" ? lerCorpo(req) : Promise.resolve({});
     leituraChat.then(function (corpo) {

@@ -452,6 +452,23 @@ var NexusApi = {
      Se partner_name é null, a chave vira a string "null".
      leader é um username ou "Empate!".
      A tela Missão só usa isso no Rival ativo, e só os dois nomes e os dias. */
+  /* Convite por link (PR 38 do servidor). O token vai SEMPRE no corpo,
+     nunca na URL (a URL entra nos registros de acesso do servidor). */
+  criarConvite: function (missaoId, tipo) {
+    return nexusPedir(caminhoComCenario("/api/invites"), { mission_id: Number(missaoId), kind: tipo }, { metodo: "POST", auth: true });
+  },
+  cancelarConvite: function (conviteId) {
+    return nexusPedir(caminhoComCenario("/api/invites/" + encodeURIComponent(conviteId)), null, { metodo: "DELETE", auth: true });
+  },
+  verConvite: function (token) {
+    return nexusPedir(caminhoComCenario("/api/invites/preview"), { token: token }, { metodo: "POST", auth: true });
+  },
+  aceitarConvite: function (token, missaoId) {
+    var corpo = { token: token };
+    if (missaoId != null) corpo.mission_id = Number(missaoId);
+    return nexusPedir(caminhoComCenario("/api/invites/accept"), corpo, { metodo: "POST", auth: true });
+  },
+  /* GET /api/checkins/:id/score: scores (dias), points (pontos do Rival, PR 37), leader. */
   placarDaMissao: function (id) {
     return nexusPedir(caminhoComCenario("/api/checkins/" + encodeURIComponent(id) + "/score"), null, { metodo: "GET", auth: true });
   },

@@ -98,12 +98,11 @@
   line-height: 1.4;
 }
 
+/* Placar do Rival: duas linhas com divisória, sem cartão dentro do cartão
+   e sem cor de «ganhando/perdendo» (revisão da Clara do PR 36). */
 .placar {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
+  padding: 0;
 }
 
 .placar-lista {
@@ -121,6 +120,11 @@
   justify-content: space-between;
   gap: var(--space-3);
   margin: 0;
+  padding: var(--space-2) 0;
+}
+
+.placar-linha + .placar-linha {
+  border-top: 1px solid var(--border-soft);
 }
 
 .placar-nome {
@@ -132,6 +136,12 @@
   font: var(--text-body);
   color: var(--text);
   white-space: nowrap;
+}
+
+.placar-regra {
+  margin: var(--space-2) 0 0;
+  font: var(--text-small);
+  color: var(--text-muted);
 }
 
 .bloco-conversa {
