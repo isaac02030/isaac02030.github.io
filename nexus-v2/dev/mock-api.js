@@ -2,7 +2,9 @@
    Não é o servidor do Nexus. Não guarda senha em arquivo.
    A chave pública do aviso nasce na memória e não é gravada.
    Rode na raiz do repositório: node nexus-v2/dev/mock-api.js
-   A tela fala com http://localhost:3000 (veja NEXUS_API_URL em api.js).
+   Neste computador a tela fala com http://localhost:3000
+   (veja NEXUS_API_URL em api.js). Fora de localhost, 127.0.0.1 e [::1],
+   a tela fala com o servidor no ar.
 
    Login (POST /api/users/login):
    - senha "errada" → 401 Credenciais inválidas.
