@@ -354,7 +354,7 @@ function lerDiasDaSemana(missao, sequencia) {
 function apelidoSeguro(valor) {
   if (typeof valor !== "string") return "";
   var nome = valor.trim();
-  if (!nome || nome.length > 40 || /[\r\n]/.test(nome)) return "";
+  if (!nome || nome.length > 50 || /[\r\n]/.test(nome)) return "";
   return nome;
 }
 
@@ -710,10 +710,12 @@ function pintarDia(modelo, semRede) {
       var extraEscrita = NexusAbas.busca(["tema", "cenario", "rede"]);
       escrever.href = "conversa.html" + (extraEscrita ? extraEscrita + "&" : "?") + "missao=" + encodeURIComponent(modelo.id) + "&apoio=1";
       escrever.textContent = NexusChat.preencher(NexusChat.TEXTOS.escreverPara, { apelido: apelido });
+      escrever.setAttribute("aria-label", escrever.textContent);
       escrever.hidden = false;
     } else {
       escrever.hidden = true;
       escrever.textContent = "";
+      escrever.removeAttribute("aria-label");
     }
   }
 

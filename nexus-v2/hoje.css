@@ -195,10 +195,16 @@ body:has(.tela-hoje) {
 }
 
 .link-escrever {
-  align-self: flex-start;
+  align-self: stretch;
+  max-width: 100%;
   min-height: 48px;
+  height: auto;
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+  justify-content: flex-start;
 }
 
 .linha-par {
