@@ -245,6 +245,26 @@
   align-self: center;
 }
 
+/* Frases prontas: plano, sem degradê e sem halo. Rolam com a página, acima do campo. */
+.frases-prontas {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.frases-prontas .chip-frase {
+  width: 100%;
+  min-height: 48px;
+  height: auto;
+  white-space: normal;
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: none;
+  background-image: none;
+}
+
 /* ---------- Campo (fica visível no pé, sem cobrir o fio) ---------- */
 .compositor {
   position: sticky;

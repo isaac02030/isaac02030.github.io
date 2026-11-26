@@ -121,6 +121,17 @@ if (!/resultado\.dados\.blocked === true/.test(js)) falhas.push("«Pessoa bloque
 var htmlLimpo = semComentarios(html);
 var luzes = (htmlLimpo.match(/btn-luz/g) || []).length;
 if (luzes !== 1) falhas.push("a conversa tem uma luz de botão só («Enviar»): veio " + luzes);
+["Força hoje.", "Estou na missão com você.", "Bom ver você firme.", "Frases prontas", "Escrever para {apelido}"].forEach(function (t) {
+  if (X.TEXTOS && Object.keys(X.TEXTOS).some(function (k) { return X.TEXTOS[k] === t; })) return;
+  falhas.push("falta a frase do apoio: «" + t + "»");
+});
+if (!/id="frases-prontas" role="group" hidden/.test(html)) falhas.push("as frases prontas começam escondidas");
+if (!/parametro\("apoio"\) !== "1"/.test(js)) falhas.push("sem ?apoio=1 a conversa abre sem frases prontas");
+var usarFrase = trecho(js, "function usarFrase(", "function atualizarCampo(");
+if (!/function usarFrase\(botao\)/.test(js) || /enviarMensagem|NexusApi\.enviar/.test(usarFrase)) falhas.push("negado: o chip não envia a mensagem");
+if (!/campo\.value = botao\.textContent/.test(js) || !/campo\.focus\(\)/.test(js)) falhas.push("o chip preenche o campo e devolve o foco");
+if (ler("hoje.html").indexOf('id="link-escrever"') === -1 || !/class="btn btn-texto link-escrever"/.test(ler("hoje.html"))) falhas.push("o link de escrever é texto, sem luz");
+if (!/modo !== "parceiro" && modo !== "duo"/.test(ler("hoje.js")) || !/modelo\.hojeFeito === true/.test(ler("hoje.js"))) falhas.push("o link de escrever só no Duo, depois do registro");
 if (/urso/.test(htmlLimpo) || /urso/.test(js)) falhas.push("negado: sem urso no chat");
 var css = semComentarios(ler("conversa.css"));
 var baloes = css.match(/\.(minha|dela)[^{]*\.balao[^{]*\{[^}]*\}/g) || [];

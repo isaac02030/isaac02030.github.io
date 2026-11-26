@@ -83,7 +83,7 @@ if (!D.erroDoServidor("Escolha pelo menos 3 dias da missão por semana.") || D.e
 
 var aprovados = {
   titulo: "Em quais dias da semana?",
-  apoio: "Escolha de 3 a 7 dias. Nos outros dias você não faz check-in e não recebe lembrete. Esses dias não contam como falta.",
+  apoio: "Escolha de 3 a 7 dias. Nos outros dias você não faz check-in e não recebe lembrete. Esses dias não contam como dia sem registro.",
   contadorVarios: "{n} dias por semana.",
   erroMinimo: "Escolha pelo menos 3 dias por semana.",
   atalhoTodos: "Todos os dias",
@@ -189,15 +189,17 @@ if (hoje.indexOf("sequencia.today_is_mission_day === false") === -1) falhas.push
 if (!/if \(modelo\.diaLivre === true\) return;/.test(hoje)) falhas.push("no dia livre não há botão de registrar");
 /* Trilha de luz: o dia livre vem antes da falta (trilha.js) e é pontilhado. */
 var trilhaJs = ler("trilha.js");
-if (!/else if \(ehLivre\(dia\)\) estado = "l";\s*else if \(dia < hoje\) estado = "x";/.test(trilhaJs) || !/ehLivre: livreDe\(modelo\)/.test(hoje)) falhas.push("o dia livre não pode virar falta na trilha");
+if (!/else if \(ehLivre\(dia\)\) estado = "l";\s*else if \(dia < hoje\) estado = "x";/.test(trilhaJs) || !/ehLivre: NexusRegistro\.livreDe\(modelo\)/.test(hoje)) falhas.push("o dia livre não pode virar dia sem registro na trilha");
 if (!/\.trilha30 \.s-l i\s*\{[^}]*border-style:\s*dotted;[^}]*border-color:\s*var\(--text-muted\);/.test(ler("trilha.css"))) falhas.push("o dia livre na trilha é pontilhado em --text-muted, sem preenchimento");
+var missaoHtml = ler("missao.html");
 var missaoCss = ler("missao.css");
-if (!/\.marca-plano\.livre\s*\{[^}]*border-style:\s*dotted/.test(missaoCss)) falhas.push("o dia livre na Missão é pontilhado");
 var missaoJs = semComentarios(ler("missao.js"));
+if (/regua-plano|marca-plano|legenda-dias|pintarPlanoDias/.test(missaoHtml + missaoCss + missaoJs)) falhas.push("a régua do plano saiu da Missão");
+if (missaoHtml.indexOf('id="trilha-missao"') === -1 || missaoHtml.indexOf('href="trilha.css"') === -1 || missaoHtml.indexOf('<script src="trilha.js"></script>') === -1) falhas.push("a Missão mostra o rastro");
+if (missaoHtml.indexOf('id="dias-linha"') === -1 || !/NexusDias\.TEXTOS\.rotuloPrevia/.test(missaoJs)) falhas.push("a linha dos dias da semana fica");
+if (!/NexusTrilha\.pintar/.test(missaoJs) || !/NexusRegistro\.checkinsMeus/.test(missaoJs) || !/NexusApi\.progressoDaMissao/.test(missaoJs)) falhas.push("a Missão usa a trilha, o progresso e as mesmas regras do Hoje");
 if (missaoJs.indexOf("today_is_mission_day === false") === -1) falhas.push("a Missão precisa ler today_is_mission_day");
 if (!/if \(modelo\.diaLivre === true\) mostrarLinha\("minimo", NexusDias\.TEXTOS\.hojeLivre\);\s*else mostrarLinha\("minimo"/.test(missaoJs)) falhas.push("num dia livre a Missão não mostra «O mínimo de hoje»");
-if (ler("missao.html").indexOf('data-texto-dias="legendaMissao"') === -1 || ler("missao.html").indexOf('data-texto-dias="tituloPlano"') === -1) falhas.push("a Missão precisa do título «Plano dos 30 dias» e da legenda «Dia da missão»");
-if (ler("missao.html").indexOf('data-texto-dias="legendaLivre"') === -1) falhas.push("falta a legenda «Dia livre» na Missão");
 ["checkin.js", "dia-dificil.js"].forEach(function (nome) {
   var texto = semComentarios(ler(nome));
   if (!/resultado\.status === 400 && dados\.free_day === true\) \{\s*mostrarDiaLivre\(missaoAtual\);/.test(texto)) falhas.push(nome + " precisa mostrar a frase do dia livre (free_day), não erro");
@@ -211,6 +213,10 @@ if (ler("missao.html").indexOf('data-texto-dias="legendaLivre"') === -1) falhas.
 var sw = ler("sw.js");
 if (sw.indexOf('CACHE = "nexus-v2-v40"') === -1) falhas.push("o cache não está em nexus-v2-v40");
 if (sw.indexOf('"./dias-da-missao.js"') === -1) falhas.push("o cache não guarda dias-da-missao.js");
+if (sw.indexOf('"./registro-dias.js"') === -1) falhas.push("o cache não guarda registro-dias.js");
+["hoje.html", "missao.html"].forEach(function (nome) {
+  if (ler(nome).indexOf('<script src="registro-dias.js"></script>') === -1) falhas.push(nome + " não carrega registro-dias.js");
+});
 
 /* Marcas de página gerada por IA (regra 11). */
 [["onboarding.html", html], ["onboarding.js", js], ["dias-da-missao.js", fonteDias]].forEach(function (par) {

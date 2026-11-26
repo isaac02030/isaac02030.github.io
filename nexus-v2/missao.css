@@ -261,86 +261,133 @@
   background: var(--surface);
 }
 
-/* ---------- Os dias da missão (plano dos 30 dias) ----------
-   Traço de 1,5px nas marcas (também no pontilhado). Contraste do pontilhado
-   (--text-muted): 7,2:1 no cartão claro, 7,1:1 no escuro; no Hoje, 6,3:1 no
-   papel e 8,0:1 em #161411.
-   Mesmas marcas do Hoje: 16px, 15 por linha. Dia da missão:
-   contorno --border. Dia livre: contorno pontilhado em --text-muted, sem
-   preenchimento e sem traço. Hoje: anel no acento. */
+/* O rastro (trilha.css) fica no cartão. A grade é em px e não cresce a 200%.
+   A contagem e a lista quebram linha. A legenda é aria-hidden. */
 
-.plano-dias {
+#bloco-rastro {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--space-2);
+  min-width: 0;
+}
+
+.contagem-rastro {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.legenda-trilha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 2px 0;
+  list-style: none;
+  color: var(--text-muted);
+  font: var(--text-small);
+}
+
+.legenda-trilha li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legenda-trilha i {
+  position: relative;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+}
+
+.legenda-trilha .lf,
+.legenda-trilha .ld {
+  border-color: transparent;
+  background: var(--trilha-a);
+}
+
+.legenda-trilha .ld::after {
+  content: "";
+  position: absolute;
+  inset: 4.5px;
+  border-radius: 50%;
+  background: var(--ponto-dificil);
+}
+
+.legenda-trilha .ll {
+  border-style: dotted;
+  border-color: var(--text-muted);
+}
+
+.legenda-trilha .lx {
+  border-color: var(--text-muted);
+}
+
+.legenda-trilha .lx::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--text-muted);
+  transform: rotate(-35deg);
+}
+
+.legenda-trilha .lh {
+  border-color: var(--accent);
+  outline: 1.5px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.dia-a-dia summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--space-1);
+  cursor: pointer;
+  color: var(--text);
+  font: var(--text-label);
+}
+
+.dia-a-dia summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.lista-dias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+  color: var(--text);
+  font: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+#btn-dias {
+  width: 100%;
+  min-height: 48px;
+}
+
+#aviso-rastro {
+  background-image: none;
+  box-shadow: none;
 }
 
 .dias-linha {
   margin: 0;
   font: var(--text-body);
   color: var(--text);
-}
-
-/* No cartão da Missão sobram 324px em 390: 15 marcas com vão de 4px (304px).
-   Abaixo de 360px, 10 por linha. */
-.regua-plano {
-  display: grid;
-  grid-template-columns: repeat(15, 16px);
-  gap: 4px;
-  justify-content: start;
-  padding: 4px;
-}
-
-@media (max-width: 359px) {
-  .regua-plano {
-    grid-template-columns: repeat(10, 16px);
-  }
-}
-
-.marca-plano {
-  box-sizing: border-box;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--border);
-  border-radius: 3px;
-  background: transparent;
-}
-
-.marca-plano.livre {
-  border-style: dotted;
-  border-color: var(--text-muted);
-}
-
-.marca-plano.hoje {
-  outline: 1.5px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.titulo-plano {
-  margin: 0;
-  font: var(--text-label);
-  color: var(--text);
-}
-
-/* A legenda repete o que a linha «Dias: …» já diz; o leitor de tela não a lê. */
-.legenda-dias {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font: var(--text-small);
-  color: var(--text-muted);
-}
-
-.legenda-dias li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.legenda-dias .marca-plano {
-  flex: 0 0 auto;
 }

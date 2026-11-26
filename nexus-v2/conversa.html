@@ -85,6 +85,11 @@
       <p class="fio-vazio" id="fio-vazio" data-texto-chat="vazio" hidden></p>
       <button type="button" class="btn btn-texto ir-novas" id="ir-novas" data-texto-chat="irParaNovas" hidden></button>
 
+      <div class="frases-prontas" id="frases-prontas" role="group" hidden>
+        <button type="button" class="btn btn-secundario chip-frase" data-texto-chat="fraseForca"></button>
+        <button type="button" class="btn btn-secundario chip-frase" data-texto-chat="fraseJunto"></button>
+        <button type="button" class="btn btn-secundario chip-frase" data-texto-chat="fraseFirme"></button>
+      </div>
       <form class="compositor" id="form-mensagem" method="post" action="#enviar" novalidate>
         <label class="compositor-rotulo" for="campo-mensagem" data-texto-chat="campoRotulo"></label>
         <!-- Avisos do servidor (limite da hora, sem acesso, falha): caixa neutra com ícone, não erro de campo. -->
