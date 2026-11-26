@@ -115,6 +115,51 @@ if (!/hoje: duracao \+ 1/.test(d30js)) falhas.push("o Dia 30 mostra a trilha enc
 if (!/if \(!faltas\) return TEXTO_CUMPRIU;/.test(d30js) || !/if \(faltas === 1\) return TEXTO_UMA_FALTA;/.test(d30js)) falhas.push("a segunda frase do Dia 30 diz só o que é verdade (sem falta, uma, várias)");
 if (!/<img class="urso-dia30 so-escuro"[^>]*alt="" aria-hidden="true"/.test(d30)) falhas.push("o urso do Dia 30 é decorativo e só no escuro");
 
+/* Dia sem check-in: a palavra é «sem registro» (ou «Sem registro» no começo da frase
+   e na legenda, como «Feito»). Não vale «sem registros», «Sem Registro» nem «falta». */
+function literais(nome) {
+  return semComentarios(ler(nome)).match(/"(?:\\.|[^"\\])*"/g) || [];
+}
+["hoje.js", "missao.js", "dia-30.js", "trilha.js", "hoje.html", "missao.html", "dia-30.html"].forEach(function (nome) {
+  literais(nome).forEach(function (s) {
+    (s.match(/sem registros?/gi) || []).forEach(function (p) {
+      if (p !== "sem registro" && p !== "Sem registro") falhas.push(nome + ": a palavra do dia sem check-in divergiu em " + s);
+    });
+    if (/\bfaltas?\b/i.test(s) && !/fato-falta|data de nascimento/i.test(s)) {
+      falhas.push(nome + ": «falta» no texto do dia sem check-in: " + s);
+    }
+  });
+});
+[
+  ["hoje.js", '" dias sem registro."'],
+  ["hoje.js", '"Ontem não houve registro."'],
+  ["missao.js", '" sem registro"'],
+  ["missao.js", '"sem registro"'],
+  ["missao.js", '"hoje, ainda sem registro"'],
+  ["missao.js", '"Sem registro"'],
+  ["dia-30.js", '"Houve dias sem registro, e você chegou ao fim mesmo assim."'],
+  ["dia-30.js", '"Houve 1 dia sem registro, e você chegou ao fim mesmo assim."'],
+  ["dia-30.js", '"Houve {n} dias sem registro, e você chegou ao fim mesmo assim."'],
+  ["dia-30.js", '" sem registro"'],
+  ["dia-30.js", '"Sem registro"'],
+  ["trilha.js", '"Sem registro: "']
+].forEach(function (par) {
+  if (literais(par[0]).indexOf(par[1]) === -1) falhas.push(par[0] + ": falta a frase " + par[1]);
+});
+
+/* «Ver dia a dia» abre a lista. A seta é decorativa e o nome acessível não muda. */
+var sumario = (ler("missao.html").match(/<summary>[\s\S]*?<\/summary>/) || [""])[0];
+if (!/^<summary>Ver dia a dia<svg /.test(sumario)) falhas.push("«Ver dia a dia» continua com esse nome e ganha a seta");
+if (!/aria-hidden="true"/.test(sumario) || /aria-label/.test(sumario)) falhas.push("a seta é decorativa e não muda o nome acessível");
+var missaoCss = semComentarios(ler("missao.css"));
+if (!/\.dia-a-dia summary \{[^}]*min-height:\s*48px/.test(missaoCss) || !/\.dia-a-dia summary \{[^}]*min-width:\s*48px/.test(missaoCss)) {
+  falhas.push("«Ver dia a dia» continua com alvo de pelo menos 48px");
+}
+if (!/\.dia-a-dia\[open\] summary \.seta \{[^}]*transform:\s*rotate\(90deg\)/.test(missaoCss)) falhas.push("a seta gira ao abrir a lista");
+if (!/@media \(prefers-reduced-motion: reduce\) \{\s*\.dia-a-dia summary \.seta \{\s*transition:\s*none;\s*\}/.test(missaoCss)) {
+  falhas.push("a seta respeita prefers-reduced-motion");
+}
+
 /* Casos negados: a falta nunca é vermelha; sem animação. */
 var css = semComentarios(ler("trilha.css"));
 if (/--danger|#FF8A80|#9B1C1C|red\b/i.test(css)) falhas.push("negado: a trilha nunca usa vermelho");
