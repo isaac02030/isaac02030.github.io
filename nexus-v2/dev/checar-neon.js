@@ -107,14 +107,14 @@ fs.readdirSync(raiz).filter(function (n) { return /\.css$/.test(n) && n !== "tok
 });
 
 /* ---------- Casos negados: telas sóbrias ---------- */
-var SOBRIAS = ["crise.html", "equipe.html", "termos.html", "privacidade.html", "conta-excluida.html", "meus-dados.html", "comunidade.html", "offline.html", "ajustes.html", "dia-dificil.html", "missao.html", "grande-irmao.html"];
+var SOBRIAS = ["crise.html", "equipe.html", "termos.html", "privacidade.html", "conta-excluida.html", "meus-dados.html", "comunidade.html", "offline.html", "ajustes.html", "dia-dificil.html", "missao.html", "grande-irmao.html", "pessoas-bloqueadas.html"];
 SOBRIAS.forEach(function (nome) {
   var html = semComentarios(ler(nome));
   if (/btn-luz/.test(html)) falhas.push(nome + ": tela sóbria sem botão de luz");
   if (/urso/i.test(html)) falhas.push(nome + ": o urso não aparece em tela sóbria");
   if (/fita-|logo-fita|linearGradient/.test(html)) falhas.push(nome + ": logo sem degradê nem halo em tela sóbria");
 });
-["crise.css", "legal.css", "meus-dados.css", "comunidade.css"].forEach(function (nome) {
+["crise.css", "legal.css", "meus-dados.css", "comunidade.css", "pessoas-bloqueadas.css"].forEach(function (nome) {
   var css = semComentarios(ler(nome));
   if (/var\(--(grad|glow-[a-z0-9]+|aba-luz|neon-[a-z]+)\)|drop-shadow|#2DF2D0|#3DD8FF|box-shadow:\s*0 0 \d/i.test(css)) falhas.push(nome + ": tela sóbria sem brilho nem degradê");
 });
@@ -181,7 +181,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).for
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v36"') === -1) falhas.push("o cache não está em nexus-v2-v36");
+if (sw.indexOf('CACHE = "nexus-v2-v37"') === -1) falhas.push("o cache não está em nexus-v2-v37");
 ["./icons/urso-firme.svg", "./icons/urso-contente.svg"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });

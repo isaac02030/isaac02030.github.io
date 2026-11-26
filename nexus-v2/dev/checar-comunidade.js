@@ -270,7 +270,7 @@ if (!/de === "denuncia" && window\.NexusComunidade[\s\S]*TEXTOS\.denunciaCrise/.
 ["comunidade-textos.js", "comunidade.html", "comunidade.css", "comunidade.js", "equipe.html", "equipe.js"].forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v36"') === -1) falhas.push("o cache não está em nexus-v2-v36");
+if (sw.indexOf('CACHE = "nexus-v2-v37"') === -1) falhas.push("o cache não está em nexus-v2-v37");
 
 /* A pasta antiga não muda neste trabalho. */
 if (!fs.existsSync(path.join(raiz, "..", "nexus"))) falhas.push("a pasta nexus/ sumiu");

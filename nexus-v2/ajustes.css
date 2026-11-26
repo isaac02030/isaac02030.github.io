@@ -125,6 +125,10 @@
   color: var(--text-muted);
 }
 
+.linha-lista + .linha-lista {
+  border-top: 0;
+}
+
 /* Instrução do iPhone: um passo por linha (revisão da Clara). */
 .passos-iphone {
   margin: var(--space-2) 0 0;

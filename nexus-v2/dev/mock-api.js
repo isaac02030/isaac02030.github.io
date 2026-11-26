@@ -244,6 +244,21 @@
    - equipe-chat-503    a lista de denúncias do chat responde 503
    Avisos de mensagem: GET/PUT /api/users/me/notification-preferences com «messages».
 
+   Pessoas bloqueadas (rotas novas; o servidor de verdade ainda não tem):
+   - GET /api/users/me/blocks → { blocks: [{ block_id, username, created_at }] },
+     só quem eu bloqueei, do mais recente ao mais antigo. Sem e-mail e sem
+     o id da pessoa.
+   - DELETE /api/users/me/blocks/:blockId → 200 { unblocked: true } também
+     quando a linha não existe ou é de outra pessoa (a linha dela fica).
+   - id inválido → 400. Sem token → 401. 429 e 503 nos cenários abaixo.
+   - só responde se a origem for localhost, 127.0.0.1 ou [::1]. Fora disso,
+     404 e não apaga nada.
+   - ?cenario=bloqueados-vazio, bloqueados-erro (500), bloqueados-503,
+     bloqueados-429, bloqueados-lento (espera e devolve a lista)
+   - ?cenario=desbloqueio-erro, desbloqueio-503, desbloqueio-429,
+     desbloqueio-lento (espera e só então desbloqueia)
+   Os apelidos daqui são de teste. Pessoa Leste e Pessoa Oeste não são gente real.
+
    Isto não vale no servidor de verdade. São só atalhos deste arquivo.
    Os nomes daqui são de teste. Par Teste não é uma pessoa real. */
 
@@ -1692,6 +1707,99 @@ function estenderMissao(email, id, corpo, cenario) {
   return { status: 200, dados: { mission: deNovo.mission, days: 36 } };
 }
 
+var bloqueiosPorPessoa = {};
+var donoDoBloqueio = {};
+var proximoIdBloqueio = 1001;
+
+function criarBloqueio(email, username, createdAt) {
+  var id = proximoIdBloqueio;
+  proximoIdBloqueio += 1;
+  donoDoBloqueio[String(id)] = email;
+  return { block_id: id, username: username, created_at: createdAt };
+}
+
+function listaDeBloqueios(email) {
+  if (!bloqueiosPorPessoa[email]) {
+    bloqueiosPorPessoa[email] = [
+      criarBloqueio(email, "Pessoa Leste", "2026-11-23T12:00:00.000Z"),
+      criarBloqueio(email, "Pessoa Oeste", "2026-11-02T12:00:00.000Z")
+    ];
+  }
+  return bloqueiosPorPessoa[email];
+}
+
+function publicoBloqueio(item) {
+  return { block_id: item.block_id, username: item.username, created_at: item.created_at };
+}
+
+function copiaDeBloqueios(email) {
+  return listaDeBloqueios(email).map(publicoBloqueio).sort(function (a, b) {
+    return String(b.created_at).localeCompare(String(a.created_at));
+  }).slice(0, 100);
+}
+
+function removerMeuBloqueio(email, id) {
+  if (donoDoBloqueio[String(id)] !== email) return;
+  var lista = bloqueiosPorPessoa[email] || [];
+  bloqueiosPorPessoa[email] = lista.filter(function (item) {
+    return String(item.block_id) !== String(id);
+  });
+  delete donoDoBloqueio[String(id)];
+}
+
+function esperarBloqueio(resultado) {
+  return new Promise(function (resolver) {
+    setTimeout(function () { resolver(resultado); }, 8000);
+  });
+}
+
+/* Lista e desbloqueio. Só em localhost, 127.0.0.1 e [::1].
+   Fora disso responde 404 e não mexe na lista. */
+function responderBloqueios(req, url) {
+  if (!pedidoDeDesenvolvimento(req)) {
+    return { status: 404, dados: { error: "Não encontrado." } };
+  }
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var cenario = nomeDoCenario(req);
+  var email = acesso.email;
+  if (req.method === "GET" && url === "/api/users/me/blocks") {
+    if (cenario === "bloqueados-erro") return { status: 500, dados: { error: "Não foi possível abrir a lista." } };
+    if (cenario === "bloqueados-503") return { status: 503, dados: { error: "Esta parte ainda não está disponível." } };
+    if (cenario === "bloqueados-429") return { status: 429, dados: { error: "Você pediu a lista muitas vezes. Espere um pouco e tente de novo." } };
+    if (cenario === "bloqueados-vazio") return { status: 200, dados: { blocks: [] } };
+    var lista = { status: 200, dados: { blocks: copiaDeBloqueios(email) } };
+    if (cenario === "bloqueados-lento") return esperarBloqueio(lista);
+    return lista;
+  }
+  var apagar = url.match(/^\/api\/users\/me\/blocks\/([^/]+)$/);
+  if (apagar && req.method === "DELETE") {
+    var id = "";
+    try { id = decodeURIComponent(apagar[1]); } catch (erroId) { id = ""; }
+    if (!/^[1-9]\d{0,17}$/.test(id)) return { status: 400, dados: { error: "Identificador inválido." } };
+    if (cenario === "desbloqueio-erro" || cenario === "bloqueados-erro") {
+      return { status: 500, dados: { error: "Não foi possível desbloquear agora." } };
+    }
+    if (cenario === "desbloqueio-503" || cenario === "bloqueados-503") {
+      return { status: 503, dados: { error: "O desbloqueio ainda não está disponível." } };
+    }
+    if (cenario === "desbloqueio-429" || cenario === "bloqueados-429") {
+      return { status: 429, dados: { error: "Você tentou desbloquear muitas vezes. Espere um pouco e tente de novo." } };
+    }
+    if (cenario === "desbloqueio-lento") {
+      return new Promise(function (resolver) {
+        setTimeout(function () {
+          removerMeuBloqueio(email, id);
+          resolver({ status: 200, dados: { unblocked: true } });
+        }, 8000);
+      });
+    }
+    removerMeuBloqueio(email, id);
+    return { status: 200, dados: { unblocked: true } };
+  }
+  return { status: 404, dados: { error: "Não encontrado." } };
+}
+
 function negar(acesso) {
   return { status: acesso.status, dados: acesso.dados };
 }
@@ -2060,6 +2168,17 @@ var servidor = http.createServer(function (req, res) {
       enviar(res, resultado.status, resultado.dados);
     }).catch(function () {
       enviar(res, 400, { error: "A mensagem precisa ser um texto. Escreva de novo e envie." });
+    });
+    return;
+  }
+  if (url === "/api/users/me/blocks" || url.indexOf("/api/users/me/blocks/") === 0) {
+    Promise.resolve().then(function () {
+      return responderBloqueios(req, url);
+    }).then(function (resultado) {
+      if (!resultado) resultado = { status: 404, dados: { error: "Não encontrado." } };
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 500, { error: "Não foi possível abrir a lista." });
     });
     return;
   }
