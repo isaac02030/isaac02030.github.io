@@ -1,9 +1,25 @@
-/* A URL da API fica só nesta linha.
-   O servidor antigo está desligado. Não aponte para ele.
-   Para testar neste computador, deixe http://localhost:3000
-   e rode: node nexus-v2/dev/mock-api.js
-   Quando houver um servidor novo, troque só o endereço abaixo. */
-var NEXUS_API_URL = "http://localhost:3000";
+/* O endereço da API depende de onde a página está aberta.
+   Neste computador (localhost, 127.0.0.1 ou [::1]) fica
+   http://localhost:3000. Rode: node nexus-v2/dev/mock-api.js
+   Em qualquer outro host (a prévia na Cloudflare Pages, por exemplo)
+   aponta para o servidor no ar, sem barra no fim.
+   O servidor antigo está desligado. Não aponte para ele. */
+function nexusPaginaLocal() {
+  var host = "";
+  try {
+    host = String(location.hostname || "").toLowerCase();
+  } catch (erroHost) {
+    host = "";
+  }
+  if (host.charAt(0) === "[" && host.charAt(host.length - 1) === "]") {
+    host = host.slice(1, -1);
+  }
+  return host === "localhost" || host === "127.0.0.1" || host === "::1";
+}
+
+var NEXUS_API_URL = nexusPaginaLocal()
+  ? "http://localhost:3000"
+  : "https://nexus-backend-production-3f61.up.railway.app";
 
 function nexusUrl(caminho) {
   var base = String(NEXUS_API_URL || "").replace(/\/+$/, "");

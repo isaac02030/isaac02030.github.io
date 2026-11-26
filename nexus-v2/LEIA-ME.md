@@ -33,15 +33,14 @@ Esses atalhos existem só no arquivo `dev/mock-api.js`.
 
 Para ver o escuro com o celular no claro, abra http://localhost:8080/?tema=escuro . Para voltar ao claro, `?tema=claro`. Sem o parâmetro, a tela segue o modo do aparelho.
 
-## Trocar o endereço da API
+## Endereço da API
 
-Abra `api.js`. A URL está numa linha só:
+Abra `api.js`. A tela escolhe o endereço pelo host da página:
 
-```js
-var NEXUS_API_URL = "http://localhost:3000";
-```
+- Em `localhost`, `127.0.0.1` ou `[::1]`, continua `http://localhost:3000`. Para testar neste computador, rode `node nexus-v2/dev/mock-api.js`.
+- Em qualquer outro host (a prévia na Cloudflare Pages, por exemplo), usa `https://nexus-backend-production-3f61.up.railway.app`, sem barra no fim.
 
-O servidor antigo está desligado. Quando houver um servidor novo, troque só esse endereço. O login usa `POST /api/users/login`. O cadastro usa `POST /api/users/register`.
+O servidor antigo está desligado. Não aponte para ele. O login usa `POST /api/users/login`. O cadastro usa `POST /api/users/register`.
 
 ## O que esta tela ainda não faz
 
