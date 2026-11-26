@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pessoas bloqueadas — Nexus</title>
+  <meta id="cor-da-barra" name="theme-color" content="#0B5F52">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nexus">
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem("nexus_v2_token")) {
+          location.replace("./" + location.search);
+          return;
+        }
+      } catch (erro) {
+        location.replace("./");
+        return;
+      }
+      var tema = "";
+      try {
+        var pedido = new URLSearchParams(location.search).get("tema");
+        if (pedido === "claro" || pedido === "escuro" || pedido === "sistema") tema = pedido;
+        else tema = localStorage.getItem("nexus_v2_tema") || "";
+      } catch (erroTema) {
+        tema = "";
+      }
+      if (tema === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (tema === "claro") document.documentElement.setAttribute("data-theme", "light");
+      var escuro = tema === "escuro" || (tema !== "claro" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var meta = document.getElementById("cor-da-barra");
+      if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
+    })();
+  </script>
+  <link rel="preload" href="fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="pessoas-bloqueadas.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
+  <main class="pagina pagina-com-abas" id="conteudo">
+    <div class="cartao cartao-topo bloqueados">
+      <noscript>
+        <p class="alerta alerta-neutro">O Nexus precisa de JavaScript para mostrar as pessoas bloqueadas.</p>
+      </noscript>
+      <a class="btn btn-texto btn-voltar" id="voltar" href="ajustes.html" data-texto-bloqueados="voltar">Voltar</a>
+      <h1 class="titulo" id="titulo" tabindex="-1" data-texto-bloqueados="titulo">Pessoas bloqueadas</h1>
+      <p id="aviso-lista" class="aviso-status" role="status" aria-live="polite" hidden></p>
+
+      <section class="vista" id="vista-carregando" aria-live="polite">
+        <p class="carregando" data-texto-bloqueados="carregando">Carregando a lista…</p>
+      </section>
+
+      <section class="vista" id="vista-erro" hidden>
+        <div id="alerta-lista" class="alerta alerta-neutro" role="alert"></div>
+        <button type="button" class="btn btn-secundario" id="btn-tentar" aria-disabled="false" data-texto-bloqueados="tentar">Tentar de novo</button>
+      </section>
+
+      <section class="vista" id="vista-vazia" hidden>
+        <p class="vazio" data-texto-bloqueados="vazio">Você não bloqueou ninguém.</p>
+        <p class="apoio" data-texto-bloqueados="vazioApoio">Para bloquear alguém, use as opções de uma mensagem no chat.</p>
+      </section>
+
+      <section class="vista" id="vista-lista" hidden>
+        <p class="apoio" data-texto-bloqueados="apoio">Quem está nesta lista não forma Duo nem Rival com você.</p>
+        <ul class="lista" id="lista"></ul>
+      </section>
+    </div>
+  </main>
+
+  <!-- Confirmação sóbria: Cancelar primeiro e com o foco. Desbloquear em contorno, sem vermelho. -->
+  <dialog class="dialogo" id="dialogo-desbloquear" role="alertdialog" aria-modal="true" aria-labelledby="desbloquear-titulo" aria-describedby="desbloquear-texto" tabindex="-1">
+    <h2 class="dialogo-titulo" id="desbloquear-titulo"></h2>
+    <p class="dialogo-texto" id="desbloquear-texto"></p>
+    <div id="alerta-desbloquear" class="alerta alerta-neutro" role="alert" hidden></div>
+    <div class="dialogo-botoes">
+      <button type="button" class="btn btn-primario" id="btn-cancelar-desbloquear" data-texto-bloqueados="cancelar">Cancelar</button>
+      <button type="button" class="btn btn-secundario" id="btn-confirmar-desbloquear" aria-busy="false">
+        <span class="btn-rotulo" data-texto-bloqueados="desbloquear">Desbloquear</span>
+      </button>
+    </div>
+  </dialog>
+
+  <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <script src="comunidade-textos.js"></script>
+  <script src="bloqueados-textos.js"></script>
+  <script src="api.js"></script>
+  <script src="abas.js"></script>
+  <script src="pessoas-bloqueadas.js"></script>
+</body>
+</html>

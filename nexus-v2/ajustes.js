@@ -335,6 +335,7 @@ function iniciar() {
 
   if (window.NexusDados) NexusDados.aplicar(document);
   document.getElementById("link-meus-dados").href = "meus-dados.html" + buscaTema();
+  document.getElementById("link-pessoas-bloqueadas").href = "pessoas-bloqueadas.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
   NexusAbas.iniciar("ajustes");
 }
 

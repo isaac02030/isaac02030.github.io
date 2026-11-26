@@ -406,6 +406,17 @@ var NexusApi = {
   bloquearPar: function (missaoId) {
     return nexusPedir(caminhoComCenario("/api/messages/" + encodeURIComponent(missaoId) + "/block"), null, { metodo: "POST", auth: true });
   },
+  /* GET /api/users/me/blocks → { blocks: [{ block_id, username, created_at }] }.
+     Só quem eu bloqueei, do mais recente ao mais antigo. O mock só responde
+     em localhost, 127.0.0.1 e [::1]. */
+  listarBloqueios: function () {
+    return nexusPedir(caminhoComCenario("/api/users/me/blocks"), null, { metodo: "GET", auth: true });
+  },
+  /* DELETE /api/users/me/blocks/:blockId. 200 { unblocked: true } também quando
+     a linha já não existe. O parâmetro é o id do bloqueio, nunca o da pessoa. */
+  desbloquear: function (blockId) {
+    return nexusPedir(caminhoComCenario("/api/users/me/blocks/" + encodeURIComponent(blockId)), null, { metodo: "DELETE", auth: true });
+  },
   /* Só admin: denúncias do chat (trecho, motivo e comentário, sem nomes). */
   denunciasDoChat: function () {
     return nexusPedir(caminhoComCenario("/api/messages/admin/reports"), null, { metodo: "GET", auth: true });
