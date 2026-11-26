@@ -173,16 +173,22 @@ if (!/\.dia input:checked \+ \.dia-caixa \{[\s\S]*?background: var\(--sel-fundo\
 });
 var manifesto = JSON.parse(ler("manifest.webmanifest"));
 if (manifesto.theme_color !== "#000000" || manifesto.background_color !== "#000000") falhas.push("manifest: theme_color e background_color #000000");
-[["icons/icon-192.png", 192], ["icons/icon-512.png", 512]].forEach(function (par) {
+[["icons/icon-192.png", 192], ["icons/icon-512.png", 512], ["icons/favicon-16.png", 16], ["icons/favicon-32.png", 32]].forEach(function (par) {
   var d = fs.readFileSync(path.join(raiz, par[0]));
   if (d.readUInt32BE(16) !== par[1] || d.readUInt32BE(20) !== par[1]) falhas.push(par[0] + ": tamanho errado");
+});
+var link16 = '<link rel="icon" href="icons/favicon-16.png" type="image/png" sizes="16x16">';
+var link32 = '<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">';
+fs.readdirSync(raiz).filter(function (n) { return /\.html$/.test(n); }).forEach(function (nome) {
+  var html = ler(nome);
+  if (html.indexOf(link16) === -1 || html.indexOf(link32) === -1) falhas.push(nome + ": falta o ícone de 16 ou de 32 px");
 });
 fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).forEach(function (nome) {
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v41"') === -1) falhas.push("o cache não está em nexus-v2-v41");
-["./icons/urso-firme.svg", "./icons/urso-contente.svg"].forEach(function (a) {
+if (sw.indexOf('CACHE = "nexus-v2-v42"') === -1) falhas.push("o cache não está em nexus-v2-v42");
+["./icons/urso-firme.svg", "./icons/urso-contente.svg", "./icons/urso-firme-16.svg", "./icons/urso-firme-32.svg", "./icons/urso-contente-16.svg", "./icons/urso-contente-32.svg", "./icons/logo-16.svg", "./icons/logo-32.svg", "./icons/favicon-16.png", "./icons/favicon-32.png"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });
 
