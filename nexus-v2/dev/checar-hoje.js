@@ -33,7 +33,7 @@ if (tokens.indexOf('url("fonts/Figtree-Variable.woff2") format("woff2")') === -1
   falhas.push("o @font-face não usa o arquivo variável com pesos 400 a 700");
 }
 if (sw.indexOf('"./fonts/Figtree-Variable.woff2"') === -1) falhas.push("o cache não guarda a fonte");
-if (sw.indexOf('CACHE = "nexus-v2-v35"') === -1) falhas.push("o cache não está em nexus-v2-v35");
+if (sw.indexOf('CACHE = "nexus-v2-v36"') === -1) falhas.push("o cache não está em nexus-v2-v36");
 
 /* Nenhum arquivo do v2 pede fonte ou estilo a outro site. */
 fs.readdirSync(raiz).forEach(function (nome) {

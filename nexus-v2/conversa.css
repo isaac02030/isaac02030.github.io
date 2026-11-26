@@ -58,6 +58,53 @@
   gap: var(--space-4);
 }
 
+/* Erro ao abrir: caixa neutra. Sem degradê, sem halo e sem luz. */
+#vista-erro {
+  align-items: stretch;
+  min-width: 0;
+}
+
+#alerta-abrir {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  box-shadow: none;
+  background-image: none;
+}
+
+#alerta-abrir .icone {
+  width: 24px;
+  height: 24px;
+  color: var(--text);
+}
+
+#vista-erro #btn-tentar {
+  width: 100%;
+  min-height: 48px;
+  box-shadow: none;
+  background-image: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#vista-erro #btn-tentar[aria-disabled="true"] {
+  cursor: wait;
+}
+
+#vista-erro .link-voltar-erro {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  max-width: 100%;
+  color: var(--accent-standout);
+  font: var(--text-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
 .vista-conversa {
   flex: 1 1 auto;
 }

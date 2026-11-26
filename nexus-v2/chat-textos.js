@@ -19,6 +19,7 @@
     abrindo: "Abrindo a conversa…",
     vazio: "Ainda não há mensagens. Escreva a primeira.",
     erroAbrir: "Não foi possível abrir a conversa. Tente de novo.",
+    erroAbrirDeNovo: "Ainda não foi possível abrir a conversa. Tente mais tarde.",
     semRedeAbrir: "Sem internet. A conversa não abriu.",
     semPar: "A conversa só funciona enquanto o Duo ou o Rival estiver ativo.",
     voltarMissao: "Voltar à missão",
