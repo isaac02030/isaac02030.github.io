@@ -55,7 +55,7 @@
   }
 
   /* «Trilha dos 30 dias. Dia 14 é hoje. Feitos: 10. Difíceis: 1. Dia livre: 1.
-     Faltas: 1. Hoje ainda não foi registrado.» */
+     Sem registro: 1. Hoje ainda não foi registrado.» */
   function resumo(dados) {
     var duracao = Number(dados.duracao) || 30;
     var hoje = Number(dados.hoje) || 1;
@@ -70,7 +70,7 @@
     partes.push("Feitos: " + n.f + ".");
     partes.push(plural(n.d, "Difícil", "Difíceis") + ": " + n.d + ".");
     if (n.l > 0) partes.push(plural(n.l, "Dia livre", "Dias livres") + ": " + n.l + ".");
-    partes.push(plural(n.x, "Falta", "Faltas") + ": " + n.x + ".");
+    partes.push("Sem registro: " + n.x + ".");
     if (!fim) {
       var deHoje = estados(dados)[hoje - 1];
       if (deHoje && deHoje.estado === "l") partes.push("Hoje é dia livre.");

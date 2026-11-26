@@ -87,7 +87,7 @@ var dia11 = pintado({ duracao: 30, hoje: 11, feitos: [1, 2, 3, 4, 5, 6, 7, 8, 9,
 if (tem(itemDo(dia11, 11), "ponta-esq")) falhas.push("no começo de uma linha não há fio antes de hoje");
 
 /* Leitor de tela: um resumo só, nada de 30 itens. */
-var resumo = "Trilha dos 30 dias. Dia 14 é hoje. Feitos: 9. Difícil: 1. Dias livres: 2. Falta: 1. Hoje ainda não foi registrado.";
+var resumo = "Trilha dos 30 dias. Dia 14 é hoje. Feitos: 9. Difícil: 1. Dias livres: 2. Sem registro: 1. Hoje ainda não foi registrado.";
 if (ol.atributos.role !== "img" || ol.atributos["aria-label"] !== resumo) falhas.push("resumo do leitor de tela: veio «" + ol.atributos["aria-label"] + "»");
 if (!/Hoje já foi registrado\.$/.test(olFeito.atributos["aria-label"])) falhas.push("depois do registro, o resumo diz «Hoje já foi registrado.»");
 if (ol.filhos.some(function (li) { return li.atributos["aria-hidden"] !== "true"; })) falhas.push("cada dia é aria-hidden (o leitor ouve só o resumo)");
@@ -103,9 +103,13 @@ if (!tem(itemDo(olFim, 30), "ultimo") || !tem(olFim, "trilha-fim")) falhas.push(
 if (olFim.filhos.some(function (li) { return tem(li, "ponta-esq") || tem(li, "ponta-dir"); })) falhas.push("no Dia 30 não há ponta de hoje");
 var c = T.contagem(FIM);
 if (c.feitos !== 22 || c.dificeis !== 2 || c.livres !== 4 || c.faltas !== 2) falhas.push("contagem do Dia 30 errada: " + JSON.stringify(c));
-if (!/^Trilha dos 30 dias\. Feitos: 22\. Difíceis: 2\. Dias livres: 4\. Faltas: 2\.$/.test(olFim.atributos["aria-label"])) falhas.push("resumo do Dia 30: «" + olFim.atributos["aria-label"] + "»");
+if (!/^Trilha dos 30 dias\. Feitos: 22\. Difíceis: 2\. Dias livres: 4\. Sem registro: 2\.$/.test(olFim.atributos["aria-label"])) falhas.push("resumo do Dia 30: «" + olFim.atributos["aria-label"] + "»");
 var d30 = ler("dia-30.html");
 var d30js = semComentarios(ler("dia-30.js"));
+if (d30js.indexOf('var TEXTO_FALHAS = "Houve dias sem registro, e você chegou ao fim mesmo assim."') === -1) falhas.push("a frase de reserva do Dia 30");
+if (d30js.indexOf('var TEXTO_UMA_FALTA = "Houve 1 dia sem registro, e você chegou ao fim mesmo assim."') === -1) falhas.push("a frase de 1 dia sem registro");
+if (d30js.indexOf('var TEXTO_FALTAS = "Houve {n} dias sem registro, e você chegou ao fim mesmo assim."') === -1) falhas.push("a frase de vários dias sem registro");
+if (d30js.indexOf('n.faltas + " sem registro"') === -1 || d30js.indexOf('"Sem registro"') === -1) falhas.push("a contagem e a legenda do Dia 30 dizem sem registro");
 if (!/<ol class="trilha30" id="marcas" role="img"><\/ol>/.test(d30)) falhas.push("o Dia 30 mostra a trilha");
 if (!/hoje: duracao \+ 1/.test(d30js)) falhas.push("o Dia 30 mostra a trilha encerrada");
 if (!/if \(!faltas\) return TEXTO_CUMPRIU;/.test(d30js) || !/if \(faltas === 1\) return TEXTO_UMA_FALTA;/.test(d30js)) falhas.push("a segunda frase do Dia 30 diz só o que é verdade (sem falta, uma, várias)");

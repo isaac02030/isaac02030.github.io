@@ -16,10 +16,10 @@ var TEXTO_ERRO_ABRIR = "Não foi possível abrir o fim do ciclo. Tente de novo."
 var TEXTO_ERRO_CONTINUAR = "Não foi possível abrir os próximos 36 dias. Tente de novo.";
 var TEXTO_SEM_REDE = "Sem internet. O ciclo já terminou; continuar fica para quando a conexão voltar.";
 var TEXTO_CUMPRIU = "Palavra cumprida neste ciclo.";
-var TEXTO_FALHAS = "Houve falhas, e você chegou ao fim mesmo assim.";
+var TEXTO_FALHAS = "Houve dias sem registro, e você chegou ao fim mesmo assim.";
 /* Trilha (spec da Clara, seção 8): a segunda frase diz só o que é verdade. */
-var TEXTO_UMA_FALTA = "Houve uma falta, e você chegou ao fim mesmo assim.";
-var TEXTO_FALTAS = "Houve {n} faltas, e você chegou ao fim mesmo assim.";
+var TEXTO_UMA_FALTA = "Houve 1 dia sem registro, e você chegou ao fim mesmo assim.";
+var TEXTO_FALTAS = "Houve {n} dias sem registro, e você chegou ao fim mesmo assim.";
 var TEXTO_CONTINUAR = "Continuar mais 36 dias";
 var TEXTO_ABRINDO = "Abrindo…";
 var ciclo = 0;
@@ -323,14 +323,14 @@ function pintarGrade(modelo) {
   var dados = dadosDaTrilha(modelo);
   NexusTrilha.pintar(caixa, dados);
   var n = NexusTrilha.contagem(dados);
-  /* «26 feitos · 2 difíceis · 2 livres · 1 falta»: só o que existe. */
+  /* «26 feitos · 2 difíceis · 2 livres · 1 sem registro»: só o que existe. */
   var partes = [plural(n.feitos, "feito", "feitos")];
   if (n.dificeis) partes.push(plural(n.dificeis, "difícil", "difíceis"));
   if (n.livres) partes.push(plural(n.livres, "livre", "livres"));
-  if (n.faltas) partes.push(plural(n.faltas, "falta", "faltas"));
+  if (n.faltas) partes.push(n.faltas + " sem registro");
   document.getElementById("contagem").textContent = partes.join(" · ");
   /* Legenda: só os estados que aparecem na trilha. */
-  var itens = [["lf", "Feito", n.feitos], ["ld", "Dia difícil", n.dificeis], ["ll", "Dia livre", n.livres], ["lx", "Falta", n.faltas]];
+  var itens = [["lf", "Feito", n.feitos], ["ld", "Dia difícil", n.dificeis], ["ll", "Dia livre", n.livres], ["lx", "Sem registro", n.faltas]];
   var legenda = document.getElementById("legenda");
   legenda.replaceChildren.apply(legenda, itens.filter(function (i) { return i[2] > 0; }).map(function (i) {
     var li = document.createElement("li");

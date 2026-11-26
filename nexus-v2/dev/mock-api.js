@@ -131,7 +131,10 @@
    - fim-27            (fim-27@exemplo.com)          dia 31, 27 check-ins
    - fim-status        (fim-status@exemplo.com)      status completed no dia 12
    - fim-misto                                       dia 31 com faltas, difíceis e dias livres (trilha)
-   - trilha-dia1, trilha-meio, trilha-feito          Hoje com a trilha de luz (dia 1; dia 14 com falta e livre)
+   - trilha-dia1, trilha-meio, trilha-feito          Hoje com a trilha de luz (dia 1; dia 14 com dia sem registro e livre)
+   - trilha-66                                       dia 40 de 66, para o rastro da Missão
+   - dias-erro                                       a missão abre e o progresso dos dias falha
+   - duo-feito                                       Duo com Ana, dia de hoje já registrado
    - extend-erro       (extend-erro@exemplo.com)     o POST /extend responde 500
    - inativa           (inativa@exemplo.com)         a missão não está ativa
    - sem-porque        o porquê vem vazio
@@ -499,6 +502,15 @@ var CENARIOS = {
   "trilha-dia1": { dia: 1, feitos: [], dificeis: [], restantes: 4 },
   "trilha-meio": { dia: 14, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13], dificeis: [6], restantes: 3 },
   "trilha-feito": { dia: 14, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13, 14], dificeis: [6], restantes: 3 },
+  "trilha-66": {
+    dia: 40,
+    duracao: 66,
+    feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24, 25, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39],
+    dificeis: [6],
+    restantes: 2
+  },
+  "dias-erro": { dia: 14, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13], dificeis: [6], restantes: 3, erroProgresso: true },
+  "duo-feito": { dia: 4, feitos: [1, 3, 4], dificeis: [1, 2], restantes: 2, modo: "parceiro", parNome: "Ana", parFeitos: [1, 2] },
   "fim-misto": { dia: 31, livres: [12], feitos: [1, 2, 3, 4, 6, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24, 25, 27, 28, 29, 30], dificeis: [6, 20], restantes: 2 },
   "semana-livre": { dia: 10, diasRelativos: [0, 2, 4], feitos: [], dificeis: [], restantes: 3 },
   /* Ana é um nome de exemplo. Não é uma pessoa real. Os dias também são fictícios. */
@@ -1160,6 +1172,11 @@ function montarCenario(nome, usuario) {
     mission.partner_name = usuario.username;
   }
   if (diasDaSemana) mission.mission_weekdays = diasDaSemana;
+  if (typeof spec.duracao === "number" && isFinite(spec.duracao) && spec.duracao >= 1) {
+    mission.duration_days = Math.floor(spec.duracao);
+    var inicioDuracao = new Date(mission.started_at).getTime();
+    if (!isNaN(inicioDuracao)) mission.ends_at = new Date(inicioDuracao + mission.duration_days * MS_DIA).toISOString();
+  }
   var extraDias = extensoes[usuario.email + "|" + nome] || 0;
   if (extraDias > 0) {
     mission.duration_days += extraDias;
@@ -1207,7 +1224,8 @@ function montarCenario(nome, usuario) {
   return {
     mission: mission,
     progress: { progress: progress },
-    streak: streak
+    streak: streak,
+    erroProgresso: spec.erroProgresso === true
   };
 }
 
@@ -1909,7 +1927,7 @@ function responderHoje(req, res, email) {
 
   var progresso = caminho.match(/^\/api\/checkins\/(\d+)$/);
   if (progresso) {
-    if (pacote && pacote.erro) {
+    if (pacote && (pacote.erro || pacote.erroProgresso)) {
       enviar(res, 500, { error: "Erro ao obter progresso." });
       return true;
     }

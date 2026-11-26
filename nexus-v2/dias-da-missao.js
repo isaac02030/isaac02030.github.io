@@ -1,6 +1,6 @@
 /* Dias da missão: os dias fixos da semana em que a missão acontece.
    De 3 a 7 por semana (1 = segunda ... 7 = domingo, como no servidor).
-   Os outros são dias livres: sem check-in, sem lembrete, não contam como falta.
+   Os outros são dias livres: sem check-in, sem lembrete, não contam como dia sem registro.
    A missão continua com 30 dias corridos.
 
    Todos os textos desta escolha ficam aqui, num lugar só, para trocar fácil.
@@ -9,7 +9,7 @@
 (function () {
   var TEXTOS = {
     titulo: "Em quais dias da semana?",
-    apoio: "Escolha de 3 a 7 dias. Nos outros dias você não faz check-in e não recebe lembrete. Esses dias não contam como falta.",
+    apoio: "Escolha de 3 a 7 dias. Nos outros dias você não faz check-in e não recebe lembrete. Esses dias não contam como dia sem registro.",
     contadorUm: "1 dia por semana.",
     contadorVarios: "{n} dias por semana.",
     erroMinimo: "Escolha pelo menos 3 dias por semana.",

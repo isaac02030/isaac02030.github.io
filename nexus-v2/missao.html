@@ -40,6 +40,7 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
+  <link rel="stylesheet" href="trilha.css">
   <link rel="stylesheet" href="missao.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -84,17 +85,20 @@
           <p class="modo" id="modo"></p>
         </div>
         <p class="dia-numero" id="dia-numero" hidden></p>
+        <div id="bloco-rastro">
+          <ol class="trilha30" id="trilha-missao" hidden></ol>
+          <p class="contagem-rastro" id="contagem-rastro" hidden></p>
+          <ul class="legenda-trilha" id="legenda-rastro" aria-hidden="true" hidden></ul>
+          <details class="dia-a-dia" id="dia-a-dia" hidden>
+            <summary>Ver dia a dia</summary>
+            <ul class="lista-dias" id="lista-dias"></ul>
+          </details>
+          <div id="aviso-rastro" class="alerta alerta-neutro" hidden></div>
+          <button type="button" class="btn btn-secundario" id="btn-dias" hidden>Tentar de novo</button>
+        </div>
         <p class="minimo" id="minimo" hidden></p>
         <p class="porque" id="porque" hidden></p>
-        <section class="plano-dias" id="plano-dias" aria-labelledby="titulo-plano" hidden>
-          <h2 class="titulo-plano" id="titulo-plano" data-texto-dias="tituloPlano"></h2>
-          <p class="dias-linha" id="dias-linha"></p>
-          <div class="regua-plano" id="regua-plano" aria-hidden="true"></div>
-          <ul class="legenda-dias" aria-hidden="true">
-            <li><span class="marca-plano"></span><span data-texto-dias="legendaMissao"></span></li>
-            <li><span class="marca-plano livre"></span><span data-texto-dias="legendaLivre"></span></li>
-          </ul>
-        </section>
+        <p class="dias-linha" id="dias-linha" hidden></p>
         <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
 
         <section class="placar" id="placar" aria-label="Placar" hidden>
@@ -143,6 +147,8 @@
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="dias-da-missao.js"></script>
+  <script src="trilha.js"></script>
+  <script src="registro-dias.js"></script>
   <script src="chat-textos.js"></script>
   <script>
     (function () {
