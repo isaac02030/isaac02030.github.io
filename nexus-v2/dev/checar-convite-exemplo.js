@@ -34,8 +34,10 @@ if (html.indexOf('host === "localhost"') === -1 || html.indexOf('host === "127.0
 }
 
 var js = fs.readFileSync(path.join(raiz, "missao.js"), "utf8");
-if (js.indexOf("NEXUS_CONVITE_POR_LINK = false") === -1) {
-  falhas.push("a flag do convite não está desligada");
+/* Desde o PR 38 do servidor, o convite por link está ligado (checar-convite.js
+   confere o convite real); o link fictício continua só no desenvolvimento. */
+if (js.indexOf("NEXUS_CONVITE_POR_LINK = true") === -1) {
+  falhas.push("a flag do convite por link está ligada");
 }
 if (js.indexOf('cenarioDaPagina() !== "link-fake"') === -1 && js.indexOf("link-fake") === -1) {
   falhas.push("o cenário link-fake não está na página");

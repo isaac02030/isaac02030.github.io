@@ -134,6 +134,12 @@
   white-space: nowrap;
 }
 
+.placar-regra {
+  margin: var(--space-2) 0 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
 .bloco-conversa {
   display: flex;
   flex-direction: column;

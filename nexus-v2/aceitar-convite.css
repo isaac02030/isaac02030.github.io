@@ -1,0 +1,68 @@
+/* Aceitar convite (Duo ou Rival). Tela calma: sem urso, sem animação.
+   Luz: só o botão «Aceitar convite» (.btn-luz). */
+
+.pagina-convite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(100%, 30rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-top: calc(var(--space-6) + var(--safe-top));
+  padding-right: max(var(--space-5), env(safe-area-inset-right, 0px));
+  padding-left: max(var(--space-5), env(safe-area-inset-left, 0px));
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--space-5));
+  overflow-wrap: break-word;
+}
+
+.pagina-convite *,
+.pagina-convite *::before,
+.pagina-convite *::after {
+  animation: none;
+  transition: none;
+}
+
+.titulo-convite {
+  margin: 0;
+  font: var(--text-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.pagina-convite .vista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.texto-convite,
+.de-quem,
+.desafio {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.de-quem {
+  font: var(--text-title);
+}
+
+.desafio {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  font: var(--text-label);
+}
+
+.apoio-pontos {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.pagina-convite .btn {
+  width: 100%;
+  min-height: 48px;
+}

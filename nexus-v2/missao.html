@@ -97,8 +97,10 @@
         </section>
         <p class="frase-solo" id="frase-solo" hidden>Você já está em Solo. O dia de hoje conta mesmo assim.</p>
 
+        <!-- Placar só no Rival, em pontos (PR 37 do servidor). No Duo não há placar. -->
         <section class="placar" id="placar" aria-label="Placar" hidden>
           <ul class="placar-lista" id="placar-lista"></ul>
+          <p class="placar-regra" id="placar-regra" data-texto-convite="regraPontos"></p>
         </section>
         <div id="aviso-placar" class="alerta alerta-rede" role="status" hidden></div>
 
@@ -114,11 +116,15 @@
           <p class="aviso-vivo" id="aviso-convite" aria-live="polite" aria-atomic="true"></p>
         </div>
 
+        <!-- Convite por link: o token aparece uma vez, para copiar ou compartilhar; não fica gravado. -->
         <div class="bloco-link" id="bloco-link" hidden>
           <label class="rotulo-link" for="campo-link">Link do convite</label>
-          <textarea id="campo-link" readonly rows="2" spellcheck="false" autocomplete="off" aria-describedby="apoio-link"></textarea>
+          <textarea id="campo-link" readonly rows="2" spellcheck="false" autocomplete="off" aria-describedby="apoio-link validade-link"></textarea>
           <button type="button" class="btn btn-secundario" id="btn-copiar">Copiar link</button>
+          <button type="button" class="btn btn-secundario" id="btn-compartilhar" data-texto-convite="compartilhar" hidden></button>
           <p class="apoio" id="apoio-link">Quem abrir o link entra nesta missão com você. Não há pareamento automático.</p>
+          <p class="apoio" id="validade-link" hidden></p>
+          <button type="button" class="btn btn-texto" id="btn-cancelar-convite" data-texto-convite="cancelar" hidden></button>
           <p class="aviso-vivo" id="aviso-copia" aria-live="polite" aria-atomic="true"></p>
         </div>
 
@@ -144,6 +150,7 @@
   <script src="abas.js"></script>
   <script src="dias-da-missao.js"></script>
   <script src="chat-textos.js"></script>
+  <script src="convite.js"></script>
   <script>
     (function () {
       var host = location.hostname;
