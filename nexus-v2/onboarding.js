@@ -119,6 +119,41 @@ function lerRascunho() {
   }
 }
 
+/* Crise no contrato: apaga o rascunho (sessionStorage e, por garantia,
+   localStorage), esvazia os campos e o estado. Nada do que foi escrito fica. */
+function apagarContratoDoAparelho() {
+  try {
+    sessionStorage.removeItem(CHAVE_RASCUNHO);
+  } catch (erroSessao) {}
+  try {
+    localStorage.removeItem(CHAVE_RASCUNHO);
+  } catch (erroLocal) {}
+  estado.title = "";
+  estado.why_it_matters = "";
+  estado.daily_minimum = "";
+  estado.category = "";
+  estado.passo = 1;
+  rascunhoExistia = false;
+  Array.prototype.forEach.call(document.querySelectorAll("form"), function (form) {
+    try {
+      form.reset();
+    } catch (erroForm) {}
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("input[type=text], textarea"), function (campo) {
+    campo.value = "";
+  });
+}
+
+/* A ajuda abre no lugar desta tela (replace): voltar não traz o contrato de volta. */
+function abrirAjudaDoContrato() {
+  var busca = "";
+  try {
+    var tema = new URLSearchParams(location.search).get("tema");
+    if (tema === "claro" || tema === "escuro" || tema === "sistema") busca = "?tema=" + tema;
+  } catch (erro) {}
+  location.replace("crise.html" + busca);
+}
+
 function guardarRascunho() {
   try {
     sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
@@ -626,6 +661,15 @@ async function criarAMissao(opcoes) {
       mostrarAviso(alerta, "rede", TEXTO_SEM_REDE_MISSAO);
       return;
     }
+    /* Crise no contrato (PR 47 do servidor): 200 com crisis: true. A missão
+       NÃO foi criada. Nada fica guardado neste aparelho, a tela não segue
+       para o Hoje e a ajuda abre na hora, como no post da comunidade. */
+    if (resultado.ok && resultado.dados && resultado.dados.crisis === true) {
+      indo = true;
+      apagarContratoDoAparelho();
+      abrirAjudaDoContrato();
+      return;
+    }
     if (!resultado.ok && resultado.status === 503 && conferido.campo) {
       mostrarIndisponivel(alerta, function () {
         criarAMissao({ semDias: true });
@@ -641,7 +685,8 @@ async function criarAMissao(opcoes) {
       focarGrupoDias();
       return;
     }
-    if (!resultado.ok) {
+    /* Só conta como criada a resposta que traz a missão. */
+    if (!resultado.ok || !resultado.dados || !resultado.dados.mission) {
       mostrarAviso(alerta, "falha", TEXTO_FALHA_MISSAO);
       return;
     }

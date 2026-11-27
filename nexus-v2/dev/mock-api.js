@@ -1440,6 +1440,27 @@ function listarMissoes(email) {
   return { status: 200, dados: usuarios[email].missoes.map(paraLista) };
 }
 
+/* Crise no contrato (PR 47 do servidor): qualquer texto do pedido com o
+   marcador de teste «crise-teste» (título, mínimo, porquê...) responde 200 com
+   crisis: true e NÃO cria a missão. O mock não lê o texto de verdade: o
+   sinal é só o marcador. */
+function criseNoContratoMock(corpo) {
+  var dados = corpo && typeof corpo === "object" ? corpo : {};
+  var achou = Object.keys(dados).some(function (chave) {
+    return typeof dados[chave] === "string" && dados[chave].toLowerCase().indexOf("crise-teste") !== -1;
+  });
+  if (!achou) return null;
+  return {
+    status: 200,
+    dados: {
+      saved: false,
+      crisis: true,
+      crisis_level: "alto",
+      message: "A missão não foi criada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo."
+    }
+  };
+}
+
 async function criarMissao(email, corpo) {
   var title = typeof corpo.title === "string" ? corpo.title.trim() : "";
   var category = typeof corpo.category === "string" ? corpo.category.trim() : "";
@@ -2702,7 +2723,7 @@ var servidor = http.createServer(function (req, res) {
     }
     if (url === "/api/missions" && req.method === "POST") {
       if (acesso.status !== 200) return negar(acesso);
-      return criarMissao(acesso.email, corpo);
+      return criseNoContratoMock(corpo) || criarMissao(acesso.email, corpo);
     }
     var abandono = url.match(/^\/api\/missions\/(\d+)\/abandon$/);
     if (abandono && req.method === "POST") {
