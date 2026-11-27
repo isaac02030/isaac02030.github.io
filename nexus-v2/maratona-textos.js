@@ -130,7 +130,10 @@
     for (var dia = 1; dia <= duracao; dia++) {
       var feitos = contagens[dia] || 0;
       var estado;
-      if (hoje > 0 && dia > hoje) estado = "o";
+      /* Antes do início a trilha é só caminho: contorno vazio, sem lápis,
+         sem falta e sem ponta acesa. */
+      if (fase === "upcoming") estado = "o";
+      else if (hoje > 0 && dia > hoje) estado = "o";
       else if (feitos === 0) estado = "x";
       else if (feitos * 2 < total) estado = "p";
       else estado = "f";

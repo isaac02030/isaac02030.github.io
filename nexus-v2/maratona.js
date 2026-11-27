@@ -185,9 +185,14 @@
 
     var feitos = Number(grupo.today_done) || 0;
     var total = Number(grupo.participants) || 0;
-    document.getElementById("texto-grupo").textContent = total === 1
-      ? M.preencher(T.grupoHojeUm, { feitos: feitos, total: total })
-      : M.preencher(T.grupoHoje, { feitos: feitos, total: total });
+    var grupoEl = document.getElementById("texto-grupo");
+    /* Antes do início ninguém cumpriu nada: não há frase de hoje para mostrar. */
+    visivel(grupoEl, maratona.phase !== "upcoming");
+    if (maratona.phase !== "upcoming") {
+      grupoEl.textContent = total === 1
+        ? M.preencher(T.grupoHojeUm, { feitos: feitos, total: total })
+        : M.preencher(T.grupoHoje, { feitos: feitos, total: total });
+    }
 
     var membro = acesso.is_member === true;
     var soLeitura = acesso.post_code === "read_only";
@@ -304,8 +309,49 @@
     contador.textContent = campo.value.length + " de " + campo.getAttribute("maxlength");
   }
 
-  function erroCriar(texto) {
-    aviso(document.getElementById("alerta-criar"), texto);
+  /* O erro de validação fica junto do campo: borda, texto e aria ligados.
+     O aviso geral fica só para o que não é de um campo (rede, sessão, crise). */
+  var CAMPOS_ERRO = {
+    "nome-maratona-campo": "nome-erro",
+    "minimo-campo": "minimo-erro",
+    "dias-campo": "dias-erro",
+    "pessoas-campo": "pessoas-erro",
+    "inicio-campo": "inicio-erro"
+  };
+  var CAMPO_DO_CODIGO = {
+    invalid_title: "nome-maratona-campo",
+    invalid_minimum: "minimo-campo",
+    invalid_days: "dias-campo",
+    invalid_people: "pessoas-campo",
+    invalid_start: "inicio-campo"
+  };
+
+  function limparCampos() {
+    Object.keys(CAMPOS_ERRO).forEach(function (id) {
+      var campo = document.getElementById(id);
+      var texto = document.getElementById(CAMPOS_ERRO[id]);
+      campo.setAttribute("aria-invalid", "false");
+      texto.textContent = "";
+      visivel(texto, false);
+    });
+  }
+
+  function erroCriar(texto, campo) {
+    visivel(document.getElementById("alerta-criar"), !!texto && !campo);
+    if (texto && !campo) aviso(document.getElementById("alerta-criar"), texto);
+    else aviso(document.getElementById("alerta-criar"), "");
+    limparCampos();
+    if (campo && Object.prototype.hasOwnProperty.call(CAMPOS_ERRO, campo)) {
+      var input = document.getElementById(campo);
+      var erro = document.getElementById(CAMPOS_ERRO[campo]);
+      input.setAttribute("aria-invalid", "true");
+      erro.textContent = texto || "";
+      visivel(erro, !!texto);
+    }
+  }
+
+  function campoDoCodigo(codigo) {
+    return Object.prototype.hasOwnProperty.call(CAMPO_DO_CODIGO, codigo) ? CAMPO_DO_CODIGO[codigo] : "";
   }
 
   function dadosCriar() {
@@ -314,12 +360,12 @@
     var dias = Number(document.getElementById("dias-campo").value);
     var pessoas = Number(document.getElementById("pessoas-campo").value);
     var inicio = document.getElementById("inicio-campo").value.trim();
-    if (!titulo) return { erro: T.nomeFalta };
-    if (!minimo) return { erro: T.minimoFalta };
-    if (!Number.isInteger(dias) || dias < 3 || dias > 30) return { erro: T.diasFalta };
-    if (!Number.isInteger(pessoas) || pessoas < 2 || pessoas > 100) return { erro: T.pessoasFalta };
+    if (!titulo) return { erro: T.nomeFalta, campo: "nome-maratona-campo" };
+    if (!minimo) return { erro: T.minimoFalta, campo: "minimo-campo" };
+    if (!Number.isInteger(dias) || dias < 3 || dias > 30) return { erro: T.diasFalta, campo: "dias-campo" };
+    if (!Number.isInteger(pessoas) || pessoas < 2 || pessoas > 100) return { erro: T.pessoasFalta, campo: "pessoas-campo" };
     if (inicio && (!/^\d{4}-\d{2}-\d{2}$/.test(inicio) || !dataReal(inicio) ||
-      inicio < inicioMin || inicio > inicioMax)) return { erro: T.inicioFalta };
+      inicio < inicioMin || inicio > inicioMax)) return { erro: T.inicioFalta, campo: "inicio-campo" };
     var dados = { title: titulo, description: minimo, duration_days: dias, max_participants: pessoas };
     if (inicio) dados.start_day = inicio;
     return { dados: dados };
@@ -328,7 +374,7 @@
   async function criar() {
     erroCriar("");
     var conferido = dadosCriar();
-    if (conferido.erro) return erroCriar(conferido.erro);
+    if (conferido.erro) return erroCriar(conferido.erro, conferido.campo);
     var botao = document.getElementById("btn-criar");
     botao.disabled = true;
     botao.setAttribute("aria-busy", "true");
@@ -347,7 +393,8 @@
       return B.abrirAjuda();
     }
     if (!resultado.ok) {
-      return erroCriar(M.erroDoServidor(resultado.dados && resultado.dados.code, resultado.erro));
+      var codigo = resultado.dados && resultado.dados.code;
+      return erroCriar(M.erroDoServidor(codigo, resultado.erro), campoDoCodigo(codigo));
     }
     var criada = resultado.dados && resultado.dados.marathon;
     if (criada && criada.id) location.assign(B.link("maratona.html", { c: slug, m: criada.id }));

@@ -106,29 +106,34 @@
         <div class="campo">
           <label for="nome-maratona-campo" data-texto-maratona="campoNome"></label>
           <p class="dica" id="nome-ajuda" data-texto-maratona="nomeAjuda"></p>
-          <input id="nome-maratona-campo" name="title" type="text" maxlength="60" autocomplete="off" aria-describedby="nome-ajuda nome-contador">
+          <input id="nome-maratona-campo" name="title" type="text" maxlength="60" autocomplete="off" aria-invalid="false" aria-describedby="nome-ajuda nome-contador nome-erro">
           <p class="contador" id="nome-contador">0 de 60</p>
+          <p class="erro-campo" id="nome-erro" hidden></p>
         </div>
         <div class="campo">
           <label for="minimo-campo" data-texto-maratona="campoMinimo"></label>
           <p class="dica" id="minimo-ajuda" data-texto-maratona="minimoAjuda"></p>
-          <input id="minimo-campo" name="description" type="text" maxlength="140" autocomplete="off" aria-describedby="minimo-ajuda minimo-contador">
+          <input id="minimo-campo" name="description" type="text" maxlength="140" autocomplete="off" aria-invalid="false" aria-describedby="minimo-ajuda minimo-contador minimo-erro">
           <p class="contador" id="minimo-contador">0 de 140</p>
+          <p class="erro-campo" id="minimo-erro" hidden></p>
         </div>
         <div class="dupla">
           <div class="campo">
             <label for="dias-campo" data-texto-maratona="campoDias"></label>
-            <input id="dias-campo" name="duration_days" type="number" min="3" max="30" step="1" value="7" inputmode="numeric">
+            <input id="dias-campo" name="duration_days" type="number" min="3" max="30" step="1" value="7" inputmode="numeric" aria-invalid="false" aria-describedby="dias-erro">
+            <p class="erro-campo" id="dias-erro" hidden></p>
           </div>
           <div class="campo">
             <label for="pessoas-campo" data-texto-maratona="campoPessoas"></label>
-            <input id="pessoas-campo" name="max_participants" type="number" min="2" max="100" step="1" value="100" inputmode="numeric">
+            <input id="pessoas-campo" name="max_participants" type="number" min="2" max="100" step="1" value="100" inputmode="numeric" aria-invalid="false" aria-describedby="pessoas-erro">
+            <p class="erro-campo" id="pessoas-erro" hidden></p>
           </div>
         </div>
         <div class="campo">
           <label for="inicio-campo" data-texto-maratona="campoInicio"></label>
           <p class="dica" id="inicio-ajuda" data-texto-maratona="campoInicioAjuda"></p>
-          <input id="inicio-campo" name="start_day" type="date" autocomplete="off" aria-describedby="inicio-ajuda">
+          <input id="inicio-campo" name="start_day" type="date" autocomplete="off" aria-invalid="false" aria-describedby="inicio-ajuda inicio-erro">
+          <p class="erro-campo" id="inicio-erro" hidden></p>
         </div>
         <div class="botoes">
           <button type="submit" class="btn btn-primario" id="btn-criar" aria-busy="false" data-texto-maratona="criarBotao"></button>

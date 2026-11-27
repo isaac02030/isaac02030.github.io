@@ -92,16 +92,26 @@
   margin-top: 0;
 }
 
-/* Trilha do grupo: uma marca por dia. Sete por linha em 390 px; quatro por
-   linha em telas até 360 px (200%), para as sete marcas caberem sem corte.
-   O fio vai do meio de uma marca ao meio da seguinte. */
+/* Sem rede e 503: o aviso respira antes de «Voltar» e «Tentar de novo». */
+.tela-maratona .voltar {
+  margin-bottom: var(--space-3);
+}
+
+.vista-aviso .alerta {
+  margin-bottom: var(--space-4);
+}
+
+/* Trilha do grupo: uma marca por dia, alinhada à esquerda. Sete por linha em
+   390 px; quatro por linha em telas até 360 px (200%), para as sete marcas
+   caberem sem corte. O fio liga o meio de uma marca ao meio da seguinte,
+   somente dentro da mesma linha. A luz é o botão; as marcas não têm halo. */
 .trilha-maratona {
   --colunas: 7;
-  --fio: 6px;
+  --fio: 34px;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(var(--colunas), minmax(22px, 1fr));
-  column-gap: var(--fio);
+  grid-template-columns: repeat(var(--colunas), 22px);
+  justify-content: space-between;
   row-gap: 14px;
   margin: var(--space-4) 0;
   padding: 4px 0;
@@ -112,6 +122,7 @@
 
 .trilha-maratona .tm-c {
   position: relative;
+  width: 22px;
   height: 22px;
 }
 
@@ -122,22 +133,24 @@
   box-sizing: border-box;
   width: 22px;
   height: 22px;
-  margin: 0 auto;
+  margin: 0;
   border: 1.5px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
+  box-shadow: none;
 }
 
 .trilha-maratona .tm-c::after {
   content: "";
   position: absolute;
-  left: calc(50% + 11px);
-  width: calc(100% + var(--fio) - 22px);
+  left: 22px;
+  width: var(--fio);
   top: 50%;
   height: 2px;
   margin-top: -1px;
   border-radius: 2px;
   background: var(--fio-futuro);
+  box-shadow: none;
 }
 
 /* O fio para no fim de cada linha; nunca cruza para a linha de baixo. */
@@ -151,7 +164,7 @@
 
 .trilha-maratona .lk-on::after {
   background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
-  box-shadow: var(--glow-fio);
+  box-shadow: none;
 }
 
 .trilha-maratona .lk-dim::after {
@@ -195,16 +208,17 @@
   transform: rotate(-45deg);
 }
 
+/* Dia ainda por vir: contorno vazio, visível nos dois temas. */
 .trilha-maratona .s-o i {
-  border-color: var(--border-soft);
+  border-color: var(--border);
   background: var(--bg);
 }
 
-/* Contorno duplo e ponta acesa no dia de hoje. */
+/* Contorno duplo no dia de hoje, sem halo: a luz da tela é o botão. */
 .trilha-maratona .hoje i {
   outline: 2px solid var(--ponta-cor);
   outline-offset: 2px;
-  box-shadow: var(--glow-ponta);
+  box-shadow: none;
 }
 
 /* O que o servidor mandou: mínimo, contagem e estado de hoje. */
@@ -264,6 +278,19 @@
   padding: var(--space-2);
 }
 
+/* O erro fica junto do campo, com borda e texto ligados ao input. */
+.formulario-maratona input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.formulario-maratona .erro-campo[hidden] {
+  display: none;
+}
+
+.formulario-maratona .erro-campo {
+  color: var(--danger);
+}
+
 .formulario-maratona .contador {
   margin: 0;
 }
@@ -290,7 +317,7 @@
 @media (max-width: 360px) {
   .trilha-maratona {
     --colunas: 4;
-    --fio: 6px;
+    --fio: 25px;
     row-gap: 12px;
   }
   .trilha-maratona .tm-c:nth-child(7n):not(.lk-fim)::after {
