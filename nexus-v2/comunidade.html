@@ -51,13 +51,15 @@
 </head>
 <body>
   <a class="saltar" href="#conteudo">Pular para o conteúdo</a>
-  <!-- Comunidade (leitura). Visual novo: papel liso, sem cartão com sombra, sem urso.
+  <!-- Comunidade por dentro (?c=<slug>). Papel liso, sem cartão com sombra, sem urso.
+       Uma luz só: «Publicar». Sem ?c=, a página leva à lista (comunidades.html).
        Os textos vêm de comunidade-textos.js. -->
   <main class="pagina-com-abas tela-comunidade" id="conteudo">
     <noscript>
       <p class="alerta alerta-rede">O Nexus precisa de JavaScript para abrir a comunidade.</p>
     </noscript>
 
+    <a class="btn btn-texto voltar" id="link-voltar" href="comunidades.html" data-texto-comunidade="voltar"></a>
     <h1 class="comunidade-titulo" id="titulo" tabindex="-1" data-texto-comunidade="comunidadesTitulo"></h1>
 
     <section class="vista" id="vista-carregando" aria-live="polite">
@@ -76,14 +78,55 @@
       <a class="btn btn-secundario btn-grande" id="btn-agora-nao" href="hoje.html" data-texto-comunidade="agoraNao"></a>
     </section>
 
-    <section class="vista" id="vista-lista" hidden>
-      <ul class="lista-comunidades" id="lista-comunidades"></ul>
-      <p class="vazio-texto" id="lista-vazia" data-texto-comunidade="comunidadesVazio" hidden></p>
-    </section>
-
     <section class="vista" id="vista-feed" hidden>
-      <ol class="posts" id="posts"></ol>
-      <p class="vazio-texto" id="feed-vazio" hidden></p>
+      <div class="comunidade-meta">
+        <span class="chip-area" id="chip-area"></span>
+        <span class="meta-pessoas" id="meta-pessoas"></span>
+        <span class="meta-membro" id="meta-membro"></span>
+      </div>
+      <div id="alerta-entrar" class="alerta" role="alert" hidden></div>
+
+      <!-- Alimentação: regra em texto, sempre no topo. -->
+      <p class="faixa-regras" id="faixa-alimentacao" data-texto-comunidade="faixaAlimentacao" hidden></p>
+
+      <!-- Postar: 280 caracteres, o mesmo contador do chat. A única luz da tela. -->
+      <form class="formulario postar" id="form-post" method="post" action="#publicar" novalidate hidden>
+        <label class="so-leitor" for="texto-post" data-texto-comunidade="escrevaDica"></label>
+        <textarea id="texto-post" name="content" rows="2" maxlength="280" aria-describedby="post-contador post-aviso"></textarea>
+        <div class="postar-rodape">
+          <p class="contador" id="post-contador">0 de 280</p>
+          <button type="submit" class="btn btn-primario btn-luz btn-publicar" id="btn-publicar" aria-busy="false">
+            <span class="btn-rotulo" data-texto-comunidade="publicar"></span>
+          </button>
+        </div>
+        <p class="so-leitor" id="post-aviso" aria-live="polite"></p>
+        <div id="alerta-post" class="alerta" role="alert" hidden></div>
+      </form>
+      <p class="aviso-publicado" id="aviso-publicado" role="status" tabindex="-1" hidden></p>
+
+      <!-- Quem não pode postar: o motivo e o caminho, numa caixa neutra. -->
+      <div class="caixa-motivo" id="caixa-motivo" hidden>
+        <p class="aviso-texto" id="motivo-post"></p>
+        <a class="btn btn-texto link-linha" id="caminho-post" href="missao.html" hidden></a>
+      </div>
+
+      <section class="bloco-posts" id="bloco-destaques" aria-labelledby="titulo-destaques" hidden>
+        <h2 class="secao-titulo" id="titulo-destaques" data-texto-comunidade="destaques"></h2>
+        <ol class="posts destaques" id="destaques"></ol>
+      </section>
+
+      <section class="bloco-posts" aria-labelledby="titulo-recentes">
+        <h2 class="secao-titulo" id="titulo-recentes" data-texto-comunidade="recentes"></h2>
+        <ol class="posts" id="posts"></ol>
+        <p class="vazio-texto" id="feed-vazio" hidden></p>
+        <div id="alerta-mais" class="alerta" role="alert" hidden></div>
+        <p class="dica-rolar" id="dica-rolar" hidden><span data-texto-comunidade="rolarSozinha"></span> <a class="link-inline" id="link-hoje" href="hoje.html" data-texto-comunidade="irParaHoje"></a></p>
+        <button type="button" class="btn btn-secundario btn-grande" id="btn-anteriores" aria-busy="false" hidden><span class="btn-rotulo" data-texto-comunidade="verAnteriores"></span></button>
+        <div class="sentinela" id="sentinela" aria-hidden="true"></div>
+        <p class="so-leitor" id="aviso-mais" aria-live="polite"></p>
+      </section>
+
+      <a class="linha-seta" id="link-merito" href="merito.html"><span data-texto-comunidade="meritoERanking"></span><svg class="seta" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg></a>
     </section>
   </main>
 
@@ -114,6 +157,7 @@
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="nota-limite.js"></script>
+  <script src="comunidade-base.js"></script>
   <script src="comunidade.js"></script>
 </body>
 </html>

@@ -320,6 +320,59 @@ var NexusApi = {
   abrirComunidade: function (slug) {
     return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug)), null, { metodo: "GET", auth: true });
   },
+  /* Telas da comunidade, 1.ª parte (PRs 40 a 44 do servidor).
+     GET /api/communities/recommended/:missionId → { area, subject, communities }
+     (as da área da missão, as de assunto parecido primeiro; 404 se a missão
+     não é da pessoa; sem área, a lista vem vazia). */
+  comunidadesRecomendadas: function (missaoId) {
+    return nexusPedir(caminhoComCenario("/api/communities/recommended/" + encodeURIComponent(missaoId)), null, { metodo: "GET", auth: true });
+  },
+  /* POST /api/communities/:slug/join: entrar (um toque; já membro também é 200). */
+  entrarNaComunidade: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/join"), null, { metodo: "POST", auth: true });
+  },
+  /* GET /:slug/posts?cursor= → { posts, next_cursor, page_size, continuous_scroll,
+     scroll_hint }. 10 por página antes do dia cumprido, 20 depois. Cada post traz
+     supports (o total) e supported_by_me, nunca quem apoiou. */
+  postsDaComunidade: function (slug, cursor) {
+    var caminho = caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts");
+    if (typeof cursor === "string" && cursor) {
+      caminho += (caminho.indexOf("?") === -1 ? "?" : "&") + "cursor=" + encodeURIComponent(cursor);
+    }
+    return nexusPedir(caminho, null, { metodo: "GET", auth: true });
+  },
+  /* GET /:slug/highlights → { highlights } (até 3 da semana, sem post escondido). */
+  destaquesDaComunidade: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/highlights"), null, { metodo: "GET", auth: true });
+  },
+  /* POST /:slug/posts com { content }. 201 { post }; 200 com crisis: true (não
+     publicado; a tela abre a ajuda); 403 com code (read_only, no_active_mission,
+     other_area...); 429 limite de 3 em 24 h. */
+  publicarPost: function (slug, texto) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts"), { content: texto }, { metodo: "POST", auth: true });
+  },
+  /* POST e DELETE /:slug/posts/:postId/support → { supported, supports }. */
+  apoiarPost: function (slug, postId, ligar) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) + "/support"), null, { metodo: ligar ? "POST" : "DELETE", auth: true });
+  },
+  /* POST /api/communities com { name, area, category (assunto), description
+     (regras), icon (só emoji) }. 201 { community }; 200 com crisis: true;
+     403 needs_completed_mission; 409 nome repetido; 429 uma por semana. */
+  criarComunidade: function (dados) {
+    var corpo = { name: dados.name, area: dados.area };
+    if (dados.category) corpo.category = dados.category;
+    if (dados.description) corpo.description = dados.description;
+    if (dados.icon) corpo.icon = dados.icon;
+    return nexusPedir(caminhoComCenario("/api/communities"), corpo, { metodo: "POST", auth: true });
+  },
+  /* GET /api/communities/merit/me → { missions, title, next, rule }. */
+  meuMerito: function () {
+    return nexusPedir(caminhoComCenario("/api/communities/merit/me"), null, { metodo: "GET", auth: true });
+  },
+  /* GET /:slug/ranking → { top (3 primeiros), me (ou null), rule }. */
+  rankingDaComunidade: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/ranking"), null, { metodo: "GET", auth: true });
+  },
   /* POST /api/communities/:slug/posts/:postId/report com { reason, details? }.
      201 { reported: true }; 201 ou 200 com crisis: true (a tela abre a ajuda);
      409 já denunciado; 503 sem a migração 005. details só vai se tiver texto. */

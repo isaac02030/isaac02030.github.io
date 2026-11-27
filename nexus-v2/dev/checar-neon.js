@@ -107,7 +107,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.css$/.test(n) && n !== "tok
 });
 
 /* ---------- Casos negados: telas sóbrias ---------- */
-var SOBRIAS = ["crise.html", "equipe.html", "termos.html", "privacidade.html", "conta-excluida.html", "meus-dados.html", "comunidade.html", "offline.html", "ajustes.html", "dia-dificil.html", "missao.html", "grande-irmao.html", "pessoas-bloqueadas.html"];
+var SOBRIAS = ["crise.html", "equipe.html", "termos.html", "privacidade.html", "conta-excluida.html", "meus-dados.html", "comunidades.html", "criar-comunidade.html", "merito.html", "offline.html", "ajustes.html", "dia-dificil.html", "missao.html", "grande-irmao.html", "pessoas-bloqueadas.html"];
 SOBRIAS.forEach(function (nome) {
   var html = semComentarios(ler(nome));
   if (/btn-luz/.test(html)) falhas.push(nome + ": tela sóbria sem botão de luz");
@@ -118,6 +118,18 @@ SOBRIAS.forEach(function (nome) {
   var css = semComentarios(ler(nome));
   if (/var\(--(grad|glow-[a-z0-9]+|aba-luz|neon-[a-z]+)\)|drop-shadow|#2DF2D0|#3DD8FF|box-shadow:\s*0 0 \d/i.test(css)) falhas.push(nome + ": tela sóbria sem brilho nem degradê");
 });
+/* Comunidade por dentro (telas da comunidade, 1.ª parte): a única luz é o
+   «Publicar», dentro do formulário de postar. A folha de denúncia, os avisos e
+   os posts ficam sóbrios, sem urso. */
+var comunidadeHtml = semComentarios(ler("comunidade.html"));
+if ((comunidadeHtml.match(/btn-luz/g) || []).length !== 1) falhas.push("comunidade.html: uma luz só (o «Publicar»)");
+var formPost = comunidadeHtml.slice(comunidadeHtml.indexOf('id="form-post"'), comunidadeHtml.indexOf("</form>", comunidadeHtml.indexOf('id="form-post"')));
+if (!/id="btn-publicar"/.test(formPost) || !/btn-luz/.test(formPost)) falhas.push("comunidade.html: a luz fica no «Publicar»");
+var folhaDenuncia = comunidadeHtml.slice(comunidadeHtml.indexOf('id="folha-denuncia"'), comunidadeHtml.indexOf("</dialog>"));
+if (!folhaDenuncia || /btn-luz|urso|linearGradient/.test(folhaDenuncia)) falhas.push("comunidade.html: a folha de denúncia é sóbria");
+if (/\burso|fita-|logo-fita|linearGradient/i.test(comunidadeHtml)) falhas.push("comunidade.html: sem urso nem logo com luz");
+if (/btn-luz|\burso/.test(semComentarios(ler("comunidade.js")))) falhas.push("comunidade.js: os posts não ganham luz nem urso");
+
 /* Partes sóbrias dentro de telas com luz. */
 function secao(html, id) {
   var i = html.indexOf('id="' + id + '"');
@@ -187,7 +199,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).for
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v43"') === -1) falhas.push("o cache não está em nexus-v2-v43");
+if (sw.indexOf('CACHE = "nexus-v2-v45"') === -1) falhas.push("o cache não está em nexus-v2-v45");
 ["./icons/urso-firme.svg", "./icons/urso-contente.svg", "./icons/urso-firme-16.svg", "./icons/urso-firme-32.svg", "./icons/urso-contente-16.svg", "./icons/urso-contente-32.svg", "./icons/logo-16.svg", "./icons/logo-32.svg", "./icons/favicon-16.png", "./icons/favicon-32.png"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });

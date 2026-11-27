@@ -477,3 +477,588 @@ body:has(.tela-comunidade) {
   font: var(--text-title);
   color: var(--text);
 }
+
+/* ========== Telas da comunidade, 1.ª parte (spec da Clara, 27/11) ==========
+   Lista por área, comunidade por dentro, criar e Meu mérito. Tudo plano: a
+   única luz é o «Publicar» (classe .btn-luz da base, por dentro da comunidade).
+   O símbolo do título é a fita de marcas em cor cheia, sem halo. */
+
+.voltar {
+  align-self: flex-start;
+  margin: calc(var(--space-2) * -1) 0 calc(var(--space-3) * -1) calc(var(--space-2) * -1);
+}
+
+.secao-titulo {
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--borda-cartao);
+  font: var(--text-label);
+  color: var(--text-muted);
+}
+
+.bloco-lista,
+.bloco-posts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* Mente, Corpo, Rotina: segmentos locais (não são abas do app). O escolhido
+   tem contorno e negrito, não só cor. */
+.segmentos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.segmento {
+  flex: 1 1 auto;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font: var(--text-body);
+  cursor: pointer;
+}
+
+.segmento[aria-selected="true"] {
+  border: 2px solid var(--accent-standout);
+  font-weight: 700;
+}
+
+/* Uma comunidade por linha, com divisória fina. Sem cartão por item. */
+.lista-comunidades {
+  border-top: 0;
+}
+
+.linha-comunidade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.linha-comunidade .link-comunidade {
+  flex: 1 1 12rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.comunidade-nome {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.comunidade-descricao {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.comunidade-pessoas,
+.meta-pessoas {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.btn-entrar {
+  min-width: 6rem;
+  padding: var(--space-2) var(--space-4);
+}
+
+.participa {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.sem-missao,
+.caixa-motivo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.caixa-motivo {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.caixa-motivo.motivo-texto {
+  padding: 0 0 var(--space-3);
+  border: 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Ícone de quem criou: emoji pequeno e sem cor, ao lado do nome em texto. */
+.comunidade-icone {
+  font-size: 0.875em;
+  filter: grayscale(1);
+}
+
+.link-linha {
+  padding-left: 0;
+  margin-left: 0;
+  text-align: start;
+}
+
+/* Linha de 56 px com seta, como «Ver dia a dia»: nunca um botão chamativo. */
+.linha-seta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  border-top: 1px solid var(--borda-cartao);
+  border-bottom: 1px solid var(--borda-cartao);
+  color: var(--text);
+  font: var(--text-label);
+  text-decoration: none;
+}
+
+.linha-seta .seta {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.linha-seta:hover {
+  color: var(--accent-standout);
+}
+
+/* ---------- Comunidade por dentro ---------- */
+
+.comunidade-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.chip-area {
+  padding: 2px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font: var(--text-small);
+  color: var(--text);
+}
+
+.meta-membro {
+  margin-left: auto;
+}
+
+/* Regras da Alimentação: texto com divisória, não caixa (só os Destaques
+   ficam em caixa). */
+.faixa-regras {
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--borda-cartao);
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.postar {
+  gap: var(--space-3);
+}
+
+.postar textarea,
+.criar textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-body);
+  caret-color: var(--text);
+  resize: vertical;
+}
+
+.postar textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.postar-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.postar-rodape .contador {
+  margin: 0;
+}
+
+.btn-publicar {
+  width: auto;
+  min-width: 8rem;
+  min-height: 48px;
+  margin-left: auto;
+}
+
+.aviso-publicado {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text);
+}
+
+.posts.destaques {
+  padding: 0 var(--space-4);
+  border: 1px solid var(--borda-cartao);
+  border-radius: var(--radius-md);
+}
+
+.posts.destaques .post:first-child {
+  padding-top: var(--space-4);
+}
+
+.posts.destaques .post:last-child {
+  border-bottom: 0;
+}
+
+.post:focus {
+  outline: none;
+}
+
+.post:focus-visible {
+  outline: 2px solid var(--accent-standout);
+  outline-offset: 2px;
+}
+
+/* Apelido, título e tempo: quebram em linhas, nunca saem da tela. */
+.post-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+}
+
+.post-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.post-texto.recolhido {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.btn-ver-mais {
+  align-self: flex-start;
+  margin-top: calc(var(--space-2) * -1);
+  padding-left: 0;
+  font: var(--text-small);
+}
+
+/* «Apoiar»: contorno, mão e o total em texto. Ligado: contorno grosso e
+   negrito (aria-pressed), não só cor. Sem animação. */
+.btn-apoiar {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font: var(--text-label);
+}
+
+.btn-apoiar .icone,
+.apoios-total .icone {
+  width: 1.25em;
+  height: 1.25em;
+  flex: 0 0 auto;
+}
+
+.btn-apoiar[aria-pressed="true"] {
+  border: 2px solid var(--accent-standout);
+  color: var(--accent-standout);
+  font-weight: 700;
+}
+
+.apoios-numero {
+  font-variant-numeric: tabular-nums;
+}
+
+.apoios-total {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.post-erro {
+  flex: 1 0 100%;
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text);
+}
+
+.dica-rolar {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.link-inline {
+  display: inline-block;
+  padding-block: 10px;
+  color: var(--accent-standout);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sentinela {
+  height: 1px;
+}
+
+/* ---------- Símbolo do título: a fita de 5 marcas ---------- */
+
+.fita-titulo {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.1875rem;
+}
+
+.marca-titulo {
+  position: relative;
+  box-sizing: border-box;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+}
+
+.marca-titulo.acesa {
+  border-color: var(--accent-standout);
+  background: var(--accent-standout);
+}
+
+/* O fio entre duas marcas acesas. */
+.marca-titulo.ligada::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 0.25rem;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--accent-standout);
+}
+
+.fita-grande {
+  gap: 0.5rem;
+}
+
+.fita-grande .marca-titulo {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-width: 2px;
+  border-radius: 5px;
+}
+
+.fita-grande .marca-titulo.ligada::before {
+  width: 0.625rem;
+  height: 3px;
+  margin-top: -1.5px;
+}
+
+/* ---------- Meu mérito e ranking ---------- */
+
+.titulo-atual {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.titulo-atual-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.titulo-atual-nome {
+  margin: 0;
+  font: var(--text-title);
+  color: var(--text);
+}
+
+.titulo-atual-conta,
+.linha-proximo-titulo {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text-muted);
+}
+
+.linha-proximo-titulo {
+  color: var(--text);
+}
+
+.lista-titulos,
+.lista-ranking {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linha-titulo-merito {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: 52px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.titulo-nome {
+  flex: 1 1 auto;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.titulo-direita {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.linha-titulo-merito.e-meu .titulo-direita {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.linha-ranking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.ranking-posicao {
+  flex: 0 0 2.5rem;
+  font: var(--text-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.ranking-meio {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ranking-nome {
+  font: var(--text-body);
+  color: var(--text);
+}
+
+.linha-ranking.e-voce .ranking-nome {
+  font-weight: 700;
+}
+
+.ranking-detalhe,
+.ranking-tempo {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.regra-merito {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.linha-reservada {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.linha-reservada p {
+  margin: 0;
+}
+
+.reservada-nome {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.reservada-estado {
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+/* ---------- Criar comunidade ---------- */
+
+.criar .erro-campo:empty {
+  display: none;
+}
+
+.criar .opcional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.legenda-campo {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.campo-area {
+  gap: 0;
+}
+
+.campo-icone {
+  max-width: 8rem;
+}
