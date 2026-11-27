@@ -193,7 +193,13 @@ async function casosDoMock() {
   igual("abrir: feitos hoje", detalhe.json.group.today_done, 9);
   igual("abrir: participa", detalhe.json.me.is_participant, true);
   semNome("abrir", detalhe.json);
+  /* Os prints de detalhe só mostraram «Entrar na maratona» porque o usuário
+     não era participante. Os dois cenários agora são participantes de verdade. */
+  var porFazer = await pedir("GET", temCenario("/api/community-missions/leitura/" + id, "maratona-por-fazer"), null, pessoa);
+  igual("por fazer: participa", porFazer.json.me.is_participant, true);
+  igual("por fazer: dia", porFazer.json.me.day_done, false);
   var diaFeito = await pedir("GET", temCenario("/api/community-missions/leitura/" + id, "maratona-dia-feito"), null, pessoa);
+  igual("dia feito: participa", diaFeito.json.me.is_participant, true);
   igual("dia feito: estado", diaFeito.json.me.day_done, true);
   var convite = await pedir("GET", temCenario("/api/community-missions/leitura", "maratona-convite"), null, pessoa);
   igual("convite: ainda não participa", convite.json.marathons[0].is_participant, false);
@@ -254,8 +260,21 @@ async function casosDoMock() {
    Confere que CADA marca do detalhe tem área pintada visível. Um mutante que
    tira a regra do dia feito tem de reprovar aqui. */
 var PORTA_SITE = 3102;
-var CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 var TIPOS = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "application/javascript; charset=utf-8" };
+
+/* O navegador é opcional: num checkout limpo, sem Playwright, esta parte é
+   pulada e o resto da checagem continua. Nada de pacote ou caminho fixo. */
+function acharPlaywright() {
+  var nomes = ["playwright", "playwright-core"];
+  for (var i = 0; i < nomes.length; i++) {
+    try {
+      return require(nomes[i]).chromium;
+    } catch (erro) {
+      if (erro.code !== "MODULE_NOT_FOUND") throw erro;
+    }
+  }
+  return null;
+}
 
 function servirSite() {
   var servidor = http.createServer(function (req, res) {
@@ -287,16 +306,23 @@ function pintadas(marcas) {
   }).length;
 }
 
+var navegadorRodou = false;
 async function casosDoNavegador() {
+  var chromium = acharPlaywright();
+  if (!chromium) {
+    console.warn("aviso: checagem do navegador pulada: Playwright não encontrado");
+    return;
+  }
+  navegadorRodou = true;
   var servidor = await servirSite();
   var navegador = null;
   try {
     var login = await pedir("POST", "/api/users/login", { email: "com-missao@exemplo.com", password: "123456" });
     var token = login.json.token;
     if (!token) throw new Error("login do navegador não deu token");
-    var pw = path.join(__dirname, "..", "..", "..", "pw");
-    var chromium = require(path.join(pw, "node_modules", "playwright-core")).chromium;
-    navegador = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--no-sandbox"] });
+    var opcoes = { headless: true, args: ["--no-sandbox"] };
+    if (process.env.NEXUS_CHROME) opcoes.executablePath = process.env.NEXUS_CHROME;
+    navegador = await chromium.launch(opcoes);
     var contexto = await navegador.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
     await contexto.addInitScript(function (dados) {
       try { localStorage.setItem("nexus_v2_token", dados.token); } catch (e) {}
@@ -365,5 +391,6 @@ esperarMock(50).then(casosDoMock).then(casosDoNavegador).catch(function (erro) {
     console.error("FALHOU:\n- " + falhas.join("\n- "));
     process.exit(1);
   }
-  console.log("ok: Maratona sem sair, sem ranking e sem nomes; textos, trilha pintada no navegador (mutante reprovado), visual sóbrio e rotas do mock (503, crise, limite e dia repetido)");
+  console.log("ok: Maratona sem sair, sem ranking e sem nomes; textos, visual sóbrio, rotas do mock (503, crise, limite, dia repetido) e cenários de participante (por fazer/feito)" +
+    (navegadorRodou ? "; trilha pintada no navegador (mutante reprovado)" : ""));
 });

@@ -238,7 +238,8 @@
     - ?cenario=maratona-503 (503 calmo), maratona-vazia, maratona-antes,
       maratona-encerrada, maratona-cheia, maratona-ja-criou,
       maratona-registro-erro, maratona-crise, maratona-sem-missao, maratona-erro,
-      maratona-dia-feito (dia da pessoa já registrado) e maratona-convite
+      maratona-por-fazer (participante, dia por registrar), maratona-dia-feito
+      (participante, dia registrado) e maratona-convite
       (antes de começar, sem participar, para ver o botão entrar)
 
    Chat do Duo/Rival (PRs 32 a 35 do servidor; ?cenario= na página):
@@ -2724,6 +2725,13 @@ function maratonaDoCenario(m, cenario) {
   return copia;
 }
 
+/* Os prints do detalhe precisam de um participante de verdade: um com o dia
+   por fazer e outro com o dia registrado. Sem isso a tela mostra «Entrar na
+   maratona», mesmo quando o DOM da trilha está certo. */
+function participanteDoPrint(cenario) {
+  return cenario === "maratona-por-fazer" || cenario === "maratona-dia-feito";
+}
+
 function podeCriarMaratona(email, slug, cenario) {
   if (cenario === "maratona-sem-missao") return false;
   return eMembro(email, slug, cenario) && SO_LEITURA.indexOf(slug) === -1 &&
@@ -2754,7 +2762,8 @@ async function responderMaratona(req, caminho, corpo) {
     var itens = cenario === "maratona-vazia" ? [] : maratonasMock[slug].map(function (m) {
       var copia = maratonaDoCenario(m, cenario);
       if (copia.phase === "ended") return null;
-      copia.is_participant = participantesMaratona[m.id + "|" + email] === true && cenario !== "maratona-convite";
+      copia.is_participant = participanteDoPrint(cenario) ||
+        (participantesMaratona[m.id + "|" + email] === true && cenario !== "maratona-convite");
       return copia;
     }).filter(Boolean);
     return { status: 200, dados: { marathons: itens, can_create: podeCriarMaratona(email, slug, cenario) } };
@@ -2799,7 +2808,8 @@ async function responderMaratona(req, caminho, corpo) {
   var encontrada = (maratonasMock[slug] || []).filter(function (m) { return m.id === id; })[0];
   if (!encontrada) return { status: 404, dados: { error: MT.notFound } };
   var vista = maratonaDoCenario(encontrada, cenario);
-  var participa = participantesMaratona[id + "|" + email] === true && cenario !== "maratona-convite";
+  var participa = participanteDoPrint(cenario) ||
+    (participantesMaratona[id + "|" + email] === true && cenario !== "maratona-convite");
   var diaDeHoje = (vista.days || []).filter(function (d) { return Number(d.day) === Number(vista.day); })[0];
   var feitos = diaDeHoje ? (Number(diaDeHoje.done) || 0) : 0;
 
@@ -2816,7 +2826,9 @@ async function responderMaratona(req, caminho, corpo) {
         group: { participants: vista.participants, today_done: feitos, days: vista.days },
         me: {
           is_participant: participa,
-          day_done: checkinsMaratona[id + "|" + email] === true || cenario === "maratona-dia-feito"
+          day_done: cenario === "maratona-dia-feito" ? true
+            : cenario === "maratona-por-fazer" ? false
+            : checkinsMaratona[id + "|" + email] === true
         }
       }
     };
