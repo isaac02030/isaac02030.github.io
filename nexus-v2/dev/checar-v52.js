@@ -78,6 +78,7 @@ quer(/id="btn-continuar"[^>]*data-texto-comunidade="continuar"/.test(novaHtml), 
 quer((novaHtml.match(/btn-luz/g) || []).length === 1, "Novo título: tem de haver uma luz só");
 quer(/localStorage\.getItem\("nexus_v2_token"\)[\s\S]*location\.replace\("\.\/"/.test(novaHtml), "Novo título: sem login, vai para a entrada");
 quer(/<nav class="abas" id="abas"/.test(novaHtml), "Novo título: falta a barra de abas");
+quer(/NexusAbas\.montar\("missao"\)/.test(novaJs), "Novo título: a barra de abas não é montada");
 quer(!/[«»·→]/.test(novaHtml + novaJs + novaCss), "Novo título: aspas ou marca de IA no texto");
 quer(!/box-shadow|gradient|border-left|drop-shadow/.test(novaCss), "Novo título: a fita e o urso ficam planos");
 quer(/width:\s*40px/.test(novaCss) && /height:\s*40px/.test(novaCss), "Novo título: o urso precisa ser pequeno");

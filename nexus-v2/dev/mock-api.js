@@ -2330,7 +2330,7 @@ function equipeMock(email, metodo, caminho, cenario) {
    - dia-cumprido      rolagem contínua (páginas de 20); sem ele, 10 + «Ver anteriores»
    - com-merito        3 missões de 30 dias concluídas (Praticante; pode criar)
    - nao-membro        não é membro de nenhuma comunidade
-    - titulo-novo       6 missões (Constante): título novo ao entrar ou concluir
+    - titulo-novo       6 missões (Constante): título para a troca; na primeira abertura só guarda
     - uma-comunidade    só uma comunidade na lista (para o atalho e o link)
    - post-limite       429 ao publicar; post-crise: 200 crisis: true, nada gravado
    - criar-crise       200 crisis: true ao criar; criar-limite: 429

@@ -24,6 +24,7 @@
     B.iniciarCenario();
     C.aplicar(document);
     document.title = T.novoTitulo + " — Nexus";
+    NexusAbas.montar("missao");
     document.getElementById("btn-continuar").addEventListener("click", function () {
       N.limparPendente();
       location.replace("hoje.html" + B.busca());
