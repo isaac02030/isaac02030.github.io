@@ -180,6 +180,27 @@ body:has(.tela-comeco) {
   color: var(--sel-texto);
 }
 
+/* Exemplos das áreas: bloco próprio, fora dos botões. A 200% a coluna única
+   dos chips já empilha os nomes; aqui a linha inteira pode quebrar sem cortar
+   a legenda e sem criar uma segunda luz. */
+.areas-exemplos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.areas-exemplo {
+  margin: 0;
+  color: var(--text-muted);
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.areas-exemplo-nome {
+  color: var(--text);
+}
+
 .previa {
   display: flex;
   flex-direction: column;
@@ -282,10 +303,15 @@ body:has(.tela-comeco) {
     min-height: 44px;
     white-space: normal;
   }
-  /* Menos folga dentro da carta para «combinou.» caber inteiro na linha.
-     A quebra continua sendo entre palavras (break-word), sem ponto sozinho. */
+  /* Menos folga dentro da carta para «combinou.» e «instrumento.» caberem
+     inteiros na linha a 200%. A quebra continua sendo entre palavras
+     (break-word), sem ponto sozinho e sem encurtar os alvos. */
   .carta {
-    padding: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+  .carta-texto {
+    font-size: 1rem;
   }
 }
 

@@ -51,7 +51,7 @@ TROCAS.forEach(function (t) {
 
 /* 2. O mínimo de 8 e 12: a tela não mostra o número; o erro só vem com frase curta. */
 var checkin = ler("checkin.js");
-var trechos = ["TEXTO_VAZIO", "TEXTO_CURTA_ESTUDO", "TEXTO_CURTA_ACADEMIA"].map(function (nome) {
+var trechos = ["TEXTO_VAZIO", "TEXTO_CURTA_ESTUDO", "TEXTO_CURTA_ACADEMIA", "TEXTO_CURTA_OUTRO"].map(function (nome) {
   var m = checkin.match(new RegExp("var " + nome + " = [^\\n]+"));
   return m ? m[0] : "";
 }).join("\n");
@@ -77,8 +77,14 @@ if (typeof caixa.teste !== "function") {
   if (caixa.teste("aprendizagem", "li um texto") !== "Essa nota ficou curta demais. Conte um pouco mais do que você praticou.") falhas.push("negado: 11 caracteres no estudo têm de dar o erro de frase curta");
   if (caixa.teste("aprendizagem", "li um texto.") !== "") falhas.push("12 caracteres no estudo passam sem erro");
   if (caixa.teste("outra", "x") !== "") falhas.push("sem categoria, qualquer frase passa");
+  /* «Outro objetivo» usa text_note: mesma nota curta da academia, com texto
+     neutro. O caso negado continua valendo para categoria desconhecida. */
+  if (caixa.regra({ category: "outro" }).minimo !== 8) falhas.push("outro objetivo perdeu o mínimo da nota curta");
+  if (caixa.teste("outro", "meditar") !== "Essa nota ficou curta demais. Conte um pouco mais do que você fez.") falhas.push("outro objetivo: nota curta sem texto neutro");
+  if (caixa.teste("outro", "meditei hoje") !== "") falhas.push("outro objetivo: nota com 8 caracteres passa sem erro");
 }
 if (!/if \(categoria === "fitness"\) return TEXTO_CURTA_ACADEMIA;/.test(checkin)) falhas.push("o erro de prova curta do servidor usa o texto de frase curta, sem número");
+if (!/if \(categoria === "outro"\) return TEXTO_CURTA_OUTRO;/.test(checkin)) falhas.push("o erro de prova curta do servidor não entende outro objetivo");
 if (/Escreva uma frase curta sobre/.test(tudo["checkin.js"])) falhas.push("negado: a dica repetida do check-in voltou");
 var checkinHtml = ler("checkin.html");
 if (!/<textarea id="nota"[^>]*><\/textarea>\s*(<!--[^>]*-->\s*)?<p id="nota-erro" class="erro-campo" role="alert" hidden><\/p>/.test(checkinHtml)) falhas.push("check-in: o erro fica colado ao campo, logo abaixo dele, com role=alert");

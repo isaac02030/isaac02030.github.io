@@ -29,6 +29,7 @@ var TEXTO_VAZIO = "Antes de registrar, escreva uma nota curta do que fez.";
    erro, colado ao campo, se a frase for curta demais. */
 var TEXTO_CURTA_ESTUDO = "Essa nota ficou curta demais. Conte um pouco mais do que você praticou.";
 var TEXTO_CURTA_ACADEMIA = "Essa nota ficou curta demais. Conte um pouco mais do que você treinou.";
+var TEXTO_CURTA_OUTRO = "Essa nota ficou curta demais. Conte um pouco mais do que você fez.";
 var TEXTO_INATIVA = "Esta missão não está ativa.";
 var TEXTO_TERMINOU = "A missão já terminou.";
 var TEXTO_FALHA = "Não foi possível registrar agora. Tente de novo.";
@@ -269,6 +270,7 @@ function regraDaNota(missao) {
   var categoria = missao && missao.category;
   if (categoria === "fitness") return { minimo: 8, ajuda: "", curta: TEXTO_CURTA_ACADEMIA };
   if (categoria === "aprendizagem") return { minimo: 12, ajuda: "", curta: TEXTO_CURTA_ESTUDO };
+  if (categoria === "outro") return { minimo: 8, ajuda: "", curta: TEXTO_CURTA_OUTRO };
   return { minimo: 1, ajuda: "", curta: "" };
 }
 
@@ -278,6 +280,7 @@ function ajudaDoErroDeProva(erro, missao) {
   var categoria = missao && missao.category;
   if (categoria === "fitness") return TEXTO_CURTA_ACADEMIA;
   if (categoria === "aprendizagem") return TEXTO_CURTA_ESTUDO;
+  if (categoria === "outro") return TEXTO_CURTA_OUTRO;
   return tipo === "academia" ? TEXTO_CURTA_ACADEMIA : TEXTO_CURTA_ESTUDO;
 }
 
