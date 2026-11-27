@@ -39,7 +39,7 @@ if (!objetivo || objetivo[0] !== '<input id="objetivo" name="title" type="text" 
 var grupo = html.slice(html.indexOf('id="grupo-area"'), html.indexOf("</fieldset>", html.indexOf('id="grupo-area"')));
 if (grupo.indexOf('id="grupo-area"') === -1) falhas.push("falta o grupo da área");
 if (!/role="radiogroup"/.test(grupo)) falhas.push("o grupo da área precisa de role=radiogroup");
-if (!/<legend class="areas-legenda">Área<\/legend>/.test(grupo)) falhas.push("falta a legenda curta «Área»");
+if (!/<legend class="areas-legenda">Área \(opcional\)<\/legend>/.test(grupo)) falhas.push("falta a legenda «Área (opcional)»");
 AREAS.forEach(function (valor, i) {
   var rotulo = ["Mente", "Corpo", "Rotina"][i];
   var botao = '<button type="button" class="area" data-area="' + valor + '" aria-pressed="false">' + rotulo + "</button>";
