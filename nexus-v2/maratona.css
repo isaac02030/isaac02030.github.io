@@ -1,0 +1,298 @@
+/* Maratona da comunidade: papel liso no claro, preto de verdade no escuro.
+   Uma linha de lista dentro da comunidade, sem cartão em destaque.
+   Nesta tela a trilha é o assunto: ela e o botão principal são as duas únicas
+   luzes permitidas. Sem urso, sem ranking, sem barra colorida na lateral. */
+
+.tela-maratona {
+  width: min(100%, 30rem);
+  margin: 0 auto;
+  padding: calc(var(--space-5) + var(--safe-top)) var(--space-4) calc(var(--space-7) + var(--safe-bottom));
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  transition: none;
+  animation: none;
+}
+
+.tela-maratona .comunidade-titulo {
+  margin-bottom: var(--space-2);
+}
+
+/* A linha na comunidade: contorno fino, fundo do papel, nada de sombra. */
+.linha-maratona {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  margin: var(--space-4) 0;
+  background: var(--bg);
+  box-shadow: none;
+  transition: none;
+}
+
+.linha-maratona[hidden] {
+  display: none;
+}
+
+.linha-maratona-nome {
+  margin: 0 0 var(--space-2);
+}
+
+.linha-maratona-meta {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+}
+
+.linha-maratona-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.linha-maratona-acoes .btn {
+  min-height: var(--target);
+}
+
+/* Diálogo de entrada: os dois botões com o mesmo tamanho.
+   O foco começa em «Agora não» (quem abriu pode voltar sem tocar em nada). */
+.dialogo-maratona .botoes {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.dialogo-maratona .botoes .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--target);
+}
+
+.dialogo-maratona .folha-titulo {
+  margin-top: 0;
+}
+
+/* Trilha do grupo: uma marca por dia, no máximo 10 por linha para caber em
+   390 px sem rolagem lateral. A ponta acesa fica no dia de hoje. */
+.trilha-maratona {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(var(--colunas, 7), minmax(22px, 1fr));
+  column-gap: 6px;
+  row-gap: 14px;
+  margin: var(--space-4) 0;
+  padding: 4px 0;
+  max-width: 100%;
+  transition: none;
+  animation: none;
+}
+
+.trilha-maratona .tm-c {
+  position: relative;
+  height: 22px;
+}
+
+.trilha-maratona i {
+  display: block;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.trilha-maratona .tm-c::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: -6px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: var(--fio-futuro);
+}
+
+.trilha-maratona .lk-fim::after {
+  display: none;
+}
+
+.trilha-maratona .lk-on::after {
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+  box-shadow: var(--glow-fio);
+}
+
+.trilha-maratona .lk-dim::after {
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+  opacity: var(--fio-dim);
+}
+
+.trilha-maratona .s-f i {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
+}
+
+/* Pouca gente cumpriu: contorno com ponto. Nunca vermelho e nunca nota. */
+.trilha-maratona .s-p i {
+  border-color: var(--trilha-a);
+  background: var(--bg);
+}
+
+.trilha-maratona .s-p i::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--trilha-a);
+}
+
+/* Falta do grupo: traço diagonal, cor de apoio. Sem alarme e sem vermelho. */
+.trilha-maratona .s-x i {
+  border-color: var(--text-muted);
+}
+
+.trilha-maratona .s-x i::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: var(--text-muted);
+  transform: rotate(-45deg);
+}
+
+.trilha-maratona .s-o i {
+  border-color: var(--border-soft);
+  background: var(--bg);
+}
+
+/* Contorno duplo e ponta acesa no dia de hoje. */
+.trilha-maratona .hoje i {
+  outline: 2px solid var(--ponta-cor);
+  outline-offset: 2px;
+  box-shadow: var(--glow-ponta);
+}
+
+/* O que o servidor mandou: mínimo, contagem e estado de hoje. */
+.maratona-minimo,
+.maratona-grupo,
+.maratona-meu-dia {
+  margin: 0 0 var(--space-3);
+}
+
+.maratona-grupo {
+  color: var(--text-muted);
+}
+
+.maratona-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.maratona-acoes .btn {
+  min-height: var(--target);
+}
+
+/* Criar: campos curtos, contadores no lugar do jargão do servidor. */
+.formulario-maratona {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.formulario-maratona .campo {
+  display: grid;
+  gap: 4px;
+}
+
+.formulario-maratona input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--target);
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+.formulario-maratona .contador {
+  margin: 0;
+}
+
+.formulario-maratona .dupla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.formulario-maratona .botoes {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.formulario-maratona .botoes .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--target);
+}
+
+@media (max-width: 360px) {
+  .trilha-maratona {
+    column-gap: 4px;
+  }
+  .trilha-maratona .tm-c::after {
+    right: -4px;
+  }
+}
+
+/* Contraste alto e cores forçadas: a forma continua dizendo o estado. */
+@media (prefers-contrast: more) {
+  .trilha-maratona i {
+    border-width: 2px;
+  }
+  .trilha-maratona .lk-on::after,
+  .trilha-maratona .lk-dim::after,
+  .trilha-maratona .s-f i,
+  .trilha-maratona .hoje i {
+    background: var(--accent);
+    box-shadow: none;
+  }
+  .trilha-maratona .s-p i::after,
+  .trilha-maratona .s-x i::after {
+    background: var(--text);
+  }
+}
+
+@media (forced-colors: active) {
+  .trilha-maratona .lk-on::after,
+  .trilha-maratona .lk-dim::after {
+    background: CanvasText;
+    box-shadow: none;
+    opacity: 1;
+  }
+  .trilha-maratona .s-f i,
+  .trilha-maratona .s-p i::after {
+    background: Highlight;
+    border-color: Highlight;
+  }
+  .trilha-maratona .hoje i {
+    outline: 2px solid CanvasText;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tela-maratona *,
+  .trilha-maratona * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

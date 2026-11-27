@@ -230,6 +230,15 @@
    - DELETE /api/communities/admin/posts/:id → { deleted: true }; não existe → 404
    - ?cenario=equipe-vazia (lista vazia), equipe-indisponivel (503), equipe-erro-acao (500 na ação)
 
+    Maratona da comunidade (?cenario= na página; sem migração 017 o servidor responde 503):
+    - GET /api/community-missions/:slug → { marathons, can_create }
+    - POST /api/community-missions/:slug → cria e já entra; crise primeiro, nada gravado
+    - GET /api/community-missions/:slug/:id → { marathon, group, me } (só contagens do grupo)
+    - POST .../:id/join → entra; POST .../:id/checkin → registra o dia (tabela própria)
+    - ?cenario=maratona-503 (503 calmo), maratona-vazia, maratona-antes,
+      maratona-encerrada, maratona-cheia, maratona-ja-criou,
+      maratona-registro-erro, maratona-crise, maratona-sem-missao, maratona-erro
+
    Chat do Duo/Rival (PRs 32 a 35 do servidor; ?cenario= na página):
    - GET /api/messages/:missionId → { mission_id, messages } (só com par ativo;
      sem par, lista vazia; missão de outra pessoa → 403)
@@ -2654,6 +2663,182 @@ async function responderComunidade(req, caminho, corpo) {
   return { status: 404, dados: { error: "Não encontrado." } };
 }
 
+/* ---------- Maratona (PR 46 do servidor, migração 017) ----------
+   Só contagens do grupo: nenhum nome de pessoa entra na resposta. Os
+   cenários abaixo servem para os prints e para as checagens, e não valem
+   fora de localhost. Sem a migração o servidor responde 503 calmo. */
+var MT = {
+  unavailable: "A maratona ainda não está disponível. Tente de novo mais tarde.",
+  server: "Não deu para concluir agora. Tente de novo daqui a pouco.",
+  notFound: "Maratona não encontrada.",
+  created: "Maratona criada.",
+  joined: "Você entrou na maratona.",
+  done: "Dia registrado na maratona.",
+  crisis: "A maratona não foi criada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo."
+};
+var maratonasMock = {};
+var participantesMaratona = {};
+var checkinsMaratona = {};
+var proximoIdMaratona = 1;
+
+function diaISODeslocado(dias) {
+  var d = new Date();
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+/* Uma maratona ativa, com o dia 3 do grupo. Quem entra já participa. */
+function maratonaPadrao(slug, email) {
+  var id = proximoIdMaratona++;
+  var m = {
+    id: id, title: "7 dias de leitura", description: "Ler uma página por dia",
+    duration_days: 7, max_participants: 100, start_day: diaISODeslocado(-2),
+    phase: "active", day: 3, starts_in_days: null, participants: 14,
+    days: [{ day: 1, done: 12 }, { day: 2, done: 11 }, { day: 3, done: 9 }]
+  };
+  if (!maratonasMock[slug]) maratonasMock[slug] = [];
+  maratonasMock[slug].push(m);
+  participantesMaratona[id + "|" + email] = true;
+  return m;
+}
+
+function maratonaDoCenario(m, cenario) {
+  var copia = Object.assign({}, m, { days: (m.days || []).slice() });
+  if (cenario === "maratona-antes") {
+    copia.phase = "upcoming";
+    copia.day = null;
+    copia.starts_in_days = 2;
+  }
+  if (cenario === "maratona-encerrada") {
+    copia.phase = "ended";
+    copia.day = null;
+    copia.starts_in_days = null;
+  }
+  if (cenario === "maratona-cheia") {
+    copia.max_participants = 14;
+    copia.participants = 14;
+    copia.is_participant = false;
+  }
+  return copia;
+}
+
+function podeCriarMaratona(email, slug, cenario) {
+  if (cenario === "maratona-sem-missao") return false;
+  return eMembro(email, slug, cenario) && SO_LEITURA.indexOf(slug) === -1 &&
+    acessoParaPostar(email, comunidadePorSlug(slug) || { slug: slug, area: "mente" }, cenario).ok;
+}
+
+/* GET e POST /api/community-missions/:slug, e as quatro rotas da maratona. */
+async function responderMaratona(req, caminho, corpo) {
+  if (caminho !== "/api/community-missions" && caminho.indexOf("/api/community-missions/") !== 0) return null;
+  var acesso = autorizar(req);
+  if (acesso.status !== 200) return negar(acesso);
+  var email = acesso.email;
+  var cenario = nomeDoCenario(req);
+  var metodo = req.method;
+  if (!ehAdulto(email)) return { status: 403, dados: corpoSemIdade() };
+  if (cenario === "maratona-503") return { status: 503, dados: { error: MT.unavailable, code: "unavailable" } };
+  if (cenario === "maratona-erro") return { status: 500, dados: { error: MT.server } };
+
+  var partes = caminho.split("/").slice(3);
+  var slug = partes[0] || "";
+  if (!comunidadePorSlug(slug)) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+  /* A comunidade de leitura já aberta serve de cenário padrão. As outras
+     começam vazias, para a crise não parecer gravada. */
+  if (!maratonasMock[slug] && slug === "leitura" && cenario !== "maratona-vazia") maratonaPadrao(slug, email);
+
+  /* Lista. A encerrada não aparece; a 503 acima já resolveu a migração. */
+  if (partes.length === 1 && metodo === "GET") {
+    var itens = cenario === "maratona-vazia" ? [] : maratonasMock[slug].map(function (m) {
+      var copia = maratonaDoCenario(m, cenario);
+      if (copia.phase === "ended") return null;
+      copia.is_participant = participantesMaratona[m.id + "|" + email] === true;
+      return copia;
+    }).filter(Boolean);
+    return { status: 200, dados: { marathons: itens, can_create: podeCriarMaratona(email, slug, cenario) } };
+  }
+
+  /* Criar: crise primeiro, depois os limites do contrato. */
+  if (partes.length === 1 && metodo === "POST") {
+    var dados = corpo || {};
+    if (cenario === "maratona-crise") {
+      return { status: 200, dados: { saved: false, crisis: true, crisis_level: "alto", message: MT.crisis } };
+    }
+    if (cenario === "maratona-ja-criou") {
+      return { status: 409, dados: { error: "Você já tem uma maratona aberta nesta comunidade.", code: "open_marathon" } };
+    }
+    var titulo = typeof dados.title === "string" ? dados.title.trim() : "";
+    var minimo = typeof dados.description === "string" ? dados.description.trim() : "";
+    var dias = Number(dados.duration_days);
+    var pessoas = Number(dados.max_participants);
+    if (!titulo || titulo.length > 60) return { status: 400, dados: { error: "Dê um nome à maratona.", code: "invalid_title" } };
+    if (!minimo || minimo.length > 140) return { status: 400, dados: { error: "Escreva o mínimo de cada dia.", code: "invalid_minimum" } };
+    if (!Number.isInteger(dias) || dias < 3 || dias > 30) return { status: 400, dados: { error: "A maratona dura de 3 a 30 dias.", code: "invalid_days" } };
+    if (!Number.isInteger(pessoas) || pessoas < 2 || pessoas > 100) return { status: 400, dados: { error: "A maratona aceita de 2 a 100 pessoas.", code: "invalid_people" } };
+    if (dados.start_day && !/^\d{4}-\d{2}-\d{2}$/.test(dados.start_day)) {
+      return { status: 400, dados: { error: "Escolha um dia de início entre hoje e daqui a 14 dias.", code: "invalid_start" } };
+    }
+    if (!podeCriarMaratona(email, slug, cenario)) {
+      return { status: 403, dados: { error: "Entre na comunidade para criar uma maratona.", code: "not_member" } };
+    }
+    var criada = {
+      id: proximoIdMaratona++, title: titulo, description: minimo, duration_days: dias,
+      max_participants: pessoas, start_day: dados.start_day || diaISODeslocado(0),
+      phase: "active", day: 1, starts_in_days: null, participants: 1, days: []
+    };
+    if (!maratonasMock[slug]) maratonasMock[slug] = [];
+    maratonasMock[slug].push(criada);
+    participantesMaratona[criada.id + "|" + email] = true;
+    return { status: 201, dados: { marathon: criada, message: MT.created } };
+  }
+
+  if (!/^\d+$/.test(partes[1] || "")) return { status: 404, dados: { error: MT.notFound } };
+  var id = Number(partes[1]);
+  var encontrada = (maratonasMock[slug] || []).filter(function (m) { return m.id === id; })[0];
+  if (!encontrada) return { status: 404, dados: { error: MT.notFound } };
+  var vista = maratonaDoCenario(encontrada, cenario);
+  var participa = participantesMaratona[id + "|" + email] === true;
+  var diaDeHoje = (vista.days || []).filter(function (d) { return Number(d.day) === Number(vista.day); })[0];
+  var feitos = diaDeHoje ? (Number(diaDeHoje.done) || 0) : 0;
+
+  /* Detalhe: só o total do grupo e o estado do próprio dia. */
+  if (partes.length === 2 && metodo === "GET") {
+    return {
+      status: 200,
+      dados: {
+        marathon: {
+          id: vista.id, title: vista.title, description: vista.description,
+          duration_days: vista.duration_days, max_participants: vista.max_participants,
+          phase: vista.phase, day: vista.day, starts_in_days: vista.starts_in_days
+        },
+        group: { participants: vista.participants, today_done: feitos, days: vista.days },
+        me: { is_participant: participa, day_done: checkinsMaratona[id + "|" + email] === true }
+      }
+    };
+  }
+
+  if (partes[2] === "join" && metodo === "POST") {
+    if (vista.phase === "ended") return { status: 409, dados: { error: "Esta maratona já terminou.", code: "ended" } };
+    if (!eMembro(email, slug, cenario)) return { status: 403, dados: { error: "Entre na comunidade para participar da maratona.", code: "not_member" } };
+    if (cenario === "maratona-cheia") return { status: 409, dados: { error: "Esta maratona já está cheia.", code: "full" } };
+    participantesMaratona[id + "|" + email] = true;
+    return { status: 201, dados: { joined: true, already: participa, message: MT.joined } };
+  }
+
+  if (partes[2] === "checkin" && metodo === "POST") {
+    if (!participa) return { status: 403, dados: { error: "Entre na maratona para registrar o dia.", code: "not_participant" } };
+    if (vista.phase === "upcoming") return { status: 409, dados: { error: "A maratona ainda não começou.", code: "not_started" } };
+    if (vista.phase === "ended") return { status: 409, dados: { error: "Esta maratona já terminou.", code: "ended" } };
+    if (cenario === "maratona-registro-erro") return { status: 500, dados: { error: MT.server } };
+    if (checkinsMaratona[id + "|" + email]) {
+      return { status: 409, dados: { error: "Você já registrou o dia de hoje na maratona.", code: "already_done", day: vista.day } };
+    }
+    checkinsMaratona[id + "|" + email] = true;
+    return { status: 201, dados: { done: true, day: vista.day, message: MT.done } };
+  }
+  return { status: 404, dados: { error: MT.notFound } };
+}
+
 garantirUsuario("com-missao@exemplo.com", "pessoa");
 usuarios["com-missao@exemplo.com"].missoes.push(novaMissao(usuarios["com-missao@exemplo.com"], {
   id: 1,
@@ -2718,6 +2903,18 @@ var servidor = http.createServer(function (req, res) {
       enviar(res, resultado.status, resultado.dados);
     }).catch(function () {
       enviar(res, 400, { error: "Escolha não reconhecida. Toque de novo no interruptor.", code: "preferences_invalid" });
+    });
+    return;
+  }
+  if (url === "/api/community-missions" || url.indexOf("/api/community-missions/") === 0) {
+    var leituraMaratona = (req.method === "POST") ? lerCorpo(req) : Promise.resolve({});
+    leituraMaratona.then(function (corpo) {
+      return responderMaratona(req, url, corpo);
+    }).then(function (resultado) {
+      if (!resultado) resultado = { status: 404, dados: { error: "Não encontrado." } };
+      enviar(res, resultado.status, resultado.dados);
+    }).catch(function () {
+      enviar(res, 400, { error: "Não deu para concluir agora. Tente de novo daqui a pouco." });
     });
     return;
   }

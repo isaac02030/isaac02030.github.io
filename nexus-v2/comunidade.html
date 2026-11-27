@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="abas.css">
   <link rel="stylesheet" href="comunidade.css">
+  <link rel="stylesheet" href="maratona.css">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -104,6 +105,18 @@
       </form>
       <p class="aviso-publicado" id="aviso-publicado" role="status" tabindex="-1" hidden></p>
 
+      <!-- Maratona: uma linha, não um cartão em destaque. Sem nome de pessoa. -->
+      <section class="linha-maratona" id="linha-maratona" aria-labelledby="maratona-nome" hidden>
+        <h2 class="linha-maratona-nome" id="maratona-nome" data-texto-maratona="maratona"></h2>
+        <p class="linha-maratona-meta"><span id="maratona-quando"></span><span id="maratona-pessoas"></span></p>
+        <p class="aviso-texto" id="maratona-motivo" hidden></p>
+        <div class="linha-maratona-acoes">
+          <button type="button" class="btn btn-secundario" id="btn-maratona-entrar" aria-busy="false" data-texto-maratona="entrarNaMaratona"></button>
+          <a class="btn btn-texto" id="link-maratona-criar" data-texto-maratona="criarLinha"></a>
+        </div>
+        <div id="alerta-maratona" class="alerta" role="alert" hidden></div>
+      </section>
+
       <!-- Quem não pode postar: o motivo e o caminho, numa caixa neutra. -->
       <div class="caixa-motivo" id="caixa-motivo" hidden>
         <p class="aviso-texto" id="motivo-post"></p>
@@ -152,12 +165,24 @@
     </form>
   </dialog>
 
+  <!-- Folha da Maratona: foco inicial em «Agora não», sem nome de pessoa. -->
+  <dialog class="folha dialogo-maratona" id="dialogo-maratona" aria-labelledby="titulo-dialogo-maratona">
+    <h2 class="folha-titulo" id="titulo-dialogo-maratona" data-texto-maratona="dialogoTitulo"></h2>
+    <p id="texto-dialogo-maratona" data-texto-maratona="dialogoTexto"></p>
+    <div class="botoes">
+      <button type="button" class="btn btn-primario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
+      <button type="button" class="btn btn-secundario" id="btn-agora-nao-maratona" data-texto-maratona="agoraNao"></button>
+    </div>
+  </dialog>
+
   <nav class="abas" id="abas" aria-label="Seções"></nav>
   <script src="comunidade-textos.js"></script>
+  <script src="maratona-textos.js"></script>
   <script src="api.js"></script>
   <script src="abas.js"></script>
   <script src="nota-limite.js"></script>
   <script src="comunidade-base.js"></script>
+  <script src="maratona-comunidade.js"></script>
   <script src="comunidade.js"></script>
 </body>
 </html>

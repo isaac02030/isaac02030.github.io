@@ -391,6 +391,31 @@ var NexusApi = {
   apagarPost: function (postId) {
     return nexusPedir(caminhoComCenario("/api/communities/admin/posts/" + encodeURIComponent(postId)), null, { metodo: "DELETE", auth: true });
   },
+  /* Maratona (PR 46 do servidor, base /api/community-missions). Todas pedem
+     login e 18+; sem a migração 017 respondem 503 com code "unavailable".
+     Nenhuma resposta traz nomes de pessoas, só contagens do grupo. */
+  listarMaratonas: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/community-missions/" + encodeURIComponent(slug)), null, { metodo: "GET", auth: true });
+  },
+  criarMaratona: function (slug, dados) {
+    var corpo = {
+      title: dados.title,
+      description: dados.description,
+      duration_days: Number(dados.duration_days),
+      max_participants: Number(dados.max_participants)
+    };
+    if (dados.start_day) corpo.start_day = dados.start_day;
+    return nexusPedir(caminhoComCenario("/api/community-missions/" + encodeURIComponent(slug)), corpo, { metodo: "POST", auth: true });
+  },
+  abrirMaratona: function (slug, id) {
+    return nexusPedir(caminhoComCenario("/api/community-missions/" + encodeURIComponent(slug) + "/" + encodeURIComponent(id)), null, { metodo: "GET", auth: true });
+  },
+  entrarNaMaratona: function (slug, id) {
+    return nexusPedir(caminhoComCenario("/api/community-missions/" + encodeURIComponent(slug) + "/" + encodeURIComponent(id) + "/join"), null, { metodo: "POST", auth: true });
+  },
+  registrarDiaMaratona: function (slug, id) {
+    return nexusPedir(caminhoComCenario("/api/community-missions/" + encodeURIComponent(slug) + "/" + encodeURIComponent(id) + "/checkin"), null, { metodo: "POST", auth: true });
+  },
   entrar: function (email, senha) {
     return nexusPedir("/api/users/login", {
       email: email,
