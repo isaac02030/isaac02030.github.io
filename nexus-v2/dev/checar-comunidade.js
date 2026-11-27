@@ -112,7 +112,12 @@ function conferirTextos(fonte) {
   /* Sem caixa de 18+ para conta antiga. */
   if (/Tenho 18 anos ou mais|Confirmar e entrar/.test(fonte)) erros.push("voltou a caixa de 18+ (decidido: só o aviso)");
   /* O aviso ao autor nunca diz quantas denúncias houve. */
-  if (/\{(n|total|quantas|contagem)\}/.test(fonte)) erros.push("um texto da comunidade tem lugar para número de denúncias");
+  /* (Só nos textos da denúncia e do aviso ao autor: as telas novas usam {n}
+     para pessoas, apoios e missões, que não são denúncias.) */
+  Object.keys(M.TEXTOS).forEach(function (chave) {
+    if (!/^(denuncia|escondido|denunciar)/.test(chave)) return;
+    if (/\{(n|total|quantas|contagem)\}/.test(M.TEXTOS[chave])) erros.push("um texto da comunidade tem lugar para número de denúncias");
+  });
   if (/\bfeed\b|adminDenuncias/.test(fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/feed(Vazio|Fechado)/g, ""))) erros.push("«feed» ou o rótulo solto «Denúncias» voltou");
   return erros;
 }
@@ -270,7 +275,7 @@ if (!/de === "denuncia" && window\.NexusComunidade[\s\S]*TEXTOS\.denunciaCrise/.
 ["comunidade-textos.js", "comunidade.html", "comunidade.css", "comunidade.js", "equipe.html", "equipe.js"].forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v43"') === -1) falhas.push("o cache não está em nexus-v2-v43");
+if (sw.indexOf('CACHE = "nexus-v2-v45"') === -1) falhas.push("o cache não está em nexus-v2-v45");
 
 /* A pasta antiga não muda neste trabalho. */
 if (!fs.existsSync(path.join(raiz, "..", "nexus"))) falhas.push("a pasta nexus/ sumiu");

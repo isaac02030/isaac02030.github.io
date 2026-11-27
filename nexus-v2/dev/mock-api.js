@@ -2040,16 +2040,66 @@ var MSG_SO_ADMIN = "Esta area esta disponivel apenas para o admin.";
 var MOTIVOS_DENUNCIA = ["perigoso", "ofensa", "improprio", "spam", "outro"];
 var EMAIL_ADMIN = "admin@exemplo.com";
 var POST_DA_PESSOA = 50;
+/* Comunidades do mock: as 8 prontas do servidor (migração 014) e duas criadas
+   por pessoas de teste. Áreas fixas: mente, corpo, rotina. A Alimentação é só
+   leitura (READ_ONLY_COMMUNITY_SLUGS no servidor). */
 var COMUNIDADES = [
-  { id: 1, slug: "ingles-diario", name: "Inglês todo dia", category: "aprendizagem" },
-  { id: 2, slug: "academia-cedo", name: "Academia cedo", category: "fitness" }
+  { id: 1, slug: "ingles-diario", name: "Inglês todo dia", category: "aprendizagem", area: "mente", description: "Uma frase em inglês por dia, sem pressa.", member_count: 5, is_default: false, icon: "🗣️" },
+  { id: 2, slug: "academia-cedo", name: "Academia cedo", category: "fitness", area: "corpo", description: "Treino antes das 8h.", member_count: 9, is_default: false, icon: "🏋️" },
+  { id: 101, slug: "estudos", name: "Estudos", category: "estudos", area: "mente", description: "Para quem estuda todo dia: provas, cursos e concursos. Troque métodos e conte como foi a sessão.", member_count: 31, is_default: true, icon: null },
+  { id: 102, slug: "idiomas", name: "Idiomas", category: "idiomas", area: "mente", description: "Inglês, espanhol ou outra língua. Compartilhe o que funciona para praticar um pouco por dia.", member_count: 18, is_default: true, icon: null },
+  { id: 103, slug: "leitura", name: "Leitura", category: "leitura", area: "mente", description: "Livros, páginas por dia e o que você está lendo agora.", member_count: 42, is_default: true, icon: null },
+  { id: 104, slug: "academia", name: "Academia", category: "academia", area: "corpo", description: "Treino de força e rotina na academia. Dúvidas de iniciante são bem-vindas.", member_count: 27, is_default: true, icon: null },
+  { id: 105, slug: "corrida", name: "Corrida", category: "corrida", area: "corpo", description: "Do primeiro quilômetro à prova. Conte o treino do dia e o que ajudou a sair de casa.", member_count: 12, is_default: true, icon: null },
+  { id: 106, slug: "alimentacao", name: "Alimentação", category: "alimentacao", area: "corpo", description: "Aqui a conversa é sobre hábito e comida do dia a dia. Sem metas de peso, sem calorias muito baixas, sem jejum longo e sem fotos de corpo. Se a comida está pesando para você, toque em Ajuda.", member_count: 7, is_default: true, icon: null },
+  { id: 107, slug: "organizacao", name: "Organização", category: "organizacao", area: "rotina", description: "Casa, agenda, finanças e tarefas. O que você organizou hoje e como.", member_count: 15, is_default: true, icon: null },
+  { id: 108, slug: "sono", name: "Sono", category: "sono", area: "rotina", description: "Horário de dormir, rotina da noite e o que ajuda a acordar melhor.", member_count: 5, is_default: true, icon: null }
 ];
-/* Nomes de teste, não são pessoas reais. */
+var SO_LEITURA = ["alimentacao"];
+var TITULOS_MOCK = [
+  { name: "Iniciante", min: 1, level: 1 }, { name: "Praticante", min: 3, level: 2 },
+  { name: "Constante", min: 6, level: 3 }, { name: "Veterano", min: 12, level: 4 },
+  { name: "Referência", min: 24, level: 5 }
+];
+/* Nomes de teste, não são pessoas reais. m = missões concluídas (título). */
 var POSTS_DE_TESTE = [
-  { id: 11, community_id: 1, user_id: 901, username: "caderno_azul", content: "Hoje li duas páginas sem traduzir. A segunda foi mais fácil que a primeira.", horas: 3 },
-  { id: 12, community_id: 1, user_id: 902, username: "leitura_lenta", content: "Dica que me ajudou: deixar o livro aberto em cima da mesa antes de dormir.", horas: 20 },
-  { id: 13, community_id: 2, user_id: 903, username: "treino_cedo", content: "Fui às 7h. Só o mínimo, mas fui.", horas: 5 }
+  { id: 11, community_id: 1, user_id: 901, username: "caderno_azul", content: "Hoje li duas páginas sem traduzir. A segunda foi mais fácil que a primeira.", horas: 3, m: 3, apoios: 4 },
+  { id: 12, community_id: 1, user_id: 902, username: "leitura_lenta", content: "Dica que me ajudou: deixar o livro aberto em cima da mesa antes de dormir.", horas: 20, m: 1, apoios: 2 },
+  { id: 13, community_id: 2, user_id: 903, username: "treino_cedo", content: "Fui às 7h. Só o mínimo, mas fui.", horas: 5, m: 0, apoios: 1 },
+  { id: 61, community_id: 103, user_id: 911, username: "marcador_verde", content: "Dez páginas de manhã, antes do celular, mudaram o resto do dia. Comece pelo livro que já está na mesa e deixe o celular em outro cômodo até terminar as páginas do dia.", horas: 50, m: 7, apoios: 24 },
+  { id: 62, community_id: 103, user_id: 912, username: "pagina_10", content: "Qual livro curto vocês indicam para quem não lê há anos?", horas: 26, m: 3, apoios: 17 },
+  { id: 63, community_id: 103, user_id: 913, username: "estante_baixa", content: "Marcar a página em que parei e reler o último parágrafo ajuda a retomar sem perder o fio. Funciona até com livro difícil, desde que a leitura seja todo dia, mesmo pouca.", horas: 74, m: 14, apoios: 12 },
+  { id: 64, community_id: 103, user_id: 914, username: "leitora_nova", content: "Primeira semana. Li 8 páginas hoje, o mínimo era 1.", horas: 0.2, m: 1, apoios: 3 }
 ];
+/* Mais posts de teste na Leitura, para a lista por cursor ter várias páginas. */
+(function () {
+  var frases = [
+    "Li no ônibus hoje. Cinco páginas.",
+    "Dia difícil, mas li uma página antes de dormir.",
+    "Trocar o livro que não estava andando foi a melhor decisão da semana.",
+    "Ler em voz baixa me ajuda a não pular linhas.",
+    "Anoto uma frase por capítulo. Virou um caderno bom de reler.",
+    "Hoje só deu o mínimo. Conta do mesmo jeito.",
+    "Alguém lê dois livros ao mesmo tempo? Como fazem?",
+    "Deixei a luz de leitura ligada no quarto. Lembra que é hora."
+  ];
+  for (var i = 0; i < 24; i++) {
+    POSTS_DE_TESTE.push({
+      id: 200 + i, community_id: 103, user_id: 920 + (i % 6), username: "leitor_teste_" + (i % 6 + 1),
+      content: frases[i % frases.length], horas: 3 + i * 5, m: [0, 1, 3, 6, 12, 24][i % 6], apoios: i % 4
+    });
+  }
+})();
+var RANKING_TESTE = [
+  { username: "estante_baixa", missions: 14, dias: 1100 },
+  { username: "marcador_verde", missions: 7, dias: 400 },
+  { username: "pagina_10", missions: 6, dias: 240 }
+];
+var membrosMock = {};
+var apoiosMock = {};
+var publicadosMock = [];
+var proximoPostMock = 5000;
+var criadasPorEmail = {};
 var denunciasFeitas = {};
 var escondidosDaEquipe = null;
 
@@ -2105,7 +2155,7 @@ function postsDaComunidade(comunidade, email) {
   var meu = {
     id: POST_DA_PESSOA, community_id: comunidade.id, user_id: usuario.id, username: usuario.username,
     content: "Meu dia 4: fiz o mínimo e anotei duas palavras novas.",
-    created_at: new Date(agora - 3600000).toISOString(), hidden: false
+    created_at: new Date(agora - 3600000).toISOString(), hidden: false, apoiosBase: 2, author_title: null
   };
   if (email === "autor@exemplo.com") {
     meu.hidden = true;
@@ -2118,8 +2168,14 @@ function postsDaComunidade(comunidade, email) {
     if (post.community_id !== comunidade.id) return;
     lista.push({
       id: post.id, community_id: post.community_id, user_id: post.user_id, username: post.username,
-      content: post.content, created_at: new Date(agora - post.horas * 3600000).toISOString(), hidden: false
+      content: post.content, created_at: new Date(agora - post.horas * 3600000).toISOString(), hidden: false,
+      apoiosBase: post.apoios || 0, author_title: tituloMock(post.m || 0)
     });
+  });
+  /* Os publicados nesta sessão do mock (o autor vê o título dele também). */
+  publicadosMock.forEach(function (p) {
+    if (p.post.community_id !== comunidade.id) return;
+    lista.push(Object.assign({}, p.post, { username: p.username, hidden: false, apoiosBase: 0, author_title: null }));
   });
   return lista;
 }
@@ -2192,6 +2248,258 @@ function equipeMock(email, metodo, caminho, cenario) {
   return { status: 200, dados: { restored: true, post_id: Number(alvo) } };
 }
 
+/* ---------- Telas da comunidade, 1.ª parte (PRs 40 a 44 do servidor) ----------
+   Cenários (?cenario=, podem se juntar com hífen; vale «contém»):
+   - sem-missao        sem missão ativa (não posta; lista lê)
+   - outra-area        a missão ativa é de Corpo
+   - (padrão)          as áreas das missões ativas da pessoa; com-missao@ é Mente
+   - dia-cumprido      rolagem contínua (páginas de 20); sem ele, 10 + «Ver anteriores»
+   - com-merito        3 missões de 30 dias concluídas (Praticante; pode criar)
+   - nao-membro        não é membro de nenhuma comunidade
+   - post-limite       429 ao publicar; post-crise: 200 crisis: true, nada gravado
+   - criar-crise       200 crisis: true ao criar; criar-limite: 429
+   - lista-antiga      a lista por cursor e os destaques dão 503 (como sem a 015)
+   - apoio-erro        500 ao apoiar; ranking-vazio: ninguém com missão concluída
+   Nunca diz quem apoiou: só o total e supported_by_me. */
+
+function temCenario(cenario, nome) {
+  return typeof cenario === "string" && cenario.indexOf(nome) !== -1;
+}
+
+function eMembro(email, slug, cenario) {
+  if (!membrosMock[email]) membrosMock[email] = temCenario(cenario, "nao-membro") ? {} : { "leitura": true, "ingles-diario": true };
+  return membrosMock[email][slug] === true;
+}
+
+function areasAtivas(email, cenario) {
+  if (temCenario(cenario, "sem-missao")) return [];
+  if (temCenario(cenario, "outra-area")) return ["corpo"];
+  var usuario = usuarios[email];
+  return (usuario && usuario.missoes ? usuario.missoes : []).filter(function (m) {
+    return m.status === "active";
+  }).map(function (m) { return m.area || null; });
+}
+
+function meritoDe(email, cenario) {
+  if (temCenario(cenario, "com-merito")) return 3;
+  return 0;
+}
+
+function tituloMock(n) {
+  var achado = null;
+  TITULOS_MOCK.forEach(function (t) { if (n >= t.min) achado = t; });
+  return achado ? { name: achado.name, level: achado.level, marks: 5 } : null;
+}
+
+function proximoTituloMock(n) {
+  for (var i = 0; i < TITULOS_MOCK.length; i++) {
+    if (TITULOS_MOCK[i].min > n) return { name: TITULOS_MOCK[i].name, missions: TITULOS_MOCK[i].min, missing: TITULOS_MOCK[i].min - n };
+  }
+  return null;
+}
+
+var NOMES_AREA = { mente: "Mente", corpo: "Corpo", rotina: "Rotina" };
+
+/* A mesma regra de lib/community-access.js (postAccess). */
+function acessoParaPostar(email, comunidade, cenario) {
+  if (SO_LEITURA.indexOf(comunidade.slug) !== -1) return { ok: false, code: "read_only", message: "Os posts aqui abrem em breve. Por enquanto, dá para ler." };
+  var areas = areasAtivas(email, cenario);
+  var area = comunidade.area;
+  if (areas.indexOf(area) !== -1) return { ok: true, code: "ok" };
+  if (!areas.length) return { ok: false, code: "no_active_mission", message: "Para postar aqui você precisa de uma missão ativa em " + NOMES_AREA[area] + "." };
+  var outra = areas.filter(function (a) { return !!NOMES_AREA[a]; })[0];
+  if (!outra) return { ok: false, code: "mission_without_area", message: "Sua missão ativa ainda não tem área. Para postar aqui, ela precisa ser de " + NOMES_AREA[area] + "." };
+  return { ok: false, code: "other_area", message: "Sua missão ativa é de " + NOMES_AREA[outra] + ". Esta comunidade é de " + NOMES_AREA[area] + "." };
+}
+
+function acessoDaComunidade(email, comunidade, cenario) {
+  var membro = eMembro(email, comunidade.slug, cenario);
+  var post = acessoParaPostar(email, comunidade, cenario);
+  return {
+    is_member: membro,
+    can_read_forum: true,
+    can_post_forum: membro && post.ok,
+    post_code: !membro && post.ok ? "not_member" : post.code,
+    post_requirement: !membro && post.ok ? "Só membros desta comunidade podem publicar. Entre na comunidade e tente de novo." : (post.ok ? "" : post.message)
+  };
+}
+
+function comunidadeParaLista(c, email, cenario) {
+  return {
+    id: c.id, slug: c.slug, name: c.name, category: c.category, area: c.area, description: c.description,
+    icon: c.icon, is_default: c.is_default, member_count: c.member_count, is_member: eMembro(email, c.slug, cenario)
+  };
+}
+
+function totalDeApoios(post) {
+  var dados = apoiosMock[post.id];
+  return (post.apoiosBase || 0) + (dados ? Object.keys(dados).length : 0);
+}
+
+function comApoios(post, email) {
+  return Object.assign({}, post, {
+    supports: totalDeApoios(post),
+    supported_by_me: !!(apoiosMock[post.id] && apoiosMock[post.id][email])
+  });
+}
+
+/* Todos os posts de uma comunidade, do mais novo ao mais antigo. */
+function todosOsPosts(comunidade, email) {
+  return postsDaComunidade(comunidade, email).sort(function (a, b) {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime() || b.id - a.id;
+  });
+}
+
+function cursorDe(n) {
+  return Buffer.from("pos|" + n, "utf8").toString("base64url");
+}
+
+function lerCursor(valor) {
+  if (typeof valor !== "string" || !/^[A-Za-z0-9_-]{1,80}$/.test(valor)) return -1;
+  var m = /^pos\|(\d{1,6})$/.exec(Buffer.from(valor, "base64url").toString("utf8"));
+  return m ? Number(m[1]) : -1;
+}
+
+function respostaDaLista(req, comunidade, email, cenario) {
+  var continua = temCenario(cenario, "dia-cumprido");
+  var tamanho = continua ? 20 : 10;
+  var cursor = queryDe(req).get("cursor");
+  var inicio = 0;
+  if (cursor !== null) {
+    inicio = lerCursor(cursor);
+    if (inicio < 0) return { status: 400, dados: { error: "Não deu para carregar mais posts. Abra a comunidade de novo.", code: "invalid_cursor" } };
+  }
+  var lista = cenario === "comunidade-vazia" ? [] : todosOsPosts(comunidade, email);
+  var pagina = lista.slice(inicio, inicio + tamanho).map(function (p) { return comApoios(p, email); });
+  var fim = inicio + pagina.length;
+  return {
+    status: 200,
+    dados: {
+      posts: pagina,
+      next_cursor: fim < lista.length ? cursorDe(fim) : null,
+      page_size: tamanho,
+      continuous_scroll: continua,
+      scroll_hint: continua ? null : "Registre o dia para a lista rolar sozinha."
+    }
+  };
+}
+
+function destaquesDe(comunidade, email, cenario) {
+  if (cenario === "comunidade-vazia") return [];
+  return todosOsPosts(comunidade, email).filter(function (p) {
+    return !p.hidden && totalDeApoios(p) > 0 && (Date.now() - new Date(p.created_at).getTime()) < 7 * MS_DIA;
+  }).sort(function (a, b) {
+    return totalDeApoios(b) - totalDeApoios(a) || new Date(b.created_at) - new Date(a.created_at);
+  }).slice(0, 3).map(function (p) { return comApoios(p, email); });
+}
+
+function apoiarMock(email, comunidade, postId, metodo, cenario) {
+  if (SO_LEITURA.indexOf(comunidade.slug) !== -1) return { status: 403, dados: { error: "Os posts aqui abrem em breve. Por enquanto, dá para ler.", code: "read_only" } };
+  var post = acharPost(comunidade, postId, email);
+  if (!post || post.hidden) return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+  if (temCenario(cenario, "apoio-erro")) return { status: 500, dados: { error: "Não deu para concluir agora. Tente de novo daqui a pouco." } };
+  if (metodo === "POST" && String(post.user_id) === String(usuarios[email].id)) {
+    return { status: 403, dados: { error: "Você não pode apoiar o seu próprio post.", code: "own_post" } };
+  }
+  if (!apoiosMock[post.id]) apoiosMock[post.id] = {};
+  if (metodo === "DELETE") {
+    var tinha = !!apoiosMock[post.id][email];
+    delete apoiosMock[post.id][email];
+    return { status: 200, dados: { supported: false, removed: tinha, supports: totalDeApoios(post) } };
+  }
+  if (apoiosMock[post.id][email]) return { status: 409, dados: { error: "Você já apoiou este post.", code: "already_supported", supported: true, supports: totalDeApoios(post) } };
+  apoiosMock[post.id][email] = true;
+  return { status: 201, dados: { supported: true, supports: totalDeApoios(post) } };
+}
+
+function publicarMock(email, comunidade, corpo, cenario) {
+  var conteudo = corpo && corpo.content;
+  if (temCenario(cenario, "post-crise")) {
+    return { status: 200, dados: { posted: false, crisis: true, crisis_level: "alto", message: "Seu post não foi publicado. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
+  }
+  if (conteudo != null && typeof conteudo !== "string") return { status: 400, dados: { error: "O post precisa ser um texto. Escreva de novo e envie." } };
+  var texto = (conteudo || "").trim();
+  if (!texto) return { status: 400, dados: { error: "O post está vazio. Escreva alguma coisa e envie." } };
+  if (Array.from(texto).length > 280) return { status: 400, dados: { error: "O post passou de 280 caracteres. Encurte um pouco e envie de novo." } };
+  if (!eMembro(email, comunidade.slug, cenario)) return { status: 403, dados: { error: "Só membros desta comunidade podem publicar. Entre na comunidade e tente de novo." } };
+  var acesso = acessoParaPostar(email, comunidade, cenario);
+  if (!acesso.ok) return { status: 403, dados: { error: acesso.message, code: acesso.code, locked: true, community_area: comunidade.area } };
+  var usuario = usuarios[email];
+  var hoje = publicadosMock.filter(function (p) { return p.email === email && Date.now() - p.quando < MS_DIA; }).length;
+  if (temCenario(cenario, "post-limite") || hoje >= 3) return { status: 429, dados: { error: "Você já publicou 3 posts nas últimas 24 horas. Tente de novo amanhã.", limit: 3 } };
+  var post = { id: proximoPostMock++, community_id: comunidade.id, user_id: usuario.id, content: texto, created_at: new Date().toISOString() };
+  publicadosMock.push({ email: email, quando: Date.now(), post: post, username: usuario.username });
+  return { status: 201, dados: { post: post } };
+}
+
+var EMOJI_MOCK = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|‍|️|[\u{1F3FB}-\u{1F3FF}])+$/u;
+
+function slugMock(nome) {
+  return nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+}
+
+function criarComunidadeMock(email, corpo, cenario) {
+  corpo = corpo || {};
+  if (temCenario(cenario, "criar-crise")) {
+    return { status: 200, dados: { saved: false, crisis: true, crisis_level: "alto", message: "A comunidade não foi criada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
+  }
+  var nome = typeof corpo.name === "string" ? corpo.name.replace(/\s+/g, " ").trim() : "";
+  if (!nome || Array.from(nome).length > 40) return { status: 400, dados: { error: "Dê um nome à comunidade, com até 40 caracteres.", code: "invalid_name" } };
+  var slug = slugMock(nome);
+  if (slug.length < 2) return { status: 400, dados: { error: "Use letras ou números no nome da comunidade.", code: "invalid_name" } };
+  if (!NOMES_AREA[corpo.area]) return { status: 400, dados: { error: "Escolha uma área: Mente, Corpo ou Rotina.", code: "invalid_area" } };
+  if (typeof corpo.category === "string" && Array.from(corpo.category.trim()).length > 30) return { status: 400, dados: { error: "O assunto passou de 30 caracteres. Encurte um pouco e envie de novo.", code: "invalid_topic" } };
+  if (typeof corpo.description === "string" && Array.from(corpo.description.trim()).length > 200) return { status: 400, dados: { error: "As regras passaram de 200 caracteres. Encurte um pouco e envie de novo.", code: "invalid_description" } };
+  var icone = corpo.icon;
+  if (icone != null && icone !== "" && !(typeof icone === "string" && icone.length <= 8 && EMOJI_MOCK.test(icone) && /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(icone))) {
+    return { status: 400, dados: { error: "O ícone precisa ser um emoji. Escolha outro e envie de novo.", code: "invalid_icon" } };
+  }
+  if (meritoDe(email, cenario) < 1) {
+    return { status: 403, dados: { error: "Criar uma comunidade abre depois que você concluir uma missão de 30 dias.", code: "needs_completed_mission", locked: true, missions_done: 0, needed: 1 } };
+  }
+  if (temCenario(cenario, "criar-limite") || criadasPorEmail[email]) return { status: 429, dados: { error: "Você já criou uma comunidade nesta semana. Tente de novo daqui a alguns dias.", code: "create_limit", limit: 1 } };
+  if (comunidadePorSlug(slug) || ["admin", "suggest", "smart-suggest", "recommended", "merit"].indexOf(slug) !== -1) {
+    return { status: 409, dados: { error: "Já existe uma comunidade com esse nome.", code: "name_taken" } };
+  }
+  var nova = {
+    id: 300 + COMUNIDADES.length, slug: slug, name: nome, category: (corpo.category || corpo.area), area: corpo.area,
+    description: corpo.description || null, member_count: 1, is_default: false, icon: icone || "⚡"
+  };
+  COMUNIDADES.push(nova);
+  criadasPorEmail[email] = true;
+  eMembro(email, slug, cenario);
+  membrosMock[email][slug] = true;
+  return { status: 201, dados: { community: nova, message: "Comunidade criada." } };
+}
+
+function recomendadasMock(email, missaoId, cenario) {
+  var usuario = usuarios[email];
+  var missao = (usuario.missoes || []).filter(function (m) { return String(m.id) === String(missaoId); })[0];
+  if (!missao) return { status: 404, dados: { error: "Missão não encontrada." } };
+  var area = temCenario(cenario, "outra-area") ? "corpo" : missao.area;
+  if (!area) return { status: 200, dados: { area: null, subject: missao.subject || null, communities: [], message: "Esta missão não tem área. As recomendações aparecem para missões com área." } };
+  var assunto = String(missao.subject || "").toLowerCase();
+  var lista = COMUNIDADES.filter(function (c) { return c.area === area; }).map(function (c) {
+    var bate = !!assunto && (c.name + " " + c.description).toLowerCase().indexOf(assunto) !== -1;
+    return Object.assign(comunidadeParaLista(c, email, cenario), { subject_match: bate });
+  }).sort(function (a, b) {
+    return Number(b.subject_match) - Number(a.subject_match) || Number(b.is_default) - Number(a.is_default) || b.member_count - a.member_count;
+  });
+  return { status: 200, dados: { area: area, area_label: NOMES_AREA[area], subject: missao.subject || null, communities: lista } };
+}
+
+function rankingMock(email, cenario) {
+  var minhas = meritoDe(email, cenario);
+  if (temCenario(cenario, "ranking-vazio")) {
+    return { status: 200, dados: { top: [], me: null, rule: "Vale o número de missões. No empate, o tempo na comunidade." } };
+  }
+  var top = RANKING_TESTE.map(function (r, i) {
+    return { position: i + 1, username: r.username, title: tituloMock(r.missions), missions: r.missions, days_in_community: r.dias, is_me: false };
+  });
+  var eu = minhas > 0 ? { position: 4, username: usuarios[email].username, title: tituloMock(minhas), missions: minhas, days_in_community: 150, is_me: true } : null;
+  return { status: 200, dados: { top: top, me: eu, rule: "Vale o número de missões. No empate, o tempo na comunidade." } };
+}
+
 /* Rotas da comunidade e /api/users/me. Devolve null se o caminho não é daqui. */
 async function responderComunidade(req, caminho, corpo) {
   if (caminho !== "/api/users/me" && caminho.indexOf("/api/communities") !== 0) return null;
@@ -2217,7 +2525,43 @@ async function responderComunidade(req, caminho, corpo) {
 
   if (caminho === "/api/communities" && metodo === "GET") {
     if (cenario === "comunidade-erro") return { status: 500, dados: { error: "Erro ao listar comunidades." } };
-    return { status: 200, dados: COMUNIDADES.map(function (c) { return { id: c.id, slug: c.slug, name: c.name, category: c.category }; }) };
+    if (cenario === "comunidade-indisponivel") return { status: 503, dados: { error: "A comunidade ainda não está disponível." } };
+    /* A ordem do servidor: prontas primeiro, depois as com mais gente. */
+    var ordem = COMUNIDADES.slice().sort(function (a, b) {
+      return Number(b.is_default) - Number(a.is_default) || b.member_count - a.member_count;
+    });
+    return { status: 200, dados: ordem.map(function (c) { return comunidadeParaLista(c, email, cenario); }) };
+  }
+  if (caminho === "/api/communities" && metodo === "POST") return criarComunidadeMock(email, corpo, cenario);
+  if (caminho === "/api/communities/merit/me" && metodo === "GET") {
+    var n = meritoDe(email, cenario);
+    return { status: 200, dados: { missions: n, title: tituloMock(n), next: proximoTituloMock(n), rule: "Vale o número de missões. No empate, o tempo na comunidade." } };
+  }
+  var recomendada = caminho.match(/^\/api\/communities\/recommended\/(\d+)$/);
+  if (recomendada && metodo === "GET") return recomendadasMock(email, recomendada[1], cenario);
+  var sub = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/(posts|highlights|ranking|join)$/);
+  if (sub) {
+    var alvo = comunidadePorSlug(sub[1]);
+    if (!alvo) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+    if (sub[2] === "join" && metodo === "POST") {
+      var ja = eMembro(email, alvo.slug, cenario);
+      if (!ja) {
+        membrosMock[email][alvo.slug] = true;
+        alvo.member_count += 1;
+      }
+      return { status: 200, dados: { success: true, already_member: ja } };
+    }
+    if (sub[2] === "posts" && metodo === "POST") return publicarMock(email, alvo, corpo, cenario);
+    if (sub[2] === "ranking" && metodo === "GET") return rankingMock(email, cenario);
+    if (metodo === "GET" && temCenario(cenario, "lista-antiga")) return { status: 503, dados: { error: "A lista de posts ainda não está disponível. Tente de novo mais tarde.", code: "unavailable" } };
+    if (sub[2] === "posts" && metodo === "GET") return respostaDaLista(req, alvo, email, cenario);
+    if (sub[2] === "highlights" && metodo === "GET") return { status: 200, dados: { highlights: destaquesDe(alvo, email, cenario), days: 7, max: 3 } };
+  }
+  var apoio = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/support$/);
+  if (apoio && (metodo === "POST" || metodo === "DELETE")) {
+    var daVez = comunidadePorSlug(apoio[1]);
+    if (!daVez) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+    return apoiarMock(email, daVez, apoio[2], metodo, cenario);
   }
   var denuncia = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/report$/);
   if (denuncia && metodo === "POST") return denunciarMock(email, denuncia[1], denuncia[2], corpo || {}, cenario);
@@ -2229,13 +2573,20 @@ async function responderComunidade(req, caminho, corpo) {
     if (!comunidade) return { status: 404, dados: { error: "Comunidade não encontrada." } };
     var fechada = cenario === "comunidade-fechada";
     var posts = (fechada || cenario === "comunidade-vazia") ? [] : postsDaComunidade(comunidade, email);
+    var acessoCom = acessoDaComunidade(email, comunidade, cenario);
+    if (fechada) acessoCom.can_read_forum = false;
     return {
       status: 200,
       dados: {
-        community: { id: comunidade.id, slug: comunidade.slug, name: comunidade.name, category: comunidade.category, is_member: true },
-        ranking: [],
-        posts: posts,
-        access: { is_member: true, can_read_forum: !fechada, can_post_forum: false }
+        community: comunidadeParaLista(comunidade, email, cenario),
+        ranking: rankingMock(email, cenario).dados,
+        /* Como o servidor: a lista antiga vem sem o total de apoios. */
+        posts: posts.slice(0, 20).map(function (p) {
+          var copia = Object.assign({}, p);
+          delete copia.apoiosBase;
+          return copia;
+        }),
+        access: acessoCom
       }
     };
   }
@@ -2253,6 +2604,10 @@ usuarios["com-missao@exemplo.com"].missoes.push(novaMissao(usuarios["com-missao@
   mode: "solo",
   status: "active"
 }));
+/* Telas da comunidade: a missão de exemplo é de Mente, sobre leitura (como a
+   área e o assunto do PR 40). Fica aqui para não depender do formulário. */
+usuarios["com-missao@exemplo.com"].missoes[0].area = "mente";
+usuarios["com-missao@exemplo.com"].missoes[0].subject = "leitura";
 
 var servidor = http.createServer(function (req, res) {
   if (req.method === "OPTIONS") {
