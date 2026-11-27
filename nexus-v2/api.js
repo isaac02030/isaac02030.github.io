@@ -588,6 +588,10 @@ var NexusApi = {
       proof_mode: dados.proof_mode
     };
     if (Array.isArray(dados.mission_weekdays)) corpo.mission_weekdays = dados.mission_weekdays.slice();
+    /* Área opcional. Só vai se a pessoa escolheu uma das três. Sem escolha, o campo fica de fora. */
+    if (dados.area === "mente" || dados.area === "corpo" || dados.area === "rotina") corpo.area = dados.area;
+    /* Assunto opcional. Só vai se sobrou texto depois do trim. Vazio fica de fora. */
+    if (typeof dados.subject === "string" && dados.subject.trim()) corpo.subject = dados.subject.trim();
     return nexusPedir("/api/missions", corpo, { metodo: "POST", auth: true });
   },
   chaveVapid: function () {

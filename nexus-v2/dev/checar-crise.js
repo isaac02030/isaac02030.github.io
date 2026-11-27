@@ -16,7 +16,7 @@ var path = require("path");
 
 var raiz = path.join(__dirname, "..");
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 /* Texto que aparece na tela, na ordem do HTML (sem JS, Portugal primeiro). */
@@ -128,7 +128,7 @@ function conferir(html, cssBruto, sw) {
 
   /* ---------- Cache ---------- */
   if (sw.indexOf('"./crise.html"') === -1 || sw.indexOf('"./crise.css"') === -1) falhas.push("a tela de crise saiu do cache (precisa abrir sem internet)");
-  if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+  if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 
   /* ---------- 3. Abre sem login e sem internet ---------- */
   if (/location\.(replace|assign)\(|location\.href\s*=/.test(semComentarios(html))) falhas.push("a tela de crise não pode mandar ninguém para outra página ao abrir (precisa abrir sem login)");

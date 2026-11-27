@@ -17,7 +17,7 @@ var falhas = [];
 var MSG = "A frase passou de 280 caracteres. Encurte um pouco e envie de novo.";
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 var modulo = ler("nota-limite.js");
@@ -58,7 +58,7 @@ var sw = ler("sw.js");
 
 /* ---------- Cache ---------- */
 if (sw.indexOf('"./nota-limite.js"') === -1) falhas.push("sw.js não guarda nota-limite.js");
-if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 
 /* ---------- CSS discreto ---------- */
 var base = ler("base.css");

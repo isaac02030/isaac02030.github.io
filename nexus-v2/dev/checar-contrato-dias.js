@@ -16,7 +16,7 @@ var PORTA = 3096;
 var falhas = [];
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 function semComentarios(texto) {
@@ -211,7 +211,7 @@ if (!/if \(modelo\.diaLivre === true\) mostrarLinha\("minimo", NexusDias\.TEXTOS
 });
 
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 if (sw.indexOf('"./dias-da-missao.js"') === -1) falhas.push("o cache não guarda dias-da-missao.js");
 if (sw.indexOf('"./registro-dias.js"') === -1) falhas.push("o cache não guarda registro-dias.js");
 ["hoje.html", "missao.html"].forEach(function (nome) {

@@ -97,6 +97,22 @@
             <p id="erro-objetivo" class="erro-campo" hidden></p>
           </div>
 
+          <fieldset class="areas" id="grupo-area" role="radiogroup">
+            <legend class="areas-legenda">Área (opcional)</legend>
+            <div class="areas-grade">
+              <button type="button" class="area" data-area="mente" aria-pressed="false">Mente</button>
+              <button type="button" class="area" data-area="corpo" aria-pressed="false">Corpo</button>
+              <button type="button" class="area" data-area="rotina" aria-pressed="false">Rotina</button>
+            </div>
+          </fieldset>
+
+          <div class="campo">
+            <label for="assunto">Assunto</label>
+            <p id="assunto-dica" class="dica">Ex.: filosofia</p>
+            <input id="assunto" name="subject" type="text" maxlength="60" autocomplete="off" aria-describedby="assunto-dica assunto-contador">
+            <p id="assunto-contador" class="contador">0 de 60</p>
+          </div>
+
           <button type="submit" class="btn btn-primario btn-luz">Continuar</button>
         </form>
       </section>

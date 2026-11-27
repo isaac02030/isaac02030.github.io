@@ -103,6 +103,10 @@ body:has(.tela-comeco) {
 
 .carta-texto {
   color: var(--text-muted);
+  /* Texto largo: quebra entre palavras, nunca no meio delas nem deixando
+     um ponto sozinho no fim. Sem anywhere e sem word-break aqui. */
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .carta-marca {
@@ -129,6 +133,51 @@ body:has(.tela-comeco) {
 .carta:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Área da missão: opcional, nenhuma marcada. O mesmo recorte dos dias
+   (fundo escuro e borda aqua no escuro; cheio no claro), sem luz extra. */
+.areas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.areas-legenda {
+  padding: 0;
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.areas-grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(48px, 1fr));
+  gap: var(--space-2);
+}
+
+.area {
+  width: 100%;
+  min-width: 48px;
+  min-height: 48px;
+  padding: var(--space-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+  font: var(--text-label);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.area[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--sel-fundo);
+  color: var(--sel-texto);
 }
 
 .previa {
@@ -221,6 +270,22 @@ body:has(.tela-comeco) {
 @media (max-width: 359px) {
   .dias-grade {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  /* A 200% os nomes Mente, Corpo e Rotina não cabem em três colunas.
+     Empilham inteiros, com largura total e pelo menos 44 px de altura. */
+  .areas-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .area {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+  }
+  /* Menos folga dentro da carta para «combinou.» caber inteiro na linha.
+     A quebra continua sendo entre palavras (break-word), sem ponto sozinho. */
+  .carta {
+    padding: var(--space-3);
   }
 }
 

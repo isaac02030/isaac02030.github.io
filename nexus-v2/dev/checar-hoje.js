@@ -8,7 +8,7 @@ var raiz = path.join(__dirname, "..");
 var falhas = [];
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 var html = ler("hoje.html");
@@ -33,7 +33,7 @@ if (tokens.indexOf('url("fonts/Figtree-Variable.woff2") format("woff2")') === -1
   falhas.push("o @font-face não usa o arquivo variável com pesos 400 a 700");
 }
 if (sw.indexOf('"./fonts/Figtree-Variable.woff2"') === -1) falhas.push("o cache não guarda a fonte");
-if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 
 /* Nenhum arquivo do v2 pede fonte ou estilo a outro site. */
 fs.readdirSync(raiz).forEach(function (nome) {

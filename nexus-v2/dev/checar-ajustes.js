@@ -8,7 +8,7 @@ var raiz = path.join(__dirname, "..");
 var falhas = [];
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 var html = ler("ajustes.html");
@@ -105,7 +105,7 @@ if (api.indexOf("caminhoComCenario(\"/api/users/me/reminder\")") === -1) {
   falhas.push("o lembrete não repassa o cenário ao mock");
 }
 
-if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 if (sw.indexOf("./ajustes.css") === -1 || sw.indexOf("./ajustes.js") === -1) {
   falhas.push("o cache não inclui os arquivos novos de Ajustes");
 }
