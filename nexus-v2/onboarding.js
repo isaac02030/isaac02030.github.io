@@ -14,10 +14,13 @@ var LIMITE_AVISO_MS = 8000;
 var HORA_PADRAO = "20:00";
 var rascunhoExistia = false;
 
+var AREAS = ["mente", "corpo", "rotina"];
+
 var estado = {
   passo: 1,
   category: "",
   title: "",
+  area: "",
   why_it_matters: "",
   daily_minimum: "",
   mission_weekdays: NexusDias.TODOS.slice(),
@@ -105,6 +108,7 @@ function lerRascunho() {
     var horario = normalizarHora(dados.reminder_time);
     estado.category = categoria;
     estado.title = textoLimpo(dados.title, 255);
+    estado.area = areaValida(dados.area);
     estado.why_it_matters = textoLimpo(dados.why_it_matters, 2000);
     estado.daily_minimum = textoLimpo(dados.daily_minimum, 120);
     estado.reminder_time = horario;
@@ -125,6 +129,7 @@ function guardarRascunho() {
       passo: estado.passo,
       category: estado.category,
       title: estado.title,
+      area: estado.area,
       why_it_matters: estado.why_it_matters,
       daily_minimum: estado.daily_minimum,
       mission_weekdays: estado.mission_weekdays,
@@ -143,6 +148,23 @@ function normalizarHora(valor) {
   return achado[1] + ":" + achado[2];
 }
 
+function areaValida(valor) {
+  return AREAS.indexOf(valor) === -1 ? "" : valor;
+}
+
+function areaEscolhida() {
+  var botao = document.querySelector('.area[aria-pressed="true"]');
+  if (!botao) return "";
+  return areaValida(botao.getAttribute("data-area"));
+}
+
+function aplicarArea(valor) {
+  var escolhida = areaValida(valor);
+  document.querySelectorAll(".area").forEach(function (botao) {
+    botao.setAttribute("aria-pressed", botao.getAttribute("data-area") === escolhida ? "true" : "false");
+  });
+}
+
 function categoriaEscolhida() {
   var marcado = document.querySelector('input[name="categoria"]:checked');
   if (!marcado) return "";
@@ -153,6 +175,7 @@ function categoriaEscolhida() {
 function lerCampos() {
   estado.category = categoriaEscolhida();
   estado.title = document.getElementById("objetivo").value;
+  estado.area = areaEscolhida();
   estado.why_it_matters = document.getElementById("porque").value;
   estado.daily_minimum = document.getElementById("minimo").value;
   estado.mission_weekdays = diasMarcados();
@@ -165,6 +188,7 @@ function aplicarRascunho() {
     radio.checked = radio.value === estado.category;
   });
   document.getElementById("objetivo").value = estado.title;
+  aplicarArea(estado.area);
   document.getElementById("porque").value = estado.why_it_matters;
   document.getElementById("minimo").value = estado.daily_minimum;
   document.getElementById("horario").value = estado.reminder_time || (rascunhoExistia ? "" : HORA_PADRAO);
@@ -621,9 +645,17 @@ async function criarAMissao(opcoes) {
       proof_mode: prova
     };
     if (conferido.campo) pedido.mission_weekdays = conferido.campo;
+    if (estado.area === "mente" || estado.area === "corpo" || estado.area === "rotina") pedido.area = estado.area;
     var resultado = await NexusApi.criarMissao(pedido);
     if (resultado.semRede) {
       mostrarAviso(alerta, "rede", TEXTO_SEM_REDE_MISSAO);
+      return;
+    }
+    var codigo = resultado.dados && typeof resultado.dados.code === "string" ? resultado.dados.code : "";
+    if (!resultado.ok && (codigo === "invalid_area" || codigo === "invalid_subject" || codigo === "area_unavailable")) {
+      /* 400 ou 503 da área: a frase que já existe. O que foi digitado fica.
+         Não tenta de novo sem a área. */
+      mostrarAviso(alerta, "neutro", TEXTO_FALHA_MISSAO);
       return;
     }
     if (!resultado.ok && resultado.status === 503 && conferido.campo) {
@@ -736,6 +768,14 @@ function iniciar() {
   document.querySelectorAll("[data-voltar]").forEach(function (botao) {
     botao.addEventListener("click", function () {
       mostrarPasso(Number(botao.getAttribute("data-voltar")), true);
+    });
+  });
+
+  document.querySelectorAll(".area").forEach(function (botao) {
+    botao.addEventListener("click", function () {
+      var valor = botao.getAttribute("aria-pressed") === "true" ? "" : botao.getAttribute("data-area");
+      aplicarArea(valor);
+      lerCampos();
     });
   });
 

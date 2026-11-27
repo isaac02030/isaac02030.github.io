@@ -27,6 +27,12 @@
      migração 004. Sem o campo, cria normalmente.
    - título "dias-servidor" com mission_weekdays → 400 com a frase dos 3 dias
      (para ver o texto do servidor na tela, mesmo com 3 dias marcados).
+   - area, se vier: só "mente", "corpo" ou "rotina". Outro valor → 400
+     code invalid_area. Sem o campo, a missão nasce com area null.
+   - subject, se vier: texto até 60 caracteres depois do trim. Outro tipo ou
+     mais longo → 400 code invalid_subject. Vazio vira null.
+   - título "sem-area" com area ou subject → 503 code area_unavailable, sem
+     criar. Sem esses campos, cria normalmente.
    - o resto cria a missão. duration_days do pedido é ignorado e fica 30,
      como na rota de verdade. started_at nasce agora.
    Aviso:
@@ -1142,7 +1148,9 @@ function novaMissao(usuario, campos) {
     created_at: agora.toISOString(),
     user_name: usuario.username,
     partner_name: campos.partner_name || null,
-    mission_weekdays: Array.isArray(campos.mission_weekdays) ? campos.mission_weekdays : null
+    mission_weekdays: Array.isArray(campos.mission_weekdays) ? campos.mission_weekdays : null,
+    area: campos.area === "mente" || campos.area === "corpo" || campos.area === "rotina" ? campos.area : null,
+    subject: typeof campos.subject === "string" && campos.subject ? campos.subject : null
   };
 }
 
@@ -1440,20 +1448,50 @@ function listarMissoes(email) {
   return { status: 200, dados: usuarios[email].missoes.map(paraLista) };
 }
 
+var AREAS_MISSAO = ["mente", "corpo", "rotina"];
+
+function lerAreaMissao(valor) {
+  if (valor === undefined || valor === null) return { ok: true, valor: null };
+  if (typeof valor !== "string" || AREAS_MISSAO.indexOf(valor) === -1) {
+    return { ok: false, status: 400, dados: { error: "Escolha uma área: Mente, Corpo ou Rotina.", code: "invalid_area" } };
+  }
+  return { ok: true, valor: valor };
+}
+
+function lerAssuntoMissao(valor) {
+  if (valor === undefined || valor === null) return { ok: true, valor: null };
+  if (typeof valor !== "string") {
+    return { ok: false, status: 400, dados: { error: "O assunto precisa ser um texto curto.", code: "invalid_subject" } };
+  }
+  var texto = valor.replace(/\s+/g, " ").trim();
+  if (!texto) return { ok: true, valor: null };
+  if (Array.from(texto).length > 60) {
+    return { ok: false, status: 400, dados: { error: "O assunto passou de 60 caracteres. Encurte um pouco e envie de novo.", code: "invalid_subject" } };
+  }
+  return { ok: true, valor: texto };
+}
+
 async function criarMissao(email, corpo) {
   var title = typeof corpo.title === "string" ? corpo.title.trim() : "";
   var category = typeof corpo.category === "string" ? corpo.category.trim() : "";
   if (!title || !category) {
     return { status: 400, dados: { error: "Titulo e categoria sao obrigatorios." } };
   }
-  if (title === "falha") {
-    return { status: 500, dados: { error: "Erro ao criar missao." } };
-  }
   var temDias = corpo.mission_weekdays !== undefined && corpo.mission_weekdays !== null;
   var dias = validarDias(corpo.mission_weekdays);
   if (!dias.ok) return { status: 400, dados: { error: dias.erro } };
+  var area = lerAreaMissao(corpo.area);
+  if (!area.ok) return { status: area.status, dados: area.dados };
+  var assunto = lerAssuntoMissao(corpo.subject);
+  if (!assunto.ok) return { status: assunto.status, dados: assunto.dados };
+  if (title === "falha") {
+    return { status: 500, dados: { error: "Erro ao criar missao." } };
+  }
   if (temDias && title === "sem-migracao") {
     return { status: 503, dados: { error: "A escolha dos dias da missão ainda não está disponível. Crie a missão sem escolher os dias ou tente mais tarde." } };
+  }
+  if ((area.valor || assunto.valor) && title === "sem-area") {
+    return { status: 503, dados: { error: "A escolha da área da missão ainda não está disponível. Crie a missão sem escolher a área ou tente mais tarde.", code: "area_unavailable" } };
   }
   if (temDias && title === "dias-servidor") {
     return { status: 400, dados: { error: MSG_DIAS_MINIMO } };
@@ -1471,7 +1509,9 @@ async function criarMissao(email, corpo) {
     proof_mode: typeof corpo.proof_mode === "string" && corpo.proof_mode ? corpo.proof_mode : "self_report",
     mode: "solo",
     status: "active",
-    mission_weekdays: dias.valor
+    mission_weekdays: dias.valor,
+    area: area.valor,
+    subject: assunto.valor
   });
   usuarios[email].missoes.unshift(mission);
   return {
