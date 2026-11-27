@@ -183,7 +183,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v48"') === -1) falhas.push("o cache não está em nexus-v2-v48");
+if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });
