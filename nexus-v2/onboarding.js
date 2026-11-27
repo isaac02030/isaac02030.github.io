@@ -15,6 +15,8 @@ var HORA_PADRAO = "20:00";
 var rascunhoExistia = false;
 
 var AREAS = ["mente", "corpo", "rotina"];
+/* Lista fechada aceita pelo servidor. Qualquer outro valor volta como vazio. */
+var CATEGORIAS = ["aprendizagem", "fitness", "outro"];
 
 var estado = {
   passo: 1,
@@ -104,7 +106,7 @@ function lerRascunho() {
     rascunhoExistia = true;
     var dados = JSON.parse(bruto);
     if (!dados || typeof dados !== "object") return;
-    var categoria = dados.category === "fitness" || dados.category === "aprendizagem" ? dados.category : "";
+    var categoria = categoriaValida(dados.category);
     var passo = dados.passo === 2 || dados.passo === 3 || dados.passo === 4 ? dados.passo : 1;
     var horario = normalizarHora(dados.reminder_time);
     estado.category = categoria;
@@ -190,6 +192,10 @@ function areaValida(valor) {
   return AREAS.indexOf(valor) === -1 ? "" : valor;
 }
 
+function categoriaValida(valor) {
+  return CATEGORIAS.indexOf(valor) === -1 ? "" : valor;
+}
+
 function areaEscolhida() {
   var botao = document.querySelector('.area[aria-pressed="true"]');
   if (!botao) return "";
@@ -206,8 +212,7 @@ function aplicarArea(valor) {
 function categoriaEscolhida() {
   var marcado = document.querySelector('input[name="categoria"]:checked');
   if (!marcado) return "";
-  if (marcado.value === "fitness" || marcado.value === "aprendizagem") return marcado.value;
-  return "";
+  return categoriaValida(marcado.value);
 }
 
 function atualizarContadorAssunto() {
@@ -258,9 +263,10 @@ function marcarCartas() {
 
 function atualizarExemplo() {
   var dica = document.getElementById("objetivo-dica");
-  dica.textContent = categoriaEscolhida() === "fitness"
-    ? "Ex.: Treinar cinco vezes por semana"
-    : "Ex.: Praticar inglês todos os dias";
+  var categoria = categoriaEscolhida();
+  if (categoria === "outro") dica.textContent = "Ex.: Meditar dez minutos por dia";
+  else if (categoria === "fitness") dica.textContent = "Ex.: Treinar cinco vezes por semana";
+  else dica.textContent = "Ex.: Praticar inglês todos os dias";
 }
 
 function ehIOS() {
@@ -536,7 +542,7 @@ function enviarPasso1(evento) {
   var alerta = document.getElementById("alerta-1");
   esconderAviso(alerta);
   lerCampos();
-  var textoCategoria = estado.category ? "" : "Escolha estudo ou academia.";
+  var textoCategoria = estado.category ? "" : "Escolha um caminho: estudo, academia ou outro objetivo.";
   var textoObjetivo = estado.title.trim() ? "" : "Escreva o objetivo em uma frase.";
   definirErro(grupo, erroCategoria, textoCategoria);
   definirErro(objetivo, erroObjetivo, textoObjetivo);
@@ -686,7 +692,8 @@ async function criarAMissao(opcoes) {
   travarPasso4(true);
   var indo = false;
   try {
-    var prova = estado.category === "fitness" ? "workout_proof" : "study_note";
+    var prova = estado.category === "outro" ? "text_note"
+      : estado.category === "fitness" ? "workout_proof" : "study_note";
     var pedido = {
       title: estado.title.trim(),
       category: estado.category,

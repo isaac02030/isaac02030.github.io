@@ -87,6 +87,14 @@
               </span>
               <span class="carta-marca" aria-hidden="true"></span>
             </label>
+            <label class="carta">
+              <input type="radio" name="categoria" value="outro">
+              <span class="carta-corpo">
+                <span class="carta-nome">Outro objetivo</span>
+                <span class="carta-texto">Meditar, escrever ou tocar um instrumento.</span>
+              </span>
+              <span class="carta-marca" aria-hidden="true"></span>
+            </label>
           </fieldset>
           <p id="erro-categoria" class="erro-campo" hidden></p>
 
@@ -103,6 +111,12 @@
               <button type="button" class="area" data-area="mente" aria-pressed="false">Mente</button>
               <button type="button" class="area" data-area="corpo" aria-pressed="false">Corpo</button>
               <button type="button" class="area" data-area="rotina" aria-pressed="false">Rotina</button>
+            </div>
+            <!-- Fora dos botões: a 200% a legenda inteira cabe e nada parte. -->
+            <div class="areas-exemplos" id="areas-exemplos">
+              <p class="areas-exemplo"><span class="areas-exemplo-nome">Mente:</span> Estudo, idiomas, leitura</p>
+              <p class="areas-exemplo"><span class="areas-exemplo-nome">Corpo:</span> Treino, corrida, alimentação</p>
+              <p class="areas-exemplo"><span class="areas-exemplo-nome">Rotina:</span> Sono, organização, dinheiro</p>
             </div>
           </fieldset>
 
