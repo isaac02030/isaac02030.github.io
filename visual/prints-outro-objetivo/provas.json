@@ -1,0 +1,1117 @@
+[
+  {
+    "print": "claro-vazio.png",
+    "tema": "claro",
+    "estado": "vazio",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 66485,
+    "sha256": "a91b881b746d77bb",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "claro-outro-escolhido.png",
+    "tema": "claro",
+    "estado": "outro",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 70320,
+    "sha256": "3a0b2590e88c9d19",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Meditar dez minutos por dia",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": true,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "carta-marca",
+        "sombra": "rgb(255, 255, 255) 0px 0px 0px 4px inset"
+      }
+    ],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "claro-area-escolhida.png",
+    "tema": "claro",
+    "estado": "escolhida",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 67115,
+    "sha256": "66f57f6a03d58612",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "claro-contador-limite.png",
+    "tema": "claro",
+    "estado": "limite",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 67708,
+    "sha256": "ae9a1adb8dc4072d",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "60 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "claro-zoom200.png",
+    "tema": "claro",
+    "estado": "escolhida",
+    "zoom": true,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 3190,
+    "bytes": 152556,
+    "sha256": "f54a9df4d8eb903d",
+    "contadorDesenhado": true,
+    "scrollWidth": 195,
+    "bodyScrollWidth": 195,
+    "innerWidth": 195,
+    "devicePixelRatio": 2,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1480,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 116
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 93
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 93
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 44,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 44,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 44,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      4,
+      5,
+      6
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "claro-foco-teclado.png",
+    "tema": "claro",
+    "estado": "escolhida",
+    "zoom": false,
+    "focoTeclado": true,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 68105,
+    "sha256": "d104eb0f4875d439",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "light",
+    "corFundo": "rgb(238, 241, 236)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [],
+    "halosExternos": [],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "mente",
+    "focoVisivel": true
+  },
+  {
+    "print": "escuro-vazio.png",
+    "tema": "escuro",
+    "estado": "vazio",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 81558,
+    "sha256": "0372f6a01f23f98e",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "escuro-outro-escolhido.png",
+    "tema": "escuro",
+    "estado": "outro",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 85160,
+    "sha256": "942bcc3f0a0daa56",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Meditar dez minutos por dia",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": true,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "carta-marca",
+        "sombra": "rgb(11, 14, 16) 0px 0px 0px 4px inset"
+      },
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "escuro-area-escolhida.png",
+    "tema": "escuro",
+    "estado": "escolhida",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 82613,
+    "sha256": "0e0c20475691a0f9",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "escuro-contador-limite.png",
+    "tema": "escuro",
+    "estado": "limite",
+    "zoom": false,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 82835,
+    "sha256": "462a1fd11ac33733",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "60 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "escuro-zoom200.png",
+    "tema": "escuro",
+    "estado": "escolhida",
+    "zoom": true,
+    "focoTeclado": false,
+    "larguraPng": 390,
+    "alturaPng": 3190,
+    "bytes": 181999,
+    "sha256": "45f41deb29fafd50",
+    "contadorDesenhado": true,
+    "scrollWidth": 195,
+    "bodyScrollWidth": 195,
+    "innerWidth": 195,
+    "devicePixelRatio": 2,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1480,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 116
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 93
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 93
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 44,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 44,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 44,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      4,
+      5,
+      6
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "BODY",
+    "focoVisivel": false
+  },
+  {
+    "print": "escuro-foco-teclado.png",
+    "tema": "escuro",
+    "estado": "escolhida",
+    "zoom": false,
+    "focoTeclado": true,
+    "larguraPng": 390,
+    "alturaPng": 1151,
+    "bytes": 83647,
+    "sha256": "04e810fec7a9aae5",
+    "contadorDesenhado": true,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "innerWidth": 390,
+    "devicePixelRatio": 1,
+    "temaHtml": "dark",
+    "corFundo": "rgb(0, 0, 0)",
+    "contador": "0 de 60",
+    "contadorTopoNoDocumento": 1037,
+    "dicaObjetivo": "Ex.: Praticar inglês todos os dias",
+    "dicaAssunto": "Ex.: filosofia",
+    "legendaArea": "Área (opcional)",
+    "cartoes": [
+      {
+        "nome": "Estudo",
+        "ajuda": "Inglês ou outra matéria. Um pouco, todos os dias.",
+        "valor": "aprendizagem",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Academia",
+        "ajuda": "Seu treino, do jeito que você combinou.",
+        "valor": "fitness",
+        "escolhido": false,
+        "linhasAjuda": 49
+      },
+      {
+        "nome": "Outro objetivo",
+        "ajuda": "Meditar, escrever ou tocar um instrumento.",
+        "valor": "outro",
+        "escolhido": false,
+        "linhasAjuda": 49
+      }
+    ],
+    "chips": [
+      {
+        "nome": "Mente",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Corpo",
+        "altura": 48,
+        "linhasTexto": 1
+      },
+      {
+        "nome": "Rotina",
+        "altura": 48,
+        "linhasTexto": 1
+      }
+    ],
+    "exemplos": [
+      "Mente: Estudo, idiomas, leitura",
+      "Corpo: Treino, corrida, alimentação",
+      "Rotina: Sono, organização, dinheiro e outros hábitos"
+    ],
+    "exemplosLinhas": [
+      3,
+      3,
+      4
+    ],
+    "exemplosRecortados": [],
+    "pontoLinhas": 1,
+    "palavrasPartidas": [],
+    "halos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosExternos": [
+      {
+        "id": null,
+        "classe": "btn btn-primario btn-luz",
+        "sombra": "rgba(45, 242, 208, 0.34) 0px 0px 26px 0px, rgba(255, 255, 255, 0.5) 0px 1px 0px 0px inset"
+      }
+    ],
+    "halosForaDaLuz": [],
+    "luzes": [
+      "BUTTON"
+    ],
+    "alvosMenores44": [],
+    "totalAlvos": 9,
+    "foco": "mente",
+    "focoVisivel": true
+  }
+]

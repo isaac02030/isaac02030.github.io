@@ -47,7 +47,7 @@ if (/<button[^>]*>[^<]*(Estudo|idiomas|Treino|corrida|Sono|dinheiro)/.test(grupo
 var iExemplos = html.indexOf('id="areas-exemplos"');
 iExemplos = html.indexOf(">", iExemplos) + 1;
 var exemplos = html.slice(iExemplos, html.indexOf("</div>", iExemplos)).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-igual("linhas de exemplo", exemplos, "Mente: Estudo, idiomas, leitura Corpo: Treino, corrida, alimentação Rotina: Sono, organização, dinheiro");
+igual("linhas de exemplo", exemplos, "Mente: Estudo, idiomas, leitura Corpo: Treino, corrida, alimentação Rotina: Sono, organização, dinheiro e outros hábitos");
 if (!/\.areas-exemplos \{[^}]*flex-direction: column/.test(css)) falhas.push("o bloco dos exemplos precisa ser uma coluna");
 if (!/\.area \{[^}]*min-height:\s*48px/.test(css)) falhas.push("o alvo de 48px da área mudou");
 if (!/\.areas-grade \{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/.test(css)) falhas.push("a 200% as áreas precisam seguir em uma coluna");
