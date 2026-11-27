@@ -1,10 +1,12 @@
-/* Confere a área na criação da missão (Mente, Corpo ou Rotina).
-   Opcional: nenhuma vem marcada, e o pedido só leva area quando a pessoa escolhe.
+/* Confere a área e o assunto na criação da missão.
+   Os dois são opcionais. area só vai com mente, corpo ou rotina.
+   subject só vai quando sobra texto depois do trim, no máximo 60.
    Rode na raiz do repositório: node nexus-v2/dev/checar-area.js
 
-   Casos negados: outro valor dá 400 invalid_area e não cria missão;
-   com o título "sem-area" e uma área, o mock responde 503 area_unavailable
-   e também não cria. */
+   Casos negados: outro valor de área dá 400 invalid_area e não cria missão;
+   assunto com mais de 60 dá 400 invalid_subject e não cria;
+   com o título "sem-area" e área ou assunto, o mock responde 503
+   area_unavailable e também não cria. */
 
 var fs = require("fs");
 var path = require("path");
@@ -47,13 +49,29 @@ if ((grupo.match(/data-area="/g) || []).length !== 3) falhas.push("a área só p
 if (/checked|aria-pressed="true"/.test(grupo)) falhas.push("nenhuma área pode vir marcada");
 if (/<input[^>]*name="area"/.test(html)) falhas.push("a área não pode ir num campo escondido");
 
+var iAreaHtml = html.indexOf('id="grupo-area"');
+var iAssunto = html.indexOf('id="assunto"');
+var iPasso2 = html.indexOf('id="passo-2"');
+if (!(iAreaHtml !== -1 && iAssunto > iAreaHtml && iAssunto < iPasso2)) falhas.push("o assunto fica no passo 1, junto da área");
+if (html.indexOf('<label for="assunto">Assunto</label>') === -1) falhas.push("falta o rótulo Assunto");
+if (html.indexOf('<p id="assunto-dica" class="dica">ex.: filosofia</p>') === -1) falhas.push("falta a dica ex.: filosofia");
+if (!/<input id="assunto" name="subject" type="text" maxlength="60" autocomplete="off" aria-describedby="assunto-dica assunto-contador">/.test(html)) {
+  falhas.push("o assunto precisa de maxlength 60 e não pode ser obrigatório");
+}
+if (html.indexOf('<p id="assunto-contador" class="contador">0 de 60</p>') === -1) falhas.push("falta o contador 0 de 60");
+if (/id="assunto-contador"[^>]*aria-live|id="assunto-contador"[^>]*role=/.test(html)) falhas.push("o contador do assunto não pode falar a cada tecla");
+
 var criar = js.slice(js.indexOf("async function criarAMissao"), js.indexOf("function limparErroAoDigitar"));
 if (criar.indexOf('pedido.area = estado.area') === -1) falhas.push("criar a missão precisa poder mandar a área");
 if (!/if \(estado\.area === "mente" \|\| estado\.area === "corpo" \|\| estado\.area === "rotina"\) pedido\.area = estado\.area;/.test(criar)) {
   falhas.push("area só vai quando o valor é mente, corpo ou rotina");
 }
 var pedido = criar.slice(criar.indexOf("var pedido = {"), criar.indexOf("};", criar.indexOf("var pedido = {")));
-if (/area\s*:/.test(pedido)) falhas.push("o pedido não pode trazer area já no objeto, só depois, se houver escolha");
+if (/area\s*:/.test(pedido) || /subject\s*:/.test(pedido)) falhas.push("o pedido não pode trazer area nem subject já no objeto");
+if (!/var assunto = estado\.subject\.trim\(\);\s*if \(assunto\) pedido\.subject = assunto;/.test(criar)) {
+  falhas.push("subject só vai quando sobra texto depois do trim");
+}
+if (criar.indexOf("innerHTML") !== -1) falhas.push("o assunto não pode usar innerHTML");
 var iArea = criar.indexOf('pedido.area = estado.area');
 var iEnvio = criar.indexOf("NexusApi.criarMissao(");
 if (!(iArea !== -1 && iEnvio !== -1 && iArea < iEnvio)) falhas.push("a área entra no pedido antes do envio");
@@ -69,6 +87,9 @@ if (js.indexOf('var valor = botao.getAttribute("aria-pressed") === "true" ? "" :
 
 if (!/if \(dados\.area === "mente" \|\| dados\.area === "corpo" \|\| dados\.area === "rotina"\) corpo\.area = dados\.area;/.test(api)) {
   falhas.push("api.js só pode mandar area com um dos 3 valores");
+}
+if (!/if \(typeof dados\.subject === "string" && dados\.subject\.trim\(\)\) corpo\.subject = dados\.subject\.trim\(\);/.test(api)) {
+  falhas.push("api.js só pode mandar subject quando sobra texto depois do trim");
 }
 var corpoApi = api.slice(api.indexOf("criarMissao: function"), api.indexOf("chaveVapid:"));
 if (/corpo\.area\s*=/.test(corpoApi.replace('if (dados.area === "mente" || dados.area === "corpo" || dados.area === "rotina") corpo.area = dados.area;', ""))) {
@@ -172,6 +193,37 @@ async function provarMock() {
 
     var livre = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "sem-area" }), auth);
     if (livre.status !== 201 || livre.json.mission.area !== null) falhas.push("sem area, mesmo com o título de teste, a missão cria");
+
+    var comAssunto = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "Com assunto", subject: "filosofia" }), auth);
+    if (comAssunto.status !== 201 || !comAssunto.json.mission || comAssunto.json.mission.subject !== "filosofia") {
+      falhas.push("subject filosofia devia voltar na missão criada");
+    }
+    var espacos = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "So espaco", subject: "   " }), auth);
+    if (espacos.status !== 201 || !espacos.json.mission || espacos.json.mission.subject !== null) {
+      falhas.push("subject só com espaço vira null e a missão cria");
+    }
+    var sessenta = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "Sessenta", subject: new Array(61).join("a") }), auth);
+    if (sessenta.status !== 201 || !sessenta.json.mission || sessenta.json.mission.subject !== new Array(61).join("a")) {
+      falhas.push("subject com 60 caracteres devia criar");
+    }
+    var antesAssunto = await pedir("GET", "/api/missions", null, auth);
+    var quantasAssunto = Array.isArray(antesAssunto.json) ? antesAssunto.json.length : -1;
+    var longo = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "Longo", subject: new Array(62).join("a") }), auth);
+    if (longo.status !== 400 || !longo.json || longo.json.code !== "invalid_subject") {
+      falhas.push("subject com 61 caracteres devia dar 400 invalid_subject");
+    }
+    var tipo = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "Tipo", subject: 12 }), auth);
+    if (tipo.status !== 400 || !tipo.json || tipo.json.code !== "invalid_subject") {
+      falhas.push("subject que não é texto devia dar 400 invalid_subject");
+    }
+    var semAssunto = await pedir("POST", "/api/missions", Object.assign({}, base, { title: "sem-area", subject: "filosofia" }), auth);
+    if (semAssunto.status !== 503 || !semAssunto.json || semAssunto.json.code !== "area_unavailable") {
+      falhas.push("sem a migração, com subject, devia dar 503 area_unavailable");
+    }
+    var depoisAssunto = await pedir("GET", "/api/missions", null, auth);
+    if (!Array.isArray(depoisAssunto.json) || depoisAssunto.json.length !== quantasAssunto) {
+      falhas.push("um pedido negado de assunto criou missão");
+    }
   } finally {
     filho.kill();
   }
@@ -182,7 +234,7 @@ provarMock().then(function () {
     console.error(falhas.join("\n"));
     process.exit(1);
   }
-  console.log("ok: área opcional, só mente, corpo ou rotina, e só quando escolhida");
+  console.log("ok: área e assunto opcionais; subject só até 60 e só quando preenchido");
 }).catch(function (erro) {
   console.error(erro && erro.message ? erro.message : erro);
   process.exit(1);

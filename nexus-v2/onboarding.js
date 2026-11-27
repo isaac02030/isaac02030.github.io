@@ -21,6 +21,7 @@ var estado = {
   category: "",
   title: "",
   area: "",
+  subject: "",
   why_it_matters: "",
   daily_minimum: "",
   mission_weekdays: NexusDias.TODOS.slice(),
@@ -109,6 +110,7 @@ function lerRascunho() {
     estado.category = categoria;
     estado.title = textoLimpo(dados.title, 255);
     estado.area = areaValida(dados.area);
+    estado.subject = textoLimpo(dados.subject, 60);
     estado.why_it_matters = textoLimpo(dados.why_it_matters, 2000);
     estado.daily_minimum = textoLimpo(dados.daily_minimum, 120);
     estado.reminder_time = horario;
@@ -130,6 +132,7 @@ function guardarRascunho() {
       category: estado.category,
       title: estado.title,
       area: estado.area,
+      subject: estado.subject,
       why_it_matters: estado.why_it_matters,
       daily_minimum: estado.daily_minimum,
       mission_weekdays: estado.mission_weekdays,
@@ -172,10 +175,20 @@ function categoriaEscolhida() {
   return "";
 }
 
+function atualizarContadorAssunto() {
+  var campo = document.getElementById("assunto");
+  var contador = document.getElementById("assunto-contador");
+  if (!campo || !contador) return;
+  var n = campo.value.length;
+  contador.textContent = n + " de 60";
+  contador.classList.toggle("no-limite", n >= 60);
+}
+
 function lerCampos() {
   estado.category = categoriaEscolhida();
   estado.title = document.getElementById("objetivo").value;
   estado.area = areaEscolhida();
+  estado.subject = document.getElementById("assunto").value;
   estado.why_it_matters = document.getElementById("porque").value;
   estado.daily_minimum = document.getElementById("minimo").value;
   estado.mission_weekdays = diasMarcados();
@@ -189,6 +202,8 @@ function aplicarRascunho() {
   });
   document.getElementById("objetivo").value = estado.title;
   aplicarArea(estado.area);
+  document.getElementById("assunto").value = estado.subject;
+  atualizarContadorAssunto();
   document.getElementById("porque").value = estado.why_it_matters;
   document.getElementById("minimo").value = estado.daily_minimum;
   document.getElementById("horario").value = estado.reminder_time || (rascunhoExistia ? "" : HORA_PADRAO);
@@ -646,6 +661,8 @@ async function criarAMissao(opcoes) {
     };
     if (conferido.campo) pedido.mission_weekdays = conferido.campo;
     if (estado.area === "mente" || estado.area === "corpo" || estado.area === "rotina") pedido.area = estado.area;
+    var assunto = estado.subject.trim();
+    if (assunto) pedido.subject = assunto;
     var resultado = await NexusApi.criarMissao(pedido);
     if (resultado.semRede) {
       mostrarAviso(alerta, "rede", TEXTO_SEM_REDE_MISSAO);
@@ -789,6 +806,11 @@ function iniciar() {
       }
       lerCampos();
     });
+  });
+
+  document.getElementById("assunto").addEventListener("input", function () {
+    lerCampos();
+    atualizarContadorAssunto();
   });
 
   limparErroAoDigitar(document.getElementById("objetivo"), document.getElementById("erro-objetivo"));
