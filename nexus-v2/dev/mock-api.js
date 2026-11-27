@@ -2168,6 +2168,7 @@ var RANKING_TESTE = [
   { username: "marcador_verde", missions: 7, dias: 400 },
   { username: "pagina_10", missions: 6, dias: 240 }
 ];
+var membrosBase = {};
 var membrosMock = {};
 var apoiosMock = {};
 var publicadosMock = [];
@@ -2329,6 +2330,8 @@ function equipeMock(email, metodo, caminho, cenario) {
    - dia-cumprido      rolagem contínua (páginas de 20); sem ele, 10 + «Ver anteriores»
    - com-merito        3 missões de 30 dias concluídas (Praticante; pode criar)
    - nao-membro        não é membro de nenhuma comunidade
+    - titulo-novo       6 missões (Constante): título novo ao entrar ou concluir
+    - uma-comunidade    só uma comunidade na lista (para o atalho e o link)
    - post-limite       429 ao publicar; post-crise: 200 crisis: true, nada gravado
    - criar-crise       200 crisis: true ao criar; criar-limite: 429
    - lista-antiga      a lista por cursor e os destaques dão 503 (como sem a 015)
@@ -2339,9 +2342,33 @@ function temCenario(cenario, nome) {
   return typeof cenario === "string" && cenario.indexOf(nome) !== -1;
 }
 
+/* A chave inclui o cenário para os prints não herdarem a comunidade uns dos
+   outros. O estado comum (entradas feitas pela pessoa) fica na base e é
+   copiado para cada cenário novo; «uma-comunidade» e «nao-membro» são
+   exceções explícitas, usadas só nos prints. */
+function chaveMembro(email, cenario) {
+  return String(email) + "|" + String(cenario || "");
+}
+
+function baseMembros(email) {
+  if (!membrosBase[email]) membrosBase[email] = { "leitura": true, "ingles-diario": true };
+  return membrosBase[email];
+}
+
 function eMembro(email, slug, cenario) {
-  if (!membrosMock[email]) membrosMock[email] = temCenario(cenario, "nao-membro") ? {} : { "leitura": true, "ingles-diario": true };
-  return membrosMock[email][slug] === true;
+  var chave = chaveMembro(email, cenario);
+  if (!membrosMock[chave]) {
+    if (temCenario(cenario, "nao-membro")) membrosMock[chave] = {};
+    else if (temCenario(cenario, "uma-comunidade")) membrosMock[chave] = { "leitura": true };
+    else membrosMock[chave] = Object.assign({}, baseMembros(email));
+  }
+  return membrosMock[chave][slug] === true;
+}
+
+function marcarMembro(email, slug, cenario) {
+  eMembro(email, slug, cenario);
+  membrosMock[chaveMembro(email, cenario)][slug] = true;
+  baseMembros(email)[slug] = true;
 }
 
 function areasAtivas(email, cenario) {
@@ -2354,6 +2381,7 @@ function areasAtivas(email, cenario) {
 }
 
 function meritoDe(email, cenario) {
+  if (temCenario(cenario, "titulo-novo")) return 6;
   if (temCenario(cenario, "com-merito")) return 3;
   return 0;
 }
@@ -2540,8 +2568,7 @@ function criarComunidadeMock(email, corpo, cenario) {
   };
   COMUNIDADES.push(nova);
   criadasPorEmail[email] = true;
-  eMembro(email, slug, cenario);
-  membrosMock[email][slug] = true;
+  marcarMembro(email, slug, cenario);
   return { status: 201, dados: { community: nova, message: "Comunidade criada." } };
 }
 
@@ -2603,6 +2630,7 @@ async function responderComunidade(req, caminho, corpo) {
     var ordem = COMUNIDADES.slice().sort(function (a, b) {
       return Number(b.is_default) - Number(a.is_default) || b.member_count - a.member_count;
     });
+    if (temCenario(cenario, "uma-comunidade")) ordem = ordem.slice(0, 1);
     return { status: 200, dados: ordem.map(function (c) { return comunidadeParaLista(c, email, cenario); }) };
   }
   if (caminho === "/api/communities" && metodo === "POST") return criarComunidadeMock(email, corpo, cenario);
@@ -2619,10 +2647,10 @@ async function responderComunidade(req, caminho, corpo) {
     if (sub[2] === "join" && metodo === "POST") {
       var ja = eMembro(email, alvo.slug, cenario);
       if (!ja) {
-        membrosMock[email][alvo.slug] = true;
+        marcarMembro(email, alvo.slug, cenario);
         alvo.member_count += 1;
       }
-      return { status: 200, dados: { success: true, already_member: ja } };
+      return { status: 200, dados: { success: true, already_member: ja, title: tituloMock(meritoDe(email, cenario)) } };
     }
     if (sub[2] === "posts" && metodo === "POST") return publicarMock(email, alvo, corpo, cenario);
     if (sub[2] === "ranking" && metodo === "GET") return rankingMock(email, cenario);

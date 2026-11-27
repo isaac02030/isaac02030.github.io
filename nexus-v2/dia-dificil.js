@@ -618,7 +618,7 @@ function mostrarSucesso() {
   });
 }
 
-function tratarResposta(resultado) {
+async function tratarResposta(resultado) {
   if (!resultado || resultado.semRede) {
     mostrarAviso(document.getElementById("alerta"), "rede", notaEscrita() ? TEXTO_SEM_REDE : TEXTO_SEM_REDE_SEM_NOTA);
     return;
@@ -638,6 +638,7 @@ function tratarResposta(resultado) {
       mostrarAviso(document.getElementById("alerta"), "falha", TEXTO_FALHA);
       return;
     }
+    if (window.NexusTituloNovo && await NexusTituloNovo.verificar()) return;
     mostrarSucesso();
     return;
   }
@@ -706,7 +707,7 @@ async function enviar(evento) {
   var resultado = await NexusApi.registrarDiaDificil(missaoAtual.id, notaEscrita());
   if (saindo) return;
   definirCarregando(false);
-  tratarResposta(resultado);
+  await tratarResposta(resultado);
 }
 
 function ligarLinks() {

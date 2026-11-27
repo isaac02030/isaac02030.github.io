@@ -29,8 +29,8 @@ function semComentarios(t) {
   return t.replace(/<!--[\s\S]*?-->/g, "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'\\])\/\/.*$/gm, "$1");
 }
 
-var NOVAS_JS = ["comunidade-base.js", "comunidade.js", "comunidades.js", "criar-comunidade.js", "merito.js"];
-var NOVAS_HTML = ["comunidade.html", "comunidades.html", "criar-comunidade.html", "merito.html"];
+var NOVAS_JS = ["comunidade-base.js", "comunidade.js", "comunidades.js", "criar-comunidade.js", "merito.js", "titulo-novo.js", "novo-titulo.js"];
+var NOVAS_HTML = ["comunidade.html", "comunidades.html", "criar-comunidade.html", "merito.html", "novo-titulo.html"];
 
 /* ---------- Textos ---------- */
 var textosFonte = ler("comunidade-textos.js");
@@ -183,7 +183,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v51"') === -1) falhas.push("o cache não está em nexus-v2-v51");
+if (sw.indexOf('CACHE = "nexus-v2-v52"') === -1) falhas.push("o cache não está em nexus-v2-v52");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });

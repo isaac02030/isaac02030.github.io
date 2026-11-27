@@ -112,13 +112,23 @@
     botao.textContent = T.entrar;
     if (resultado.ok && resultado.dados && resultado.dados.success === true) {
       var jaEra = resultado.dados.already_member === true;
-      marcarMembro(comunidade.slug, jaEra);
-      var marca = marcaParticipa();
-      marca.setAttribute("role", "status");
-      marca.tabIndex = -1;
-      botao.replaceWith(marca);
-      if (!jaEra) gente.textContent = C.contarPessoas(Number(comunidade.member_count) || 0);
-      NexusAbas.focar(marca);
+      if (!window.NexusTituloNovo) {
+        marcarMembro(comunidade.slug, jaEra);
+        var simples = marcaParticipa();
+        botao.replaceWith(simples);
+        if (!jaEra) gente.textContent = C.contarPessoas(Number(comunidade.member_count) || 0);
+        return;
+      }
+      NexusTituloNovo.verificar(resultado.dados.title).then(function (abriu) {
+        if (abriu) return;
+        marcarMembro(comunidade.slug, jaEra);
+        var marca = marcaParticipa();
+        marca.setAttribute("role", "status");
+        marca.tabIndex = -1;
+        botao.replaceWith(marca);
+        if (!jaEra) gente.textContent = C.contarPessoas(Number(comunidade.member_count) || 0);
+        NexusAbas.focar(marca);
+      });
       return;
     }
     if (resultado.semRede) return B.mostrarAviso(alerta, "rede", T.entrarSemRede);
