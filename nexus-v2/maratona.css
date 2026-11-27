@@ -92,12 +92,13 @@
   margin-top: 0;
 }
 
-/* Sem rede e 503: o aviso respira antes de «Voltar» e «Tentar de novo». */
+/* Sem rede e 503: o aviso respira antes de «Voltar» e «Tentar de novo».
+   A seção tem classe `vista`; o id é que é `vista-aviso`. */
 .tela-maratona .voltar {
   margin-bottom: var(--space-3);
 }
 
-.vista-aviso .alerta {
+#vista-aviso .alerta {
   margin-bottom: var(--space-4);
 }
 
@@ -162,18 +163,24 @@
   display: none;
 }
 
+/* Mesmos tokens da trilha dos 30 dias (trilha.css). A primeira declaração
+   é o apoio se o navegador não aceitar o color-mix; a segunda pinta o fio. */
 .trilha-maratona .lk-on::after {
+  background: var(--trilha-a);
   background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
   box-shadow: none;
 }
 
 .trilha-maratona .lk-dim::after {
+  background: var(--trilha-a);
   background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
   opacity: var(--fio-dim);
 }
 
+/* Dia feito pelo grupo: quadrado cheio. Nunca fica transparente. */
 .trilha-maratona .s-f i {
   border-color: transparent;
+  background: var(--trilha-a);
   background: color-mix(in srgb, var(--trilha-a), var(--trilha-b) var(--t));
 }
 

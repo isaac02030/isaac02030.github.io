@@ -153,7 +153,10 @@
     dias.forEach(function (dia) {
       var li = document.createElement("li");
       li.className = "tm-c s-" + dia.estado + (dia.hoje ? " hoje" : "") + (dia.link ? " " + dia.link : "");
-      li.style.setProperty("--t", (dia.dia / Math.max(1, dias.length)).toFixed(2));
+      /* color-mix espera porcentagem, como em trilha.js; um número (0.14)
+         deixa o fundo e o fio transparentes. */
+      var t = Math.min(100, Math.max(0, Math.round((dia.dia / Math.max(1, dias.length)) * 100)));
+      li.style.setProperty("--t", t + "%");
       var marca = document.createElement("i");
       marca.setAttribute("aria-hidden", "true");
       li.appendChild(marca);

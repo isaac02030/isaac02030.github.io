@@ -75,6 +75,20 @@ if (comunidadeHtml.indexOf('data-texto-maratona="dialogoTitulo"') === -1) falhas
 if (/id="btn-entrar-maratona"[^>]*btn-primario/.test(html + comunidadeHtml)) falhas.push("o diálogo dá peso de botão principal a «Entrar»");
 if (!/\.dialogo-maratona \.botoes \.btn,\s*\n\.dialogo-maratona \.botoes \.btn:hover[\s\S]*?background:\s*var\(--surface\)/.test(css)) falhas.push("os botões do diálogo não têm o mesmo peso");
 
+/* A trilha dos 30 dias usa --t em porcentagem; número deixa o color-mix
+   inválido e os dias passados somem da imagem (21:25 do Orfeu). */
+if (!/setProperty\("--t",\s*t\s*\+\s*"%"\)/.test(jsSemComentarios) || /toFixed\(2\)/.test(jsSemComentarios)) {
+  falhas.push("a posição no degradê da trilha não é porcentagem");
+}
+if (!/\.trilha-maratona \.s-f i\s*\{[^}]*background:\s*var\(--trilha-a\)/.test(css)) falhas.push("o dia feito não tem fundo visível");
+if (!/\.trilha-maratona \.lk-on::after\s*\{[^}]*background:\s*var\(--trilha-a\)/.test(css) ||
+    !/\.trilha-maratona \.lk-dim::after\s*\{[^}]*background:\s*var\(--trilha-a\)/.test(css)) {
+  falhas.push("o fio entre os dias não tem cor de apoio");
+}
+if (!/#vista-aviso \.alerta\s*\{[^}]*margin-bottom:\s*var\(--space-4\)/.test(css)) {
+  falhas.push("o aviso e «Tentar de novo» não têm 16 px entre eles");
+}
+
 /* ---------- Regras proibidas ---------- */
 var fonteTela = semComentarios(html + js + linhaJs + textosJs + comunidadeHtml + comunidadeJs);
 if (/innerHTML|outerHTML|insertAdjacentHTML/.test(fonteTela)) falhas.push("texto de terceiros entrou por innerHTML");
@@ -236,17 +250,120 @@ async function casosDoMock() {
   igual("sem 18+: maratona", (await pedir("GET", "/api/community-missions/leitura", null, semIdade)).status, 403);
 }
 
+/* ---------- A imagem vale mais que a medida: abra o detalhe no navegador ----------
+   Confere que CADA marca do detalhe tem área pintada visível. Um mutante que
+   tira a regra do dia feito tem de reprovar aqui. */
+var PORTA_SITE = 3102;
+var CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+var TIPOS = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "application/javascript; charset=utf-8" };
+
+function servirSite() {
+  var servidor = http.createServer(function (req, res) {
+    var caminho = decodeURIComponent((req.url || "/").split("?")[0]);
+    if (caminho.indexOf("/nexus-v2/") !== 0) {
+      res.writeHead(404);
+      return res.end();
+    }
+    var arquivo = path.join(raiz, "..", caminho);
+    fs.readFile(arquivo, function (erro, dados) {
+      if (erro) {
+        res.writeHead(404);
+        return res.end();
+      }
+      res.writeHead(200, { "Content-Type": TIPOS[path.extname(arquivo)] || "application/octet-stream", "Cache-Control": "no-store" });
+      res.end(dados);
+    });
+  });
+  return new Promise(function (resolve) {
+    servidor.listen(PORTA_SITE, "127.0.0.1", function () { resolve(servidor); });
+  });
+}
+
+var transparente = "rgba(0, 0, 0, 0)";
+function pintadas(marcas) {
+  return marcas.filter(function (m) {
+    if (m.fundo !== transparente && m.fundo !== m.fundoPagina) return true;
+    return parseFloat(m.borda) > 0 && m.bordaCor !== transparente && m.bordaCor !== m.fundoPagina;
+  }).length;
+}
+
+async function casosDoNavegador() {
+  var servidor = await servirSite();
+  var navegador = null;
+  try {
+    var login = await pedir("POST", "/api/users/login", { email: "com-missao@exemplo.com", password: "123456" });
+    var token = login.json.token;
+    if (!token) throw new Error("login do navegador não deu token");
+    var pw = path.join(__dirname, "..", "..", "..", "pw");
+    var chromium = require(path.join(pw, "node_modules", "playwright-core")).chromium;
+    navegador = await chromium.launch({ executablePath: CHROME, headless: true, args: ["--no-sandbox"] });
+    var contexto = await navegador.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    await contexto.addInitScript(function (dados) {
+      try { localStorage.setItem("nexus_v2_token", dados.token); } catch (e) {}
+    }, { token: token });
+    await contexto.route("http://localhost:3000/**", async function (route) {
+      var url = route.request().url().replace("http://localhost:3000", "http://127.0.0.1:" + PORTA);
+      try {
+        var resposta = await route.fetch({ url: url });
+        await route.fulfill({ response: resposta });
+      } catch (e) {
+        await route.abort();
+      }
+    });
+    var pagina = await contexto.newPage();
+    await pagina.goto("http://127.0.0.1:" + PORTA_SITE + "/nexus-v2/maratona.html?c=leitura&m=1&tema=escuro", { waitUntil: "networkidle" });
+    await pagina.waitForSelector("#vista-detalhe:not([hidden])", { timeout: 15000 });
+    await pagina.waitForSelector("#trilha > li", { timeout: 15000 });
+
+    var lerMarcas = function () {
+      return pagina.evaluate(function () {
+        var fundoPagina = getComputedStyle(document.body).backgroundColor;
+        return Array.from(document.querySelectorAll("#trilha > li")).map(function (li) {
+          var ci = getComputedStyle(li.querySelector("i"));
+          return {
+            classe: li.className,
+            t: li.style.getPropertyValue("--t"),
+            fundo: ci.backgroundColor,
+            borda: ci.borderTopWidth,
+            bordaCor: ci.borderTopColor,
+            fio: getComputedStyle(li, "::after").backgroundColor,
+            fundoPagina: fundoPagina
+          };
+        });
+      });
+    };
+    var marcas = await lerMarcas();
+    if (marcas.length !== 7) falhas.push("o detalhe no navegador não tem 7 marcas: tem " + marcas.length);
+    if (pintadas(marcas) !== marcas.length) falhas.push("alguma marca do detalhe não tem área pintada visível");
+    marcas.forEach(function (m, i) {
+      if (!/%$/.test(m.t)) falhas.push("marca " + (i + 1) + " sem --t em porcentagem: " + m.t);
+      if (m.classe.indexOf(" s-f ") !== -1 && m.fundo === transparente) falhas.push("dia " + (i + 1) + " feito ficou transparente");
+      if ((m.classe.indexOf("lk-on") !== -1 || m.classe.indexOf("lk-dim") !== -1) && m.fio === transparente) {
+        falhas.push("o fio do dia " + (i + 1) + " ficou transparente");
+      }
+    });
+    /* Mutante: a mesma marca feita, sem a regra que pinta o quadrado. */
+    await pagina.addStyleTag({ content: ".trilha-maratona .s-f i { background: var(--bg) !important; border-color: var(--bg) !important; }" });
+    var mutante = await lerMarcas();
+    if (pintadas(mutante) === mutante.length) falhas.push("o teste não reprovou o mutante sem a marca do dia feito");
+    await contexto.close();
+  } finally {
+    if (navegador) await navegador.close();
+    await new Promise(function (resolve) { servidor.close(resolve); });
+  }
+}
+
 var filho = spawn(process.execPath, [path.join(__dirname, "mock-api.js")], {
   env: Object.assign({}, process.env, { NEXUS_MOCK_PORTA: String(PORTA) }),
   stdio: "ignore"
 });
-esperarMock(50).then(casosDoMock).catch(function (erro) {
-  falhas.push("mock: " + erro.message);
+esperarMock(50).then(casosDoMock).then(casosDoNavegador).catch(function (erro) {
+  falhas.push("mock/navegador: " + erro.message);
 }).then(function () {
   filho.kill();
   if (falhas.length) {
     console.error("FALHOU:\n- " + falhas.join("\n- "));
     process.exit(1);
   }
-  console.log("ok: Maratona sem sair, sem ranking e sem nomes; textos, trilha, visual sóbrio e rotas do mock (503, crise, limite e dia repetido)");
+  console.log("ok: Maratona sem sair, sem ranking e sem nomes; textos, trilha pintada no navegador (mutante reprovado), visual sóbrio e rotas do mock (503, crise, limite e dia repetido)");
 });
