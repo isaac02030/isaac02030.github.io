@@ -36,6 +36,7 @@ var comunidadeJs = semComentarios(ler("comunidade.js"));
 var checkinJs = semComentarios(ler("checkin.js"));
 var dificilJs = semComentarios(ler("dia-dificil.js"));
 var trilhaCss = ler("trilha.css");
+var ursoClaro = ler("icons/urso-contente-claro.svg");
 var sw = ler("sw.js");
 
 /* ---------- 1. Ajustes ---------- */
@@ -128,6 +129,10 @@ quer(/await NexusTituloNovo\.verificar\(\)/.test(checkinJs + dificilJs), "Conclu
 
 /* ---------- 4. Tela ---------- */
 quer(/<img class="urso-novo-titulo" id="urso" src="icons\/urso-contente\.svg" alt="" width="140" height="140"/.test(novaHtml), "Novo título: o urso precisa ser o desenho grande de 140 px");
+quer(ursoClaro.indexOf('stroke="#0B5F52"') !== -1, "Urso no claro: o traço precisa ser pinho #0B5F52");
+quer(!/fill="#[0-9A-Fa-f]{6}"|drop-shadow|linearGradient|mask/.test(ursoClaro), "Urso no claro: sem preenchimento, halo, degradê ou máscara");
+quer(novaJs.indexOf("icons/urso-contente-claro.svg") !== -1 && /temaEscolhido\(\) === "escuro"/.test(novaJs), "Urso: no claro vai o traço de pinho; no escuro, o de luz");
+quer(/pintarUrso\(\);/.test(novaJs), "Urso: a escolha do desenho não é aplicada ao abrir");
 quer(novaHtml.indexOf('id="fita-titulo"') !== -1 && novaHtml.indexOf('id="fita-titulo"') < novaHtml.indexOf('id="nome-titulo"'), "Novo título: a fita precisa ficar acima do nome");
 quer(/id="btn-continuar"[^>]*data-texto-comunidade="continuar"/.test(novaHtml), "Novo título: falta o botão «Continuar»");
 quer((novaHtml.match(/btn-luz/g) || []).length === 1, "Novo título: tem de haver uma luz só");
@@ -144,7 +149,7 @@ quer(novaJs.indexOf('location.replace("hoje.html"') !== -1, "Novo título: «Con
 
 /* ---------- 5. Cache e provas ---------- */
 quer(sw.indexOf('CACHE = "nexus-v2-v52"') !== -1, "o cache não está em nexus-v2-v52");
-["ajustes.html", "ajustes.js", "hoje.html", "hoje.js", "checkin.html", "checkin.js", "dia-dificil.html", "dia-dificil.js", "comunidade.html", "comunidade.js", "comunidades.html", "comunidades.js", "novo-titulo.html", "novo-titulo.css", "novo-titulo.js", "titulo-novo.js", "comunidade-textos.js"].forEach(function (nome) {
+["ajustes.html", "ajustes.js", "hoje.html", "hoje.js", "checkin.html", "checkin.js", "dia-dificil.html", "dia-dificil.js", "comunidade.html", "comunidade.js", "comunidades.html", "comunidades.js", "novo-titulo.html", "novo-titulo.css", "novo-titulo.js", "titulo-novo.js", "comunidade-textos.js", "icons/urso-contente-claro.svg"].forEach(function (nome) {
   quer(sw.indexOf('"./' + nome + '"') !== -1, "sw.js sem " + nome);
 });
 quer(!fs.existsSync(path.join(raiz, "visual")), "os prints não podem ficar no repositório público");

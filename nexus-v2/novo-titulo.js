@@ -7,6 +7,27 @@
   var B = window.NexusComBase;
   var N = window.NexusTituloNovo;
 
+  /* O urso de luz é só do escuro. No claro, o mesmo traço em pinho, chapado,
+     sem preenchimento preto e sem brilho — a regra da trilha no caderno. */
+  function temaEscolhido() {
+    var pedido = "";
+    try {
+      pedido = new URLSearchParams(location.search).get("tema") || "";
+    } catch (erro) {}
+    if (pedido === "escuro" || pedido === "claro") return pedido;
+    var guardado = "";
+    try {
+      guardado = localStorage.getItem("nexus_v2_tema") || "";
+    } catch (erroGuardado) {}
+    if (guardado === "escuro" || guardado === "claro") return guardado;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+  }
+
+  function pintarUrso() {
+    var urso = document.getElementById("urso");
+    if (urso) urso.setAttribute("src", temaEscolhido() === "escuro" ? "icons/urso-contente.svg" : "icons/urso-contente-claro.svg");
+  }
+
   function pintar(titulo) {
     var fita = document.getElementById("fita-titulo");
     fita.replaceChildren();
@@ -25,6 +46,7 @@
   function iniciar() {
     B.iniciarCenario();
     C.aplicar(document);
+    pintarUrso();
     document.title = T.novoTitulo + " — Nexus";
     NexusAbas.montar("missao");
     document.getElementById("btn-continuar").addEventListener("click", function () {

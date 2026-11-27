@@ -102,6 +102,7 @@ var ARQUIVOS = [
   "./icons/icon-512.png",
   "./icons/urso-firme.svg",
   "./icons/urso-contente.svg",
+  "./icons/urso-contente-claro.svg",
   "./fonts/Figtree-Variable.woff2",
   "./fonts/Figtree-Variable-Italic.woff2"
 ];
