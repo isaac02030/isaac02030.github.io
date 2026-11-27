@@ -17,7 +17,7 @@ var falhas = [];
 var MSG = "A frase passou de 280 caracteres. Encurte um pouco e envie de novo.";
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 var modulo = ler("nota-limite.js");

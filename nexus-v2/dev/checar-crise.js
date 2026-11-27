@@ -16,7 +16,7 @@ var path = require("path");
 
 var raiz = path.join(__dirname, "..");
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 /* Texto que aparece na tela, na ordem do HTML (sem JS, Portugal primeiro). */

@@ -11,7 +11,7 @@ var raiz = path.join(__dirname, "..");
 var falhas = [];
 
 function ler(nome) {
-  return fs.readFileSync(path.join(raiz, nome), "utf8");
+  return fs.readFileSync(path.join(raiz, nome), "utf8").replace(/\r\n/g, "\n");
 }
 
 var dia = ler("dia-30.js");
