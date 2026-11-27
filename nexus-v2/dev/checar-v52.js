@@ -121,8 +121,14 @@ if (N) {
   quer(N.valido({ name: "Constante", level: 9, marks: 5 }) === null, "negado: nível fora de 1 a 5 abriu a tela");
   quer(N.valido({ name: "Constante", level: 3, marks: 4 }) === null, "negado: fita com 4 marcas abriu a tela");
   quer(N.valido(null) === null, "negado: título vazio abriu a tela");
-  N.registrar({ name: "Praticante", level: 2, marks: 5 });
-  N.verificar({ name: "Praticante", level: 2, marks: 5 }).then(function (igual) {
+  /* Primeira vez no aparelho: guarda o título, mas não mostra «novo». */
+  N.verificar({ name: "Constante", level: 3, marks: 5 }).then(function (primeira) {
+    quer(primeira === false, "primeira abertura não devia abrir «Novo título»");
+    quer(destino === "", "primeira abertura não devia navegar");
+    quer(N.lerPendente() === null, "primeira abertura não devia deixar título pendente");
+    N.registrar({ name: "Praticante", level: 2, marks: 5 });
+    return N.verificar({ name: "Praticante", level: 2, marks: 5 });
+  }).then(function (igual) {
     quer(igual === false, "título igual não devia abrir tela");
     quer(destino === "", "título igual não devia navegar");
     return N.verificar({ name: "Constante", level: 3, marks: 5 });
