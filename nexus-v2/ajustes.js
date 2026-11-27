@@ -269,22 +269,11 @@ function cancelarSaida() {
   focar(botao);
 }
 
-/* O token e o usuário saem, como na saída antiga.
-   Os rascunhos desta aba também saem: nota, missão pela metade e o dia guardado.
-   O tema do aparelho fica. */
+/* Sair apaga tudo o que é nexus_v2_ deste aparelho, inclusive o título visto
+   e o pendente. Quem entrar depois não herda o título de outra conta.
+   O tema fica. A limpeza é a mesma de api.js, usada na saída por sessão. */
 function limparSessao() {
-  try {
-    localStorage.removeItem(CHAVE_TOKEN);
-    localStorage.removeItem(CHAVE_USUARIO);
-  } catch (erro) {}
-  try {
-    var i = sessionStorage.length;
-    while (i > 0) {
-      i -= 1;
-      var chave = sessionStorage.key(i);
-      if (chave && chave.indexOf("nexus_v2_") === 0) sessionStorage.removeItem(chave);
-    }
-  } catch (erroSessao) {}
+  nexusLimparSessao();
 }
 
 function sairDaConta() {

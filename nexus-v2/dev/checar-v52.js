@@ -35,6 +35,7 @@ var comunidadesJs = semComentarios(ler("comunidades.js"));
 var comunidadeJs = semComentarios(ler("comunidade.js"));
 var checkinJs = semComentarios(ler("checkin.js"));
 var dificilJs = semComentarios(ler("dia-dificil.js"));
+var trilhaCss = ler("trilha.css");
 var sw = ler("sw.js");
 
 /* ---------- 1. Ajustes ---------- */
@@ -48,6 +49,59 @@ quer(ajustesJs.indexOf("encodeURIComponent(minhas[0].slug)") !== -1, "Ajustes: o
 quer(/atualizarLinkMerito\(\);/.test(ajustesJs), "Ajustes: a linha não é atualizada ao abrir");
 quer(!/innerHTML|document\.write/.test(ajustesJs), "Ajustes: texto só por textContent");
 
+/* Sair da conta não pode deixar o título da conta anterior no aparelho. */
+function extrairFuncao(fonte, nome) {
+  var inicio = fonte.indexOf("function " + nome + "()");
+  if (inicio < 0) return "";
+  var abre = fonte.indexOf("{", inicio);
+  var nivel = 0;
+  for (var i = abre; i < fonte.length; i++) {
+    if (fonte[i] === "{") nivel++;
+    else if (fonte[i] === "}") {
+      nivel--;
+      if (nivel === 0) return fonte.slice(inicio, i + 1);
+    }
+  }
+  return "";
+}
+function areaFake(inicial) {
+  var dados = Object.assign({}, inicial);
+  return {
+    get length() { return Object.keys(dados).length; },
+    key: function (i) { return Object.keys(dados)[i] || null; },
+    getItem: function (c) { return Object.prototype.hasOwnProperty.call(dados, c) ? dados[c] : null; },
+    setItem: function (c, v) { dados[c] = String(v); },
+    removeItem: function (c) { delete dados[c]; },
+    dados: dados
+  };
+}
+var fonteApi = ler("api.js");
+var funcaoApi = extrairFuncao(fonteApi, "nexusLimparSessao");
+var funcaoSaida = extrairFuncao(ajustesJs, "limparSessao");
+quer(funcaoApi !== "" && funcaoSaida !== "", "Sair: falta a função de limpar a sessão");
+quer(/nexusLimparSessao\(\);/.test(funcaoSaida), "Sair: não usa a limpeza completa de api.js");
+if (funcaoApi && funcaoSaida) {
+  var ctxSaida = {
+    localStorage: areaFake({
+      "nexus_v2_token": "x",
+      "nexus_v2_user": "y",
+      "nexus_v2_tema": "claro",
+      "nexus_v2_titulo_visto": '{"name":"Constante","level":3,"marks":5}',
+      "nexus_v2_titulo_pendente": '{"name":"Veterano","level":4,"marks":5}'
+    }),
+    sessionStorage: areaFake({ "nexus_v2_rascunho": "rascunho" }),
+    console: console
+  };
+  vm.createContext(ctxSaida);
+  vm.runInContext(funcaoApi, ctxSaida);
+  vm.runInContext(funcaoSaida, ctxSaida);
+  vm.runInContext("limparSessao();", ctxSaida);
+  var restantes = Object.keys(ctxSaida.localStorage.dados);
+  quer(restantes.every(function (c) { return c.indexOf("nexus_v2_titulo_") !== 0; }), "Sair: sobrou chave nexus_v2_titulo_*");
+  quer(restantes.join(",") === "nexus_v2_tema", "Sair: devia ficar só o tema, ficou " + restantes.join(","));
+  quer(Object.keys(ctxSaida.sessionStorage.dados).length === 0, "Sair: sobrou chave na sessão");
+}
+
 /* ---------- 2. Hoje ---------- */
 quer(/<a class="linha-mensagem link-comunidades" id="link-comunidades" href="comunidades\.html">Comunidades<\/a>/.test(hojeHtml), "Hoje: falta o atalho de texto com o padrão «Comunidades»");
 quer(/link-comunidades[^>]*btn-luz|btn-luz[^>]*link-comunidades/.test(hojeHtml) === false, "Hoje: o atalho ganhou luz");
@@ -58,6 +112,7 @@ quer(hojeJs.indexOf("comunidadeLinhaHoje") !== -1, "Hoje: a frase «Comunidade: 
 quer(hojeJs.indexOf("link.textContent = texto") !== -1, "Hoje: o nome entra por textContent");
 quer(hojeJs.indexOf("minhas.length !== 1") !== -1, "Hoje: só mostra o nome com uma comunidade");
 quer(/pintarAtalhoComunidades\(\);/.test(hojeJs), "Hoje: o atalho não é pintado ao abrir");
+quer(/@media \(max-width: 360px\)[\s\S]*\.trilha30[\s\S]*grid-template-columns:\s*repeat\(5,\s*22px\)/.test(trilhaCss), "Hoje a 200%: a trilha precisa caber em 5 quadrados por linha");
 quer(textosJs.indexOf('comunidadeLinhaHoje: "Comunidade: {nome}"') !== -1, "A frase do atalho mudou");
 
 /* ---------- 3. Título novo: lista fechada, casos negados ---------- */
@@ -72,8 +127,8 @@ quer(/await NexusTituloNovo\.verificar\(\)/.test(checkinJs + dificilJs), "Conclu
 });
 
 /* ---------- 4. Tela ---------- */
-quer(/<img class="urso-novo-titulo" id="urso" src="icons\/urso-contente-32\.svg"/.test(novaHtml), "Novo título: falta o urso contente pequeno");
-quer(novaHtml.indexOf('id="nome-titulo"') !== -1, "Novo título: falta o lugar do nome e da fita");
+quer(/<img class="urso-novo-titulo" id="urso" src="icons\/urso-contente\.svg" alt="" width="140" height="140"/.test(novaHtml), "Novo título: o urso precisa ser o desenho grande de 140 px");
+quer(novaHtml.indexOf('id="fita-titulo"') !== -1 && novaHtml.indexOf('id="fita-titulo"') < novaHtml.indexOf('id="nome-titulo"'), "Novo título: a fita precisa ficar acima do nome");
 quer(/id="btn-continuar"[^>]*data-texto-comunidade="continuar"/.test(novaHtml), "Novo título: falta o botão «Continuar»");
 quer((novaHtml.match(/btn-luz/g) || []).length === 1, "Novo título: tem de haver uma luz só");
 quer(/localStorage\.getItem\("nexus_v2_token"\)[\s\S]*location\.replace\("\.\/"/.test(novaHtml), "Novo título: sem login, vai para a entrada");
@@ -81,8 +136,9 @@ quer(/<nav class="abas" id="abas"/.test(novaHtml), "Novo título: falta a barra 
 quer(/NexusAbas\.montar\("missao"\)/.test(novaJs), "Novo título: a barra de abas não é montada");
 quer(!/[«»·→]/.test(novaHtml + novaJs + novaCss), "Novo título: aspas ou marca de IA no texto");
 quer(!/box-shadow|gradient|border-left|drop-shadow/.test(novaCss), "Novo título: a fita e o urso ficam planos");
-quer(/width:\s*40px/.test(novaCss) && /height:\s*40px/.test(novaCss), "Novo título: o urso precisa ser pequeno");
-quer(novaJs.indexOf("B.simboloDoTitulo(titulo, true)") !== -1, "Novo título: a fita de marcas não aparece");
+quer(/width:\s*140px/.test(novaCss) && /height:\s*140px/.test(novaCss), "Novo título: o urso precisa medir 140 px");
+quer(!/fita-grande[\s\S]{0,80}gap:\s*0\.375rem/.test(novaCss) && !/marca-titulo[\s\S]{0,80}width:\s*0\.875rem/.test(novaCss), "Novo título: a fita não pode ser menor que a do «Meu mérito»");
+quer(novaJs.indexOf('getElementById("fita-titulo")') !== -1 && novaJs.indexOf("fita.appendChild(B.simboloDoTitulo(titulo, true))") !== -1, "Novo título: a fita de marcas não aparece acima do nome");
 quer(novaJs.indexOf("texto.textContent = titulo.name") !== -1, "Novo título: o nome entra por textContent");
 quer(novaJs.indexOf('location.replace("hoje.html"') !== -1, "Novo título: «Continuar» não volta ao Hoje");
 

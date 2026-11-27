@@ -8,9 +8,11 @@
   var N = window.NexusTituloNovo;
 
   function pintar(titulo) {
+    var fita = document.getElementById("fita-titulo");
+    fita.replaceChildren();
+    fita.appendChild(B.simboloDoTitulo(titulo, true));
     var nome = document.getElementById("nome-titulo");
     nome.replaceChildren();
-    nome.appendChild(B.simboloDoTitulo(titulo, true));
     var texto = document.createElement("span");
     texto.className = "titulo-novo-texto";
     texto.textContent = titulo.name;
