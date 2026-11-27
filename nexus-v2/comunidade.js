@@ -772,7 +772,7 @@ function ligarFolha() {
 
 /* ---------- Carga ---------- */
 
-function pintarComunidade(dados, destaques, pagina, missao) {
+function pintarComunidade(dados, destaques, pagina, missao, maratona) {
   var comunidade = dados && dados.community ? dados.community : {};
   var acesso = dados && dados.access ? dados.access : {};
   comunidadeAtual = comunidade;
@@ -808,6 +808,9 @@ function pintarComunidade(dados, destaques, pagina, missao) {
   acrescentarPosts(posts);
   ajustarMais();
   document.getElementById("link-merito").href = B.link("merito.html", { c: slugAtual });
+  /* A Maratona é uma linha da comunidade. Sem a rota (503 da migração 017),
+     ela não aparece; o resto da tela continua igual. */
+  NexusMaratonaLinha.pintar(maratona, acesso, slugAtual);
   mostrarVista("feed");
   ligarVerMaisDosDestaques();
   focarTitulo();
@@ -834,7 +837,8 @@ async function carregar() {
     NexusApi.eu(),
     NexusApi.destaquesDaComunidade(slugAtual),
     NexusApi.postsDaComunidade(slugAtual, ""),
-    NexusApi.listarMissoes()
+    NexusApi.listarMissoes(),
+    NexusApi.listarMaratonas(slugAtual)
   ]);
   if (meu !== ciclo) return;
   var comunidade = pedidos[0];
@@ -842,7 +846,7 @@ async function carregar() {
   if (eu.ok && eu.dados && eu.dados.user && eu.dados.user.id != null) meuId = eu.dados.user.id;
   if (!comunidade.ok) return falhouAoAbrir(comunidade);
   var missao = pedidos[4].ok ? B.missaoAtiva(pedidos[4].dados) : null;
-  pintarComunidade(comunidade.dados, pedidos[2], pedidos[3], missao);
+  pintarComunidade(comunidade.dados, pedidos[2], pedidos[3], missao, pedidos[5]);
   NexusAbas.concluirRolagem();
 }
 
@@ -850,6 +854,7 @@ function iniciar() {
   /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
   window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
+  if (window.NexusMaratonaTextos) window.NexusMaratonaTextos.aplicar(document);
   document.getElementById("btn-agora-nao").href = "hoje.html" + busca();
   document.getElementById("link-voltar").href = B.link("comunidades.html");
   document.getElementById("link-hoje").href = B.link("hoje.html");
@@ -864,6 +869,7 @@ function iniciar() {
   });
   document.getElementById("texto-post").setAttribute("placeholder", T.escrevaDica);
   ligarFolha();
+  NexusMaratonaLinha.iniciar();
   NexusAbas.montar("missao");
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
   carregar();

@@ -92,7 +92,10 @@ if (!/@media \(prefers-contrast: more\), \(forced-colors: active\)/.test(tokens)
 /* Trilha de luz (uma luz só: fio, hoje, ponta e o último do Dia 30). */
 var PERMITIDOS = [".btn-luz", ".btn-luz:hover", ".logo-fita", ".urso-hoje", '.aba[aria-current="page"]::before',
   ".trilha30 .lk-on::after", ".trilha30 .e-hoje i", ".trilha30 .ponta-esq::before,\n.trilha30 .ponta-dir::before", ".trilha30 .ultimo i",
-  ".dia-30 .btn-primario.btn-luz", ".urso-dia30"];
+  ".dia-30 .btn-primario.btn-luz", ".urso-dia30",
+  /* Maratona: a trilha é o assunto daquela tela. São os dois pontos da mesma
+     luz (fio e ponta), com o botão principal contando à parte. */
+  ".trilha-maratona .lk-on::after", ".trilha-maratona .hoje i"];
 fs.readdirSync(raiz).filter(function (n) { return /\.css$/.test(n) && n !== "tokens.css"; }).forEach(function (nome) {
   var css = semComentarios(ler(nome));
   var re = /([^{}]+)\{([^{}]*)\}/g, m;
@@ -199,7 +202,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).for
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v49"') === -1) falhas.push("o cache não está em nexus-v2-v49");
+if (sw.indexOf('CACHE = "nexus-v2-v50"') === -1) falhas.push("o cache não está em nexus-v2-v50");
 ["./icons/urso-firme.svg", "./icons/urso-contente.svg", "./icons/urso-firme-16.svg", "./icons/urso-firme-32.svg", "./icons/urso-contente-16.svg", "./icons/urso-contente-32.svg", "./icons/logo-16.svg", "./icons/logo-32.svg", "./icons/favicon-16.png", "./icons/favicon-32.png"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });
