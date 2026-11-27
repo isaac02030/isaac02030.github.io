@@ -112,12 +112,14 @@ function conferirTextos(fonte) {
   /* Sem caixa de 18+ para conta antiga. */
   if (/Tenho 18 anos ou mais|Confirmar e entrar/.test(fonte)) erros.push("voltou a caixa de 18+ (decidido: só o aviso)");
   /* O aviso ao autor nunca diz quantas denúncias houve. */
-  /* (Só nos textos da denúncia e do aviso ao autor: as telas novas usam {n}
-     para pessoas, apoios e missões, que não são denúncias.) */
-  Object.keys(M.TEXTOS).forEach(function (chave) {
-    if (!/^(denuncia|escondido|denunciar)/.test(chave)) return;
-    if (/\{(n|total|quantas|contagem)\}/.test(M.TEXTOS[chave])) erros.push("um texto da comunidade tem lugar para número de denúncias");
-  });
+  /* Vale para todos os textos da denúncia, do aviso ao autor e da equipe:
+     o arquivo inteiro, menos o bloco das telas novas da comunidade (lista,
+     por dentro, criar e mérito), que usa {n} para pessoas, apoios e missões.
+     Sem o marcador do bloco, vale para o arquivo inteiro. */
+  var inicioTelas = fonte.indexOf("NOVOS (telas da comunidade, 1.ª parte");
+  var fimTelas = inicioTelas === -1 ? -1 : fonte.indexOf("};", inicioTelas);
+  var daDenuncia = inicioTelas === -1 ? fonte : fonte.slice(0, inicioTelas) + fonte.slice(fimTelas);
+  if (/\{(n|total|quantas|contagem)\}/.test(daDenuncia)) erros.push("um texto da comunidade tem lugar para número de denúncias");
   if (/\bfeed\b|adminDenuncias/.test(fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/feed(Vazio|Fechado)/g, ""))) erros.push("«feed» ou o rótulo solto «Denúncias» voltou");
   return erros;
 }

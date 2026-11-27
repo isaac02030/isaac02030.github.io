@@ -605,6 +605,20 @@ body:has(.tela-comunidade) {
   background: var(--surface);
 }
 
+.caixa-motivo.motivo-texto {
+  padding: 0 0 var(--space-3);
+  border: 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Ícone de quem criou: emoji pequeno e sem cor, ao lado do nome em texto. */
+.comunidade-icone {
+  font-size: 0.875em;
+  filter: grayscale(1);
+}
+
 .link-linha {
   padding-left: 0;
   margin-left: 0;
@@ -658,11 +672,12 @@ body:has(.tela-comunidade) {
   margin-left: auto;
 }
 
+/* Regras da Alimentação: texto com divisória, não caixa (só os Destaques
+   ficam em caixa). */
 .faixa-regras {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--borda-cartao);
   font: var(--text-body);
   color: var(--text);
 }

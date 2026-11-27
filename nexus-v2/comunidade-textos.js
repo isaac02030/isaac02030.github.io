@@ -121,7 +121,7 @@
     postLimite: "Você já postou 3 vezes hoje. Volte amanhã.",
     postErro: "Não foi possível publicar agora. Tente de novo.",
     postSemRede: "Sem internet. O post não foi publicado.",
-    soLeitura: "Os posts aqui abrem em breve. Por enquanto, dá para ler.", /* (srv) */
+    soLeitura: "Aqui, por enquanto, só dá para ler.",
     faixaAlimentacao: "Aqui valem dicas. Promessa de emagrecer e números extremos não.",
     paraPostarEntre: "Para postar, entre na comunidade.",
     precisaMissao: "Para postar aqui você precisa de uma missão ativa em {area}.", /* (srv) */
@@ -146,6 +146,7 @@
     apoiar: "Apoiar",
     umApoio: "1 apoio",
     apoios: "{n} apoios",
+    apoiarRotulo: "Apoiar, {apoios}",
     apoioProprio: "Você não pode apoiar o seu próprio post.", /* (srv) */
     apoioErro: "Não foi possível apoiar agora. Tente de novo.",
     apoioSemRede: "Sem internet. O apoio não mudou.",
@@ -187,8 +188,8 @@
     semTituloTexto: "O primeiro título, Iniciante, vem com 1 missão de 30 dias concluída.",
     umaMissaoConcluida: "1 missão concluída",
     missoesConcluidas: "{n} missões concluídas",
-    proximo: "Próximo: {nome}, com {n} missões. Faltam {f}.",
-    proximoFalta1: "Próximo: {nome}, com {n} missões. Falta 1.",
+    proximo: "Próximo: {nome}, com {n} missões. Faltam\u00A0{f}.",
+    proximoFalta1: "Próximo: {nome}, com {n} missões. Falta\u00A01.",
     noTopo: "Este é o último título.",
     titulos: "Títulos",
     seuTitulo: "Seu título",

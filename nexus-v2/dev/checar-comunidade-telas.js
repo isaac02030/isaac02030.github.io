@@ -49,7 +49,6 @@ if (chavesNovas.length < 60) falhas.push("poucos textos novos encontrados (" + c
 
 /* Frases já aprovadas pelo dono do projeto (decisões de 27/11 e servidor). */
 var APROVADOS = {
-  soLeitura: "Os posts aqui abrem em breve. Por enquanto, dá para ler.",
   criada: "Você criou esta comunidade. Denúncias vão para a equipe do Nexus.",
   rolarSozinha: "Registre o dia para a lista rolar sozinha.",
   maisCursor: "Não deu para carregar mais posts. Abra a comunidade de novo.",
@@ -62,6 +61,8 @@ var APROVADOS = {
 Object.keys(APROVADOS).forEach(function (k) {
   if (M.TEXTOS[k] !== APROVADOS[k]) falhas.push("texto «" + k + "» diferente do aprovado");
 });
+/* Revisão da Clara: o aviso de só leitura é do site, não o do servidor. */
+if (M.TEXTOS.soLeitura !== "Aqui, por enquanto, só dá para ler.") falhas.push("o aviso de só leitura é «Aqui, por enquanto, só dá para ler.»");
 var TITULOS_APROVADOS = [["Iniciante", 1, 1], ["Praticante", 3, 2], ["Constante", 6, 3], ["Veterano", 12, 4], ["Referência", 24, 5]];
 if (JSON.stringify(M.TITULOS.map(function (t) { return [t.nome, t.min, t.nivel]; })) !== JSON.stringify(TITULOS_APROVADOS)) falhas.push("os títulos (opção A) mudaram");
 
@@ -101,8 +102,8 @@ var agora = new Date("2026-11-27T12:00:00Z");
   [M.tempoCurto("2026-11-27T09:00:00Z", agora), "3 h"], [M.tempoCurto("2026-11-25T11:00:00Z", agora), "2 d"],
   [M.tempoNaComunidade(0), "entrou hoje"], [M.tempoNaComunidade(1), "1 dia"], [M.tempoNaComunidade(45), "1 mês"],
   [M.tempoNaComunidade(240), "8 meses"], [M.tempoNaComunidade(1100), "3 anos"],
-  [M.linhaDoProximo({ name: "Constante", missions: 6, missing: 3 }), "Próximo: Constante, com 6 missões. Faltam 3."],
-  [M.linhaDoProximo({ name: "Praticante", missions: 3, missing: 1 }), "Próximo: Praticante, com 3 missões. Falta 1."],
+  [M.linhaDoProximo({ name: "Constante", missions: 6, missing: 3 }), "Próximo: Constante, com 6 missões. Faltam\u00A03."],
+  [M.linhaDoProximo({ name: "Praticante", missions: 3, missing: 1 }), "Próximo: Praticante, com 3 missões. Falta\u00A01."],
   [M.linhaDoProximo(null), "Este é o último título."],
   [M.nomeDaArea("corpo"), "Corpo"], [M.nomeDaArea("outra"), ""],
   [M.iconeValido("📚"), true], [M.iconeValido("livro"), false], [M.iconeValido("📚x"), false], [M.iconeValido(""), false]
@@ -143,6 +144,15 @@ if (!/resultado\.status === 429\) return mostrarAviso\(alerta, "falha", T\.postL
 if (!/id="btn-anteriores"/.test(comHtml) || !/new IntersectionObserver/.test(comJs)) falhas.push("lista: «Ver anteriores» e a rolagem sozinha");
 if (!/rolagemContinua = pagina\.dados\.continuous_scroll === true/.test(comJs)) falhas.push("a rolagem sozinha vem do servidor (continuous_scroll), nunca do aparelho");
 if (!/aria-pressed/.test(comJs)) falhas.push("«Apoiar» liga e desliga com aria-pressed");
+if (M.preencher(M.TEXTOS.apoiarRotulo, { apoios: M.contarApoios(24) }) !== "Apoiar, 24 apoios" || !/botao\.setAttribute\("aria-label", C\.preencher\(T\.apoiarRotulo/.test(comJs)) falhas.push("o nome do botão é «Apoiar, 24 apoios»");
+/* Revisão do Argos: «Você» só pelo servidor (is_mine ou user_id), nunca pelo apelido. */
+var ehMeuFonte = comJs.slice(comJs.indexOf("function ehMeu("), comJs.indexOf("}", comJs.indexOf("function ehMeu(")) + 1);
+if (!ehMeuFonte || /username|meuNome/.test(ehMeuFonte) || !/is_mine === true/.test(ehMeuFonte)) falhas.push("ehMeu: só is_mine e user_id, sem o apelido");
+if (/nexus_v2_user/.test(comJs)) falhas.push("comunidade.js não lê o apelido guardado no aparelho");
+/* Revisão da Clara: destaque só com 3 apoios ou mais, sem repetir em Recentes. */
+if (!/var MINIMO_DESTAQUE = 3;/.test(comJs) || !/\(Number\(post\.supports\) \|\| 0\) < MINIMO_DESTAQUE\) return;/.test(comJs)) falhas.push("destaque só com 3 apoios ou mais");
+if (!/if \(emDestaque\[String\(post\.id\)\]\) return;/.test(comJs)) falhas.push("o post em destaque não se repete em Recentes");
+if (!/caixa\.classList\.toggle\("motivo-texto", soLeitura\)/.test(comJs)) falhas.push("só leitura: texto com divisória, sem caixa");
 if (/role="tab"[\s\S]*abas|ABAS\.push/.test(comJs)) falhas.push("nada de 4.ª aba");
 var abas = ler("abas.js");
 if ((abas.match(/href: "[a-z-]+\.html"/g) || []).length !== 3) falhas.push("a barra continua com 3 abas");

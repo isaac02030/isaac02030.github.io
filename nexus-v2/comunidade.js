@@ -11,7 +11,6 @@ var C = window.NexusComunidade;
 var B = window.NexusComBase;
 var ciclo = 0;
 var meuId = null;
-var meuNome = "";
 var slugAtual = "";
 var postDaFolha = null;
 var botaoDaFolha = null;
@@ -119,10 +118,12 @@ function abrirIdade() {
 
 /* ---------- Posts ---------- */
 
+/* Só pelo servidor: is_mine e, enquanto ele não vem, o user_id do /me.
+   Nunca pelo apelido (dois apelidos iguais não podem virar «Você»). */
 function ehMeu(post) {
   if (post && post.is_mine === true) return true;
   if (meuId != null && post.user_id != null) return String(post.user_id) === String(meuId);
-  return !!meuNome && post.username === meuNome;
+  return false;
 }
 
 /* Só para o autor: cartão neutro com borda, no lugar do corpo do post.
@@ -210,7 +211,7 @@ function apoioDoPost(post, meu) {
   function pintar(ligado, n) {
     botao.setAttribute("aria-pressed", ligado ? "true" : "false");
     contagem.textContent = String(n);
-    contagem.setAttribute("aria-label", C.contarApoios(n));
+    botao.setAttribute("aria-label", C.preencher(T.apoiarRotulo, { apoios: C.contarApoios(n) }));
     botao.dataset.total = String(n);
   }
   pintar(post.supported_by_me === true, total);
@@ -331,11 +332,20 @@ function ligarVerMais(item) {
   texto.insertAdjacentElement("afterend", botao);
 }
 
+/* Destaque só com 3 apoios ou mais (revisão da Clara). O post em destaque
+   não se repete em Recentes. */
+var MINIMO_DESTAQUE = 3;
+var emDestaque = {};
+
 function pintarDestaques(lista) {
   var ol = document.getElementById("destaques");
   ol.replaceChildren();
+  emDestaque = {};
   (Array.isArray(lista) ? lista : []).slice(0, 3).forEach(function (post) {
-    if (post && post.id != null && post.hidden !== true) ol.appendChild(itemDoPost(post, true));
+    if (!post || post.id == null || post.hidden === true) return;
+    if ((Number(post.supports) || 0) < MINIMO_DESTAQUE) return;
+    emDestaque[String(post.id)] = true;
+    ol.appendChild(itemDoPost(post, true));
   });
   document.getElementById("bloco-destaques").hidden = ol.children.length === 0;
 }
@@ -350,6 +360,7 @@ function acrescentarPosts(posts) {
   var primeiro = null;
   (Array.isArray(posts) ? posts : []).forEach(function (post) {
     if (!post || post.id == null) return;
+    if (emDestaque[String(post.id)]) return;
     if (ol.querySelector('[data-post="' + String(post.id).replace(/[^0-9]/g, "") + '"]')) return;
     var item = itemDoPost(post, false);
     item.dataset.post = String(post.id).replace(/[^0-9]/g, "");
@@ -443,6 +454,8 @@ function areaDaComunidade() {
 
 function mostrarMotivo(texto, caminho, href) {
   var caixa = document.getElementById("caixa-motivo");
+  /* Só leitura: texto com divisória, sem caixa (revisão da Clara). */
+  if (caixa.classList) caixa.classList.toggle("motivo-texto", soLeitura);
   document.getElementById("motivo-post").textContent = texto;
   var link = document.getElementById("caminho-post");
   link.hidden = !caminho;
@@ -833,20 +846,10 @@ async function carregar() {
   NexusAbas.concluirRolagem();
 }
 
-function lerMeuNome() {
-  try {
-    var usuario = JSON.parse(localStorage.getItem("nexus_v2_user") || "{}");
-    return usuario && typeof usuario.username === "string" ? usuario.username : "";
-  } catch (erro) {
-    return "";
-  }
-}
-
 function iniciar() {
   /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
   window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
-  meuNome = lerMeuNome();
   document.getElementById("btn-agora-nao").href = "hoje.html" + busca();
   document.getElementById("link-voltar").href = B.link("comunidades.html");
   document.getElementById("link-hoje").href = B.link("hoje.html");
