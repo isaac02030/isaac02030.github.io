@@ -61,7 +61,7 @@ if (!/categoriaValida\(dados\.category\)/.test(js) || !/return categoriaValida\(
 if (js.indexOf('dica.textContent = "Ex.: Meditar dez minutos por dia"') === -1) falhas.push("a dica do objetivo não muda com Outro");
 if (js.indexOf("Escolha um caminho: estudo, academia ou outro objetivo.") === -1) falhas.push("o erro da categoria precisa citar o terceiro caminho");
 if (!/estado\.category === "outro" \? "text_note"/.test(js)) falhas.push("outro objetivo precisa mandar proof_mode text_note");
-if (sw.indexOf('CACHE = "nexus-v2-v51"') === -1) falhas.push("o cache não está em nexus-v2-v51");
+if (sw.indexOf('CACHE = "nexus-v2-v52"') === -1) falhas.push("o cache não está em nexus-v2-v52");
 
 /* Executa as três funções de verdade, com um DOM mínimo. */
 var dica = { textContent: "" };

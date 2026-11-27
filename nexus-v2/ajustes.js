@@ -269,22 +269,11 @@ function cancelarSaida() {
   focar(botao);
 }
 
-/* O token e o usuário saem, como na saída antiga.
-   Os rascunhos desta aba também saem: nota, missão pela metade e o dia guardado.
-   O tema do aparelho fica. */
+/* Sair apaga tudo o que é nexus_v2_ deste aparelho, inclusive o título visto
+   e o pendente. Quem entrar depois não herda o título de outra conta.
+   O tema fica. A limpeza é a mesma de api.js, usada na saída por sessão. */
 function limparSessao() {
-  try {
-    localStorage.removeItem(CHAVE_TOKEN);
-    localStorage.removeItem(CHAVE_USUARIO);
-  } catch (erro) {}
-  try {
-    var i = sessionStorage.length;
-    while (i > 0) {
-      i -= 1;
-      var chave = sessionStorage.key(i);
-      if (chave && chave.indexOf("nexus_v2_") === 0) sessionStorage.removeItem(chave);
-    }
-  } catch (erroSessao) {}
+  nexusLimparSessao();
 }
 
 function sairDaConta() {
@@ -314,6 +303,22 @@ function irParaEntrarSeSemSessao() {
   location.replace("./" + buscaTema());
 }
 
+/* «Meu mérito»: com uma comunidade só, abre o ranking dela (?c=slug);
+   com nenhuma ou várias, abre a tela de mérito sem comunidade escolhida. */
+function atualizarLinkMerito() {
+  var link = document.getElementById("link-meu-merito");
+  if (!link) return;
+  var busca = NexusAbas.busca(["tema", "cenario", "rede"]);
+  link.href = "merito.html" + busca;
+  if (!window.NexusApi || navigator.onLine === false) return;
+  NexusApi.listarComunidades().then(function (resultado) {
+    if (!resultado.ok || !Array.isArray(resultado.dados)) return;
+    var minhas = resultado.dados.filter(function (c) { return c && c.is_member === true; });
+    if (minhas.length !== 1 || typeof minhas[0].slug !== "string" || !minhas[0].slug) return;
+    link.href = "merito.html" + busca + (busca ? "&" : "?") + "c=" + encodeURIComponent(minhas[0].slug);
+  }).catch(function () {});
+}
+
 function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
   var link = document.getElementById("link-ajuda");
@@ -336,6 +341,7 @@ function iniciar() {
   if (window.NexusDados) NexusDados.aplicar(document);
   document.getElementById("link-meus-dados").href = "meus-dados.html" + buscaTema();
   document.getElementById("link-pessoas-bloqueadas").href = "pessoas-bloqueadas.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
+  atualizarLinkMerito();
   NexusAbas.iniciar("ajustes");
 }
 

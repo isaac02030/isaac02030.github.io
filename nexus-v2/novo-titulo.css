@@ -1,0 +1,36 @@
+/* Novo título: sóbrio, com o urso contente de 140 px (spec 5) e a fita de
+   5 marcas acima do nome, no tamanho do «Meu mérito». A luz única é o botão
+   Continuar (.btn-luz, em base.css). */
+
+.tela-novo-titulo {
+  text-align: center;
+}
+
+.tela-novo-titulo .vista {
+  padding-top: var(--space-5);
+}
+
+.urso-novo-titulo {
+  display: block;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto var(--space-4);
+}
+
+.fita-novo-titulo {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 var(--space-3);
+}
+
+.titulo-novo-nome {
+  margin: 0 0 var(--space-5);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tela-novo-titulo .btn-grande {
+  width: 100%;
+  min-height: var(--target);
+}

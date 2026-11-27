@@ -529,6 +529,12 @@ async function entrarAqui(botao) {
   botao.textContent = T.entrar;
   if (resultado.ok && resultado.dados && resultado.dados.success === true) {
     /* O acesso a postar muda com a entrada: abre de novo, do servidor. */
+    if (window.NexusTituloNovo) {
+      NexusTituloNovo.verificar(resultado.dados.title).then(function (abriu) {
+        if (!abriu) carregar();
+      });
+      return;
+    }
     carregar();
     return;
   }

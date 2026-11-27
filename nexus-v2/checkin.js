@@ -674,7 +674,7 @@ function mostrarSucesso() {
 
 /* Sem note_saved, a cópia do dia neste aparelho não guarda a nota
    (nexusEsquecerNotasLocais, api.js): o Hoje não mostra «Ver a nota de hoje». */
-function tratarResposta(resultado) {
+async function tratarResposta(resultado) {
   if (!resultado || resultado.semRede) {
     mostrarAviso(document.getElementById("alerta"), "rede", TEXTO_SEM_REDE);
     return;
@@ -692,6 +692,7 @@ function tratarResposta(resultado) {
       irParaHoje(TEXTO_JA);
       return;
     }
+    if (window.NexusTituloNovo && await NexusTituloNovo.verificar()) return;
     mostrarSucesso();
     return;
   }
@@ -748,7 +749,7 @@ async function enviar(evento) {
   var resultado = await NexusApi.registrarDia(missaoAtual.id, notaEscrita());
   if (saindo) return;
   definirCarregando(false);
-  tratarResposta(resultado);
+  await tratarResposta(resultado);
 }
 
 function ligarLinks() {

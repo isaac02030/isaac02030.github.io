@@ -141,6 +141,20 @@
   left: calc(50% + 6px);
 }
 
+/* A 200% (195 px de CSS), 10 quadrados por linha não cabem sem rolagem.
+   Passam a ser 5 por linha; o fio para na quebra e a ponta não cruza linha. */
+@media (max-width: 360px) {
+  .trilha30 {
+    grid-template-columns: repeat(5, 22px);
+    justify-content: space-between;
+  }
+
+  .trilha30 .c:nth-child(5n)::after,
+  .trilha30 .c:nth-child(5n + 1)::before {
+    display: none;
+  }
+}
+
 /* Dia 30: o último quadrado recebe o único halo maior da tela. */
 .trilha30 .ultimo i {
   box-shadow: var(--glow-fim);
