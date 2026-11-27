@@ -17,13 +17,20 @@
   margin-bottom: var(--space-2);
 }
 
-/* A linha na comunidade: contorno fino, fundo do papel, nada de sombra. */
+/* A lista não mostra número nem marcador: cada linha já tem a própria seta. */
+.lista-maratonas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* A linha na comunidade: só duas divisórias, fundo do papel, nada de cartão. */
 .linha-maratona {
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3);
+  border-top: 1px solid var(--borda-cartao);
+  border-bottom: 1px solid var(--borda-cartao);
+  padding: var(--space-3) 0;
   margin: var(--space-4) 0;
-  background: var(--bg);
+  background: transparent;
   box-shadow: none;
   transition: none;
 }
@@ -33,14 +40,18 @@
 }
 
 .linha-maratona-nome {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 4px;
+  font: var(--text-label);
+  color: var(--text);
 }
 
 .linha-maratona-meta {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
   margin: 0 0 var(--space-3);
   color: var(--text-muted);
+  font: var(--text-small);
 }
 
 .linha-maratona-acoes {
@@ -68,17 +79,29 @@
   min-height: var(--target);
 }
 
+/* Pergunta de dois lados: os dois botões têm o mesmo peso, sem luz própria. */
+.dialogo-maratona .botoes .btn,
+.dialogo-maratona .botoes .btn:hover {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  text-decoration: none;
+}
+
 .dialogo-maratona .folha-titulo {
   margin-top: 0;
 }
 
-/* Trilha do grupo: uma marca por dia, no máximo 10 por linha para caber em
-   390 px sem rolagem lateral. A ponta acesa fica no dia de hoje. */
+/* Trilha do grupo: uma marca por dia. Sete por linha em 390 px; quatro por
+   linha em telas até 360 px (200%), para as sete marcas caberem sem corte.
+   O fio vai do meio de uma marca ao meio da seguinte. */
 .trilha-maratona {
+  --colunas: 7;
+  --fio: 6px;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(var(--colunas, 7), minmax(22px, 1fr));
-  column-gap: 6px;
+  grid-template-columns: repeat(var(--colunas), minmax(22px, 1fr));
+  column-gap: var(--fio);
   row-gap: 14px;
   margin: var(--space-4) 0;
   padding: 4px 0;
@@ -99,6 +122,7 @@
   box-sizing: border-box;
   width: 22px;
   height: 22px;
+  margin: 0 auto;
   border: 1.5px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
@@ -107,13 +131,18 @@
 .trilha-maratona .tm-c::after {
   content: "";
   position: absolute;
-  left: 22px;
-  right: -6px;
+  left: calc(50% + 11px);
+  width: calc(100% + var(--fio) - 22px);
   top: 50%;
   height: 2px;
   margin-top: -1px;
   border-radius: 2px;
   background: var(--fio-futuro);
+}
+
+/* O fio para no fim de cada linha; nunca cruza para a linha de baixo. */
+.trilha-maratona .tm-c:nth-child(7n):not(.lk-fim)::after {
+  display: none;
 }
 
 .trilha-maratona .lk-fim::after {
@@ -180,9 +209,21 @@
 
 /* O que o servidor mandou: mínimo, contagem e estado de hoje. */
 .maratona-minimo,
+.maratona-dia,
 .maratona-grupo,
 .maratona-meu-dia {
   margin: 0 0 var(--space-3);
+}
+
+.maratona-dia {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+/* O rótulo fica numa linha; o texto escrito pela pessoa na de baixo. */
+.maratona-minimo {
+  display: grid;
+  gap: 2px;
 }
 
 .maratona-grupo {
@@ -244,12 +285,19 @@
   min-height: var(--target);
 }
 
+/* 200% (195 px de CSS): quatro marcas na primeira linha e três na segunda.
+   A ordem de leitura continua da esquerda para a direita e de cima para baixo. */
 @media (max-width: 360px) {
   .trilha-maratona {
-    column-gap: 4px;
+    --colunas: 4;
+    --fio: 6px;
+    row-gap: 12px;
   }
-  .trilha-maratona .tm-c::after {
-    right: -4px;
+  .trilha-maratona .tm-c:nth-child(7n):not(.lk-fim)::after {
+    display: block;
+  }
+  .trilha-maratona .tm-c:nth-child(4n):not(.lk-fim)::after {
+    display: none;
   }
 }
 

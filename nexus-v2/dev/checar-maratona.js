@@ -36,6 +36,7 @@ var linhaJs = ler("maratona-comunidade.js");
 var textosJs = ler("maratona-textos.js");
 var comunidadeJs = ler("comunidade.js");
 var sw = ler("sw.js");
+var jsSemComentarios = semComentarios(js);
 
 /* ---------- Estrutura e cache ---------- */
 if (sw.indexOf('CACHE = "nexus-v2-v50"') === -1) falhas.push("o cache não está em nexus-v2-v50");
@@ -59,10 +60,20 @@ if (js.indexOf("resposta.dados.marathon") === -1 || js.indexOf("resposta.dados.m
 if ((js.match(/mostrarVista\("aviso"\)/g) || []).length < 3) {
   falhas.push("um erro 503 ou sem rede ficou preso na vista de carregando");
 }
+if (/<ol class="lista-maratonas"/.test(html) || !/<ul class="lista-maratonas"/.test(html)) falhas.push("a lista ainda usa ol e mostra número");
+if (!/\.lista-maratonas\s*\{[^}]*list-style:\s*none/.test(css)) falhas.push("a lista ainda mostra marcador");
+if (!/id="inicio-campo"[^>]*type="date"/.test(html)) falhas.push("o dia de início não usa seletor de data do aparelho");
+if (jsSemComentarios.indexOf("toISOString") !== -1 || jsSemComentarios.indexOf("Europe/Lisbon") === -1) falhas.push("o intervalo do seletor não usa datas de Lisboa");
+if (!/inicio < inicioMin \|\| inicio > inicioMax/.test(jsSemComentarios)) falhas.push("a validação não aplica o intervalo do seletor");
+if (comunidadeHtml.indexOf('id="maratona-prefixo"') === -1 || !/prefixo"\)\.hidden = !titulo/.test(linhaJs)) falhas.push("o título sem nome repete «Maratona: Maratona»");
+if (/id="texto-dia-maratona"/.test(html) === false) falhas.push("o detalhe não mostra «Dia 3 de 7» em texto");
+if (!/class="linha-maratona"[^>]*/.test(comunidadeHtml) || !/border-top:\s*1px/.test(css)) falhas.push("a linha da comunidade não virou linha com divisória");
 if ((html.match(/btn-luz/g) || []).length !== 1) falhas.push("a tela da Maratona tem mais de uma luz no HTML");
 if (!/id="trilha"[^>]*role="img"/.test(html) || html.indexOf('id="resumo-trilha"') === -1) falhas.push("tela sem trilha e resumo acessível");
 if (!/<dialog/.test(html) || html.indexOf('data-texto-maratona="dialogoTitulo"') === -1) falhas.push("falta o diálogo de entrada");
 if (comunidadeHtml.indexOf('data-texto-maratona="dialogoTitulo"') === -1) falhas.push("a comunidade não tem o diálogo de entrada");
+if (/id="btn-entrar-maratona"[^>]*btn-primario/.test(html + comunidadeHtml)) falhas.push("o diálogo dá peso de botão principal a «Entrar»");
+if (!/\.dialogo-maratona \.botoes \.btn,\s*\n\.dialogo-maratona \.botoes \.btn:hover[\s\S]*?background:\s*var\(--surface\)/.test(css)) falhas.push("os botões do diálogo não têm o mesmo peso");
 
 /* ---------- Regras proibidas ---------- */
 var fonteTela = semComentarios(html + js + linhaJs + textosJs + comunidadeHtml + comunidadeJs);
@@ -70,12 +81,14 @@ if (/innerHTML|outerHTML|insertAdjacentHTML/.test(fonteTela)) falhas.push("texto
 if (/Sair da maratona|Sair da Maratona/i.test(fonteTela)) falhas.push("botão «Sair da maratona» é proibido");
 if (/ranking individual|ranking/i.test(semComentarios(textosJs + js + linhaJs))) falhas.push("a Maratona mostra ranking individual");
 if (/[·•]/.test(semComentarios(textosJs + html + linhaJs))) falhas.push("marca de separação «·» na Maratona");
+if (/AAAA-MM-DD|caracteres/i.test(semComentarios(textosJs + html))) falhas.push("jargão de programador na tela da Maratona");
 if (/urso|bear/i.test(semComentarios(textosJs + html + css + linhaJs))) falhas.push("urso na tela da Maratona");
 if (/@exemplo\.com|username|apelido/i.test(semComentarios(textosJs + html + css + linhaJs))) falhas.push("nome de pessoa na tela da Maratona");
 if (/overflow-wrap:\s*anywhere|word-break/.test(css)) falhas.push("CSS parte palavras; use quebra de linha");
 if (/border-left:\s*[2-9]|box-shadow:\s*0[^;]*,/.test(css)) falhas.push("cartão com barra colorida ou sombra");
 if (!/--target:\s*44px/.test(ler("tokens.css"))) falhas.push("alvo mínimo não é 44 px");
 if (!/\.linha-maratona-acoes \.btn[\s\S]*?min-height:\s*var\(--target\)/.test(css)) falhas.push("botões da linha sem 44 px");
+if (!/--colunas:\s*4/.test(css) || !/nth-child\(4n\)/.test(css)) falhas.push("a trilha não quebra em 4 + 3 telas estreitas");
 if (!/\.formulario-maratona input[\s\S]*?min-height:\s*var\(--target\)/.test(css)) falhas.push("campos sem 44 px");
 if (!/@media \(prefers-contrast: more\)/.test(css) || !/@media \(forced-colors: active\)/.test(css)) falhas.push("falta contraste alto e cores forçadas");
 if (ler("tokens.css").indexOf("--papel: #EEF1EC") === -1 || !/\[data-theme="dark"\][\s\S]*?--bg:\s*#000000/.test(ler("tokens.css"))) falhas.push("papel claro ou fundo escuro errado");
@@ -88,6 +101,10 @@ if (!M || !M.TEXTOS) falhas.push("maratona-textos.js não carregou");
 else {
   igual("nome do dia", M.quando({ phase: "active", day: 3, duration_days: 7 }), "Dia 3 de 7");
   igual("antes de começar", M.quando({ phase: "upcoming", day_number: -2, starts_in_days: 2 }), "Começa em 2 dias");
+  igual("encerrada sem data", M.quando({ phase: "ended", day: null, duration_days: 7 }), "");
+  igual("prefixo da linha", M.TEXTOS.maratonaPrefixo, "Maratona: ");
+  igual("máximo de pessoas", M.TEXTOS.campoPessoas, "Máximo de pessoas");
+  igual("dia por fazer", M.TEXTOS.pendenteHoje, "Seu dia de hoje: ainda falta.");
   igual("grupo no singular", M.preencher(M.TEXTOS.grupoHojeUm, { feitos: 1, total: 1 }), "Hoje, 1 de 1 pessoa cumpriu o dia.");
   igual("erro 503", M.erroDoServidor("unavailable"), M.TEXTOS.indisponivel);
   var trilha = M.estadosDaTrilha(
@@ -162,6 +179,12 @@ async function casosDoMock() {
   igual("abrir: feitos hoje", detalhe.json.group.today_done, 9);
   igual("abrir: participa", detalhe.json.me.is_participant, true);
   semNome("abrir", detalhe.json);
+  var diaFeito = await pedir("GET", temCenario("/api/community-missions/leitura/" + id, "maratona-dia-feito"), null, pessoa);
+  igual("dia feito: estado", diaFeito.json.me.day_done, true);
+  var convite = await pedir("GET", temCenario("/api/community-missions/leitura", "maratona-convite"), null, pessoa);
+  igual("convite: ainda não participa", convite.json.marathons[0].is_participant, false);
+  igual("convite: fase", convite.json.marathons[0].phase, "upcoming");
+  igual("convite: começa em", convite.json.marathons[0].starts_in_days, 2);
 
   var vazio = await pedir("GET", temCenario("/api/community-missions/leitura", "maratona-vazia"), null, pessoa);
   igual("vazia: lista", (vazio.json.marathons || []).length, 0);

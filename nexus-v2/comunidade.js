@@ -854,6 +854,7 @@ function iniciar() {
   /* ?cenario= só vale com o mock local (localhost, 127.0.0.1, [::1]). Fora disso não vai à API. */
   window.NEXUS_CENARIO = hostDeDesenvolvimento() ? parametro("cenario") : "";
   C.aplicar(document);
+  if (window.NexusMaratonaTextos) window.NexusMaratonaTextos.aplicar(document);
   document.getElementById("btn-agora-nao").href = "hoje.html" + busca();
   document.getElementById("link-voltar").href = B.link("comunidades.html");
   document.getElementById("link-hoje").href = B.link("hoje.html");

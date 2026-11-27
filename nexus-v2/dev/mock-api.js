@@ -237,7 +237,9 @@
     - POST .../:id/join → entra; POST .../:id/checkin → registra o dia (tabela própria)
     - ?cenario=maratona-503 (503 calmo), maratona-vazia, maratona-antes,
       maratona-encerrada, maratona-cheia, maratona-ja-criou,
-      maratona-registro-erro, maratona-crise, maratona-sem-missao, maratona-erro
+      maratona-registro-erro, maratona-crise, maratona-sem-missao, maratona-erro,
+      maratona-dia-feito (dia da pessoa já registrado) e maratona-convite
+      (antes de começar, sem participar, para ver o botão entrar)
 
    Chat do Duo/Rival (PRs 32 a 35 do servidor; ?cenario= na página):
    - GET /api/messages/:missionId → { mission_id, messages } (só com par ativo;
@@ -2439,7 +2441,7 @@ function respostaDaLista(req, comunidade, email, cenario) {
     inicio = lerCursor(cursor);
     if (inicio < 0) return { status: 400, dados: { error: "Não deu para carregar mais posts. Abra a comunidade de novo.", code: "invalid_cursor" } };
   }
-  var lista = cenario === "comunidade-vazia" ? [] : todosOsPosts(comunidade, email);
+  var lista = (cenario === "comunidade-vazia" || cenario === "maratona-convite") ? [] : todosOsPosts(comunidade, email);
   var pagina = lista.slice(inicio, inicio + tamanho).map(function (p) { return comApoios(p, email); });
   var fim = inicio + pagina.length;
   return {
@@ -2455,7 +2457,7 @@ function respostaDaLista(req, comunidade, email, cenario) {
 }
 
 function destaquesDe(comunidade, email, cenario) {
-  if (cenario === "comunidade-vazia") return [];
+  if (cenario === "comunidade-vazia" || cenario === "maratona-convite") return [];
   return todosOsPosts(comunidade, email).filter(function (p) {
     return !p.hidden && totalDeApoios(p) > 0 && (Date.now() - new Date(p.created_at).getTime()) < 7 * MS_DIA;
   }).sort(function (a, b) {
@@ -2642,7 +2644,7 @@ async function responderComunidade(req, caminho, corpo) {
     var comunidade = comunidadePorSlug(aberta[1]);
     if (!comunidade) return { status: 404, dados: { error: "Comunidade não encontrada." } };
     var fechada = cenario === "comunidade-fechada";
-    var posts = (fechada || cenario === "comunidade-vazia") ? [] : postsDaComunidade(comunidade, email);
+    var posts = (fechada || cenario === "comunidade-vazia" || cenario === "maratona-convite") ? [] : postsDaComunidade(comunidade, email);
     var acessoCom = acessoDaComunidade(email, comunidade, cenario);
     if (fechada) acessoCom.can_read_forum = false;
     return {
@@ -2704,7 +2706,7 @@ function maratonaPadrao(slug, email) {
 
 function maratonaDoCenario(m, cenario) {
   var copia = Object.assign({}, m, { days: (m.days || []).slice() });
-  if (cenario === "maratona-antes") {
+  if (cenario === "maratona-antes" || cenario === "maratona-convite") {
     copia.phase = "upcoming";
     copia.day = null;
     copia.starts_in_days = 2;
@@ -2752,7 +2754,7 @@ async function responderMaratona(req, caminho, corpo) {
     var itens = cenario === "maratona-vazia" ? [] : maratonasMock[slug].map(function (m) {
       var copia = maratonaDoCenario(m, cenario);
       if (copia.phase === "ended") return null;
-      copia.is_participant = participantesMaratona[m.id + "|" + email] === true;
+      copia.is_participant = participantesMaratona[m.id + "|" + email] === true && cenario !== "maratona-convite";
       return copia;
     }).filter(Boolean);
     return { status: 200, dados: { marathons: itens, can_create: podeCriarMaratona(email, slug, cenario) } };
@@ -2797,7 +2799,7 @@ async function responderMaratona(req, caminho, corpo) {
   var encontrada = (maratonasMock[slug] || []).filter(function (m) { return m.id === id; })[0];
   if (!encontrada) return { status: 404, dados: { error: MT.notFound } };
   var vista = maratonaDoCenario(encontrada, cenario);
-  var participa = participantesMaratona[id + "|" + email] === true;
+  var participa = participantesMaratona[id + "|" + email] === true && cenario !== "maratona-convite";
   var diaDeHoje = (vista.days || []).filter(function (d) { return Number(d.day) === Number(vista.day); })[0];
   var feitos = diaDeHoje ? (Number(diaDeHoje.done) || 0) : 0;
 
@@ -2812,7 +2814,10 @@ async function responderMaratona(req, caminho, corpo) {
           phase: vista.phase, day: vista.day, starts_in_days: vista.starts_in_days
         },
         group: { participants: vista.participants, today_done: feitos, days: vista.days },
-        me: { is_participant: participa, day_done: checkinsMaratona[id + "|" + email] === true }
+        me: {
+          is_participant: participa,
+          day_done: checkinsMaratona[id + "|" + email] === true || cenario === "maratona-dia-feito"
+        }
       }
     };
   }

@@ -78,14 +78,15 @@
 
     <section class="vista" id="vista-lista" hidden>
       <h1 class="comunidade-titulo" id="titulo-lista" tabindex="-1" data-texto-maratona="listaTitulo"></h1>
-      <ol class="lista-maratonas" id="lista-maratonas"></ol>
+      <ul class="lista-maratonas" id="lista-maratonas"></ul>
       <p class="vazio-texto" id="lista-vazia" data-texto-maratona="semMaratona" hidden></p>
       <a class="btn btn-secundario btn-grande" id="link-criar" href="maratona.html?criar=1" data-texto-maratona="criarLinha" hidden></a>
     </section>
 
     <section class="vista" id="vista-detalhe" hidden>
       <h1 class="comunidade-titulo" id="nome-maratona" tabindex="-1"></h1>
-      <p class="maratona-minimo"><span data-texto-maratona="minimoRotulo"></span>: <span id="valor-minimo"></span></p>
+      <p class="maratona-dia" id="texto-dia-maratona" hidden></p>
+      <p class="maratona-minimo"><span data-texto-maratona="minimoRotulo"></span><span id="valor-minimo"></span></p>
       <p class="maratona-grupo" id="texto-grupo"></p>
       <p class="maratona-meu-dia" id="texto-meu-dia" hidden></p>
       <ol class="trilha-maratona" id="trilha" role="img" aria-label=""></ol>
@@ -127,7 +128,7 @@
         <div class="campo">
           <label for="inicio-campo" data-texto-maratona="campoInicio"></label>
           <p class="dica" id="inicio-ajuda" data-texto-maratona="campoInicioAjuda"></p>
-          <input id="inicio-campo" name="start_day" type="text" maxlength="10" autocomplete="off" aria-describedby="inicio-ajuda" placeholder="AAAA-MM-DD">
+          <input id="inicio-campo" name="start_day" type="date" autocomplete="off" aria-describedby="inicio-ajuda">
         </div>
         <div class="botoes">
           <button type="submit" class="btn btn-primario" id="btn-criar" aria-busy="false" data-texto-maratona="criarBotao"></button>
@@ -141,7 +142,7 @@
     <h2 class="folha-titulo" id="titulo-dialogo-maratona" data-texto-maratona="dialogoTitulo"></h2>
     <p id="texto-dialogo-maratona" data-texto-maratona="dialogoTexto"></p>
     <div class="botoes">
-      <button type="button" class="btn btn-primario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
+      <button type="button" class="btn btn-secundario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
       <button type="button" class="btn btn-secundario" id="btn-agora-nao-maratona" data-texto-maratona="agoraNao"></button>
     </div>
   </dialog>

@@ -105,9 +105,9 @@
       </form>
       <p class="aviso-publicado" id="aviso-publicado" role="status" tabindex="-1" hidden></p>
 
-      <!-- Maratona: uma linha, não um cartão em destaque. Sem nome de pessoa. -->
+      <!-- Maratona: uma linha de lista com divisória, não um cartão. Sem nome de pessoa. -->
       <section class="linha-maratona" id="linha-maratona" aria-labelledby="maratona-nome" hidden>
-        <h2 class="linha-maratona-nome" id="maratona-nome" data-texto-maratona="maratona"></h2>
+        <h2 class="linha-maratona-nome" id="maratona-nome"><span id="maratona-prefixo" data-texto-maratona="maratonaPrefixo"></span><span id="maratona-titulo"></span></h2>
         <p class="linha-maratona-meta"><span id="maratona-quando"></span><span id="maratona-pessoas"></span></p>
         <p class="aviso-texto" id="maratona-motivo" hidden></p>
         <div class="linha-maratona-acoes">
@@ -170,7 +170,7 @@
     <h2 class="folha-titulo" id="titulo-dialogo-maratona" data-texto-maratona="dialogoTitulo"></h2>
     <p id="texto-dialogo-maratona" data-texto-maratona="dialogoTexto"></p>
     <div class="botoes">
-      <button type="button" class="btn btn-primario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
+      <button type="button" class="btn btn-secundario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
       <button type="button" class="btn btn-secundario" id="btn-agora-nao-maratona" data-texto-maratona="agoraNao"></button>
     </div>
   </dialog>

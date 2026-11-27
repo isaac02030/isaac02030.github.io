@@ -1,6 +1,7 @@
 /* A linha da Maratona dentro de comunidade.html?c=<slug>.
-   Não é cartão em destaque: uma linha de lista, com nome, quando começa ou
-   em que dia está, o total do grupo e «Entrar na maratona» ou «Ver».
+   Não é cartão em destaque: linha de lista com divisória, título discreto,
+   quando começa ou em que dia está, o total do grupo e «Entrar na maratona»
+   ou «Ver».
    Quem não é membro e a comunidade só leitura não recebem botão de entrar.
    Texto de pessoa entra só por textContent. */
 
@@ -44,7 +45,9 @@
 
     var m = itens.slice().sort(ordem)[0];
     maratonaAtual = m;
-    document.getElementById("maratona-nome").textContent = typeof m.title === "string" && m.title ? m.title : T.maratona;
+    var titulo = typeof m.title === "string" ? m.title.trim() : "";
+    document.getElementById("maratona-prefixo").hidden = !titulo;
+    document.getElementById("maratona-titulo").textContent = titulo || T.maratona;
     document.getElementById("maratona-quando").textContent = M.quando(m);
     document.getElementById("maratona-pessoas").textContent = M.contarPessoas(m.participants);
 

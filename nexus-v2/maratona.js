@@ -16,9 +16,44 @@
   var eu = null;
   var acesso = null;
   var botaoDaFolha = null;
+  var inicioMin = "";
+  var inicioMax = "";
 
   function parametro(nome) {
     return B.parametro(nome);
+  }
+
+  /* Datas da Maratona são em Lisboa, não em UTC: usar toISOString aqui pode
+     mudar o dia no verão. O seletor do aparelho recebe o mesmo intervalo que
+     a validação usa. */
+  function dataLisboa(data) {
+    var partes = new Intl.DateTimeFormat("pt-PT", {
+      timeZone: "Europe/Lisbon",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(data);
+    var ano = "";
+    var mes = "";
+    var dia = "";
+    for (var i = 0; i < partes.length; i++) {
+      if (partes[i].type === "year") ano = partes[i].value;
+      if (partes[i].type === "month") mes = partes[i].value;
+      if (partes[i].type === "day") dia = partes[i].value;
+    }
+    return ano + "-" + mes + "-" + dia;
+  }
+
+  function dataReal(valor) {
+    var partes = valor.split("-");
+    if (partes.length !== 3) return false;
+    var ano = Number(partes[0]);
+    var mes = Number(partes[1]);
+    var dia = Number(partes[2]);
+    var conferida = new Date(Date.UTC(ano, mes - 1, dia));
+    return conferida.getUTCFullYear() === ano &&
+      conferida.getUTCMonth() === mes - 1 &&
+      conferida.getUTCDate() === dia;
   }
 
   function visivel(el, sim) {
@@ -141,6 +176,10 @@
 
     document.getElementById("nome-maratona").textContent =
       typeof maratona.title === "string" && maratona.title ? maratona.title : T.maratona;
+    var diaTexto = M.quando(maratona);
+    var dia = document.getElementById("texto-dia-maratona");
+    dia.textContent = diaTexto;
+    visivel(dia, !!diaTexto);
     document.getElementById("valor-minimo").textContent =
       typeof maratona.description === "string" ? maratona.description : "";
 
@@ -165,6 +204,9 @@
       visivel(meuDia, true);
     } else if (participa && maratona.phase === "ended") {
       meuDia.textContent = T.encerrada;
+      visivel(meuDia, true);
+    } else if (participa && maratona.phase === "active") {
+      meuDia.textContent = T.pendenteHoje;
       visivel(meuDia, true);
     } else {
       visivel(meuDia, false);
@@ -276,7 +318,8 @@
     if (!minimo) return { erro: T.minimoFalta };
     if (!Number.isInteger(dias) || dias < 3 || dias > 30) return { erro: T.diasFalta };
     if (!Number.isInteger(pessoas) || pessoas < 2 || pessoas > 100) return { erro: T.pessoasFalta };
-    if (inicio && !/^\d{4}-\d{2}-\d{2}$/.test(inicio)) return { erro: T.inicioFalta };
+    if (inicio && (!/^\d{4}-\d{2}-\d{2}$/.test(inicio) || !dataReal(inicio) ||
+      inicio < inicioMin || inicio > inicioMax)) return { erro: T.inicioFalta };
     var dados = { title: titulo, description: minimo, duration_days: dias, max_participants: pessoas };
     if (inicio) dados.start_day = inicio;
     return { dados: dados };
@@ -359,6 +402,15 @@
       evento.preventDefault();
       criar();
     });
+    var campoInicio = document.getElementById("inicio-campo");
+    inicioMin = dataLisboa(new Date());
+    var partes = inicioMin.split("-");
+    var limite = new Date(Date.UTC(
+      Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]) + 14, 12
+    ));
+    inicioMax = dataLisboa(limite);
+    campoInicio.min = inicioMin;
+    campoInicio.max = inicioMax;
     contar(document.getElementById("nome-maratona-campo"), document.getElementById("nome-contador"));
     contar(document.getElementById("minimo-campo"), document.getElementById("minimo-contador"));
     NexusAbas.montar("missao");

@@ -13,6 +13,7 @@
   var TEXTOS = {
     /* Linha dentro da comunidade. */
     maratona: "Maratona",
+    maratonaPrefixo: "Maratona: ",
     listaTitulo: "Maratonas da comunidade",
     criarLinha: "Criar uma maratona",
     comecaEmUm: "Começa em 1 dia",
@@ -30,6 +31,7 @@
     minimoRotulo: "Mínimo de cada dia",
     registroAntes: "A maratona ainda não começou. O registro abre no primeiro dia.",
     feitoHoje: "Seu dia de hoje: feito.",
+    pendenteHoje: "Seu dia de hoje: ainda falta.",
     registrarDia: "Registrar o dia",
     registrando: "Registrando…",
     registrado: "Dia registrado.",
@@ -47,14 +49,14 @@
     campoNome: "Nome da maratona",
     campoMinimo: "Mínimo de cada dia",
     campoDias: "Dias",
-    campoPessoas: "Pessoas",
+    campoPessoas: "Máximo de pessoas",
     campoInicio: "Dia de início (opcional)",
-    campoInicioAjuda: "AAAA-MM-DD, em Lisboa. Se ficar vazio, começa hoje.",
+    campoInicioAjuda: "Escolha a data. Se ficar vazio, começa hoje.",
     criarBotao: "Criar maratona",
     criando: "Criando…",
     criada: "Maratona criada.",
-    nomeAjuda: "Até 60 caracteres.",
-    minimoAjuda: "Até 140 caracteres.",
+    nomeAjuda: "Um nome que ajude o grupo a encontrar a maratona.",
+    minimoAjuda: "O que cada pessoa precisa fazer por dia.",
     jaCriou: "Você já tem uma maratona aberta nesta comunidade. Quando ela terminar, você pode criar outra.",
 
     /* Respostas do servidor que valem como texto pronto. */
@@ -101,6 +103,7 @@
     var duracao = Number(maratona.duration_days) || 0;
     var bruto = maratona.day != null ? Number(maratona.day) : Number(maratona.day_number);
     var fase = maratona.phase || "";
+    if (fase === "ended") return "";
     if (fase === "upcoming" || !(bruto >= 1)) {
       var n = maratona.starts_in_days != null ? Number(maratona.starts_in_days) : 1 - (isNaN(bruto) ? 0 : bruto);
       if (!(n > 0)) return "";
@@ -161,7 +164,8 @@
     if (codigo === "not_participant") return TEXTOS.naoParticipa;
     if (codigo === "not_member") return TEXTOS.semParticipar;
     if (codigo === "unavailable") return TEXTOS.indisponivel;
-    return typeof erro === "string" && erro ? erro : TEXTOS.erroGenerico;
+    /* Código desconhecido nunca mostra texto cru do servidor na tela. */
+    return TEXTOS.erroGenerico;
   }
 
   function aplicar(raiz) {
