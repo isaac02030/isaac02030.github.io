@@ -209,6 +209,11 @@
   line-height: 0;
 }
 
+/* «Link copiado.» não fica colado nos botões. O vão é o mesmo no claro e no escuro. */
+#aviso-copia:not(:empty) {
+  margin-top: var(--space-4);
+}
+
 .fim {
   display: flex;
   flex-direction: column;
