@@ -54,7 +54,7 @@ var iAssunto = html.indexOf('id="assunto"');
 var iPasso2 = html.indexOf('id="passo-2"');
 if (!(iAreaHtml !== -1 && iAssunto > iAreaHtml && iAssunto < iPasso2)) falhas.push("o assunto fica no passo 1, junto da área");
 if (html.indexOf('<label for="assunto">Assunto</label>') === -1) falhas.push("falta o rótulo Assunto");
-if (html.indexOf('<p id="assunto-dica" class="dica">ex.: filosofia</p>') === -1) falhas.push("falta a dica ex.: filosofia");
+if (html.indexOf('<p id="assunto-dica" class="dica">Ex.: filosofia</p>') === -1) falhas.push("falta a dica Ex.: filosofia");
 if (!/<input id="assunto" name="subject" type="text" maxlength="60" autocomplete="off" aria-describedby="assunto-dica assunto-contador">/.test(html)) {
   falhas.push("o assunto precisa de maxlength 60 e não pode ser obrigatório");
 }
