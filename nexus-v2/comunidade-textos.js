@@ -154,7 +154,7 @@
     minutos: "{n} min",
     horas: "{n} h",
     dias: "{n} d",
-    meritoERanking: "Meu mérito e o ranking",
+    meritoERanking: "Meu mérito",
 
     /* Criar comunidade. */
     criarTitulo: "Criar uma comunidade",

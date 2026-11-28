@@ -33,6 +33,7 @@ var missaoHtml = semComentarios(ler("missao.html"));
 var missaoCss = semComentarios(ler("missao.css"));
 var comunidadesHtml = semComentarios(ler("comunidades.html"));
 var comunidadesJs = semComentarios(ler("comunidades.js"));
+var comunidadeHtml = semComentarios(ler("comunidade.html"));
 var novaHtml = semComentarios(ler("novo-titulo.html"));
 var novaCss = semComentarios(ler("novo-titulo.css"));
 var novaJs = semComentarios(ler("novo-titulo.js"));
@@ -56,7 +57,7 @@ quer(posicoes.every(function (p, i) { return p !== -1 && (i === 0 || p > posicoe
 quer(abasJs.indexOf('id: "comunidade"') !== -1, "falta o id da aba Comunidade");
 quer(/icone: "M10 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zM2 19a5 5 0 0 1 10 0M20 8a3\.5 3\.5 0 1 0-7 0 3\.5 3\.5 0 0 0 7 0zM7\.5 21a6\.5 6\.5 0 0 1 13 0"/.test(abasJs), "o ícone precisa ser dois bustos de traço, um atrás e um na frente");
 quer(/setAttribute\("aria-hidden", "true"\)/.test(abasJs) && /setAttribute\("fill", "none"\)/.test(abasJs) && /setAttribute\("stroke-width", "2"\)/.test(abasJs), "ícone de aba: traço de 2 px, sem preenchimento e aria-hidden");
-quer(abasJs.indexOf('quebra: "Comun"') !== -1 && abasJs.indexOf('createElement("wbr")') !== -1, "a 200% o rótulo precisa quebrar sem hífen, com wbr");
+quer(abasJs.indexOf("quebra:") === -1 && abasJs.indexOf("wbr") === -1, "negado: o rótulo «Comunidade» não pode partir a 200% (sem wbr)");
 quer(abasJs.indexOf("texto.textContent = aba.texto") !== -1, "as abas usam textContent, nunca innerHTML");
 quer(!/innerHTML|outerHTML|document\.write/.test(abasJs), "abas.js: texto só por textContent");
 quer(/aria-current", "page"/.test(abasJs) && /if \(aba\.id === ativa\)/.test(abasJs), "a aba ativa precisa de aria-current=page");
@@ -66,9 +67,10 @@ quer(/href = aba\.href \+ busca/.test(abasJs), "as 4 abas são links reais para 
 quer(/\.aba\s*\{[^}]*min-width:\s*0/.test(abasCss), "as 4 colunas precisam ser iguais (min-width: 0)");
 quer(/\.aba\s*\{[^}]*min-height:\s*56px/.test(abasCss) && !/\.aba\s*\{[^}]*[^-]height:\s*56px/.test(abasCss), "a aba mantém 56 px mínimos e cresce com o texto");
 quer(/\.aba\s*\{[^}]*font-size:\s*0\.75rem/.test(abasCss), "o rótulo da aba é 12 px");
-quer(/\.aba span\s*\{[^}]*hyphens:\s*none/.test(abasCss), "sem hífen automático no rótulo");
-quer(/@media \(max-width: 360px\)[\s\S]*\.aba\s*\{[^}]*padding-left:\s*0/.test(abasCss), "a 200% o rótulo precisa do espaço lateral todo");
-quer(/flex:\s*1 1 0/.test(abasCss), "as 4 abas precisam repartir a largura por igual");
+quer(/\.aba span\s*\{[^}]*hyphens:\s*none/.test(abasCss) && /\.aba span\s*\{[^}]*overflow-wrap:\s*normal/.test(abasCss), "sem hífen e sem partir palavra no rótulo");
+quer(/@media \(max-width: 320px\)[\s\S]*\.aba\s*\{[^}]*flex:\s*1 1 auto/.test(abasCss), "a 200% as abas precisam da largura do próprio rótulo");
+quer(/@media \(max-width: 320px\)[\s\S]*\.aba\s*\{[^}]*padding-left:\s*0/.test(abasCss), "a 200% o rótulo precisa do espaço lateral todo");
+quer(/flex:\s*1 1 0/.test(abasCss), "em 390 px as 4 abas repartem a largura por igual");
 quer(/'\.aba\[aria-current="page"\]::before'/.test(ler("dev/checar-neon.js")) || ler("dev/checar-neon.js").indexOf('.aba[aria-current="page"]::before') !== -1, "a barrinha de luz da aba ativa não pode mudar de seletor");
 quer(/\.icone-aba\s*\{[^}]*width:\s*24px[^}]*height:\s*24px/.test(abasCss), "o ícone da aba continua com 24 px");
 
@@ -108,6 +110,8 @@ quer(/<a class="linha-seta" id="link-meu-merito" href="merito\.html"><span data-
 quer(comunidadesHtml.indexOf('id="link-meu-merito"') < comunidadesHtml.indexOf('id="link-criar"'), "«Meu mérito» precisa ficar antes de «Criar uma comunidade»");
 quer(comunidadesJs.indexOf('getElementById("link-meu-merito").href = B.link("merito.html")') !== -1, "o link de mérito da lista não usa o ajudante de busca");
 quer(textosJs.indexOf('meritoTitulo: "Meu mérito"') !== -1, "o texto da linha «Meu mérito» mudou");
+quer(textosJs.indexOf('meritoERanking: "Meu mérito"') !== -1 && !/meritoERanking: "Meu mérito e o ranking"/.test(textosJs), "o mérito dentro da comunidade tem de ter o mesmo nome da lista");
+quer(/id="link-merito" href="merito\.html"><span data-texto-comunidade="meritoERanking">/.test(comunidadeHtml), "a comunidade por dentro precisa da linha «Meu mérito»");
 quer(!/innerHTML|outerHTML/.test(comunidadesJs + ajustesJs + hojeJs + missaoHtml), "as telas mudadas usam textContent, nunca innerHTML");
 
 /* ---------- 5. Título novo, urso e fita (v52 continua) ---------- */
@@ -132,6 +136,7 @@ quer(/localStorage\.getItem\("nexus_v2_token"\)[\s\S]*location\.replace\("\.\/"/
 quer(/<nav class="abas" id="abas"/.test(novaHtml), "Novo título: falta a barra de abas");
 quer(!/[«»·→]/.test(novaHtml + novaJs + novaCss), "Novo título: aspas ou marca de IA no texto");
 quer(!/box-shadow|gradient|border-left|drop-shadow/.test(novaCss), "Novo título: a fita e o urso ficam planos");
+quer(!/fita-grande[\s\S]{0,80}gap:\s*0\.375rem/.test(novaCss) && !/marca-titulo[\s\S]{0,80}width:\s*0\.875rem/.test(novaCss), "Novo título: a fita não pode ser menor que a do «Meu mérito»");
 quer(/width:\s*140px/.test(novaCss) && /height:\s*140px/.test(novaCss), "Novo título: o urso precisa medir 140 px");
 quer(novaJs.indexOf('getElementById("fita-titulo")') !== -1 && novaJs.indexOf("fita.appendChild(B.simboloDoTitulo(titulo, true))") !== -1, "Novo título: a fita de marcas não aparece acima do nome");
 quer(novaJs.indexOf("texto.textContent = titulo.name") !== -1, "Novo título: o nome entra por textContent");

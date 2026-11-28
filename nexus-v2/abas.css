@@ -73,6 +73,7 @@
 
 .aba span {
   hyphens: none;
+  overflow-wrap: normal;
 }
 
 .icone-aba {
@@ -81,12 +82,19 @@
   flex: 0 0 auto;
 }
 
-/* A 200% (195 px CSS) cada aba tem 48 px: sem espaço lateral sobra o
-   rótulo inteiro, e o wbr parte «Comunidade» em duas linhas sem hífen. */
-@media (max-width: 360px) {
+/* A 200% (195 px CSS) as colunas iguais dariam 48 px e partiriam
+   «Comunidade». Em tela estreita cada aba toma a largura do próprio
+   conteúdo: os 4 rótulos cabem juntos, cada um numa linha só. */
+@media (max-width: 320px) {
   .aba {
+    flex: 1 1 auto;
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .aba span {
+    hyphens: none;
+    overflow-wrap: normal;
   }
 }
 
