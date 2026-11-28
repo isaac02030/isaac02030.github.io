@@ -127,4 +127,4 @@ if (falhas.length) {
   console.error("FALHOU (" + falhas.length + "):\n- " + falhas.join("\n- "));
   process.exit(1);
 }
-console.log("ok: Compartilhar com botão do celular, link limpo, rodapé uniforme, ⋯ no canto, folha do próprio post e aviso sem cobrir a ação tocada");
+console.log("ok: Compartilhar com botão do celular, link limpo, rodapé uniforme, ⋯ no canto, folha do próprio post e aviso sem cobrir ações");

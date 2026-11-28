@@ -293,13 +293,42 @@ function avisoDeCompartilhamento(texto, botao) {
   var tela = document.querySelector(".tela-comunidade");
   document.body.classList.add("com-aviso-compartilhar");
   if (tela) tela.classList.add("com-aviso-compartilhar");
-  /* Só o necessário para a ação tocada continuar acima da faixa: um salto
-     maior para procurar um espaço vazio tiraria o post da vista. */
+  /* A faixa não pode ficar sobre ação nenhuma. Primeiro sobe só o necessário
+     para a ação tocada continuar à vista; depois procura o primeiro espaço
+     livre na vertical. O «⋯» do canto não conta: fica fora da faixa. */
+  function descerAteLivre() {
+    var faixa = aviso.getBoundingClientRect();
+    var alvos = document.querySelectorAll("main button, main a");
+    var intervalos = [];
+    for (var i = 0; i < alvos.length; i++) {
+      var alvo = alvos[i];
+      if (!alvo.offsetHeight || alvo.hidden || alvo.closest("[hidden]")) continue;
+      var r = alvo.getBoundingClientRect();
+      if (r.right <= faixa.left - 8 || r.left >= faixa.right + 8) continue;
+      /* O alvo entra na faixa quando descemos «entra» e sai em «sai». */
+      var entra = r.top - faixa.bottom - 8;
+      var sai = r.bottom - faixa.top + 8;
+      if (sai > 0) intervalos.push({ entra: entra, sai: sai });
+    }
+    intervalos.sort(function (a, b) { return a.entra - b.entra; });
+    var livre = Math.max(0, document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+    var d = 0;
+    for (var j = 0; j < intervalos.length; j++) {
+      var iv = intervalos[j];
+      if (iv.sai <= d) continue;
+      if (iv.entra > d) break;
+      d = iv.sai;
+      if (d > livre) break;
+    }
+    var passo = Math.min(d, livre);
+    if (passo > 0) window.scrollBy(0, passo);
+  }
   if (botao && botao.offsetHeight > 0) {
     var acao = botao.getBoundingClientRect();
     var area = aviso.getBoundingClientRect();
     if (acao.bottom > area.top - 8) window.scrollBy(0, acao.bottom - area.top + 8);
   }
+  descerAteLivre();
   avisoCompartilharTimer = setTimeout(function () {
     aviso.hidden = true;
     aviso.textContent = "";
