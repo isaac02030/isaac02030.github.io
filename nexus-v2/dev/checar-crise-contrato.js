@@ -113,7 +113,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.js$/.test(n) && n !== "api.
 var crise = semComentarios(ler("crise.html"));
 if (/\burso|btn-luz/.test(crise)) falhas.push("crise.html: sem urso e sem luz");
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v54"') === -1) falhas.push("o cache não está em nexus-v2-v54");
+if (sw.indexOf('CACHE = "nexus-v2-v55"') === -1) falhas.push("o cache não está em nexus-v2-v55");
 
 /* ---------- 5. Mock: crise não cria; contrato comum cria ---------- */
 function pedir(metodo, caminho, corpo, token) {

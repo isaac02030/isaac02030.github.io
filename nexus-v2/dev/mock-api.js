@@ -213,7 +213,8 @@
      O mock não lê o comentário para achar crise: o sinal vem só do cenário.
    Cenários da comunidade (?cenario= na página):
    - comunidade-indisponivel  503 ao abrir (e na denúncia), como sem a migração 005
-   - comunidade-erro          500 ao abrir
+   - comentarios do post (PR 50): ?cenario=comentarios-crise, comentarios-limite, comentarios-indisponivel, comentarios-erro, comentarios-vazios, comentarios-escondido, comentarios-denuncia-crise, comentarios-denuncia-nao-enviada e comentarios-apoio-proprio.
+    - comunidade-erro          500 ao abrir
    - comunidade-vazia         sem posts
    - comunidade-fechada       access.can_read_forum false, sem posts
    - denuncia-crise           201 com reported: true e crisis: true (comentário não guardado)
@@ -2176,6 +2177,12 @@ var proximoPostMock = 5000;
 var criadasPorEmail = {};
 var denunciasFeitas = {};
 var escondidosDaEquipe = null;
+/* Comentários (PR 50 do servidor): estado só desta sessão do mock. Nenhuma
+   resposta leva user_id nem a lista de quem apoiou. */
+var comentariosMock = {};
+var denunciasComentarios = {};
+var apoiosComentarios = {};
+var proximoComentarioMock = 7000;
 
 function escondidosIniciais() {
   var agora = Date.now();
@@ -2293,6 +2300,180 @@ async function denunciarMock(email, slug, postId, corpo, cenario) {
     return { status: 201, dados: { reported: true, crisis: true, crisis_level: "alto", message: "Sua denúncia foi registrada, sem o texto que você escreveu. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
   }
   return { status: 201, dados: { reported: true, message: "Obrigado. Sua denúncia foi registrada." } };
+}
+
+/* ---------- Comentários do post (PR 50 do servidor) ----------
+   Só membro e missão da área escrevem, como no post. A resposta nunca traz
+   user_id nem quem apoiou; o próprio comentário vem marcado por is_mine. */
+function comentariosDoPostMock(postId) {
+  if (!comentariosMock[postId]) {
+    var agora = Date.now();
+    comentariosMock[postId] = [
+      {
+        id: proximoComentarioMock++, post_id: postId,
+        email: "caderno_azul@exemplo.com", username: "caderno_azul",
+        content: "Comecei por um livro curto e foi mais fácil manter o hábito.",
+        created_at: new Date(agora - 5 * 3600000).toISOString(), hidden: false, supportsBase: 2
+      },
+      {
+        id: proximoComentarioMock++, post_id: postId,
+        email: "estante_baixa@exemplo.com", username: "estante_baixa",
+        content: "Eu relio o último parágrafo antes de continuar.",
+        created_at: new Date(agora - 2 * 3600000).toISOString(), hidden: false, supportsBase: 1
+      }
+    ];
+  }
+  return comentariosMock[postId];
+}
+
+function acharComentarioMock(postId, commentId) {
+  var lista = comentariosDoPostMock(postId);
+  for (var i = 0; i < lista.length; i++) {
+    if (String(lista[i].id) === String(commentId)) return lista[i];
+  }
+  return null;
+}
+
+function comentarioParaResposta(comentario, email) {
+  var apoiado = apoiosComentarios[comentario.id + "|" + email] === true;
+  var resposta = {
+    id: comentario.id,
+    post_id: comentario.post_id,
+    content: comentario.content,
+    created_at: comentario.created_at,
+    username: comentario.username,
+    hidden: comentario.hidden === true,
+    supports: (Number(comentario.supportsBase) || 0) + (apoiado ? 1 : 0),
+    supported_by_me: apoiado,
+    is_mine: comentario.email === email
+  };
+  if (resposta.hidden) {
+    resposta.hidden_reason = comentario.hidden_reason || "";
+    resposta.hidden_message = comentario.hidden_message || "Seu comentário foi escondido por enquanto.";
+  }
+  return resposta;
+}
+
+function listaComentariosMock(email, postId, cenario) {
+  var lista = comentariosDoPostMock(postId).map(function (c) { return Object.assign({}, c); });
+  if (temCenario(cenario, "comentarios-vazios")) return [];
+  if (temCenario(cenario, "comentarios-escondido")) {
+    lista.unshift({
+      id: 7999, post_id: postId, email: email,
+      username: usuarios[email].username,
+      content: "Comentário que foi escondido depois de algumas denúncias.",
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+      hidden: true, hidden_reason: "ofensa",
+      hidden_message: "Seu comentário foi escondido depois de algumas denúncias. A equipe do Nexus vai conferir.",
+      supportsBase: 1
+    });
+  }
+  return lista;
+}
+
+async function escreverComentarioMock(email, comunidade, postId, corpo, cenario) {
+  var conteudo = corpo && corpo.content;
+  if (temCenario(cenario, "comentarios-crise")) {
+    return { status: 200, dados: { commented: false, crisis: true, crisis_level: "alto", message: "Seu comentário não foi enviado. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
+  }
+  if (conteudo != null && typeof conteudo !== "string") {
+    return { status: 400, dados: { error: "O comentário precisa ser um texto. Escreva de novo e envie." } };
+  }
+  var texto = (conteudo || "").trim();
+  if (!texto) return { status: 400, dados: { error: "O comentário está vazio. Escreva alguma coisa e envie." } };
+  if (Array.from(texto).length > 280) {
+    return { status: 400, dados: { error: "O comentário passou de 280 caracteres. Encurte um pouco e envie de novo." } };
+  }
+  if (temCenario(cenario, "comentarios-indisponivel")) {
+    return { status: 503, dados: { error: "Os comentários ainda não estão disponíveis. Tente de novo mais tarde.", code: "unavailable" } };
+  }
+  if (temCenario(cenario, "comentarios-erro")) {
+    return { status: 500, dados: { error: "Não deu para concluir agora. Tente de novo daqui a pouco." } };
+  }
+  if (!acharPost(comunidade, postId, email)) {
+    return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+  }
+  if (SO_LEITURA.indexOf(comunidade.slug) !== -1) {
+    return { status: 403, dados: { error: "Esta comunidade é só para leitura. Não dá para comentar.", code: "read_only" } };
+  }
+  if (!eMembro(email, comunidade.slug, cenario)) {
+    return { status: 403, dados: { error: "Só membros desta comunidade podem comentar. Entre na comunidade e tente de novo.", code: "not_member" } };
+  }
+  var acesso = acessoParaPostar(email, comunidade, cenario);
+  if (!acesso.ok) {
+    return { status: 403, dados: { error: acesso.message, code: acesso.code, locked: true } };
+  }
+  if (temCenario(cenario, "comentarios-limite")) {
+    return { status: 429, dados: { error: "Você já enviou 10 comentários nas últimas 24 horas. Tente de novo mais tarde.", limit: 10 } };
+  }
+  var criado = {
+    id: proximoComentarioMock++, post_id: Number(postId),
+    email: email, username: usuarios[email].username, content: texto,
+    created_at: new Date().toISOString(), hidden: false, supportsBase: 0
+  };
+  comentariosDoPostMock(Number(postId)).push(criado);
+  return { status: 201, dados: { comment: comentarioParaResposta(criado, email) } };
+}
+
+async function denunciarComentarioMock(email, slug, postId, commentId, corpo, cenario) {
+  if (temCenario(cenario, "comentarios-denuncia-nao-enviada")) {
+    return { status: 200, dados: { reported: false, crisis: true, message: "Sua denúncia não foi enviada. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
+  }
+  if (temCenario(cenario, "comentarios-denuncia-crise")) {
+    return { status: 201, dados: { reported: true, crisis: true, message: "Sua denúncia foi registrada, sem o texto que você escreveu. Se você está passando por um momento difícil, veja os contatos de ajuda abaixo." } };
+  }
+  var motivo = corpo && corpo.reason;
+  if (MOTIVOS_DENUNCIA.indexOf(motivo) === -1) {
+    return { status: 400, dados: { error: "Escolha um dos motivos da lista e envie de novo." } };
+  }
+  var comunidade = comunidadePorSlug(slug);
+  if (!comunidade || !acharPost(comunidade, postId, email)) {
+    return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+  }
+  var comentario = acharComentarioMock(postId, commentId);
+  if (!comentario) return { status: 404, dados: { error: "Comentário não encontrado. Ele pode ter sido apagado." } };
+  if (comentario.email === email) {
+    return { status: 400, dados: { error: "Você não pode denunciar o seu próprio comentário." } };
+  }
+  var chave = email + "|" + commentId;
+  if (denunciasComentarios[chave]) {
+    return { status: 409, dados: { error: "Você já denunciou este comentário. Uma denúncia por pessoa já basta, obrigado.", already_reported: true } };
+  }
+  denunciasComentarios[chave] = { reason: motivo };
+  var total = 0;
+  Object.keys(denunciasComentarios).forEach(function (k) {
+    if (k.indexOf("|" + commentId) !== -1) total += 1;
+  });
+  if (motivo === "perigoso" || total >= 3) {
+    comentario.hidden = true;
+    comentario.hidden_reason = motivo;
+    comentario.hidden_message = "Seu comentário foi escondido depois de algumas denúncias. A equipe do Nexus vai conferir.";
+  }
+  return { status: 201, dados: { reported: true, message: "Obrigado. Sua denúncia foi registrada." } };
+}
+
+async function apoiarComentarioMock(email, slug, postId, commentId, ligar, cenario) {
+  var comunidade = comunidadePorSlug(slug);
+  if (!comunidade || !acharPost(comunidade, postId, email)) {
+    return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+  }
+  var comentario = acharComentarioMock(postId, commentId);
+  if (!comentario || comentario.hidden) {
+    return { status: 404, dados: { error: "Comentário não encontrado. Ele pode ter sido apagado." } };
+  }
+  if (temCenario(cenario, "comentarios-apoio-proprio") || comentario.email === email) {
+    return { status: 403, dados: { error: "Você não pode apoiar o seu próprio comentário.", code: "own_comment" } };
+  }
+  var chave = comentario.id + "|" + email;
+  if (ligar) {
+    if (apoiosComentarios[chave]) {
+      return { status: 409, dados: { error: "Você já apoiou este comentário.", code: "already_supported", supported: true, supports: comentarioParaResposta(comentario, email).supports } };
+    }
+    apoiosComentarios[chave] = true;
+    return { status: 201, dados: { supported: true, supports: comentarioParaResposta(comentario, email).supports } };
+  }
+  delete apoiosComentarios[chave];
+  return { status: 200, dados: { supported: false, supports: comentarioParaResposta(comentario, email).supports } };
 }
 
 function equipeMock(email, metodo, caminho, cenario) {
@@ -2681,6 +2862,32 @@ async function responderComunidade(req, caminho, corpo) {
     if (metodo === "GET" && temCenario(cenario, "lista-antiga")) return { status: 503, dados: { error: "A lista de posts ainda não está disponível. Tente de novo mais tarde.", code: "unavailable" } };
     if (sub[2] === "posts" && metodo === "GET") return respostaDaLista(req, alvo, email, cenario);
     if (sub[2] === "highlights" && metodo === "GET") return { status: 200, dados: { highlights: destaquesDe(alvo, email, cenario), days: 7, max: 3 } };
+  }
+  var comentarios = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/comments$/);
+  if (comentarios) {
+    var alvoComentarios = comunidadePorSlug(comentarios[1]);
+    if (!alvoComentarios) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+    if (!acharPost(alvoComentarios, comentarios[2], email)) {
+      return { status: 404, dados: { error: "Post não encontrado. Ele pode ter sido apagado." } };
+    }
+    if (temCenario(cenario, "comentarios-indisponivel")) {
+      return { status: 503, dados: { error: "Os comentários ainda não estão disponíveis. Tente de novo mais tarde.", code: "unavailable" } };
+    }
+    if (metodo === "GET") {
+      return { status: 200, dados: { comments: listaComentariosMock(email, Number(comentarios[2]), cenario).map(function (c) {
+        return comentarioParaResposta(c, email);
+      }), max: 100 } };
+    }
+    if (metodo === "POST") return escreverComentarioMock(email, alvoComentarios, comentarios[2], corpo || {}, cenario);
+  }
+  var acaoComentario = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/comments\/(\d+)\/(report|support)$/);
+  if (acaoComentario) {
+    if (acaoComentario[4] === "report" && metodo === "POST") {
+      return denunciarComentarioMock(email, acaoComentario[1], acaoComentario[2], acaoComentario[3], corpo || {}, cenario);
+    }
+    if (acaoComentario[4] === "support" && (metodo === "POST" || metodo === "DELETE")) {
+      return apoiarComentarioMock(email, acaoComentario[1], acaoComentario[2], acaoComentario[3], metodo === "POST", cenario);
+    }
   }
   var apoio = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/posts\/(\d+)\/support$/);
   if (apoio && (metodo === "POST" || metodo === "DELETE")) {

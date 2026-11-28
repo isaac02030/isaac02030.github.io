@@ -831,6 +831,98 @@ body:has(.tela-comunidade) {
   color: var(--text);
 }
 
+/* ---------- Comentários: lista chata, sem respostas aninhadas ---------- */
+
+.comentarios {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--borda-cartao);
+}
+
+.comentarios-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comentario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.comentario-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.comentario-autor {
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.comentario-texto {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.comentario-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target);
+}
+
+.cartao-comentario-escondido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+  padding: var(--space-2);
+  border: 1px solid var(--borda-cartao);
+}
+
+.cartao-comentario-escondido p {
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
+.formulario-comentario {
+  margin-top: var(--space-3);
+}
+
+.formulario-comentario label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font: var(--text-label);
+  color: var(--text);
+}
+
+.formulario-comentario textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--target);
+}
+
+.comentarios-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target);
+}
+
 .dica-rolar {
   margin: 0;
   font: var(--text-small);
