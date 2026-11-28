@@ -248,7 +248,13 @@
     apoioComentarioSemRede: "Sem internet. O apoio não foi registrado.",
     apoioComentarioProprio: "Você não pode apoiar o seu próprio comentário.",
     denunciaComentarioTitulo: "Denunciar comentário",
-    fecharComentarios: "Fechar comentários"
+    fecharComentarios: "Fechar comentários",
+    /* Compartilhar: o botão do celular abre o link da comunidade. */
+    compartilhar: "Compartilhar",
+    compartilharPost: "Compartilhar post",
+    compartilharTitulo: "Post da comunidade no Nexus",
+    linkCopiado: "Link copiado.",
+    compartilharErro: "Não foi possível compartilhar agora."
   };
 
   /* Áreas fixas do servidor (lib/community-access.js). */

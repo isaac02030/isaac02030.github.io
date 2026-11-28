@@ -862,6 +862,13 @@ body:has(.tela-comunidade) {
   color: var(--text);
 }
 
+.aviso-compartilhar {
+  flex: 1 0 100%;
+  margin: 0;
+  font: var(--text-small);
+  color: var(--text-muted);
+}
+
 /* ---------- Comentários: lista chata, sem respostas aninhadas ---------- */
 
 .comentarios {

@@ -49,6 +49,8 @@ var DESENHOS = {
   rede: B.DESENHOS.rede,
   ok: B.DESENHOS.ok,
   mao: B.DESENHOS.mao,
+  /* Três pontos ligados: o desenho do botão do celular, sem cor própria. */
+  compartilhar: "M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4",
   /* Olho fechado: o post está escondido. Nada de cor de alarme. */
   escondido: "M3 3l18 18M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-2.9 3.9M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2"
 };
@@ -257,10 +259,104 @@ async function apoiar(post, botao, pintar) {
   erro("falha", T.apoioErro);
 }
 
+function idDoPost(post) {
+  return String(post && post.id != null ? post.id : "").replace(/[^0-9]/g, "");
+}
+
+/* O link é limpo: só a comunidade e o post. Nunca token, cenário de teste
+   nem e-mail. Quem não tem conta cai no login ao abrir a comunidade. */
+function linkDoPost(post) {
+  var url = new URL("comunidade.html", location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("c", slugAtual);
+  var id = idDoPost(post);
+  if (id) url.searchParams.set("p", id);
+  return url.toString();
+}
+
+function avisoDeCompartilhamento(botao, texto) {
+  var rodape = botao.parentNode;
+  var aviso = rodape && rodape.querySelector(".aviso-compartilhar");
+  if (!aviso) {
+    aviso = document.createElement("p");
+    aviso.className = "aviso-compartilhar";
+    aviso.setAttribute("role", "status");
+    if (rodape) rodape.appendChild(aviso);
+  }
+  if (aviso) aviso.textContent = texto;
+}
+
+async function compartilharPost(post, botao) {
+  if (botao.getAttribute("aria-busy") === "true") return;
+  var url = linkDoPost(post);
+  botao.setAttribute("aria-busy", "true");
+  try {
+    if (navigator.share && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: T.compartilharTitulo, url: url });
+      } catch (erro) {
+        if (erro && erro.name === "AbortError") return;
+        throw erro;
+      }
+      return;
+    }
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(url);
+      avisoDeCompartilhamento(botao, T.linkCopiado);
+      return;
+    }
+    var campo = document.createElement("textarea");
+    campo.value = url;
+    campo.setAttribute("readonly", "");
+    campo.style.position = "fixed";
+    campo.style.opacity = "0";
+    document.body.appendChild(campo);
+    campo.select();
+    var copiado = false;
+    try { copiado = document.execCommand("copy") === true; } catch (erro) { copiado = false; }
+    campo.remove();
+    if (!copiado) throw new Error("cópia falhou");
+    avisoDeCompartilhamento(botao, T.linkCopiado);
+  } catch (erro) {
+    avisoDeCompartilhamento(botao, T.compartilharErro);
+  } finally {
+    botao.removeAttribute("aria-busy");
+  }
+}
+
+function botaoDeCompartilhar(post) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-texto btn-compartilhar";
+  botao.appendChild(icone(DESENHOS.compartilhar));
+  var rotulo = document.createElement("span");
+  rotulo.textContent = T.compartilhar;
+  botao.appendChild(rotulo);
+  botao.setAttribute("aria-label", T.compartilharPost);
+  botao.addEventListener("click", function () {
+    compartilharPost(post, botao);
+  });
+  return botao;
+}
+
+/* O link de um post abre a comunidade com o post à vista, sem apelido nem
+   ranking: só a posição na página. */
+function irParaPostCompartilhado() {
+  var id = String(parametro("p") || "").replace(/[^0-9]/g, "");
+  if (!id) return false;
+  var item = document.querySelector('.post[data-post="' + id + '"]');
+  if (!item) return false;
+  item.scrollIntoView({ block: "center" });
+  NexusAbas.focar(item);
+  return true;
+}
+
 function itemDoPost(post, destaque) {
   var item = document.createElement("li");
   item.className = "post";
   item.tabIndex = -1;
+  item.dataset.post = idDoPost(post);
   /* O próprio post aparece como «Você». Sem apelido do servidor, a linha some:
      nunca uma palavra genérica no lugar do nome. */
   var meu = ehMeu(post) || post.hidden === true;
@@ -306,6 +402,7 @@ function itemDoPost(post, destaque) {
     });
     rodape.appendChild(botao);
   }
+  rodape.appendChild(botaoDeCompartilhar(post));
   item.appendChild(rodape);
   return item;
 }
@@ -1318,7 +1415,7 @@ function pintarComunidade(dados, destaques, pagina, missao, maratona) {
   NexusMaratonaLinha.pintar(maratona, acesso, slugAtual);
   mostrarVista("feed");
   ligarVerMaisDosDestaques();
-  focarTitulo();
+  if (!irParaPostCompartilhado()) focarTitulo();
 }
 
 async function carregar() {

@@ -105,7 +105,7 @@ if (/#2DF2D0|#3DD8FF|var\(--glow-|var\(--grad\)/.test(css.slice(css.indexOf(".ar
   falhas.push("a área não ganha luz própria");
 }
 
-if (ler("sw.js").indexOf('CACHE = "nexus-v2-v55"') === -1) falhas.push("o cache não está em nexus-v2-v55");
+if (ler("sw.js").indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
 
 function pedir(metodo, caminho, corpo, cabecalhos) {
   return new Promise(function (resolve, reject) {
