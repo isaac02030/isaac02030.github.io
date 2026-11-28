@@ -463,7 +463,7 @@
     campoInicio.max = inicioMax;
     contar(document.getElementById("nome-maratona-campo"), document.getElementById("nome-contador"));
     contar(document.getElementById("minimo-campo"), document.getElementById("minimo-contador"));
-    NexusAbas.montar("missao");
+    NexusAbas.montar("comunidade");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
     carregar();
   }

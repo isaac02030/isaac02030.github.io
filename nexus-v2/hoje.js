@@ -855,28 +855,7 @@ function atualizarBarra() {
   if (meta) meta.setAttribute("content", escuro ? "#000000" : "#0B5F52");
 }
 
-/* Atalho de texto: com uma comunidade só, diz o nome dela; com várias ou
-   nenhuma, fica «Comunidades». Sem luz e sem contador em qualquer caso. */
-function pintarAtalhoComunidades() {
-  var link = document.getElementById("link-comunidades");
-  if (!link) return;
-  link.textContent = "Comunidades";
-  link.removeAttribute("aria-label");
-  if (!window.NexusApi || navigator.onLine === false) return;
-  NexusApi.listarComunidades().then(function (resultado) {
-    if (!resultado.ok || !Array.isArray(resultado.dados)) return;
-    var minhas = resultado.dados.filter(function (c) { return c && c.is_member === true; });
-    if (minhas.length !== 1) return;
-    var nome = typeof minhas[0].name === "string" ? minhas[0].name.trim() : "";
-    if (!nome) return;
-    var C = window.NexusComunidade;
-    var texto = C && C.preencher
-      ? C.preencher(C.TEXTOS.comunidadeLinhaHoje, { nome: nome })
-      : ("Comunidade: " + nome);
-    link.textContent = texto;
-    link.setAttribute("aria-label", texto);
-  }).catch(function () {});
-}
+/* O atalho do Hoje saiu: a comunidade agora é a 3.ª aba. */
 
 function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
@@ -887,7 +866,6 @@ function iniciar() {
   NexusAbas.focar(document.getElementById("titulo-hoje"));
   atualizarBarra();
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", atualizarBarra);
-  pintarAtalhoComunidades();
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});
   }

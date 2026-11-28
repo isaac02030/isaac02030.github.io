@@ -876,7 +876,7 @@ function iniciar() {
   document.getElementById("texto-post").setAttribute("placeholder", T.escrevaDica);
   ligarFolha();
   NexusMaratonaLinha.iniciar();
-  NexusAbas.montar("missao");
+  NexusAbas.montar("comunidade");
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
   carregar();
 }

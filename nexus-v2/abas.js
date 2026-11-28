@@ -1,4 +1,4 @@
-/* Barra Hoje, Missão e Ajustes. As telas seguintes chamam NexusAbas.montar. */
+/* Barra Hoje, Missão, Comunidade e Ajustes. As telas seguintes chamam NexusAbas.montar. */
 
 var ABAS = [
   {
@@ -12,6 +12,15 @@ var ABAS = [
     href: "missao.html",
     texto: "Missão",
     icone: "M5 21V4h9l-1.5 3L14 10H5"
+  },
+  {
+    /* Dois bustos de traço, um atrás e um na frente. Sem emoji e sem balão. */
+    id: "comunidade",
+    href: "comunidades.html",
+    texto: "Comunidade",
+    /* Só a 200% o rótulo precisa de uma quebra sem hífen: Comun + idade. */
+    quebra: "Comun",
+    icone: "M10 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zM2 19a5 5 0 0 1 10 0M20 8a3.5 3.5 0 1 0-7 0 3.5 3.5 0 0 0 7 0zM7.5 21a6.5 6.5 0 0 1 13 0"
   },
   {
     id: "ajustes",
@@ -70,7 +79,14 @@ function montarAbas(ativa) {
     link.href = aba.href + busca;
     link.appendChild(iconeDaAba(aba.icone));
     var texto = document.createElement("span");
-    texto.textContent = aba.texto;
+    /* textContent continua «Comunidade»; o wbr só dá a quebra a 200%. */
+    if (aba.quebra) {
+      texto.appendChild(document.createTextNode(aba.quebra));
+      texto.appendChild(document.createElement("wbr"));
+      texto.appendChild(document.createTextNode(aba.texto.slice(aba.quebra.length)));
+    } else {
+      texto.textContent = aba.texto;
+    }
     link.appendChild(texto);
     if (aba.id === ativa) link.setAttribute("aria-current", "page");
     nav.appendChild(link);

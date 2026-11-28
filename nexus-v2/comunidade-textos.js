@@ -183,7 +183,6 @@
     meritoTitulo: "Meu mérito",
     continuar: "Continuar",
     novoTitulo: "Novo título",
-    comunidadeLinhaHoje: "Comunidade: {nome}",
     abrindoMerito: "Abrindo o mérito…",
     meritoErro: "Não deu para abrir o mérito agora. Tente de novo daqui a pouco.", /* (srv) */
     meritoSemRede: "Sem internet. O mérito não abriu.",

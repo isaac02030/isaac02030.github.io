@@ -153,9 +153,9 @@ if (/nexus_v2_user/.test(comJs)) falhas.push("comunidade.js não lê o apelido g
 if (!/var MINIMO_DESTAQUE = 3;/.test(comJs) || !/\(Number\(post\.supports\) \|\| 0\) < MINIMO_DESTAQUE\) return;/.test(comJs)) falhas.push("destaque só com 3 apoios ou mais");
 if (!/if \(emDestaque\[String\(post\.id\)\]\) return;/.test(comJs)) falhas.push("o post em destaque não se repete em Recentes");
 if (!/caixa\.classList\.toggle\("motivo-texto", soLeitura\)/.test(comJs)) falhas.push("só leitura: texto com divisória, sem caixa");
-if (/role="tab"[\s\S]*abas|ABAS\.push/.test(comJs)) falhas.push("nada de 4.ª aba");
+if (/role="tab"[\s\S]*abas|ABAS\.push/.test(comJs)) falhas.push("nada de aba falsa dentro da comunidade");
 var abas = ler("abas.js");
-if ((abas.match(/href: "[a-z-]+\.html"/g) || []).length !== 3) falhas.push("a barra continua com 3 abas");
+if ((abas.match(/href: "[a-z-]+\.html"/g) || []).length !== 4) falhas.push("a barra precisa ter 4 abas");
 
 var criarJs = semComentarios(ler("criar-comunidade.js"));
 var criarHtml = ler("criar-comunidade.html");
@@ -171,10 +171,10 @@ var merJs = semComentarios(ler("merito.js"));
 if (!/dados\.top/.test(merJs) || !/dados\.me/.test(merJs)) falhas.push("ranking: os 3 primeiros + a sua posição");
 if (/coroa|crown|medalha|trof/i.test(merJs + ler("merito.html"))) falhas.push("mérito sem coroa, medalha ou troféu");
 
-/* Portas: linha na Missão e atalho de texto no Hoje. */
-if (!/<a class="linha-comunidades" id="linha-comunidades" href="comunidades\.html">/.test(ler("missao.html"))) falhas.push("Missão: falta a linha «Comunidades»");
-if (!/<a class="linha-mensagem link-comunidades" id="link-comunidades" href="comunidades\.html">Comunidades<\/a>/.test(ler("hoje.html"))) falhas.push("Hoje: falta o atalho de texto");
-if (/link-comunidades[^>]*btn-luz|btn-luz[^>]*link-comunidades/.test(ler("hoje.html"))) falhas.push("Hoje: o atalho não tem luz");
+/* As portas antigas saem: a comunidade é a 3.ª aba, sem linha nem atalho. */
+if (/id="linha-comunidades"|linha-comunidades/.test(ler("missao.html") + ler("missao.css"))) falhas.push("Missão: a linha «Comunidades» precisa sair");
+if (/link-comunidades|pintarAtalhoComunidades/.test(ler("hoje.html") + ler("hoje.js"))) falhas.push("Hoje: o atalho da comunidade precisa sair");
+if (!/<a class="linha-seta" id="link-meu-merito" href="merito\.html">/.test(ler("comunidades.html"))) falhas.push("lista: falta a linha «Meu mérito» no fim");
 
 /* CSS sóbrio. */
 var css = ler("comunidade.css");
@@ -183,7 +183,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v52"') === -1) falhas.push("o cache não está em nexus-v2-v52");
+if (sw.indexOf('CACHE = "nexus-v2-v53"') === -1) falhas.push("o cache não está em nexus-v2-v53");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });
