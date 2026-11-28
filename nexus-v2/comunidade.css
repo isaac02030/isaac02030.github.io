@@ -140,21 +140,16 @@ body:has(.tela-comunidade) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 6px;
   min-height: var(--target);
 }
 
-.acoes-principais,
-.acoes-secundarias {
+.acoes-principais {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 4px;
-}
-
-.acoes-secundarias {
-  margin-left: auto;
+  gap: 6px;
 }
 
 .post-data {
@@ -162,35 +157,66 @@ body:has(.tela-comunidade) {
   color: var(--text-muted);
 }
 
-/* Ações discretas do rodapé: mesma caixa de toque, cinza e sem sublinhado
-   de destaque. «Comentários» e «Apoiar» ficam à esquerda; estas, à direita. */
-.btn-discreto {
-  font: var(--text-small);
-  color: var(--text-muted);
+/* «Comentários», «Apoiar» e «Compartilhar»: a mesma caixa, contorno, ícone e
+   palavra curta, na cor neon que os Comentários já usavam. Letra de 14 px,
+   alvo de 44 px, sem sublinhado, sem segunda luz e sem pílula só para um. */
+.btn-acao-post,
+.btn-apoiar,
+.apoios-total {
+  box-sizing: border-box;
+  min-height: var(--target);
+  padding: 0 2px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--accent-standout);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
   text-decoration: none;
-  padding: 0 4px;
-  gap: 4px;
 }
 
-.btn-discreto .icone {
-  width: 1.25em;
-  height: 1.25em;
+.btn-acao-post .icone,
+.btn-apoiar .icone,
+.apoios-total .icone {
+  width: 15px;
+  height: 15px;
   flex: 0 0 auto;
 }
 
+/* O «Denunciar» dos comentários segue discreto; o dos posts saiu do rodapé. */
 .btn-denunciar {
   font: var(--text-small);
   color: var(--text-muted);
   text-decoration: none;
 }
 
-.btn-comentarios {
-  padding: 0 4px;
+/* Canto superior direito do post: três pontos com contraste próprio, sem
+   aumentar a área de toque e sem acender luz nova. */
+.btn-mais {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: 0;
+  gap: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-standout);
 }
 
-/* Só aparece quando «Compartilhar» e «Denunciar» não cabem na linha. */
-.btn-mais {
-  display: none;
+.btn-mais .icone {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.btn-mais .icone path {
+  stroke-width: 2.6;
 }
 
 .post-denunciado {
@@ -403,7 +429,8 @@ body:has(.tela-comunidade) {
   }
 }
 
-/* Folha do «Mais»: só as duas ações discretas e um fechar. Nenhuma luz. */
+/* Folha do «Mais»: ações de ponta a ponta, com divisória inteira, «Denunciar»
+   em vermelho e «Agora não» na cor normal do texto. Nenhuma luz. */
 .folha-mais {
   padding: var(--space-4) var(--space-4) calc(var(--space-4) + var(--safe-bottom));
 }
@@ -411,25 +438,37 @@ body:has(.tela-comunidade) {
 .folha-mais-acoes {
   display: flex;
   flex-direction: column;
+  width: calc(100% + var(--space-4) * 2);
+  margin: 0 calc(var(--space-4) * -1);
 }
 
 .folha-mais .btn {
   width: 100%;
   min-height: var(--target);
   justify-content: flex-start;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 1px solid var(--borda-cartao);
+  border-radius: 0;
+  background: transparent;
   text-align: left;
+  text-decoration: none;
   font: var(--text-body);
   color: var(--text);
-  text-decoration: none;
-  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.folha-mais .btn-mais-denunciar {
+  color: var(--danger);
+  font-weight: 600;
 }
 
 .folha-mais .btn-mais-fechar {
   justify-content: center;
   margin-top: var(--space-3);
   border-bottom: 0;
-  color: var(--text-muted);
-  font: var(--text-small);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  font: var(--text-label);
 }
 
 /* Sem motivo escolhido, «Enviar denúncia» fica apagado (e não envia).
@@ -848,13 +887,16 @@ body:has(.tela-comunidade) {
   outline-offset: 2px;
 }
 
-/* Apelido, título e tempo: quebram em linhas, nunca saem da tela. */
+/* Apelido, título e tempo: quebram em linhas, nunca saem da tela.
+   O recuo à direita reserva o canto do «⋯» sem empurrar o texto. */
 .post-cabeca {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-3);
   margin: 0;
+  padding-right: var(--target);
 }
 
 .post-titulo {
@@ -880,28 +922,10 @@ body:has(.tela-comunidade) {
   font: var(--text-small);
 }
 
-/* «Apoiar»: contorno, mão e o total em texto. Ligado: contorno grosso e
+/* «Apoiar»: a mesma caixa dos outros dois. Ligado: contorno grosso e
    negrito (aria-pressed), não só cor. Sem animação. */
-.btn-apoiar {
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text);
-  font: var(--text-label);
-}
-
-.btn-apoiar .icone,
-.apoios-total .icone {
-  width: 1.25em;
-  height: 1.25em;
-  flex: 0 0 auto;
-}
-
 .btn-apoiar[aria-pressed="true"] {
   border: 2px solid var(--accent-standout);
-  color: var(--accent-standout);
   font-weight: 700;
 }
 
@@ -912,10 +936,7 @@ body:has(.tela-comunidade) {
 .apoios-total {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
   margin: 0;
-  font: var(--text-small);
-  color: var(--text-muted);
 }
 
 .post-erro {
@@ -925,7 +946,8 @@ body:has(.tela-comunidade) {
   color: var(--text);
 }
 
-/* Aviso de cópia: fixo no pé, acima da barra de abas. Não empurra a lista. */
+/* Aviso de cópia: fixo no pé, acima da barra de abas. Enquanto aparece, a
+   tela reserva espaço na base e o botão tocado é trazido para cima dele. */
 .aviso-compartilhar {
   position: fixed;
   z-index: 30;
@@ -941,6 +963,10 @@ body:has(.tela-comunidade) {
   font: var(--text-small);
   color: var(--text-muted);
   text-align: center;
+}
+
+.tela-comunidade.com-aviso-compartilhar {
+  padding-bottom: calc(var(--altura-abas) + var(--safe-bottom) + var(--space-5) + 44px);
 }
 
 /* ---------- Comentários: lista chata, sem respostas aninhadas ---------- */
@@ -1267,35 +1293,6 @@ body:has(.tela-comunidade) {
   max-width: 8rem;
 }
 
-/* A 390 px os quatro rótulos do rodapé cabem numa linha só: texto um pouco
-   menor, sem folga interna e 2 px entre os botões. A 200% (≤ 320 px) as
-   discretas saem para o «Mais» e esta regra não se aplica. */
-@media (min-width: 321px) {
-  .post-rodape .btn {
-    font-size: 12px;
-    gap: 2px;
-  }
-
-  .post-rodape .btn:not(.btn-apoiar) {
-    padding: 0;
-  }
-
-  /* «Apoiar» do comentário e do post continuam iguais: mesma caixa em
-     qualquer largura. */
-  .post-rodape .btn-apoiar,
-  .btn-apoiar-comentario {
-    font-size: 12px;
-    padding: 0 2px;
-    gap: 2px;
-  }
-
-  .post-rodape,
-  .acoes-principais,
-  .acoes-secundarias {
-    gap: 2px;
-  }
-}
-
 /* ---------- Tela estreita (200% num celular de 390 px) ----------
    A largura útil cai para 195 px. O título e a descrição não podem
    partir palavras ao meio, e o link de hoje continua com 44 px. */
@@ -1339,29 +1336,14 @@ body:has(.tela-comunidade) {
     border-top: 1px solid var(--borda-cartao);
   }
 
-  /* A 200% as duas ações discretas não cabem ao lado de «Comentários» e
-     «Apoiar»: ficam no menu «Mais», de três pontos, com nome acessível. */
-  .post-rodape .btn-compartilhar,
-  .post-rodape .btn-denunciar {
-    display: none;
-  }
-
-  .post-rodape .btn-mais {
-    display: inline-flex;
-  }
-
+  /* A 200% os três botões do rodapé podem empilhar: o espaço continua
+     pequeno e igual entre eles. O «⋯» já está no canto do post. */
   .post-rodape {
-    gap: 2px;
+    gap: 4px;
   }
 
   .acoes-principais {
     flex-wrap: wrap;
-    flex: 1 1 auto;
-    gap: 2px;
-  }
-
-  .acoes-secundarias {
-    flex: 0 0 var(--target);
-    gap: 2px;
+    gap: 4px;
   }
 }

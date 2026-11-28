@@ -53,7 +53,9 @@ var DESENHOS = {
   mao: B.DESENHOS.mao,
   /* Três pontos ligados: o desenho do botão do celular, sem cor própria. */
   compartilhar: "M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4",
-  /* Três pontos em linha: o menu «Mais» quando o rodapé não cabe. */
+  /* Balão de fala: o «Comentários» do rodapé, com o mesmo traço do «Apoiar». */
+  comentarios: "M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z",
+  /* Três pontos em linha: o menu «Mais» no canto superior direito do post. */
   mais: "M5 12h.01M12 12h.01M19 12h.01",
   /* Olho fechado: o post está escondido. Nada de cor de alarme. */
   escondido: "M3 3l18 18M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-2.9 3.9M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2"
@@ -279,19 +281,32 @@ function linkDoPost(post) {
   return url.toString();
 }
 
-/* Aviso curto e fixo, no pé da tela acima da barra de abas: não empurra a
-   lista. role="status" para leitor de tela e some depois de 3 s. */
-function avisoDeCompartilhamento(texto) {
+/* Aviso curto e fixo, no pé da tela acima da barra de abas. Enquanto aparece,
+   a tela ganha espaço na base e sobe só o necessário para a ação tocada não
+   ficar debaixo dele. role="status" + aria-live: some sozinho em 3,5 s. */
+function avisoDeCompartilhamento(texto, botao) {
   var aviso = document.getElementById("aviso-compartilhar");
   if (!aviso) return;
   if (avisoCompartilharTimer) clearTimeout(avisoCompartilharTimer);
   aviso.textContent = texto;
   aviso.hidden = false;
+  var tela = document.querySelector(".tela-comunidade");
+  document.body.classList.add("com-aviso-compartilhar");
+  if (tela) tela.classList.add("com-aviso-compartilhar");
+  /* Só o necessário para a ação tocada continuar acima da faixa: um salto
+     maior para procurar um espaço vazio tiraria o post da vista. */
+  if (botao && botao.offsetHeight > 0) {
+    var acao = botao.getBoundingClientRect();
+    var area = aviso.getBoundingClientRect();
+    if (acao.bottom > area.top - 8) window.scrollBy(0, acao.bottom - area.top + 8);
+  }
   avisoCompartilharTimer = setTimeout(function () {
     aviso.hidden = true;
     aviso.textContent = "";
+    document.body.classList.remove("com-aviso-compartilhar");
+    if (tela) tela.classList.remove("com-aviso-compartilhar");
     avisoCompartilharTimer = null;
-  }, 3000);
+  }, 3500);
 }
 
 async function compartilharPost(post, botao) {
@@ -310,7 +325,7 @@ async function compartilharPost(post, botao) {
     }
     if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
       await navigator.clipboard.writeText(url);
-      avisoDeCompartilhamento(T.linkCopiado);
+      avisoDeCompartilhamento(T.linkCopiado, botao);
       return;
     }
     var campo = document.createElement("textarea");
@@ -324,20 +339,20 @@ async function compartilharPost(post, botao) {
     try { copiado = document.execCommand("copy") === true; } catch (erro) { copiado = false; }
     campo.remove();
     if (!copiado) throw new Error("cópia falhou");
-    avisoDeCompartilhamento(T.linkCopiado);
+    avisoDeCompartilhamento(T.linkCopiado, botao);
   } catch (erro) {
-    avisoDeCompartilhamento(T.compartilharErro);
+    avisoDeCompartilhamento(T.compartilharErro, botao);
   } finally {
     botao.removeAttribute("aria-busy");
   }
 }
 
-/* À direita do rodapé: texto pequeno, cinza e sem sublinhado de destaque.
-   O desenho continua presente (20 px) quando há espaço para ele. */
+/* Mesma caixa de «Comentários» e «Apoiar»: contorno, ícone e palavra curta,
+   na cor neon que os Comentários já usavam. Sem luz própria. */
 function botaoDeCompartilhar(post) {
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-discreto btn-compartilhar";
+  botao.className = "btn btn-acao-post btn-compartilhar";
   botao.appendChild(icone(DESENHOS.compartilhar));
   var rotulo = document.createElement("span");
   rotulo.textContent = T.compartilhar;
@@ -349,25 +364,12 @@ function botaoDeCompartilhar(post) {
   return botao;
 }
 
-function botaoDeDenunciar(post, autorId) {
-  var botao = document.createElement("button");
-  botao.type = "button";
-  botao.className = "btn btn-discreto btn-denunciar";
-  botao.textContent = T.denunciar;
-  if (autorId) botao.setAttribute("aria-describedby", autorId);
-  botao.setAttribute("aria-haspopup", "dialog");
-  botao.addEventListener("click", function () {
-    abrirFolha(post, botao);
-  });
-  return botao;
-}
-
-/* Quando o rodapé não cabe, as duas ações discretas vão para uma folha
-   pequena. O botão é só o desenho de três pontos, com nome acessível. */
+/* Canto superior direito do post: três pontos, com nome acessível. A folha
+   esconde «Denunciar» no post da própria pessoa. */
 function botaoDeMais(post, acoes) {
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-discreto btn-mais";
+  botao.className = "btn btn-mais";
   botao.appendChild(icone(DESENHOS.mais));
   botao.setAttribute("aria-label", T.maisOpcoes);
   botao.setAttribute("aria-haspopup", "dialog");
@@ -381,10 +383,12 @@ function abrirFolhaMais(post, acoes, botao) {
   var folha = document.getElementById("folha-mais");
   if (!folha) return;
   acoesDaFolhaMais = { post: post, acoes: acoes, botao: botao };
+  var denunciar = folha.querySelector("#btn-mais-denunciar");
+  if (denunciar) denunciar.hidden = ehMeu(post);
   folha.setAttribute("aria-label", T.maisOpcoes);
   if (typeof folha.showModal === "function") folha.showModal();
   else folha.setAttribute("open", "");
-  var primeiro = folha.querySelector("#btn-mais-compartilhar");
+  var primeiro = folha.querySelector('button:not([hidden])');
   if (primeiro) primeiro.focus();
 }
 
@@ -414,10 +418,7 @@ function ligarFolhaMais() {
   if (denunciar) denunciar.addEventListener("click", function () {
     var atual = acoesDaFolhaMais;
     fecharFolhaMais();
-    if (atual && atual.post) {
-      var botao = atual.acoes.querySelector(".btn-denunciar");
-      if (botao) abrirFolha(atual.post, botao);
-    }
+    if (atual && atual.post && atual.botao) abrirFolha(atual.post, atual.botao);
   });
   if (fechar) fechar.addEventListener("click", fecharFolhaMais);
   folha.addEventListener("cancel", function () {
@@ -447,12 +448,9 @@ function itemDoPost(post, destaque) {
   var meu = ehMeu(post) || post.hidden === true;
   var nome = meu ? T.voce : (typeof post.username === "string" ? post.username.trim() : "");
   var idAutor = (destaque ? "autor-d-" : "autor-") + post.id;
-  if (nome) {
-    item.appendChild(cabecaDoPost(post, nome, idAutor));
-  } else {
-    idAutor = "";
-    item.appendChild(cabecaDoPost(post, "", ""));
-  }
+  var cabeca = nome ? cabecaDoPost(post, nome, idAutor) : cabecaDoPost(post, "", "");
+  if (!nome) idAutor = "";
+  item.appendChild(cabeca);
 
   if (post.hidden === true) {
     item.classList.add("post-escondido");
@@ -477,16 +475,12 @@ function itemDoPost(post, destaque) {
   criarComentariosDoPost(post, item, principais);
   var apoio = apoioDoPost(post, meu);
   if (apoio) principais.appendChild(apoio);
+  principais.appendChild(botaoDeCompartilhar(post));
   rodape.appendChild(principais);
-
-  var secundarias = document.createElement("div");
-  secundarias.className = "acoes-secundarias";
-  secundarias.appendChild(botaoDeCompartilhar(post));
-  /* «Denunciar» não aparece no próprio post. */
-  if (!meu) secundarias.appendChild(botaoDeDenunciar(post, idAutor));
-  secundarias.appendChild(botaoDeMais(post, secundarias));
-  rodape.appendChild(secundarias);
   item.appendChild(rodape);
+
+  /* «Denunciar» saiu do rodapé: fica só na folha do ⋯ do canto superior. */
+  cabeca.appendChild(botaoDeMais(post, rodape));
   return item;
 }
 
@@ -814,9 +808,13 @@ function criarComentariosDoPost(post, item, rodape) {
   var id = idComentario(post.id);
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-texto btn-comentarios";
+  botao.className = "btn btn-acao-post btn-comentarios";
   botao.id = "btn-comentarios-" + id;
-  botao.textContent = T.comentarios;
+  botao.appendChild(icone(DESENHOS.comentarios));
+  var rotulo = document.createElement("span");
+  rotulo.className = "btn-rotulo";
+  rotulo.textContent = T.comentarios;
+  botao.appendChild(rotulo);
   botao.setAttribute("aria-expanded", "false");
   botao.setAttribute("aria-controls", "comentarios-" + id);
   rodape.insertBefore(botao, rodape.firstChild);
@@ -949,7 +947,7 @@ function criarComentariosDoPost(post, item, rodape) {
 function alternarComentarios(estado) {
   var aberto = estado.botao.getAttribute("aria-expanded") === "true";
   estado.botao.setAttribute("aria-expanded", aberto ? "false" : "true");
-  estado.botao.textContent = aberto ? T.comentarios : T.fecharComentarios;
+  estado.botao.querySelector(".btn-rotulo").textContent = aberto ? T.comentarios : T.fecharComentarios;
   estado.secao.hidden = aberto;
   if (aberto) {
     NexusAbas.focar(estado.botao);
@@ -968,14 +966,14 @@ async function carregarComentarios(estado) {
   esconderAviso(estado.alerta);
   estado.botao.disabled = true;
   estado.botao.setAttribute("aria-busy", "true");
-  estado.botao.textContent = T.comentariosAbrindo;
+  estado.botao.querySelector(".btn-rotulo").textContent = T.comentariosAbrindo;
   var resultado;
   try {
     resultado = await NexusApi.comentariosDoPost(slugAtual, estado.post.id);
   } finally {
     estado.botao.disabled = false;
     estado.botao.setAttribute("aria-busy", "false");
-    estado.botao.textContent = T.fecharComentarios;
+    estado.botao.querySelector(".btn-rotulo").textContent = T.fecharComentarios;
   }
   if (meu !== ciclo) return;
   if (!resultado.ok) {
@@ -1368,7 +1366,12 @@ function marcarDenunciado(botao) {
   var texto = document.createElement("span");
   texto.textContent = T.denunciaOk;
   aviso.appendChild(texto);
-  botao.parentNode.replaceChild(aviso, botao);
+  /* O ⋯ continua no canto: o aviso entra ao lado, sem tirar o menu do post. */
+  if (botao.classList && botao.classList.contains("btn-mais")) {
+    botao.parentNode.insertBefore(aviso, botao.nextSibling);
+  } else {
+    botao.parentNode.replaceChild(aviso, botao);
+  }
   NexusAbas.focar(aviso);
 }
 

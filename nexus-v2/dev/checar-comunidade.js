@@ -263,7 +263,8 @@ if (/border-left:\s*[2-9]/.test(css)) falhas.push("comunidade.css não pode ter 
 if (/\bred\b|crimson|#9B1C1C|#FF8A80/i.test(css)) falhas.push("comunidade.css não pode ter vermelho direto");
 var usosDanger = css.split("var(--danger)").length - 1;
 var blocoPerigo = (css.match(/\.btn-perigo \{[^}]*\}/) || [""])[0];
-if (usosDanger !== 2 || (blocoPerigo.split("var(--danger)").length - 1) !== 2) falhas.push("--danger só no texto e no contorno de «Apagar»");
+var blocoDenuncia = (css.match(/\.folha-mais \.btn-mais-denunciar \{[^}]*\}/) || [""])[0];
+if (usosDanger !== 3 || (blocoPerigo.split("var(--danger)").length - 1) !== 2 || (blocoDenuncia.split("var(--danger)").length - 1) !== 1) falhas.push("--danger só em «Apagar» e em «Denunciar» da folha");
 if (/background[^;]*var\(--danger\)/.test(css)) falhas.push("nada de --danger em fundo");
 if (!/\.tela-comunidade \.alerta-falha,\s*\.folha \.alerta-falha,\s*\.confirmacao \.alerta-falha \{\s*color: var\(--text\);\s*border-color: var\(--border\);/.test(css)) falhas.push("os avisos de erro da comunidade e da equipe ficam sem vermelho");
 if (/[\u{1F300}-\u{1FAFF}☀-➿]/u.test(todas)) falhas.push("emoji como ícone");
