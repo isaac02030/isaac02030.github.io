@@ -175,7 +175,7 @@ var sw = ler("sw.js");
 ["./conversa.html", "./conversa.css", "./conversa.js", "./chat-textos.js"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v53"') === -1) falhas.push("o cache não está em nexus-v2-v53");
+if (sw.indexOf('CACHE = "nexus-v2-v54"') === -1) falhas.push("o cache não está em nexus-v2-v54");
 
 if (falhas.length) {
   console.log("FALHOU:\n- " + falhas.join("\n- "));

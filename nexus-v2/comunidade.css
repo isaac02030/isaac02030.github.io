@@ -338,6 +338,37 @@ body:has(.tela-comunidade) {
   min-height: 48px;
 }
 
+/* Confirmação da saída: «Sair» e «Agora não» com o mesmo peso e o mesmo
+   tamanho. Lado a lado em 390 px; a 200% (≤ 320 px de CSS) empilham com
+   largura total e 12 px entre eles, espaço para o anel de foco não invadir
+   o botão de cima. A base da folha fica com 16 px. */
+.dialogo-sair .botoes {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.dialogo-sair .botoes .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--target);
+}
+
+@media (max-width: 320px) {
+  .dialogo-sair {
+    padding-bottom: calc(16px + var(--safe-bottom));
+  }
+
+  .dialogo-sair .botoes {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dialogo-sair .botoes .btn {
+    width: 100%;
+  }
+}
+
 /* Sem motivo escolhido, «Enviar denúncia» fica apagado (e não envia).
    Enquanto envia, o botão continua com a cor dele (aria-busy). */
 .btn-primario:disabled:not([aria-busy="true"]) {

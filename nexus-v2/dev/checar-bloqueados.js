@@ -132,7 +132,7 @@ if (!/NexusAbas\.emDev\(\)/.test(js.slice(js.indexOf("function semRedeAgora"), j
 
 if (api.indexOf('caminhoComCenario("/api/users/me/blocks")') === -1) falhas.push("api.js não chama GET /api/users/me/blocks");
 if (api.indexOf('"/api/users/me/blocks/" + encodeURIComponent(blockId)') === -1) falhas.push("api.js não chama DELETE com o blockId");
-if (sw.indexOf('CACHE = "nexus-v2-v53"') === -1) falhas.push("o cache não está em nexus-v2-v53");
+if (sw.indexOf('CACHE = "nexus-v2-v54"') === -1) falhas.push("o cache não está em nexus-v2-v54");
 ["./bloqueados-textos.js", "./pessoas-bloqueadas.html", "./pessoas-bloqueadas.css", "./pessoas-bloqueadas.js"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });

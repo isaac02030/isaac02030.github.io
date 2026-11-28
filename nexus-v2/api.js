@@ -306,7 +306,7 @@ function saveReminderTime(dados) {
 
 var NexusApi = {
   /* GET /api/users/me devolve { user: { id, username, adult_confirmed, ... } }.
-     A comunidade usa o id só para não mostrar «Denunciar» no próprio post. */
+     A comunidade não usa o id: o próprio servidor marca is_mine em cada post. */
   eu: function () {
     return nexusPedir("/api/users/me", null, { metodo: "GET", auth: true });
   },
@@ -330,6 +330,12 @@ var NexusApi = {
   /* POST /api/communities/:slug/join: entrar (um toque; já membro também é 200). */
   entrarNaComunidade: function (slug) {
     return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/join"), null, { metodo: "POST", auth: true });
+  },
+  /* DELETE /api/communities/:slug/members/me: sair da comunidade. O servidor
+     usa o id do token; 200 { success, left, removed }, 403 not_member,
+     409 owner (quem criou ainda cuida dela). */
+  sairDaComunidade: function (slug) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/members/me"), null, { metodo: "DELETE", auth: true });
   },
   /* GET /:slug/posts?cursor= → { posts, next_cursor, page_size, continuous_scroll,
      scroll_hint }. 10 por página antes do dia cumprido, 20 depois. Cada post traz

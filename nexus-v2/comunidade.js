@@ -10,7 +10,6 @@ var T = window.NexusComunidade.TEXTOS;
 var C = window.NexusComunidade;
 var B = window.NexusComBase;
 var ciclo = 0;
-var meuId = null;
 var slugAtual = "";
 var postDaFolha = null;
 var botaoDaFolha = null;
@@ -118,12 +117,10 @@ function abrirIdade() {
 
 /* ---------- Posts ---------- */
 
-/* Só pelo servidor: is_mine e, enquanto ele não vem, o user_id do /me.
-   Nunca pelo apelido (dois apelidos iguais não podem virar «Você»). */
+/* Só pelo servidor: is_mine. Nunca pelo apelido nem por id, que a resposta
+   da API não traz mais (dois apelidos iguais não podem virar «Você»). */
 function ehMeu(post) {
-  if (post && post.is_mine === true) return true;
-  if (meuId != null && post.user_id != null) return String(post.user_id) === String(meuId);
-  return false;
+  return !!(post && post.is_mine === true);
 }
 
 /* Só para o autor: cartão neutro com borda, no lugar do corpo do post.
@@ -544,6 +541,82 @@ async function entrarAqui(botao) {
   mostrarAviso(alerta, "falha", resultado.status === 503 ? T.indisponivel : T.entrarErro);
 }
 
+/* ---------- Sair da comunidade ---------- */
+
+var gatilhoDaSaida = null;
+
+function pintarSaida(ehMembro) {
+  document.getElementById("link-sair").hidden = !ehMembro;
+}
+
+function abrirDialogoSaida(gatilho) {
+  gatilhoDaSaida = gatilho || null;
+  esconderAviso(document.getElementById("alerta-sair"));
+  var confirmar = document.getElementById("btn-sair-confirmar");
+  confirmar.disabled = false;
+  confirmar.setAttribute("aria-busy", "false");
+  var dialogo = document.getElementById("dialogo-sair");
+  if (dialogo.showModal) dialogo.showModal();
+  else dialogo.setAttribute("open", "");
+  /* A ação segura vem primeiro no foco. */
+  document.getElementById("btn-sair-agora-nao").focus();
+}
+
+function fecharDialogoSaida() {
+  var dialogo = document.getElementById("dialogo-sair");
+  if (dialogo.close) dialogo.close();
+  else dialogo.removeAttribute("open");
+}
+
+async function sairDaqui() {
+  var confirmar = document.getElementById("btn-sair-confirmar");
+  if (confirmar.getAttribute("aria-busy") === "true") return;
+  var alerta = document.getElementById("alerta-sair");
+  esconderAviso(alerta);
+  if (semRedeAgora()) return mostrarAviso(alerta, "rede", T.sairSemRede);
+  confirmar.disabled = true;
+  confirmar.setAttribute("aria-busy", "true");
+  var resultado;
+  try {
+    resultado = await NexusApi.sairDaComunidade(slugAtual);
+  } finally {
+    confirmar.disabled = false;
+    confirmar.setAttribute("aria-busy", "false");
+  }
+  var dados = resultado.dados || {};
+  if (resultado.ok && dados.left === true) {
+    fecharDialogoSaida();
+    location.assign("comunidades.html" + busca());
+    return;
+  }
+  if (resultado.semRede) return mostrarAviso(alerta, "rede", T.sairSemRede);
+  if (sessaoVencida(resultado)) return irParaEntrada();
+  if (semIdade(resultado)) return abrirIdade();
+  if (resultado.status === 403) {
+    /* Já não participa: a lista é o destino certo. */
+    fecharDialogoSaida();
+    location.assign("comunidades.html" + busca());
+    return;
+  }
+  /* 409 (quem cuida da comunidade) e 503/500: frase do servidor, sem culpa. */
+  mostrarAviso(alerta, "falha", resultado.status === 409 && resultado.erro ? resultado.erro : T.sairErro);
+}
+
+function ligarSaida() {
+  document.getElementById("link-sair").addEventListener("click", function (evento) {
+    abrirDialogoSaida(evento.currentTarget);
+  });
+  document.getElementById("btn-sair-agora-nao").addEventListener("click", fecharDialogoSaida);
+  document.getElementById("btn-sair-confirmar").addEventListener("click", sairDaqui);
+  var dialogo = document.getElementById("dialogo-sair");
+  dialogo.addEventListener("cancel", function (evento) {
+    if (document.getElementById("btn-sair-confirmar").getAttribute("aria-busy") === "true") evento.preventDefault();
+  });
+  dialogo.addEventListener("close", function () {
+    if (gatilhoDaSaida && gatilhoDaSaida.isConnected) NexusAbas.focar(gatilhoDaSaida);
+  });
+}
+
 /* ---------- Publicar ---------- */
 
 var atualizarContadorPost = function () {};
@@ -789,7 +862,9 @@ function pintarComunidade(dados, destaques, pagina, missao, maratona) {
   chip.textContent = C.nomeDaArea(areaDaComunidade());
   chip.hidden = !chip.textContent;
   document.getElementById("meta-pessoas").textContent = C.contarPessoas(comunidade.member_count);
-  pintarMembro(acesso.is_member === true || comunidade.is_member === true);
+  var souMembro = acesso.is_member === true || comunidade.is_member === true;
+  pintarMembro(souMembro);
+  pintarSaida(souMembro);
   document.getElementById("faixa-alimentacao").hidden = comunidade.slug !== "alimentacao";
   pintarPostar(acesso, missao);
 
@@ -848,8 +923,6 @@ async function carregar() {
   ]);
   if (meu !== ciclo) return;
   var comunidade = pedidos[0];
-  var eu = pedidos[1];
-  if (eu.ok && eu.dados && eu.dados.user && eu.dados.user.id != null) meuId = eu.dados.user.id;
   if (!comunidade.ok) return falhouAoAbrir(comunidade);
   var missao = pedidos[4].ok ? B.missaoAtiva(pedidos[4].dados) : null;
   pintarComunidade(comunidade.dados, pedidos[2], pedidos[3], missao, pedidos[5]);
@@ -875,6 +948,7 @@ function iniciar() {
   });
   document.getElementById("texto-post").setAttribute("placeholder", T.escrevaDica);
   ligarFolha();
+  ligarSaida();
   NexusMaratonaLinha.iniciar();
   NexusAbas.montar("comunidade");
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});

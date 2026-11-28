@@ -145,9 +145,11 @@ if (!/id="btn-anteriores"/.test(comHtml) || !/new IntersectionObserver/.test(com
 if (!/rolagemContinua = pagina\.dados\.continuous_scroll === true/.test(comJs)) falhas.push("a rolagem sozinha vem do servidor (continuous_scroll), nunca do aparelho");
 if (!/aria-pressed/.test(comJs)) falhas.push("«Apoiar» liga e desliga com aria-pressed");
 if (M.preencher(M.TEXTOS.apoiarRotulo, { apoios: M.contarApoios(24) }) !== "Apoiar, 24 apoios" || !/botao\.setAttribute\("aria-label", C\.preencher\(T\.apoiarRotulo/.test(comJs)) falhas.push("o nome do botão é «Apoiar, 24 apoios»");
-/* Revisão do Argos: «Você» só pelo servidor (is_mine ou user_id), nunca pelo apelido. */
+/* Revisão do Argos + ajuste baixo do Orfeu: «Você» só por is_mine, sem
+   apelido e sem user_id (a resposta da API não traz mais id de ninguém). */
 var ehMeuFonte = comJs.slice(comJs.indexOf("function ehMeu("), comJs.indexOf("}", comJs.indexOf("function ehMeu(")) + 1);
-if (!ehMeuFonte || /username|meuNome/.test(ehMeuFonte) || !/is_mine === true/.test(ehMeuFonte)) falhas.push("ehMeu: só is_mine e user_id, sem o apelido");
+if (!ehMeuFonte || /username|meuNome|user_id|meuId/.test(ehMeuFonte) || !/is_mine === true/.test(ehMeuFonte)) falhas.push("ehMeu: só is_mine, sem apelido nem id");
+if (/var meuId|meuId =/.test(comJs)) falhas.push("comunidade.js não guarda mais o id do /me");
 if (/nexus_v2_user/.test(comJs)) falhas.push("comunidade.js não lê o apelido guardado no aparelho");
 /* Revisão da Clara: destaque só com 3 apoios ou mais, sem repetir em Recentes. */
 if (!/var MINIMO_DESTAQUE = 3;/.test(comJs) || !/\(Number\(post\.supports\) \|\| 0\) < MINIMO_DESTAQUE\) return;/.test(comJs)) falhas.push("destaque só com 3 apoios ou mais");
@@ -171,6 +173,24 @@ var merJs = semComentarios(ler("merito.js"));
 if (!/dados\.top/.test(merJs) || !/dados\.me/.test(merJs)) falhas.push("ranking: os 3 primeiros + a sua posição");
 if (/coroa|crown|medalha|trof/i.test(merJs + ler("merito.html"))) falhas.push("mérito sem coroa, medalha ou troféu");
 
+/* Saída da comunidade (fila do beta, item 3): link de texto no fim do feed,
+   só para quem participa; confirmação curta com o foco em «Agora não».
+   Sem luz nova, sem culpa e sem mexer nos posts de ninguém. */
+if (!/id="link-sair"[^>]*data-texto-comunidade="sairDaComunidade" hidden/.test(comHtml)) falhas.push("saída: falta o link de texto no fim do feed, escondido de início");
+if (!/id="dialogo-sair"[\s\S]*?id="titulo-dialogo-sair"[\s\S]*?data-texto-comunidade="sairTitulo"/.test(comHtml)) falhas.push("saída: falta a confirmação com título curto");
+if (!/id="btn-sair-confirmar"[^>]*data-texto-comunidade="sairConfirmar"/.test(comHtml) || !/id="btn-sair-agora-nao"[^>]*data-texto-comunidade="agoraNao"/.test(comHtml)) falhas.push("saída: faltam «Sair» e «Agora não»");
+if (!/btn-sair-agora-nao"\)\.focus\(\)/.test(comJs)) falhas.push("saída: o foco começa em «Agora não»");
+if (!/pintarSaida\(souMembro\)/.test(comJs)) falhas.push("saída: o link só aparece para quem participa");
+if (!/NexusApi\.sairDaComunidade\(slugAtual\)/.test(comJs)) falhas.push("saída: falta a chamada da API");
+if (!/location\.assign\("comunidades\.html" \+ busca\(\)\)/.test(comJs)) falhas.push("saída: volta para a lista ao sair");
+if (!/metodo: "DELETE", auth: true/.test(ler("api.js"))) falhas.push("saída: a chamada da API precisa ser DELETE com auth");
+if (!/sairDaComunidade: function \(slug\)/.test(ler("api.js"))) falhas.push("api.js: falta sairDaComunidade");
+var cssSaida = semComentarios(ler("comunidade.css"));
+if (!/\.dialogo-sair \.botoes \{[\s\S]*?display: flex;[\s\S]*?gap: var\(--space-3\)/.test(cssSaida)) falhas.push("saída: «Sair» e «Agora não» precisam ficar lado a lado em 390 px");
+if (!/\.dialogo-sair \.botoes \.btn \{[\s\S]*?flex: 1 1 0;[\s\S]*?min-height: var\(--target\)/.test(cssSaida)) falhas.push("saída: os dois botões precisam da mesma largura e 44 px");
+if (!/@media \(max-width: 320px\) \{[\s\S]*?\.dialogo-sair \{[\s\S]*?padding-bottom: calc\(16px \+ var\(--safe-bottom\)\)[\s\S]*?\.dialogo-sair \.botoes \{[\s\S]*?flex-direction: column;[\s\S]*?gap: 12px/.test(cssSaida)) falhas.push("saída: a 200% os botões empilham com 12 px e a folha termina com 16 px");
+if (/community_slug: "[^"]+", user_id:/.test(ler("dev/mock-api.js"))) falhas.push("mock: a lista do admin ainda mostra user_id");
+
 /* As portas antigas saem: a comunidade é a 3.ª aba, sem linha nem atalho. */
 if (/id="linha-comunidades"|linha-comunidades/.test(ler("missao.html") + ler("missao.css"))) falhas.push("Missão: a linha «Comunidades» precisa sair");
 if (/link-comunidades|pintarAtalhoComunidades/.test(ler("hoje.html") + ler("hoje.js"))) falhas.push("Hoje: o atalho da comunidade precisa sair");
@@ -183,7 +203,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v53"') === -1) falhas.push("o cache não está em nexus-v2-v53");
+if (sw.indexOf('CACHE = "nexus-v2-v54"') === -1) falhas.push("o cache não está em nexus-v2-v54");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });
@@ -291,6 +311,18 @@ async function entrar(email) {
 function igual(nome, veio, esperado) {
   if (veio !== esperado) falhas.push(nome + ": veio " + veio + ", esperado " + esperado);
 }
+/* A resposta da comunidade não traz id de pessoa: só o servidor marca is_mine. */
+function semId(nome, json) {
+  var ruim = [];
+  (function andar(v) {
+    if (Array.isArray(v)) return v.forEach(andar);
+    if (v && typeof v === "object") Object.keys(v).forEach(function (k) {
+      if (/^(user_id|author_id|reporter_id)$/.test(k)) ruim.push(k);
+      andar(v[k]);
+    });
+  })(json);
+  if (ruim.length) falhas.push(nome + ": resposta com id de pessoa (" + ruim.join(", ") + ")");
+}
 /* Nenhuma chave de quem apoiou em lugar nenhum da resposta. */
 function semQuemApoiou(nome, json) {
   var ruim = [];
@@ -338,7 +370,8 @@ async function casosDoMock() {
   var segunda = await pedir("GET", "/api/communities/leitura/posts?cursor=" + encodeURIComponent(lista.json.next_cursor), null, pessoa);
   igual("lista: a 2.ª página não repete a 1.ª", (segunda.json.posts || []).some(function (p) { return (lista.json.posts || []).some(function (q) { return q.id === p.id; }); }), false);
   semQuemApoiou("lista", lista.json);
-  semQuemApoiou("destaques", (await pedir("GET", "/api/communities/leitura/highlights", null, pessoa)).json);
+  semId("lista", lista.json);
+  semId("destaques", (await pedir("GET", "/api/communities/leitura/highlights", null, pessoa)).json);
 
   igual("apoiar o próprio post", (await pedir("POST", "/api/communities/leitura/posts/50/support", null, pessoa)).json.code, "own_post");
   r = await pedir("POST", "/api/communities/leitura/posts/62/support", null, pessoa);
@@ -346,6 +379,16 @@ async function casosDoMock() {
   semQuemApoiou("apoiar", r.json);
   igual("apoiar de novo", (await pedir("POST", "/api/communities/leitura/posts/62/support", null, pessoa)).status, 409);
   igual("tirar o apoio", (await pedir("DELETE", "/api/communities/leitura/posts/62/support", null, pessoa)).json.supported, false);
+
+  /* Saída da comunidade: só a própria pessoa, dona não sai, posts ficam. */
+  igual("saída sem login", (await pedir("DELETE", "/api/communities/leitura/members/me")).status, 401);
+  igual("saída da responsável: 409", (await pedir("DELETE", "/api/communities/leitura/members/me?cenario=sair-dono", null, pessoa)).json.code, "owner");
+  igual("saída de quem não participa: 403", (await pedir("DELETE", "/api/communities/leitura/members/me?cenario=nao-membro", null, pessoa)).json.code, "not_member");
+  igual("saída com erro: 503/500 calmo", (await pedir("DELETE", "/api/communities/leitura/members/me?cenario=sair-erro", null, pessoa)).status, 500);
+  r = await pedir("DELETE", "/api/communities/leitura/members/me", null, pessoa);
+  igual("saída", r.json.left, true);
+  igual("saída de novo: 403", (await pedir("DELETE", "/api/communities/leitura/members/me", null, pessoa)).json.code, "not_member");
+  igual("saída não apaga os posts", (await pedir("GET", "/api/communities/leitura/posts", null, pessoa)).json.posts.some(function (p) { return p.id === 50; }), true);
 
   r = await pedir("POST", "/api/communities", { name: "Filosofia", area: "mente" }, pessoa);
   igual("criar sem 30 dias", r.status, 403);
