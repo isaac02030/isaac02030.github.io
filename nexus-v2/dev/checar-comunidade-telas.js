@@ -207,6 +207,16 @@ if (/comentario\.supporters|quemApoiou|listaDeApoiadores/.test(comJs)) falhas.pu
 if (!/comentariosDoPost: function/.test(ler("api.js")) || !/apoiarComentario: function/.test(ler("api.js"))) falhas.push("api.js: faltam os contratos dos comentários");
 if (!M.contarComentarios || M.contarComentarios(1) !== "1 comentário" || M.contarComentarios(4) !== "4 comentários") falhas.push("comentários: o contador no singular e no plural");
 
+/* Revisão da Clara (28/11): escondido sem olho e com uma frase corrida;
+   «Apoiar» igual ao dos posts, sem sublinhado e com o mesmo aria-label. */
+if (M.TEXTOS.apoioComentario !== "Apoiar" || M.TEXTOS.apoioComentarioRotulo !== "Apoiar comentário, {apoios}") falhas.push("comentários: o botão diz «Apoiar» e o nome acessível diz «Apoiar comentário, N apoios»");
+if (!M.textoDoComentarioEscondido || M.textoDoComentarioEscondido({ hidden_reason: "ofensa" }) !== "Seu comentário foi escondido por enquanto. Motivo mais citado: ofensa. Ninguém além de você vê este comentário.") falhas.push("comentários: a frase do escondido não está completa ou não usa o motivo do servidor");
+if (M.textoDoComentarioEscondido && M.textoDoComentarioEscondido({}) !== "Seu comentário foi escondido por enquanto. Ninguém além de você vê este comentário.") falhas.push("comentários: sem motivo, o aviso não pode inventar um");
+var inicioCartao = comJs.indexOf("function cartaoEscondidoComentario(");
+var cartaoEscondido = inicioCartao === -1 ? "" : comJs.slice(inicioCartao, comJs.indexOf("\n}\n", inicioCartao) + 2);
+if (!/textContent = C\.textoDoComentarioEscondido\(comentario\)/.test(cartaoEscondido) || /icone\(/.test(cartaoEscondido)) falhas.push("comentários: o aviso escondido é uma frase só, sem ícone de olho");
+if (!/botao\.className = "btn btn-apoiar btn-apoiar-comentario"/.test(comJs)) falhas.push("comentários: «Apoiar» precisa ter a mesma caixa do «Apoiar» dos posts, sem btn-texto");
+
 /* As portas antigas saem: a comunidade é a 3.ª aba, sem linha nem atalho. */
 if (/id="linha-comunidades"|linha-comunidades/.test(ler("missao.html") + ler("missao.css"))) falhas.push("Missão: a linha «Comunidades» precisa sair");
 if (/link-comunidades|pintarAtalhoComunidades/.test(ler("hoje.html") + ler("hoje.js"))) falhas.push("Hoje: o atalho da comunidade precisa sair");

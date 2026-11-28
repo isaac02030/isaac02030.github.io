@@ -835,21 +835,9 @@ function pintarComentarios(estado, comentarios) {
 function cartaoEscondidoComentario(comentario) {
   var cartao = document.createElement("div");
   cartao.className = "cartao-comentario-escondido";
-  cartao.appendChild(icone(DESENHOS.escondido));
-  var textos = document.createElement("div");
-  var titulo = document.createElement("p");
-  titulo.textContent = T.comentarioEscondido;
-  textos.appendChild(titulo);
-  var motivo = C.linhaDoMotivo(comentario.hidden_reason);
-  if (motivo) {
-    var linha = document.createElement("p");
-    linha.textContent = motivo;
-    textos.appendChild(linha);
-  }
-  var equipe = document.createElement("p");
-  equipe.textContent = T.comentarioEscondidoEquipe;
-  textos.appendChild(equipe);
-  cartao.appendChild(textos);
+  var texto = document.createElement("p");
+  texto.textContent = C.textoDoComentarioEscondido(comentario);
+  cartao.appendChild(texto);
   return cartao;
 }
 
@@ -924,7 +912,7 @@ function apoioDoComentario(estado, comentario) {
   }
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-texto btn-apoiar btn-apoiar-comentario";
+  botao.className = "btn btn-apoiar btn-apoiar-comentario";
   botao.appendChild(icone(DESENHOS.mao));
   var rotulo = document.createElement("span");
   rotulo.textContent = T.apoioComentario;

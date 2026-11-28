@@ -242,7 +242,7 @@
     comentarioEscondidoEquipe: "Ninguém além de você vê este comentário.",
     umComentario: "1 comentário",
     variosComentarios: "{n} comentários",
-    apoioComentario: "Apoiar comentário",
+    apoioComentario: "Apoiar",
     apoioComentarioRotulo: "Apoiar comentário, {apoios}",
     apoioComentarioErro: "Não foi possível apoiar agora. Tente de novo.",
     apoioComentarioSemRede: "Sem internet. O apoio não foi registrado.",
@@ -302,6 +302,16 @@
   function linhaDoMotivo(codigo) {
     var achado = motivo(codigo);
     return achado ? preencher(TEXTOS.escondidoMotivo, { motivo: achado.autor }) : "";
+  }
+
+  /* Aviso ao autor do comentário escondido: uma frase corrida, sem ícone e
+     sem contagem. O motivo vem do servidor; o resto é texto aprovado. */
+  function textoDoComentarioEscondido(comentario) {
+    var partes = [TEXTOS.comentarioEscondido];
+    var linha = linhaDoMotivo(comentario && comentario.hidden_reason);
+    if (linha) partes.push(linha.replace(/\s*$/, "") + ".");
+    partes.push(TEXTOS.comentarioEscondidoEquipe);
+    return partes.join(" ");
   }
 
   /* Só a forma: dia, mês e ano que existem. Quem decide a idade é o servidor.
@@ -424,6 +434,7 @@
     preencher: preencher,
     motivo: motivo,
     linhaDoMotivo: linhaDoMotivo,
+    textoDoComentarioEscondido: textoDoComentarioEscondido,
     dataDeNascimento: dataDeNascimento,
     aplicar: aplicar,
     AREAS: AREAS,
