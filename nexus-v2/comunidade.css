@@ -185,11 +185,41 @@ body:has(.tela-comunidade) {
   flex: 0 0 auto;
 }
 
-/* O «Denunciar» dos comentários segue discreto; o dos posts saiu do rodapé. */
+/* O «Denunciar» dos posts saiu do rodapé; o dos comentários saiu da linha. */
 .btn-denunciar {
   font: var(--text-small);
   color: var(--text-muted);
   text-decoration: none;
+}
+
+/* Pedido do Isaac: dentro do comentário aparece só «Apoiar». O botão de
+   denúncia fica fora da vista, mas continua no teclado/leitor de tela e é o
+   alvo da pressão longa e do menu de contexto. Ganha corpo só ao receber
+   foco, para quem navega por teclado saber onde está. */
+.btn-denunciar-comentario {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-denunciar-comentario:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  min-height: var(--target);
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
 }
 
 /* Canto superior direito do post: três pontos com contraste próprio, sem

@@ -202,7 +202,7 @@ fs.readdirSync(raiz).filter(function (n) { return /\.(html|js)$/.test(n); }).for
   if (/#161411/.test(ler(nome))) falhas.push(nome + ": theme-color antigo do escuro (#161411); agora #000000");
 });
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
+if (sw.indexOf('CACHE = "nexus-v2-v57"') === -1) falhas.push("o cache não está em nexus-v2-v57");
 ["./icons/urso-firme.svg", "./icons/urso-contente.svg", "./icons/urso-firme-16.svg", "./icons/urso-firme-32.svg", "./icons/urso-contente-16.svg", "./icons/urso-contente-32.svg", "./icons/logo-16.svg", "./icons/logo-32.svg", "./icons/favicon-16.png", "./icons/favicon-32.png"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });

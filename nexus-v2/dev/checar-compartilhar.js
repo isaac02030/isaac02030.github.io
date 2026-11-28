@@ -121,7 +121,7 @@ if (!/querySelector\('\[data-post="'/ .test(comJs)) falhas.push("compartilhar: f
 
 /* Sem conta, o link cai no login; com conta, nada de token na URL. */
 if (!/if \(!localStorage\.getItem\("nexus_v2_token"\)\) \{\s*location\.replace\("\.\/" \+ location\.search\);/.test(comHtml)) falhas.push("compartilhar: quem não tem conta precisa ver o login");
-if (ler("sw.js").indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
+if (ler("sw.js").indexOf('CACHE = "nexus-v2-v57"') === -1) falhas.push("o cache não está em nexus-v2-v57");
 
 if (falhas.length) {
   console.error("FALHOU (" + falhas.length + "):\n- " + falhas.join("\n- "));

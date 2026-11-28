@@ -174,7 +174,7 @@ var sw = ler("sw.js");
 ["./convite.js", "./aceitar-convite.html", "./aceitar-convite.css", "./aceitar-convite.js"].forEach(function (a) {
   if (sw.indexOf('"' + a + '"') === -1) falhas.push("sw.js não guarda " + a);
 });
-if (sw.indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
+if (sw.indexOf('CACHE = "nexus-v2-v57"') === -1) falhas.push("o cache não está em nexus-v2-v57");
 
 function terminar() {
   if (falhas.length) {
