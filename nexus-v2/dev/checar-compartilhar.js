@@ -90,6 +90,7 @@ if (!/secundarias\.appendChild\(botaoDeMais\(post, secundarias\)\);/.test(comJs)
 if (!/function abrirFolhaMais\(/.test(comJs) || !/function ligarFolhaMais\(/.test(comJs) || !/ligarFolhaMais\(\);/.test(comJs)) falhas.push("rodapé: a folha pequena do «Mais» não está ligada");
 if (!/id="folha-mais"/.test(comHtml) || !/id="btn-mais-compartilhar"/.test(comHtml) || !/id="btn-mais-denunciar"/.test(comHtml)) falhas.push("rodapé: a folha do «Mais» precisa dos dois botões");
 if (!/data-texto-comunidade="agoraNao"/.test(comHtml)) falhas.push("rodapé: a folha do «Mais» precisa de «Agora não» para fechar");
+if (!/@media \(min-width: 321px\) \{[\s\S]*?\.post-rodape \.btn \{\s*font-size: 12px;/.test(css)) falhas.push("rodapé: a 390 px os quatro botões precisam caber numa linha só");
 if (!/@media \(max-width: 320px\) \{[\s\S]*?\.post-rodape \.btn-compartilhar,\s*\.post-rodape \.btn-denunciar \{\s*display: none;[\s\S]*?\.post-rodape \.btn-mais \{\s*display: inline-flex;/.test(css)) falhas.push("rodapé: a 200% as discretas precisam ir para o «Mais»");
 
 /* O aviso de cópia é fixo no pé, acima da barra de abas, e some em 3 s. */

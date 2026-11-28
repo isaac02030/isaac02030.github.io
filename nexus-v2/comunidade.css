@@ -1267,6 +1267,35 @@ body:has(.tela-comunidade) {
   max-width: 8rem;
 }
 
+/* A 390 px os quatro rótulos do rodapé cabem numa linha só: texto um pouco
+   menor, sem folga interna e 2 px entre os botões. A 200% (≤ 320 px) as
+   discretas saem para o «Mais» e esta regra não se aplica. */
+@media (min-width: 321px) {
+  .post-rodape .btn {
+    font-size: 12px;
+    gap: 2px;
+  }
+
+  .post-rodape .btn:not(.btn-apoiar) {
+    padding: 0;
+  }
+
+  /* «Apoiar» do comentário e do post continuam iguais: mesma caixa em
+     qualquer largura. */
+  .post-rodape .btn-apoiar,
+  .btn-apoiar-comentario {
+    font-size: 12px;
+    padding: 0 2px;
+    gap: 2px;
+  }
+
+  .post-rodape,
+  .acoes-principais,
+  .acoes-secundarias {
+    gap: 2px;
+  }
+}
+
 /* ---------- Tela estreita (200% num celular de 390 px) ----------
    A largura útil cai para 195 px. O título e a descrição não podem
    partir palavras ao meio, e o link de hoje continua com 44 px. */
