@@ -48,7 +48,7 @@
     C.aplicar(document);
     pintarUrso();
     document.title = T.novoTitulo + " — Nexus";
-    NexusAbas.montar("missao");
+    NexusAbas.montar("comunidade");
     document.getElementById("btn-continuar").addEventListener("click", function () {
       N.limparPendente();
       location.replace("hoje.html" + B.busca());

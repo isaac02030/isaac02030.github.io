@@ -838,7 +838,9 @@ body:has(.tela-comunidade) {
 }
 
 .link-inline {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding-block: 10px;
   color: var(--accent-standout);
   text-decoration: underline;
@@ -1061,4 +1063,31 @@ body:has(.tela-comunidade) {
 
 .campo-icone {
   max-width: 8rem;
+}
+
+/* ---------- Tela estreita (200% num celular de 390 px) ----------
+   A largura útil cai para 195 px. O título e a descrição não podem
+   partir palavras ao meio, e o link de hoje continua com 44 px. */
+@media (max-width: 360px) {
+  .tela-comunidade {
+    padding-right: 12px;
+    padding-left: 12px;
+    overflow-wrap: normal;
+  }
+
+  .comunidade-titulo {
+    font-size: 1.5rem;
+  }
+
+  .comunidade-descricao {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow-wrap: normal;
+  }
+
+  .post-texto {
+    overflow-wrap: normal;
+  }
 }

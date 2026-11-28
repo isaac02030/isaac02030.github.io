@@ -303,21 +303,7 @@ function irParaEntrarSeSemSessao() {
   location.replace("./" + buscaTema());
 }
 
-/* «Meu mérito»: com uma comunidade só, abre o ranking dela (?c=slug);
-   com nenhuma ou várias, abre a tela de mérito sem comunidade escolhida. */
-function atualizarLinkMerito() {
-  var link = document.getElementById("link-meu-merito");
-  if (!link) return;
-  var busca = NexusAbas.busca(["tema", "cenario", "rede"]);
-  link.href = "merito.html" + busca;
-  if (!window.NexusApi || navigator.onLine === false) return;
-  NexusApi.listarComunidades().then(function (resultado) {
-    if (!resultado.ok || !Array.isArray(resultado.dados)) return;
-    var minhas = resultado.dados.filter(function (c) { return c && c.is_member === true; });
-    if (minhas.length !== 1 || typeof minhas[0].slug !== "string" || !minhas[0].slug) return;
-    link.href = "merito.html" + busca + (busca ? "&" : "?") + "c=" + encodeURIComponent(minhas[0].slug);
-  }).catch(function () {});
-}
+/* «Meu mérito» saiu daqui: agora é a última linha da aba Comunidade. */
 
 function iniciar() {
   window.NEXUS_CENARIO = cenarioDaPagina();
@@ -341,7 +327,6 @@ function iniciar() {
   if (window.NexusDados) NexusDados.aplicar(document);
   document.getElementById("link-meus-dados").href = "meus-dados.html" + buscaTema();
   document.getElementById("link-pessoas-bloqueadas").href = "pessoas-bloqueadas.html" + NexusAbas.busca(["tema", "cenario", "rede"]);
-  atualizarLinkMerito();
   NexusAbas.iniciar("ajustes");
 }
 

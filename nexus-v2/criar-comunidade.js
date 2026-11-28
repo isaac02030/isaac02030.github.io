@@ -228,7 +228,7 @@
     ["nome", "assunto", "regras", "icone"].forEach(function (q) {
       document.getElementById(CAMPOS[q]).addEventListener("input", function () { erroDoCampo(q, ""); });
     });
-    NexusAbas.montar("missao");
+    NexusAbas.montar("comunidade");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
     carregar();
   }

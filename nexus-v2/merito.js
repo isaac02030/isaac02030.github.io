@@ -155,7 +155,7 @@
     document.getElementById("btn-agora-nao").href = "hoje.html" + B.busca();
     document.getElementById("link-voltar").href = B.link("comunidades.html");
     document.getElementById("btn-tentar").addEventListener("click", carregar);
-    NexusAbas.montar("missao");
+    NexusAbas.montar("comunidade");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
     carregar();
   }

@@ -222,10 +222,11 @@
     document.title = T.comunidadesTitulo + " — Nexus";
     document.getElementById("btn-agora-nao").href = "hoje.html" + B.busca();
     document.getElementById("link-comecar").href = B.link("onboarding.html");
+    document.getElementById("link-meu-merito").href = B.link("merito.html");
     document.getElementById("link-criar").href = B.link("criar-comunidade.html");
     document.getElementById("btn-tentar").addEventListener("click", carregar);
     marcarSegmento = B.ligarSegmentos(document.getElementById("segmentos"), "mente", pintarArea);
-    NexusAbas.montar("missao");
+    NexusAbas.montar("comunidade");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
     carregar();
   }

@@ -31,12 +31,14 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: var(--target);
+  /* A spec da Clara pede 4 colunas iguais: 97,5 px em 390 px e 48 px a 200%.
+     A largura é a flex; o mínimo de 44 px continua no alvo de toque. */
+  min-width: 0;
   min-height: 56px;
   padding: 6px var(--space-2);
   color: var(--text-muted);
   font-family: var(--font);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.2;
   text-align: center;
@@ -69,10 +71,31 @@
   border-top-color: var(--border-soft);
 }
 
+.aba span {
+  hyphens: none;
+  overflow-wrap: normal;
+}
+
 .icone-aba {
   width: 24px;
   height: 24px;
   flex: 0 0 auto;
+}
+
+/* A 200% (195 px CSS) as colunas iguais dariam 48 px e partiriam
+   «Comunidade». Em tela estreita cada aba toma a largura do próprio
+   conteúdo: os 4 rótulos cabem juntos, cada um numa linha só. */
+@media (max-width: 320px) {
+  .aba {
+    flex: 1 1 auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .aba span {
+    hyphens: none;
+    overflow-wrap: normal;
+  }
 }
 
 /* Ajuda em Ajustes, no topo do cartão. Fica no HTML, sem rede e sem IA. */
