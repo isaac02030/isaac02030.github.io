@@ -162,8 +162,9 @@
       li.appendChild(marca);
       trilha.appendChild(li);
     });
-    var feitos = Number(grupo && grupo.today_done) || 0;
-    var total = Number(grupo && grupo.participants) || 0;
+    var contagem = M.contagemDoGrupo(grupo);
+    var feitos = contagem.feitos;
+    var total = contagem.total;
     var resumo = maratona.phase === "active"
       ? M.preencher(T.trilhaResumo, { n: maratona.day, m: maratona.duration_days, feitos: feitos, total: total })
       : M.preencher(T.trilhaResumoAntes, { n: maratona.starts_in_days || 1 });
@@ -186,8 +187,9 @@
     document.getElementById("valor-minimo").textContent =
       typeof maratona.description === "string" ? maratona.description : "";
 
-    var feitos = Number(grupo.today_done) || 0;
-    var total = Number(grupo.participants) || 0;
+    var contagem = M.contagemDoGrupo(grupo);
+    var feitos = contagem.feitos;
+    var total = contagem.total;
     var grupoEl = document.getElementById("texto-grupo");
     /* Antes do início ninguém cumpriu nada: não há frase de hoje para mostrar. */
     visivel(grupoEl, maratona.phase !== "upcoming");

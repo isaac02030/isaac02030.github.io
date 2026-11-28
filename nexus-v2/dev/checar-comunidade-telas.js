@@ -185,6 +185,11 @@ if (!/NexusApi\.sairDaComunidade\(slugAtual\)/.test(comJs)) falhas.push("saída:
 if (!/location\.assign\("comunidades\.html" \+ busca\(\)\)/.test(comJs)) falhas.push("saída: volta para a lista ao sair");
 if (!/metodo: "DELETE", auth: true/.test(ler("api.js"))) falhas.push("saída: a chamada da API precisa ser DELETE com auth");
 if (!/sairDaComunidade: function \(slug\)/.test(ler("api.js"))) falhas.push("api.js: falta sairDaComunidade");
+var cssSaida = semComentarios(ler("comunidade.css"));
+if (!/\.dialogo-sair \.botoes \{[\s\S]*?display: flex;[\s\S]*?gap: var\(--space-3\)/.test(cssSaida)) falhas.push("saída: «Sair» e «Agora não» precisam ficar lado a lado em 390 px");
+if (!/\.dialogo-sair \.botoes \.btn \{[\s\S]*?flex: 1 1 0;[\s\S]*?min-height: var\(--target\)/.test(cssSaida)) falhas.push("saída: os dois botões precisam da mesma largura e 44 px");
+if (!/@media \(max-width: 320px\) \{[\s\S]*?\.dialogo-sair \{[\s\S]*?padding-bottom: calc\(16px \+ var\(--safe-bottom\)\)[\s\S]*?\.dialogo-sair \.botoes \{[\s\S]*?flex-direction: column;[\s\S]*?gap: 12px/.test(cssSaida)) falhas.push("saída: a 200% os botões empilham com 12 px e a folha termina com 16 px");
+if (/community_slug: "[^"]+", user_id:/.test(ler("dev/mock-api.js"))) falhas.push("mock: a lista do admin ainda mostra user_id");
 
 /* Comentários (fila do beta, item 4; PR 50 do servidor). Lista chata, 280
    caracteres com o contador do chat, crise antes de gravar, cota do servidor,

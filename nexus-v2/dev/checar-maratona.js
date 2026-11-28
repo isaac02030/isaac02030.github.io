@@ -131,6 +131,19 @@ else {
   igual("trilha: falta do grupo", trilha[2].estado, "x");
   igual("trilha: futuro", trilha[3].estado, "o");
   if (trilha[0].hoje || trilha[2].hoje !== true) falhas.push("ponta da trilha no dia errado");
+
+  /* Caso negado: quem saiu deixa a lista de participantes, mas os check-ins
+     ficam no total do grupo. Nunca «9 de 8», nem na frase, nem na trilha. */
+  var excedente = M.contagemDoGrupo({ participants: 8, today_done: 9 });
+  igual("grupo: total de participantes", excedente.total, 8);
+  igual("grupo: 9 check-ins viram 8", excedente.feitos, 8);
+  igual("grupo: frase limitada", M.preencher(M.TEXTOS.grupoHoje, excedente), "Hoje, 8 de 8 pessoas cumpriram o dia.");
+  var trilhaExcedente = M.estadosDaTrilha(
+    { phase: "active", day: 3, duration_days: 4 },
+    { participants: 8, today_done: 9, days: [{ day: 1, done: 9 }, { day: 2, done: 9 }, { day: 3, done: 9 }] }
+  );
+  igual("trilha: 9 check-ins viram 8", trilhaExcedente[0].feitos, 8);
+  if (trilhaExcedente.some(function (dia) { return dia.feitos > 8; })) falhas.push("a trilha mostra mais gente cumprindo do que participantes");
 }
 
 /* ---------- Rotas do mock ---------- */
@@ -201,6 +214,10 @@ async function casosDoMock() {
   var diaFeito = await pedir("GET", temCenario("/api/community-missions/leitura/" + id, "maratona-dia-feito"), null, pessoa);
   igual("dia feito: participa", diaFeito.json.me.is_participant, true);
   igual("dia feito: estado", diaFeito.json.me.day_done, true);
+  /* Quem saiu sai da lista, mas os check-ins ficam no total do grupo. */
+  var excedenteMock = await pedir("GET", temCenario("/api/community-missions/leitura/" + id, "maratona-excedente"), null, pessoa);
+  igual("excedente: participantes", excedenteMock.json.group.participants, 8);
+  igual("excedente: check-ins no total", excedenteMock.json.group.today_done, 9);
   var convite = await pedir("GET", temCenario("/api/community-missions/leitura", "maratona-convite"), null, pessoa);
   igual("convite: ainda não participa", convite.json.marathons[0].is_participant, false);
   igual("convite: fase", convite.json.marathons[0].phase, "upcoming");

@@ -113,6 +113,16 @@
     return preencher(TEXTOS.diaDe, { n: Math.min(bruto, duracao), m: duracao });
   }
 
+  /* Quem saiu da comunidade sai da lista de participantes, mas os dias que
+     marcou continuam no total do grupo. A tela nunca mostra mais gente tendo
+     cumprido o dia do que gente participando (o caso «9 de 8»). */
+  function contagemDoGrupo(grupo) {
+    var g = grupo || {};
+    var total = Math.max(0, Number(g.participants) || 0);
+    var feitos = Math.max(0, Number(g.today_done) || 0);
+    return { total: total, feitos: Math.min(feitos, total) };
+  }
+
   /* Progresso do grupo, nunca nota individual. «p» quer dizer pouca gente:
      forma diferente, nunca vermelho e nunca apelido. */
   function estadosDaTrilha(maratona, grupo) {
@@ -121,10 +131,10 @@
     var duracao = Math.max(1, Number(m.duration_days) || 7);
     var fase = m.phase || "upcoming";
     var hoje = fase === "active" ? Math.max(1, Math.min(duracao, Number(m.day) || 1)) : (fase === "ended" ? duracao + 1 : 0);
-    var total = Math.max(1, Number(g.participants) || 0);
+    var total = Math.max(1, contagemDoGrupo(g).total);
     var contagens = {};
     (Array.isArray(g.days) ? g.days : []).forEach(function (dia) {
-      if (dia) contagens[Number(dia.day)] = Number(dia.done) || 0;
+      if (dia) contagens[Number(dia.day)] = Math.min(Math.max(0, Number(dia.done) || 0), total);
     });
     var lista = [];
     for (var dia = 1; dia <= duracao; dia++) {
@@ -186,6 +196,7 @@
     preencher: preencher,
     contarPessoas: contarPessoas,
     quando: quando,
+    contagemDoGrupo: contagemDoGrupo,
     estadosDaTrilha: estadosDaTrilha,
     erroDoServidor: erroDoServidor,
     aplicar: aplicar
