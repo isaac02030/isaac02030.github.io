@@ -140,6 +140,8 @@
       </section>
 
       <a class="linha-seta" id="link-merito" href="merito.html"><span data-texto-comunidade="meritoERanking"></span><svg class="seta" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg></a>
+      <!-- Sair fica no fim, em texto, só para quem participa. Sem luz e sem culpa. -->
+      <button type="button" class="btn btn-texto btn-sair" id="link-sair" aria-haspopup="dialog" data-texto-comunidade="sairDaComunidade" hidden></button>
     </section>
   </main>
 
@@ -172,6 +174,16 @@
     <div class="botoes">
       <button type="button" class="btn btn-secundario" id="btn-entrar-maratona" aria-busy="false" data-texto-maratona="entrar"></button>
       <button type="button" class="btn btn-secundario" id="btn-agora-nao-maratona" data-texto-maratona="agoraNao"></button>
+    </div>
+  </dialog>
+
+  <!-- Confirmação curta da saída: o foco começa em «Agora não». -->
+  <dialog class="folha dialogo-sair" id="dialogo-sair" aria-labelledby="titulo-dialogo-sair">
+    <h2 class="folha-titulo" id="titulo-dialogo-sair" data-texto-comunidade="sairTitulo"></h2>
+    <div id="alerta-sair" class="alerta" role="alert" hidden></div>
+    <div class="botoes">
+      <button type="button" class="btn btn-secundario" id="btn-sair-confirmar" aria-busy="false" data-texto-comunidade="sairConfirmar"></button>
+      <button type="button" class="btn btn-secundario" id="btn-sair-agora-nao" data-texto-comunidade="agoraNao"></button>
     </div>
   </dialog>
 

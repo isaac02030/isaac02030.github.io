@@ -2371,6 +2371,11 @@ function marcarMembro(email, slug, cenario) {
   baseMembros(email)[slug] = true;
 }
 
+function desmarcarMembro(email, slug, cenario) {
+  eMembro(email, slug, cenario);
+  delete membrosMock[chaveMembro(email, cenario)][slug];
+}
+
 function areasAtivas(email, cenario) {
   if (temCenario(cenario, "sem-missao")) return [];
   if (temCenario(cenario, "outra-area")) return ["corpo"];
@@ -2437,8 +2442,16 @@ function totalDeApoios(post) {
   return (post.apoiosBase || 0) + (dados ? Object.keys(dados).length : 0);
 }
 
+/* A resposta da API não traz user_id: o servidor manda só is_mine. */
+function postParaResposta(post, email) {
+  var copia = Object.assign({}, post);
+  copia.is_mine = !!(post.user_id != null && usuarios[email] && String(post.user_id) === String(usuarios[email].id));
+  delete copia.user_id;
+  return copia;
+}
+
 function comApoios(post, email) {
-  return Object.assign({}, post, {
+  return Object.assign(postParaResposta(post, email), {
     supports: totalDeApoios(post),
     supported_by_me: !!(apoiosMock[post.id] && apoiosMock[post.id][email])
   });
@@ -2530,7 +2543,7 @@ function publicarMock(email, comunidade, corpo, cenario) {
   if (temCenario(cenario, "post-limite") || hoje >= 3) return { status: 429, dados: { error: "Você já publicou 3 posts nas últimas 24 horas. Tente de novo amanhã.", limit: 3 } };
   var post = { id: proximoPostMock++, community_id: comunidade.id, user_id: usuario.id, content: texto, created_at: new Date().toISOString() };
   publicadosMock.push({ email: email, quando: Date.now(), post: post, username: usuario.username });
-  return { status: 201, dados: { post: post } };
+  return { status: 201, dados: { post: postParaResposta(post, email) } };
 }
 
 var EMOJI_MOCK = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|‍|️|[\u{1F3FB}-\u{1F3FF}])+$/u;
@@ -2640,6 +2653,17 @@ async function responderComunidade(req, caminho, corpo) {
   }
   var recomendada = caminho.match(/^\/api\/communities\/recommended\/(\d+)$/);
   if (recomendada && metodo === "GET") return recomendadasMock(email, recomendada[1], cenario);
+  var saida = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/members\/me$/);
+  if (saida && metodo === "DELETE") {
+    var alvoSaida = comunidadePorSlug(saida[1]);
+    if (!alvoSaida) return { status: 404, dados: { error: "Comunidade não encontrada." } };
+    if (temCenario(cenario, "sair-erro")) return { status: 500, dados: { error: "Não deu para sair agora. Tente de novo daqui a pouco." } };
+    if (temCenario(cenario, "sair-dono")) return { status: 409, dados: { error: "Você cuida desta comunidade. Não dá para sair enquanto for a pessoa responsável por ela.", code: "owner" } };
+    if (!eMembro(email, alvoSaida.slug, cenario)) return { status: 403, dados: { error: "Você já não participa desta comunidade.", code: "not_member" } };
+    desmarcarMembro(email, alvoSaida.slug, cenario);
+    alvoSaida.member_count = Math.max(0, alvoSaida.member_count - 1);
+    return { status: 200, dados: { success: true, left: true, removed: true } };
+  }
   var sub = caminho.match(/^\/api\/communities\/([a-z0-9-]+)\/(posts|highlights|ranking|join)$/);
   if (sub) {
     var alvo = comunidadePorSlug(sub[1]);
@@ -2683,7 +2707,7 @@ async function responderComunidade(req, caminho, corpo) {
         ranking: rankingMock(email, cenario).dados,
         /* Como o servidor: a lista antiga vem sem o total de apoios. */
         posts: posts.slice(0, 20).map(function (p) {
-          var copia = Object.assign({}, p);
+          var copia = postParaResposta(p, email);
           delete copia.apoiosBase;
           return copia;
         }),
