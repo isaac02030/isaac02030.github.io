@@ -35,6 +35,7 @@ else {
   igual("título da folha do celular", T.compartilharTitulo, "Post da comunidade no Nexus");
   igual("cópia sem celular", T.linkCopiado, "Link copiado.");
   igual("erro calmo", T.compartilharErro, "Não foi possível compartilhar agora.");
+  igual("nome do menu", T.maisOpcoes, "Mais opções");
 }
 
 var comJs = semComentarios(ler("comunidade.js"));
@@ -69,15 +70,35 @@ if (!fnCompartilhar || !/T\.compartilharErro/.test(fnCompartilhar)) falhas.push(
 if (!fnCompartilhar || !/aria-busy/.test(fnCompartilhar)) falhas.push("compartilhar: o botão precisa travar enquanto compartilha");
 
 var fnBotao = trecho(comJs, "botaoDeCompartilhar");
-if (!fnBotao || !/className = "btn btn-texto btn-compartilhar"/.test(fnBotao)) falhas.push("compartilhar: botão de texto, sem luz própria");
+if (!fnBotao || !/className = "btn btn-discreto btn-compartilhar"/.test(fnBotao)) falhas.push("compartilhar: botão discreto, cinza e sem luz própria");
 if (!fnBotao || !/icone\(DESENHOS\.compartilhar\)/.test(fnBotao) || !/textContent = T\.compartilhar/.test(fnBotao)) falhas.push("compartilhar: falta o desenho e a palavra «Compartilhar»");
 if (!fnBotao || !/setAttribute\("aria-label", T\.compartilharPost\)/.test(fnBotao)) falhas.push("compartilhar: o nome acessível é «Compartilhar post»");
 if (!/btn-luz/.test(fnBotao) && !/btn-luz/.test(trecho(comJs, "compartilharPost"))) {
   /* Está certo: nenhuma luz nova. */
 } else falhas.push("compartilhar: não pode acender uma segunda luz");
-if (!/rodape\.appendChild\(botaoDeCompartilhar\(post\)\);/.test(comJs)) falhas.push("compartilhar: falta um botão por post visível");
+if (!/secundarias\.appendChild\(botaoDeCompartilhar\(post\)\);/.test(comJs)) falhas.push("compartilhar: falta um botão por post visível");
 if (/innerHTML\s*=/.test(comJs)) falhas.push("compartilhar: texto de outra pessoa nunca entra por innerHTML");
-if (!/\.aviso-compartilhar \{[\s\S]*?color: var\(--text-muted\)/.test(css)) falhas.push("compartilhar: o aviso de cópia precisa ser neutro");
+
+/* Revisão da Clara (03:05): as duas ações discretas ficam à direita, juntas,
+   em cinza e sem sublinhado; a 200% vão para o menu «Mais». */
+if (!/btn-discreto \{[\s\S]*?color: var\(--text-muted\);[\s\S]*?text-decoration: none;/.test(css)) falhas.push("rodapé: as ações discretas precisam ser cinza e sem sublinhado");
+if (!/\.acoes-principais,\s*\.acoes-secundarias \{/.test(css) || !/\.acoes-secundarias \{\s*margin-left: auto;/.test(css)) falhas.push("rodapé: «Comentários»/«Apoiar» à esquerda e as discretas à direita");
+if (!/mais: "M5 12h\.01M12 12h\.01M19 12h\.01"/.test(comJs)) falhas.push("rodapé: falta o desenho de três pontos do «Mais»");
+var fnMais = trecho(comJs, "botaoDeMais");
+if (!fnMais || !/icone\(DESENHOS\.mais\)/.test(fnMais) || !/setAttribute\("aria-label", T\.maisOpcoes\)/.test(fnMais)) falhas.push("rodapé: o «Mais» precisa dos três pontos e do nome «Mais opções»");
+if (!/secundarias\.appendChild\(botaoDeMais\(post, secundarias\)\);/.test(comJs)) falhas.push("rodapé: falta o botão «Mais» por post");
+if (!/function abrirFolhaMais\(/.test(comJs) || !/function ligarFolhaMais\(/.test(comJs) || !/ligarFolhaMais\(\);/.test(comJs)) falhas.push("rodapé: a folha pequena do «Mais» não está ligada");
+if (!/id="folha-mais"/.test(comHtml) || !/id="btn-mais-compartilhar"/.test(comHtml) || !/id="btn-mais-denunciar"/.test(comHtml)) falhas.push("rodapé: a folha do «Mais» precisa dos dois botões");
+if (!/data-texto-comunidade="agoraNao"/.test(comHtml)) falhas.push("rodapé: a folha do «Mais» precisa de «Agora não» para fechar");
+if (!/@media \(max-width: 320px\) \{[\s\S]*?\.post-rodape \.btn-compartilhar,\s*\.post-rodape \.btn-denunciar \{\s*display: none;[\s\S]*?\.post-rodape \.btn-mais \{\s*display: inline-flex;/.test(css)) falhas.push("rodapé: a 200% as discretas precisam ir para o «Mais»");
+
+/* O aviso de cópia é fixo no pé, acima da barra de abas, e some em 3 s. */
+var fnAviso = trecho(comJs, "avisoDeCompartilhamento");
+if (!fnAviso || !/getElementById\("aviso-compartilhar"\)/.test(fnAviso) || !/textContent = texto/.test(fnAviso)) falhas.push("aviso: precisa usar textContent no aviso fixo");
+if (!fnAviso || !/setTimeout\(function \(\) \{[\s\S]*?hidden = true;[\s\S]*?\}, 3000\)/.test(fnAviso)) falhas.push("aviso: precisa sumir depois de 3 s");
+if (!/class="aviso-compartilhar" id="aviso-compartilhar" role="status" hidden/.test(comHtml)) falhas.push("aviso: falta o parágrafo role=status escondido no HTML");
+if (!/\.aviso-compartilhar \{[\s\S]*?position: fixed;[\s\S]*?bottom: calc\(var\(--altura-abas\)/.test(css)) falhas.push("aviso: precisa ficar fixo acima da barra de abas");
+if (!/\.aviso-compartilhar \{[\s\S]*?color: var\(--text-muted\)/.test(css)) falhas.push("aviso: o aviso de cópia precisa ser neutro");
 
 /* O link abre a comunidade e encontra o post, sem apelido nem ranking. */
 var fnIr = trecho(comJs, "irParaPostCompartilhado");
@@ -96,4 +117,4 @@ if (falhas.length) {
   console.error("FALHOU (" + falhas.length + "):\n- " + falhas.join("\n- "));
   process.exit(1);
 }
-console.log("ok: Compartilhar com botão do celular, link limpo, post à vista e login para quem não tem conta");
+console.log("ok: Compartilhar com botão do celular, link limpo, rodapé discreto, menu «Mais», aviso fixo e login para quem não tem conta");

@@ -22,6 +22,8 @@ var observador = null;
 var usandoListaAntiga = false;
 var comentariosAbertos = {};
 var comentarioDaFolha = null;
+var avisoCompartilharTimer = null;
+var acoesDaFolhaMais = null;
 
 function hostDeDesenvolvimento() {
   return B.dev();
@@ -51,6 +53,8 @@ var DESENHOS = {
   mao: B.DESENHOS.mao,
   /* Três pontos ligados: o desenho do botão do celular, sem cor própria. */
   compartilhar: "M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4",
+  /* Três pontos em linha: o menu «Mais» quando o rodapé não cabe. */
+  mais: "M5 12h.01M12 12h.01M19 12h.01",
   /* Olho fechado: o post está escondido. Nada de cor de alarme. */
   escondido: "M3 3l18 18M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-2.9 3.9M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2"
 };
@@ -275,16 +279,19 @@ function linkDoPost(post) {
   return url.toString();
 }
 
-function avisoDeCompartilhamento(botao, texto) {
-  var rodape = botao.parentNode;
-  var aviso = rodape && rodape.querySelector(".aviso-compartilhar");
-  if (!aviso) {
-    aviso = document.createElement("p");
-    aviso.className = "aviso-compartilhar";
-    aviso.setAttribute("role", "status");
-    if (rodape) rodape.appendChild(aviso);
-  }
-  if (aviso) aviso.textContent = texto;
+/* Aviso curto e fixo, no pé da tela acima da barra de abas: não empurra a
+   lista. role="status" para leitor de tela e some depois de 3 s. */
+function avisoDeCompartilhamento(texto) {
+  var aviso = document.getElementById("aviso-compartilhar");
+  if (!aviso) return;
+  if (avisoCompartilharTimer) clearTimeout(avisoCompartilharTimer);
+  aviso.textContent = texto;
+  aviso.hidden = false;
+  avisoCompartilharTimer = setTimeout(function () {
+    aviso.hidden = true;
+    aviso.textContent = "";
+    avisoCompartilharTimer = null;
+  }, 3000);
 }
 
 async function compartilharPost(post, botao) {
@@ -303,7 +310,7 @@ async function compartilharPost(post, botao) {
     }
     if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
       await navigator.clipboard.writeText(url);
-      avisoDeCompartilhamento(botao, T.linkCopiado);
+      avisoDeCompartilhamento(T.linkCopiado);
       return;
     }
     var campo = document.createElement("textarea");
@@ -317,18 +324,20 @@ async function compartilharPost(post, botao) {
     try { copiado = document.execCommand("copy") === true; } catch (erro) { copiado = false; }
     campo.remove();
     if (!copiado) throw new Error("cópia falhou");
-    avisoDeCompartilhamento(botao, T.linkCopiado);
+    avisoDeCompartilhamento(T.linkCopiado);
   } catch (erro) {
-    avisoDeCompartilhamento(botao, T.compartilharErro);
+    avisoDeCompartilhamento(T.compartilharErro);
   } finally {
     botao.removeAttribute("aria-busy");
   }
 }
 
+/* À direita do rodapé: texto pequeno, cinza e sem sublinhado de destaque.
+   O desenho continua presente (20 px) quando há espaço para ele. */
 function botaoDeCompartilhar(post) {
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-texto btn-compartilhar";
+  botao.className = "btn btn-discreto btn-compartilhar";
   botao.appendChild(icone(DESENHOS.compartilhar));
   var rotulo = document.createElement("span");
   rotulo.textContent = T.compartilhar;
@@ -338,6 +347,82 @@ function botaoDeCompartilhar(post) {
     compartilharPost(post, botao);
   });
   return botao;
+}
+
+function botaoDeDenunciar(post, autorId) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-discreto btn-denunciar";
+  botao.textContent = T.denunciar;
+  if (autorId) botao.setAttribute("aria-describedby", autorId);
+  botao.setAttribute("aria-haspopup", "dialog");
+  botao.addEventListener("click", function () {
+    abrirFolha(post, botao);
+  });
+  return botao;
+}
+
+/* Quando o rodapé não cabe, as duas ações discretas vão para uma folha
+   pequena. O botão é só o desenho de três pontos, com nome acessível. */
+function botaoDeMais(post, acoes) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-discreto btn-mais";
+  botao.appendChild(icone(DESENHOS.mais));
+  botao.setAttribute("aria-label", T.maisOpcoes);
+  botao.setAttribute("aria-haspopup", "dialog");
+  botao.addEventListener("click", function () {
+    abrirFolhaMais(post, acoes, botao);
+  });
+  return botao;
+}
+
+function abrirFolhaMais(post, acoes, botao) {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  acoesDaFolhaMais = { post: post, acoes: acoes, botao: botao };
+  folha.setAttribute("aria-label", T.maisOpcoes);
+  if (typeof folha.showModal === "function") folha.showModal();
+  else folha.setAttribute("open", "");
+  var primeiro = folha.querySelector("#btn-mais-compartilhar");
+  if (primeiro) primeiro.focus();
+}
+
+function fecharFolhaMais() {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  if (typeof folha.close === "function") folha.close();
+  else folha.removeAttribute("open");
+  if (acoesDaFolhaMais && acoesDaFolhaMais.botao) NexusAbas.focar(acoesDaFolhaMais.botao);
+  acoesDaFolhaMais = null;
+}
+
+function ligarFolhaMais() {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  var compartilhar = folha.querySelector("#btn-mais-compartilhar");
+  var denunciar = folha.querySelector("#btn-mais-denunciar");
+  var fechar = folha.querySelector("#btn-mais-fechar");
+  if (compartilhar) compartilhar.addEventListener("click", function () {
+    var atual = acoesDaFolhaMais;
+    fecharFolhaMais();
+    if (atual && atual.post) {
+      var botao = atual.acoes.querySelector(".btn-compartilhar");
+      if (botao) compartilharPost(atual.post, botao);
+    }
+  });
+  if (denunciar) denunciar.addEventListener("click", function () {
+    var atual = acoesDaFolhaMais;
+    fecharFolhaMais();
+    if (atual && atual.post) {
+      var botao = atual.acoes.querySelector(".btn-denunciar");
+      if (botao) abrirFolha(atual.post, botao);
+    }
+  });
+  if (fechar) fechar.addEventListener("click", fecharFolhaMais);
+  folha.addEventListener("cancel", function () {
+    acoesDaFolhaMais = null;
+  });
 }
 
 /* O link de um post abre a comunidade com o post à vista, sem apelido nem
@@ -386,23 +471,21 @@ function itemDoPost(post, destaque) {
 
   var rodape = document.createElement("div");
   rodape.className = "post-rodape";
-  criarComentariosDoPost(post, item, rodape);
+
+  var principais = document.createElement("div");
+  principais.className = "acoes-principais";
+  criarComentariosDoPost(post, item, principais);
   var apoio = apoioDoPost(post, meu);
-  if (apoio) rodape.appendChild(apoio);
+  if (apoio) principais.appendChild(apoio);
+  rodape.appendChild(principais);
+
+  var secundarias = document.createElement("div");
+  secundarias.className = "acoes-secundarias";
+  secundarias.appendChild(botaoDeCompartilhar(post));
   /* «Denunciar» não aparece no próprio post. */
-  if (!meu) {
-    var botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "btn btn-texto btn-denunciar";
-    botao.textContent = T.denunciar;
-    if (idAutor) botao.setAttribute("aria-describedby", idAutor);
-    botao.setAttribute("aria-haspopup", "dialog");
-    botao.addEventListener("click", function () {
-      abrirFolha(post, botao);
-    });
-    rodape.appendChild(botao);
-  }
-  rodape.appendChild(botaoDeCompartilhar(post));
+  if (!meu) secundarias.appendChild(botaoDeDenunciar(post, idAutor));
+  secundarias.appendChild(botaoDeMais(post, secundarias));
+  rodape.appendChild(secundarias);
   item.appendChild(rodape);
   return item;
 }
@@ -1469,6 +1552,7 @@ function iniciar() {
   });
   document.getElementById("texto-post").setAttribute("placeholder", T.escrevaDica);
   ligarFolha();
+  ligarFolhaMais();
   ligarSaida();
   NexusMaratonaLinha.iniciar();
   NexusAbas.montar("comunidade");

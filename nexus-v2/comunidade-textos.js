@@ -254,7 +254,10 @@
     compartilharPost: "Compartilhar post",
     compartilharTitulo: "Post da comunidade no Nexus",
     linkCopiado: "Link copiado.",
-    compartilharErro: "Não foi possível compartilhar agora."
+    compartilharErro: "Não foi possível compartilhar agora.",
+    /* Rodapé do post: o nome acessível do menu que guarda as ações discretas
+       quando o rodapé não cabe (revisão da Clara das 03:05). */
+    maisOpcoes: "Mais opções"
   };
 
   /* Áreas fixas do servidor (lib/community-access.js). */

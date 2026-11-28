@@ -141,8 +141,20 @@ body:has(.tela-comunidade) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: 4px;
   min-height: var(--target);
+}
+
+.acoes-principais,
+.acoes-secundarias {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.acoes-secundarias {
+  margin-left: auto;
 }
 
 .post-data {
@@ -150,13 +162,35 @@ body:has(.tela-comunidade) {
   color: var(--text-muted);
 }
 
-/* «Denunciar»: texto pequeno e discreto, no canto do rodapé, área de toque 44×44. */
-.btn-denunciar {
-  margin-left: auto;
+/* Ações discretas do rodapé: mesma caixa de toque, cinza e sem sublinhado
+   de destaque. «Comentários» e «Apoiar» ficam à esquerda; estas, à direita. */
+.btn-discreto {
   font: var(--text-small);
   color: var(--text-muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
+  padding: 0 4px;
+  gap: 4px;
+}
+
+.btn-discreto .icone {
+  width: 1.25em;
+  height: 1.25em;
+  flex: 0 0 auto;
+}
+
+.btn-denunciar {
+  font: var(--text-small);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.btn-comentarios {
+  padding: 0 4px;
+}
+
+/* Só aparece quando «Compartilhar» e «Denunciar» não cabem na linha. */
+.btn-mais {
+  display: none;
 }
 
 .post-denunciado {
@@ -367,6 +401,35 @@ body:has(.tela-comunidade) {
   .dialogo-sair .botoes .btn {
     width: 100%;
   }
+}
+
+/* Folha do «Mais»: só as duas ações discretas e um fechar. Nenhuma luz. */
+.folha-mais {
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + var(--safe-bottom));
+}
+
+.folha-mais-acoes {
+  display: flex;
+  flex-direction: column;
+}
+
+.folha-mais .btn {
+  width: 100%;
+  min-height: var(--target);
+  justify-content: flex-start;
+  text-align: left;
+  font: var(--text-body);
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--borda-cartao);
+}
+
+.folha-mais .btn-mais-fechar {
+  justify-content: center;
+  margin-top: var(--space-3);
+  border-bottom: 0;
+  color: var(--text-muted);
+  font: var(--text-small);
 }
 
 /* Sem motivo escolhido, «Enviar denúncia» fica apagado (e não envia).
@@ -862,11 +925,22 @@ body:has(.tela-comunidade) {
   color: var(--text);
 }
 
+/* Aviso de cópia: fixo no pé, acima da barra de abas. Não empurra a lista. */
 .aviso-compartilhar {
-  flex: 1 0 100%;
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: calc(var(--altura-abas) + var(--safe-bottom) + 12px);
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
   margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--borda-cartao);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
   font: var(--text-small);
   color: var(--text-muted);
+  text-align: center;
 }
 
 /* ---------- Comentários: lista chata, sem respostas aninhadas ---------- */
@@ -1234,5 +1308,31 @@ body:has(.tela-comunidade) {
     padding: var(--space-1) 0 0;
     border: 0;
     border-top: 1px solid var(--borda-cartao);
+  }
+
+  /* A 200% as duas ações discretas não cabem ao lado de «Comentários» e
+     «Apoiar»: ficam no menu «Mais», de três pontos, com nome acessível. */
+  .post-rodape .btn-compartilhar,
+  .post-rodape .btn-denunciar {
+    display: none;
+  }
+
+  .post-rodape .btn-mais {
+    display: inline-flex;
+  }
+
+  .post-rodape {
+    gap: 2px;
+  }
+
+  .acoes-principais {
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    gap: 2px;
+  }
+
+  .acoes-secundarias {
+    flex: 0 0 var(--target);
+    gap: 2px;
   }
 }
