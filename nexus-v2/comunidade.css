@@ -1224,11 +1224,6 @@ body:has(.tela-comunidade) {
    coluna de 119 px, com «este» sozinho. Em ≤ 320 px o destaque não recua
    os comentários e o aviso é só texto com uma divisória. */
 @media (max-width: 320px) {
-  .tela-comunidade {
-    padding-right: 8px;
-    padding-left: 8px;
-  }
-
   .posts.destaques {
     padding-right: 0;
     padding-left: 0;

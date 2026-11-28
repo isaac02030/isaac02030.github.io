@@ -12,7 +12,6 @@ else {
      uma regra interna com o fecho do @media. */
   var bloco = css.slice(inicio);
   if (!/\.posts\.destaques\s*\{[^}]*padding-right:\s*0[^}]*padding-left:\s*0/.test(bloco)) falhas.push("o destaque ainda recua os comentários a 320 px");
-  if (!/\.tela-comunidade\s*\{[^}]*padding-left:\s*8px/.test(bloco)) falhas.push("o recuo lateral da tela não foi reduzido a 320 px");
   if (!/\.cartao-comentario-escondido\s*\{[^}]*border:\s*0[^}]*border-top:\s*1px solid var\(--borda-cartao\)/.test(bloco)) falhas.push("o aviso ainda tem caixa: tire a borda e deixe só a divisória");
   if (!/padding:\s*var\(--space-1\)\s+0\s+0/.test(bloco)) falhas.push("o aviso ainda tem recuo lateral próprio");
 }
