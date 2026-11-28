@@ -1088,21 +1088,65 @@ function itemDoComentario(estado, comentario) {
   var apoio = apoioDoComentario(estado, comentario);
   if (apoio) rodape.appendChild(apoio);
   if (!meu) {
-    var botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "btn btn-texto btn-denunciar btn-denunciar-comentario";
-    botao.textContent = T.denunciar;
-    if (idAutor) botao.setAttribute("aria-describedby", idAutor);
-    botao.setAttribute("aria-haspopup", "dialog");
-    botao.addEventListener("click", function () {
-      abrirFolha(estado.post, botao, comentario);
+    var denunciar = document.createElement("button");
+    denunciar.type = "button";
+    denunciar.className = "btn btn-texto btn-denunciar btn-denunciar-comentario";
+    denunciar.textContent = T.denunciar;
+    if (idAutor) denunciar.setAttribute("aria-describedby", idAutor);
+    denunciar.setAttribute("aria-haspopup", "dialog");
+    denunciar.addEventListener("click", function () {
+      abrirFolha(estado.post, denunciar, comentario);
     });
-    rodape.appendChild(botao);
+    /* O rodapé do comentário mostra só «Apoiar», como pediu o Isaac. A
+       denúncia continua acessível por teclado/leitor de tela e, no toque,
+       por pressão longa ou menu de contexto — mesma folha, sem desenho novo. */
+    rodape.appendChild(denunciar);
+    ligarDenunciaPorToque(item, denunciar);
   }
   item.appendChild(cabeca);
   item.appendChild(texto);
   item.appendChild(rodape);
   return item;
+}
+
+/* Denúncia de comentário sem botão visível: pressão longa no celular ou menu
+   de contexto no mouse/teclado. Um toque comum, rolagem e os botões de apoio
+   não abrem nada; a folha única de denúncia continua a mesma. */
+function ligarDenunciaPorToque(item, botao) {
+  var inicio = null;
+  var timer = null;
+  function cancelar() {
+    if (timer) clearTimeout(timer);
+    timer = null;
+    inicio = null;
+  }
+  function abrir() {
+    cancelar();
+    var folha = document.getElementById("folha-denuncia");
+    if (folha && folha.open) return;
+    botao.click();
+  }
+  function eAcao(alvo) {
+    return !!(alvo && alvo.closest && alvo.closest("a, button, input, textarea, select"));
+  }
+  item.addEventListener("touchstart", function (event) {
+    if (eAcao(event.target) || event.touches.length !== 1) return;
+    var toque = event.touches[0];
+    inicio = { x: toque.clientX, y: toque.clientY };
+    timer = setTimeout(abrir, 500);
+  }, { passive: true });
+  item.addEventListener("touchmove", function (event) {
+    if (!timer || !inicio || !event.touches.length) return;
+    var toque = event.touches[0];
+    if (Math.abs(toque.clientX - inicio.x) > 10 || Math.abs(toque.clientY - inicio.y) > 10) cancelar();
+  }, { passive: true });
+  item.addEventListener("touchend", cancelar, { passive: true });
+  item.addEventListener("touchcancel", cancelar, { passive: true });
+  item.addEventListener("contextmenu", function (event) {
+    if (eAcao(event.target)) return;
+    event.preventDefault();
+    abrir();
+  });
 }
 
 function apoioDoComentario(estado, comentario) {
