@@ -194,7 +194,7 @@ if (funcaoApi && funcaoSaida) {
   quer(restantes.join(",") === "nexus_v2_tema", "Sair: devia ficar só o tema, ficou " + restantes.join(","));
   quer(Object.keys(ctxSaida.sessionStorage.dados).length === 0, "Sair: sobrou chave na sessão");
 }
-quer(sw.indexOf('CACHE = "nexus-v2-v54"') !== -1, "o cache não está em nexus-v2-v54");
+quer(sw.indexOf('CACHE = "nexus-v2-v55"') !== -1, "o cache não está em nexus-v2-v55");
 ["ajustes.html", "ajustes.js", "hoje.html", "hoje.js", "missao.html", "missao.css", "checkin.html", "checkin.js", "dia-dificil.html", "dia-dificil.js", "comunidade.html", "comunidade.js", "comunidades.html", "comunidades.js", "novo-titulo.html", "novo-titulo.css", "novo-titulo.js", "titulo-novo.js", "comunidade-textos.js", "icons/urso-contente-claro.svg"].forEach(function (nome) {
   quer(sw.indexOf('"./' + nome + '"') !== -1, "sw.js sem " + nome);
 });

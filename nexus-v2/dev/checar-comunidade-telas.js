@@ -191,6 +191,32 @@ if (!/\.dialogo-sair \.botoes \.btn \{[\s\S]*?flex: 1 1 0;[\s\S]*?min-height: va
 if (!/@media \(max-width: 320px\) \{[\s\S]*?\.dialogo-sair \{[\s\S]*?padding-bottom: calc\(16px \+ var\(--safe-bottom\)\)[\s\S]*?\.dialogo-sair \.botoes \{[\s\S]*?flex-direction: column;[\s\S]*?gap: 12px/.test(cssSaida)) falhas.push("saída: a 200% os botões empilham com 12 px e a folha termina com 16 px");
 if (/community_slug: "[^"]+", user_id:/.test(ler("dev/mock-api.js"))) falhas.push("mock: a lista do admin ainda mostra user_id");
 
+/* Comentários (fila do beta, item 4; PR 50 do servidor). Lista chata, 280
+   caracteres com o contador do chat, crise antes de gravar, cota do servidor,
+   denúncia na mesma folha e «Apoiar» sem lista de quem apoiou. */
+if (!/id="btn-comentarios-"|btn-comentarios-\d/.test(comJs) && !/btn-comentarios-/.test(comJs)) falhas.push("comentários: falta o botão que abre a lista");
+if (!/aria-expanded/.test(comJs) || !/aria-controls/.test(comJs)) falhas.push("comentários: o botão precisa dizer se a lista está aberta");
+if (!/btn btn-texto btn-comentarios/.test(comJs)) falhas.push("comentários: o botão é de texto, sem luz nova");
+if (!/campo\.maxLength = 280/.test(comJs) || !/window\.NexusNota\.ligar\(campo\.id, contador\.id, avisoContador\.id\)/.test(comJs)) falhas.push("comentários: contador de 280 do mesmo molde do chat");
+if (!/window\.NexusNota\.passou\(texto\)/.test(comJs)) falhas.push("comentários: limite de 280 antes de enviar");
+if (!/dados\.crisis === true[\s\S]*?B\.abrirAjuda\(\)/.test(comJs)) falhas.push("comentários: crise abre a ajuda e não finge enviar");
+if (!/NexusApi\.escreverComentario\(slugAtual, estado\.post\.id, texto\)/.test(comJs)) falhas.push("comentários: falta a chamada da API");
+if (!/aria-pressed/.test(comJs) || !/NexusApi\.apoiarComentario/.test(comJs)) falhas.push("comentários: «Apoiar» liga e desliga por comentário");
+if (!/denunciarComentario: function/.test(ler("api.js")) || !/comentarioDaFolha \?/.test(comJs)) falhas.push("comentários: a denúncia usa a rota do comentário");
+if (/comentario\.supporters|quemApoiou|listaDeApoiadores/.test(comJs)) falhas.push("comentários: ninguém vê quem apoiou");
+if (!/comentariosDoPost: function/.test(ler("api.js")) || !/apoiarComentario: function/.test(ler("api.js"))) falhas.push("api.js: faltam os contratos dos comentários");
+if (!M.contarComentarios || M.contarComentarios(1) !== "1 comentário" || M.contarComentarios(4) !== "4 comentários") falhas.push("comentários: o contador no singular e no plural");
+
+/* Revisão da Clara (28/11): escondido sem olho e com uma frase corrida;
+   «Apoiar» igual ao dos posts, sem sublinhado e com o mesmo aria-label. */
+if (M.TEXTOS.apoioComentario !== "Apoiar" || M.TEXTOS.apoioComentarioRotulo !== "Apoiar comentário, {apoios}") falhas.push("comentários: o botão diz «Apoiar» e o nome acessível diz «Apoiar comentário, N apoios»");
+if (!M.textoDoComentarioEscondido || M.textoDoComentarioEscondido({ hidden_reason: "ofensa" }) !== "Seu comentário foi escondido por enquanto. Motivo mais citado: ofensa. Ninguém além de você vê este comentário.") falhas.push("comentários: a frase do escondido não está completa ou não usa o motivo do servidor");
+if (M.textoDoComentarioEscondido && M.textoDoComentarioEscondido({}) !== "Seu comentário foi escondido por enquanto. Ninguém além de você vê este comentário.") falhas.push("comentários: sem motivo, o aviso não pode inventar um");
+var inicioCartao = comJs.indexOf("function cartaoEscondidoComentario(");
+var cartaoEscondido = inicioCartao === -1 ? "" : comJs.slice(inicioCartao, comJs.indexOf("\n}\n", inicioCartao) + 2);
+if (!/textContent = C\.textoDoComentarioEscondido\(comentario\)/.test(cartaoEscondido) || /icone\(/.test(cartaoEscondido)) falhas.push("comentários: o aviso escondido é uma frase só, sem ícone de olho");
+if (!/botao\.className = "btn btn-apoiar btn-apoiar-comentario"/.test(comJs)) falhas.push("comentários: «Apoiar» precisa ter a mesma caixa do «Apoiar» dos posts, sem btn-texto");
+
 /* As portas antigas saem: a comunidade é a 3.ª aba, sem linha nem atalho. */
 if (/id="linha-comunidades"|linha-comunidades/.test(ler("missao.html") + ler("missao.css"))) falhas.push("Missão: a linha «Comunidades» precisa sair");
 if (/link-comunidades|pintarAtalhoComunidades/.test(ler("hoje.html") + ler("hoje.js"))) falhas.push("Hoje: o atalho da comunidade precisa sair");
@@ -203,7 +229,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v54"') === -1) falhas.push("o cache não está em nexus-v2-v54");
+if (sw.indexOf('CACHE = "nexus-v2-v55"') === -1) falhas.push("o cache não está em nexus-v2-v55");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });
@@ -380,6 +406,41 @@ async function casosDoMock() {
   igual("apoiar de novo", (await pedir("POST", "/api/communities/leitura/posts/62/support", null, pessoa)).status, 409);
   igual("tirar o apoio", (await pedir("DELETE", "/api/communities/leitura/posts/62/support", null, pessoa)).json.supported, false);
 
+  /* Comentários: leitura aberta, escrita com membro e missão, cota e crise
+     do servidor, denúncia, apoio sem lista de quem apoiou e nenhum user_id. */
+  var caminhoComentarios = "/api/communities/leitura/posts/62/comments";
+  igual("comentários sem login", (await pedir("GET", caminhoComentarios)).status, 401);
+  var listaComentarios = await pedir("GET", caminhoComentarios, null, pessoa);
+  igual("comentários: leitura", listaComentarios.status, 200);
+  igual("comentários: mais antigos primeiro", listaComentarios.json.comments.length >= 2, true);
+  igual("comentários: nenhum é meu", listaComentarios.json.comments.some(function (c) { return c.is_mine === true; }), false);
+  semId("comentários", listaComentarios.json);
+  semQuemApoiou("comentários", listaComentarios.json);
+  var primeiroComentario = listaComentarios.json.comments[0];
+  igual("comentários: vazio", (await pedir("GET", caminhoComentarios + "?cenario=comentarios-vazios", null, pessoa)).json.comments.length, 0);
+  igual("comentários: sem a migração", (await pedir("GET", caminhoComentarios + "?cenario=comentarios-indisponivel", null, pessoa)).status, 503);
+  igual("comentários: crise não grava", (await pedir("POST", caminhoComentarios + "?cenario=comentarios-crise", { content: "texto de crise" }, pessoa)).json.crisis, true);
+  igual("comentários: a crise não entrou na lista", (await pedir("GET", caminhoComentarios, null, pessoa)).bruto.indexOf("texto de crise") === -1, true);
+  igual("comentários: cota de 10", (await pedir("POST", caminhoComentarios + "?cenario=comentarios-limite", { content: "dica" }, pessoa)).status, 429);
+  igual("comentários: sem missão da área", (await pedir("POST", caminhoComentarios + "?cenario=outra-area", { content: "dica" }, pessoa)).json.code, "other_area");
+  igual("comentários: Alimentação só lê", (await pedir("POST", "/api/communities/alimentacao/posts/50/comments", { content: "dica" }, pessoa)).json.code, "read_only");
+  var escrito = await pedir("POST", caminhoComentarios, { content: "Uma dica curta para quem está começando." }, pessoa);
+  igual("comentários: escrever", escrito.status, 201);
+  igual("comentários: o meu marcado", escrito.json.comment.is_mine, true);
+  semId("comentário escrito", escrito.json);
+  semQuemApoiou("comentário escrito", escrito.json);
+  igual("comentários: aparece na lista", (await pedir("GET", caminhoComentarios, null, pessoa)).bruto.indexOf("Uma dica curta") !== -1, true);
+  igual("comentários: denunciar o próprio", (await pedir("POST", caminhoComentarios + "/" + escrito.json.comment.id + "/report", { reason: "spam" }, pessoa)).status, 400);
+  var outraPessoa = await entrar("outra-pessoa@exemplo.com");
+  igual("comentários: apoiar", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/support", null, outraPessoa)).status, 201);
+  igual("comentários: apoiar de novo", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/support", null, outraPessoa)).status, 409);
+  igual("comentários: tirar o apoio", (await pedir("DELETE", caminhoComentarios + "/" + primeiroComentario.id + "/support", null, outraPessoa)).json.supported, false);
+  igual("comentários: apoio próprio", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/support?cenario=comentarios-apoio-proprio", null, outraPessoa)).json.code, "own_comment");
+  igual("comentários: denúncia", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/report", { reason: "ofensa" }, outraPessoa)).json.reported, true);
+  igual("comentários: denúncia repetida", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/report", { reason: "ofensa" }, outraPessoa)).status, 409);
+  igual("comentários: denúncia com crise", (await pedir("POST", caminhoComentarios + "/" + primeiroComentario.id + "/report?cenario=comentarios-denuncia-crise", { reason: "ofensa" }, outraPessoa)).json.crisis, true);
+  igual("comentários: escondido só para o autor", (await pedir("GET", caminhoComentarios + "?cenario=comentarios-escondido", null, pessoa)).json.comments.some(function (c) { return c.hidden === true && typeof c.hidden_message === "string"; }), true);
+
   /* Saída da comunidade: só a própria pessoa, dona não sai, posts ficam. */
   igual("saída sem login", (await pedir("DELETE", "/api/communities/leitura/members/me")).status, 401);
   igual("saída da responsável: 409", (await pedir("DELETE", "/api/communities/leitura/members/me?cenario=sair-dono", null, pessoa)).json.code, "owner");
@@ -421,5 +482,5 @@ esperarMock(50).then(casosDoMock).catch(function (erro) {
     console.error("FALHOU:\n- " + falhas.join("\n- "));
     process.exit(1);
   }
-  console.log("ok: lista por área, comunidade por dentro, criar, mérito e ranking, portas na Missão e no Hoje, e casos negados (Alimentação, sem missão da área, criar sem 30 dias, quem apoiou)");
+  console.log("ok: lista por área, comunidade por dentro, comentários, saída, criar, mérito e ranking, portas na Missão e no Hoje, e casos negados (Alimentação, sem missão da área, criar sem 30 dias, limite de comentários, quem apoiou)");
 });

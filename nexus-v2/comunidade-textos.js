@@ -218,7 +218,37 @@
     umAno: "1 ano",
     variosAnos: "{n} anos",
     pontosEMoedas: "Pontos de esforço e moedas",
-    aindaNao: "Ainda não disponível"
+    aindaNao: "Ainda não disponível",
+
+    /* NOVOS (fila do beta, item 4; PR 50 do servidor). Comentários são uma
+       lista chata, sem respostas aninhadas. As frases do servidor (limite,
+       crise, escondido) chegam na resposta e entram por textContent. */
+    comentarios: "Comentários",
+    comentariosAbrindo: "Abrindo comentários…",
+    comentariosVazios: "Ainda não há comentários. Comece a conversa.",
+    comentariosErro: "Não foi possível abrir os comentários. Tente de novo.",
+    comentariosSemRede: "Sem internet. Os comentários não abriram.",
+    comentariosSoLeitura: "Você pode ler os comentários, mas não escrever.",
+    escrevaComentario: "Escreva um comentário",
+    enviarComentario: "Enviar comentário",
+    enviandoComentario: "Enviando…",
+    comentarioEnviado: "Comentário enviado.",
+    comentarioVazio: "Escreva alguma coisa antes de enviar.",
+    comentarioErro: "Não foi possível enviar agora. Tente de novo.",
+    comentarioSemRede: "Sem internet. O comentário não foi enviado.",
+    comentarioLimite: "Você já enviou 10 comentários nas últimas 24 horas. Tente de novo mais tarde.",
+    comentarioIndisponivel: "Os comentários ainda não estão disponíveis. Tente mais tarde.",
+    comentarioEscondido: "Seu comentário foi escondido por enquanto.",
+    comentarioEscondidoEquipe: "Ninguém além de você vê este comentário.",
+    umComentario: "1 comentário",
+    variosComentarios: "{n} comentários",
+    apoioComentario: "Apoiar",
+    apoioComentarioRotulo: "Apoiar comentário, {apoios}",
+    apoioComentarioErro: "Não foi possível apoiar agora. Tente de novo.",
+    apoioComentarioSemRede: "Sem internet. O apoio não foi registrado.",
+    apoioComentarioProprio: "Você não pode apoiar o seu próprio comentário.",
+    denunciaComentarioTitulo: "Denunciar comentário",
+    fecharComentarios: "Fechar comentários"
   };
 
   /* Áreas fixas do servidor (lib/community-access.js). */
@@ -274,6 +304,16 @@
     return achado ? preencher(TEXTOS.escondidoMotivo, { motivo: achado.autor }) : "";
   }
 
+  /* Aviso ao autor do comentário escondido: uma frase corrida, sem ícone e
+     sem contagem. O motivo vem do servidor; o resto é texto aprovado. */
+  function textoDoComentarioEscondido(comentario) {
+    var partes = [TEXTOS.comentarioEscondido];
+    var linha = linhaDoMotivo(comentario && comentario.hidden_reason);
+    if (linha) partes.push(linha.replace(/\s*$/, "") + ".");
+    partes.push(TEXTOS.comentarioEscondidoEquipe);
+    return partes.join(" ");
+  }
+
   /* Só a forma: dia, mês e ano que existem. Quem decide a idade é o servidor.
      Devolve "AAAA-MM-DD" ou "" se a data não existe. */
   function dataDeNascimento(dia, mes, ano) {
@@ -319,6 +359,11 @@
   function contarApoios(valor) {
     var n = inteiro(valor);
     return n === 1 ? TEXTOS.umApoio : preencher(TEXTOS.apoios, { n: n });
+  }
+
+  function contarComentarios(valor) {
+    var n = inteiro(valor);
+    return n === 1 ? TEXTOS.umComentario : preencher(TEXTOS.variosComentarios, { n: n });
   }
 
   function contarMissoes(valor) {
@@ -389,6 +434,7 @@
     preencher: preencher,
     motivo: motivo,
     linhaDoMotivo: linhaDoMotivo,
+    textoDoComentarioEscondido: textoDoComentarioEscondido,
     dataDeNascimento: dataDeNascimento,
     aplicar: aplicar,
     AREAS: AREAS,
@@ -397,6 +443,7 @@
     nomeDaArea: nomeDaArea,
     contarPessoas: contarPessoas,
     contarApoios: contarApoios,
+    contarComentarios: contarComentarios,
     contarMissoes: contarMissoes,
     missoesConcluidas: missoesConcluidas,
     linhaDoProximo: linhaDoProximo,

@@ -361,6 +361,32 @@ var NexusApi = {
   apoiarPost: function (slug, postId, ligar) {
     return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) + "/support"), null, { metodo: ligar ? "POST" : "DELETE", auth: true });
   },
+  /* Comentários de posts (PR 50 do servidor; depende da migração 018).
+     GET → { comments, max }, até 100, mais antigos primeiro. Nenhuma resposta
+     traz user_id: o servidor marca is_mine em cada comentário. */
+  comentariosDoPost: function (slug, postId) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) + "/comments"), null, { metodo: "GET", auth: true });
+  },
+  /* POST → 201 { comment }; 200 com crisis: true (nada gravado; a tela abre a
+     ajuda); 403 (read_only, not_member, missão da área); 429 (10 em 24 h);
+     503 se a migração ainda não foi aplicada. */
+  escreverComentario: function (slug, postId, texto) {
+    return nexusPedir(caminhoComCenario("/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) + "/comments"), { content: texto }, { metodo: "POST", auth: true });
+  },
+  /* Denúncia de comentário: o mesmo motivo da folha de denúncia dos posts. */
+  denunciarComentario: function (slug, postId, commentId, motivo, detalhes) {
+    var corpo = { reason: motivo };
+    if (typeof detalhes === "string" && detalhes.trim()) corpo.details = detalhes.trim();
+    var caminho = "/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) +
+      "/comments/" + encodeURIComponent(commentId) + "/report";
+    return nexusPedir(caminhoComCenario(caminho), corpo, { metodo: "POST", auth: true });
+  },
+  /* Apoio a comentário: um por pessoa, só o total volta (nunca quem apoiou). */
+  apoiarComentario: function (slug, postId, commentId, ligar) {
+    var caminho = "/api/communities/" + encodeURIComponent(slug) + "/posts/" + encodeURIComponent(postId) +
+      "/comments/" + encodeURIComponent(commentId) + "/support";
+    return nexusPedir(caminhoComCenario(caminho), null, { metodo: ligar ? "POST" : "DELETE", auth: true });
+  },
   /* POST /api/communities com { name, area, category (assunto), description
      (regras), icon (só emoji) }. 201 { community }; 200 com crisis: true;
      403 needs_completed_mission; 409 nome repetido; 429 uma por semana. */

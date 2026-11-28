@@ -20,6 +20,8 @@ var rolagemContinua = false;
 var carregandoMais = false;
 var observador = null;
 var usandoListaAntiga = false;
+var comentariosAbertos = {};
+var comentarioDaFolha = null;
 
 function hostDeDesenvolvimento() {
   return B.dev();
@@ -288,6 +290,7 @@ function itemDoPost(post, destaque) {
 
   var rodape = document.createElement("div");
   rodape.className = "post-rodape";
+  criarComentariosDoPost(post, item, rodape);
   var apoio = apoioDoPost(post, meu);
   if (apoio) rodape.appendChild(apoio);
   /* «Denunciar» não aparece no próprio post. */
@@ -617,6 +620,417 @@ function ligarSaida() {
   });
 }
 
+/* ---------- Comentários (fila do beta, item 4; PR 50 do servidor) ----------
+   Uma lista chata por post, aberta só quando a pessoa pede. Nada de resposta
+   aninhada, nada de apelido nosso no lugar do nome, nada de innerHTML. O
+   formulário segue a mesma porta de publicar (access.can_post_forum), então
+   Alimentação, não membro e sem missão da área leem, mas não escrevem. */
+
+function idComentario(postId) {
+  return String(postId == null ? "" : postId).replace(/[^0-9]/g, "");
+}
+
+function criarComentariosDoPost(post, item, rodape) {
+  var id = idComentario(post.id);
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-texto btn-comentarios";
+  botao.id = "btn-comentarios-" + id;
+  botao.textContent = T.comentarios;
+  botao.setAttribute("aria-expanded", "false");
+  botao.setAttribute("aria-controls", "comentarios-" + id);
+  rodape.insertBefore(botao, rodape.firstChild);
+
+  var secao = document.createElement("section");
+  secao.className = "comentarios";
+  secao.id = "comentarios-" + id;
+  secao.setAttribute("aria-label", T.comentarios);
+  secao.hidden = true;
+
+  var alerta = document.createElement("div");
+  alerta.className = "alerta";
+  alerta.id = "alerta-comentarios-" + id;
+  alerta.setAttribute("role", "alert");
+  alerta.hidden = true;
+
+  var contagem = document.createElement("p");
+  contagem.className = "aviso-texto";
+  contagem.id = "contagem-comentarios-" + id;
+  contagem.setAttribute("role", "status");
+
+  var vazio = document.createElement("p");
+  vazio.className = "vazio-texto";
+  vazio.id = "vazio-comentarios-" + id;
+  vazio.textContent = T.comentariosVazios;
+  vazio.hidden = true;
+
+  var lista = document.createElement("ol");
+  lista.className = "comentarios-lista";
+  lista.id = "lista-comentarios-" + id;
+
+  var motivo = document.createElement("p");
+  motivo.className = "aviso-texto";
+  motivo.id = "motivo-comentarios-" + id;
+  motivo.hidden = true;
+
+  var form = document.createElement("form");
+  form.className = "formulario formulario-comentario";
+  form.id = "form-comentario-" + id;
+  form.method = "post";
+  form.action = "#comentar";
+  form.noValidate = true;
+  form.hidden = true;
+
+  var rotulo = document.createElement("label");
+  rotulo.htmlFor = "texto-comentario-" + id;
+  rotulo.textContent = T.escrevaComentario;
+
+  var campo = document.createElement("textarea");
+  campo.id = "texto-comentario-" + id;
+  campo.name = "content";
+  campo.rows = 2;
+  campo.maxLength = 280;
+  campo.setAttribute("aria-describedby", "contador-comentario-" + id + " aviso-comentario-" + id);
+
+  var acoes = document.createElement("div");
+  acoes.className = "comentarios-acoes";
+  var contador = document.createElement("p");
+  contador.className = "contador";
+  contador.id = "contador-comentario-" + id;
+  contador.textContent = "0 de 280";
+  var enviar = document.createElement("button");
+  enviar.type = "submit";
+  enviar.className = "btn btn-secundario";
+  enviar.id = "btn-comentario-" + id;
+  enviar.setAttribute("aria-busy", "false");
+  var textoEnviar = document.createElement("span");
+  textoEnviar.className = "btn-rotulo";
+  textoEnviar.textContent = T.enviarComentario;
+  enviar.appendChild(textoEnviar);
+  acoes.appendChild(contador);
+  acoes.appendChild(enviar);
+
+  var avisoContador = document.createElement("p");
+  avisoContador.className = "so-leitor";
+  avisoContador.id = "aviso-comentario-" + id;
+  avisoContador.setAttribute("aria-live", "polite");
+
+  var enviado = document.createElement("p");
+  enviado.className = "aviso-publicado";
+  enviado.id = "comentario-enviado-" + id;
+  enviado.setAttribute("role", "status");
+  enviado.tabIndex = -1;
+  enviado.hidden = true;
+
+  form.appendChild(rotulo);
+  form.appendChild(campo);
+  form.appendChild(acoes);
+  form.appendChild(avisoContador);
+  form.appendChild(alerta);
+
+  secao.appendChild(contagem);
+  secao.appendChild(vazio);
+  secao.appendChild(lista);
+  secao.appendChild(motivo);
+  secao.appendChild(form);
+  secao.appendChild(enviado);
+  item.appendChild(secao);
+
+  var estado = {
+    id: id,
+    post: post,
+    botao: botao,
+    secao: secao,
+    lista: lista,
+    vazio: vazio,
+    contagem: contagem,
+    motivo: motivo,
+    form: form,
+    campo: campo,
+    enviar: enviar,
+    alerta: alerta,
+    enviado: enviado,
+    atualizar: window.NexusNota.ligar(campo.id, contador.id, avisoContador.id),
+    carregado: false,
+    total: 0,
+    ocupado: false
+  };
+  comentariosAbertos[id] = estado;
+  botao.addEventListener("click", function () {
+    alternarComentarios(estado);
+  });
+  form.addEventListener("submit", function (evento) {
+    evento.preventDefault();
+    enviarComentario(estado);
+  });
+  return estado;
+}
+
+function alternarComentarios(estado) {
+  var aberto = estado.botao.getAttribute("aria-expanded") === "true";
+  estado.botao.setAttribute("aria-expanded", aberto ? "false" : "true");
+  estado.botao.textContent = aberto ? T.comentarios : T.fecharComentarios;
+  estado.secao.hidden = aberto;
+  if (aberto) {
+    NexusAbas.focar(estado.botao);
+    return;
+  }
+  if (estado.carregado) {
+    NexusAbas.focar(estado.form.hidden ? estado.botao : estado.campo);
+    return;
+  }
+  carregarComentarios(estado);
+}
+
+async function carregarComentarios(estado) {
+  if (estado.carregado || estado.botao.getAttribute("aria-busy") === "true") return;
+  var meu = ciclo;
+  esconderAviso(estado.alerta);
+  estado.botao.disabled = true;
+  estado.botao.setAttribute("aria-busy", "true");
+  estado.botao.textContent = T.comentariosAbrindo;
+  var resultado;
+  try {
+    resultado = await NexusApi.comentariosDoPost(slugAtual, estado.post.id);
+  } finally {
+    estado.botao.disabled = false;
+    estado.botao.setAttribute("aria-busy", "false");
+    estado.botao.textContent = T.fecharComentarios;
+  }
+  if (meu !== ciclo) return;
+  if (!resultado.ok) {
+    if (sessaoVencida(resultado)) return irParaEntrada();
+    if (semIdade(resultado)) return abrirIdade();
+    var texto = resultado.status === 503 ? T.comentarioIndisponivel :
+      (resultado.semRede ? T.comentariosSemRede : T.comentariosErro);
+    return mostrarAviso(estado.alerta, resultado.semRede ? "rede" : "falha", texto);
+  }
+  estado.carregado = true;
+  pintarComentarios(estado, resultado.dados && resultado.dados.comments);
+  if (podePostar()) {
+    estado.form.hidden = false;
+    estado.motivo.hidden = true;
+    NexusAbas.focar(estado.campo);
+    return;
+  }
+  estado.form.hidden = true;
+  estado.motivo.textContent = soLeitura ? T.comentariosSoLeitura :
+    (document.getElementById("motivo-post").textContent || T.comentariosSoLeitura);
+  estado.motivo.hidden = false;
+  NexusAbas.focar(estado.botao);
+}
+
+function pintarComentarios(estado, comentarios) {
+  estado.lista.replaceChildren();
+  estado.total = 0;
+  (Array.isArray(comentarios) ? comentarios : []).forEach(function (comentario) {
+    if (!comentario || comentario.id == null) return;
+    estado.lista.appendChild(itemDoComentario(estado, comentario));
+    estado.total += 1;
+  });
+  estado.vazio.hidden = estado.total > 0;
+  estado.contagem.textContent = C.contarComentarios(estado.total);
+}
+
+function cartaoEscondidoComentario(comentario) {
+  var cartao = document.createElement("div");
+  cartao.className = "cartao-comentario-escondido";
+  var texto = document.createElement("p");
+  texto.textContent = C.textoDoComentarioEscondido(comentario);
+  cartao.appendChild(texto);
+  return cartao;
+}
+
+function itemDoComentario(estado, comentario) {
+  var item = document.createElement("li");
+  item.className = "comentario";
+  item.tabIndex = -1;
+  item.dataset.comment = idComentario(comentario.id);
+
+  if (comentario.hidden === true) {
+    item.appendChild(cartaoEscondidoComentario(comentario));
+    return item;
+  }
+
+  var meu = ehMeu(comentario);
+  var cabeca = document.createElement("p");
+  cabeca.className = "comentario-cabeca";
+  var nome = meu ? T.voce : (typeof comentario.username === "string" ? comentario.username.trim() : "");
+  var idAutor = "";
+  if (nome) {
+    var autor = document.createElement("span");
+    autor.className = "comentario-autor";
+    idAutor = "autor-c-" + item.dataset.comment;
+    autor.id = idAutor;
+    autor.textContent = nome;
+    cabeca.appendChild(autor);
+  }
+  var quando = C.tempoCurto(comentario.created_at, new Date());
+  if (quando) {
+    var data = document.createElement("time");
+    data.className = "post-data";
+    data.dateTime = String(comentario.created_at);
+    data.textContent = quando;
+    cabeca.appendChild(data);
+  }
+  var texto = document.createElement("p");
+  texto.className = "comentario-texto";
+  texto.textContent = typeof comentario.content === "string" ? comentario.content : "";
+  var rodape = document.createElement("div");
+  rodape.className = "comentario-rodape";
+  var apoio = apoioDoComentario(estado, comentario);
+  if (apoio) rodape.appendChild(apoio);
+  if (!meu) {
+    var botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "btn btn-texto btn-denunciar btn-denunciar-comentario";
+    botao.textContent = T.denunciar;
+    if (idAutor) botao.setAttribute("aria-describedby", idAutor);
+    botao.setAttribute("aria-haspopup", "dialog");
+    botao.addEventListener("click", function () {
+      abrirFolha(estado.post, botao, comentario);
+    });
+    rodape.appendChild(botao);
+  }
+  item.appendChild(cabeca);
+  item.appendChild(texto);
+  item.appendChild(rodape);
+  return item;
+}
+
+function apoioDoComentario(estado, comentario) {
+  if (typeof comentario.supports !== "number" && typeof comentario.supports !== "string") return null;
+  var total = Number(comentario.supports) || 0;
+  if (ehMeu(comentario)) {
+    var so = document.createElement("p");
+    so.className = "apoios-total";
+    so.appendChild(icone(DESENHOS.mao));
+    var texto = document.createElement("span");
+    texto.textContent = C.contarApoios(total);
+    so.appendChild(texto);
+    return so;
+  }
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-apoiar btn-apoiar-comentario";
+  botao.appendChild(icone(DESENHOS.mao));
+  var rotulo = document.createElement("span");
+  rotulo.textContent = T.apoioComentario;
+  botao.appendChild(rotulo);
+  var contagem = document.createElement("span");
+  contagem.className = "apoios-numero";
+  botao.appendChild(contagem);
+  function pintar(ligado, n) {
+    botao.setAttribute("aria-pressed", ligado ? "true" : "false");
+    contagem.textContent = String(n);
+    botao.setAttribute("aria-label", C.preencher(T.apoioComentarioRotulo, { apoios: C.contarApoios(n) }));
+    botao.dataset.total = String(n);
+  }
+  pintar(comentario.supported_by_me === true, total);
+  botao.addEventListener("click", function () {
+    apoiarComentario(estado, comentario, botao, pintar);
+  });
+  return botao;
+}
+
+async function apoiarComentario(estado, comentario, botao, pintar) {
+  if (botao.getAttribute("aria-busy") === "true") return;
+  var acoes = botao.parentNode;
+  var antigo = acoes.querySelector(".post-erro");
+  if (antigo) antigo.remove();
+  function erro(texto) {
+    var aviso = document.createElement("p");
+    aviso.className = "post-erro";
+    aviso.setAttribute("role", "alert");
+    aviso.textContent = texto;
+    acoes.appendChild(aviso);
+  }
+  if (semRedeAgora()) return erro(T.apoioComentarioSemRede);
+  var ligar = botao.getAttribute("aria-pressed") !== "true";
+  botao.disabled = true;
+  botao.setAttribute("aria-busy", "true");
+  var resultado;
+  try {
+    resultado = await NexusApi.apoiarComentario(slugAtual, estado.post.id, comentario.id, ligar);
+  } finally {
+    botao.disabled = false;
+    botao.setAttribute("aria-busy", "false");
+  }
+  var dados = resultado.dados || {};
+  if (resultado.ok && typeof dados.supported === "boolean") {
+    return pintar(dados.supported, Number(dados.supports) || 0);
+  }
+  if (resultado.status === 409 && dados.supported === true) {
+    return pintar(true, Number(dados.supports) || 0);
+  }
+  if (resultado.semRede) return erro(T.apoioComentarioSemRede);
+  if (sessaoVencida(resultado)) return irParaEntrada();
+  if (semIdade(resultado)) return abrirIdade();
+  if (resultado.status === 403 && dados.code === "own_comment") return erro(T.apoioComentarioProprio);
+  erro(T.apoioComentarioErro);
+}
+
+async function enviarComentario(estado) {
+  if (estado.ocupado) return;
+  var texto = estado.campo.value.trim();
+  esconderAviso(estado.alerta);
+  estado.enviado.hidden = true;
+  if (!texto) {
+    mostrarAviso(estado.alerta, "falha", T.comentarioVazio);
+    estado.campo.focus();
+    return;
+  }
+  if (window.NexusNota.passou(texto)) {
+    mostrarAviso(estado.alerta, "falha", window.NexusNota.MSG_SERVIDOR);
+    estado.campo.focus();
+    return;
+  }
+  if (semRedeAgora()) return mostrarAviso(estado.alerta, "rede", T.comentarioSemRede);
+  var meu = ciclo;
+  estado.ocupado = true;
+  estado.enviar.disabled = true;
+  estado.enviar.setAttribute("aria-busy", "true");
+  estado.enviar.querySelector(".btn-rotulo").textContent = T.enviandoComentario;
+  var resultado;
+  try {
+    resultado = await NexusApi.escreverComentario(slugAtual, estado.post.id, texto);
+  } finally {
+    estado.ocupado = false;
+    estado.enviar.disabled = false;
+    estado.enviar.setAttribute("aria-busy", "false");
+    estado.enviar.querySelector(".btn-rotulo").textContent = T.enviarComentario;
+  }
+  if (meu !== ciclo) return;
+  var dados = resultado.dados || {};
+  if (resultado.ok && dados.crisis === true) {
+    estado.campo.value = "";
+    estado.atualizar();
+    B.abrirAjuda();
+    return;
+  }
+  if (resultado.ok && dados.comment && dados.comment.id != null) {
+    estado.campo.value = "";
+    estado.atualizar();
+    estado.lista.appendChild(itemDoComentario(estado, dados.comment));
+    estado.total += 1;
+    estado.vazio.hidden = true;
+    estado.contagem.textContent = C.contarComentarios(estado.total);
+    estado.enviado.textContent = T.comentarioEnviado;
+    estado.enviado.hidden = false;
+    NexusAbas.focar(estado.enviado);
+    return;
+  }
+  if (resultado.ok) return mostrarAviso(estado.alerta, "falha", T.comentarioErro);
+  if (resultado.semRede) return mostrarAviso(estado.alerta, "rede", T.comentarioSemRede);
+  if (sessaoVencida(resultado)) return irParaEntrada();
+  if (semIdade(resultado)) return abrirIdade();
+  if (resultado.status === 503) return mostrarAviso(estado.alerta, "falha", T.comentarioIndisponivel);
+  /* 400, 403 e 429: a frase do servidor já diz o que fazer. */
+  var frase = (resultado.status === 400 || resultado.status === 403 || resultado.status === 429) && resultado.erro ? resultado.erro :
+    (resultado.status === 429 ? T.comentarioLimite : T.comentarioErro);
+  mostrarAviso(estado.alerta, "falha", frase);
+}
+
 /* ---------- Publicar ---------- */
 
 var atualizarContadorPost = function () {};
@@ -738,15 +1152,17 @@ function definirEnviando(ligado) {
   document.getElementById("btn-cancelar-denuncia").disabled = ligado;
 }
 
-function abrirFolha(post, botao) {
+function abrirFolha(post, botao, comentario) {
   var folha = document.getElementById("folha-denuncia");
   var form = document.getElementById("form-denuncia");
   postDaFolha = post;
   botaoDaFolha = botao;
+  comentarioDaFolha = comentario || null;
   form.reset();
   definirEnviando(false);
   atualizarContador();
   esconderAviso(document.getElementById("alerta-denuncia"));
+  document.getElementById("titulo-denuncia").textContent = comentarioDaFolha ? T.denunciaComentarioTitulo : T.denunciaTitulo;
   if (typeof folha.showModal === "function") folha.showModal();
   else folha.setAttribute("open", "");
   var primeiro = folha.querySelector('input[name="motivo"]');
@@ -800,7 +1216,9 @@ async function enviarDenuncia() {
   definirEnviando(true);
   var resultado;
   try {
-    resultado = await NexusApi.denunciarPost(slugAtual, postDaFolha.id, motivo, detalhes);
+    resultado = comentarioDaFolha ?
+      await NexusApi.denunciarComentario(slugAtual, postDaFolha.id, comentarioDaFolha.id, motivo, detalhes) :
+      await NexusApi.denunciarPost(slugAtual, postDaFolha.id, motivo, detalhes);
   } finally {
     definirEnviando(false);
   }
@@ -846,6 +1264,7 @@ function ligarFolha() {
   folha.addEventListener("close", function () {
     if (botaoDaFolha && botaoDaFolha.isConnected) NexusAbas.focar(botaoDaFolha);
     postDaFolha = null;
+    comentarioDaFolha = null;
   });
 }
 
@@ -867,6 +1286,11 @@ function pintarComunidade(dados, destaques, pagina, missao, maratona) {
   pintarSaida(souMembro);
   document.getElementById("faixa-alimentacao").hidden = comunidade.slug !== "alimentacao";
   pintarPostar(acesso, missao);
+
+  /* Cada carga é uma tela nova: nenhum comentário aberto fica preso ao post
+     antigo, e a folha de denúncia não guarda o alvo da carga anterior. */
+  comentariosAbertos = {};
+  comentarioDaFolha = null;
 
   /* Destaques (até 3 da semana). Sem a rota (503 ou erro): a seção some. */
   pintarDestaques(destaques && destaques.ok && destaques.dados ? destaques.dados.highlights : []);
