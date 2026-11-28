@@ -39,7 +39,7 @@ var sw = ler("sw.js");
 var jsSemComentarios = semComentarios(js);
 
 /* ---------- Estrutura e cache ---------- */
-if (sw.indexOf('CACHE = "nexus-v2-v55"') === -1) falhas.push("o cache não está em nexus-v2-v55");
+if (sw.indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
 NOVOS.forEach(function (nome) {
   if (sw.indexOf('"./' + nome + '"') === -1) falhas.push("sw.js sem " + nome);
 });

@@ -22,6 +22,8 @@ var observador = null;
 var usandoListaAntiga = false;
 var comentariosAbertos = {};
 var comentarioDaFolha = null;
+var avisoCompartilharTimer = null;
+var acoesDaFolhaMais = null;
 
 function hostDeDesenvolvimento() {
   return B.dev();
@@ -49,6 +51,12 @@ var DESENHOS = {
   rede: B.DESENHOS.rede,
   ok: B.DESENHOS.ok,
   mao: B.DESENHOS.mao,
+  /* Três pontos ligados: o desenho do botão do celular, sem cor própria. */
+  compartilhar: "M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4",
+  /* Balão de fala: o «Comentários» do rodapé, com o mesmo traço do «Apoiar». */
+  comentarios: "M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z",
+  /* Três pontos em linha: o menu «Mais» no canto superior direito do post. */
+  mais: "M5 12h.01M12 12h.01M19 12h.01",
   /* Olho fechado: o post está escondido. Nada de cor de alarme. */
   escondido: "M3 3l18 18M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-2.9 3.9M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1M9.9 9.9a3 3 0 0 0 4.2 4.2"
 };
@@ -257,21 +265,221 @@ async function apoiar(post, botao, pintar) {
   erro("falha", T.apoioErro);
 }
 
+function idDoPost(post) {
+  return String(post && post.id != null ? post.id : "").replace(/[^0-9]/g, "");
+}
+
+/* O link é limpo: só a comunidade e o post. Nunca token, cenário de teste
+   nem e-mail. Quem não tem conta cai no login ao abrir a comunidade. */
+function linkDoPost(post) {
+  var url = new URL("comunidade.html", location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("c", slugAtual);
+  var id = idDoPost(post);
+  if (id) url.searchParams.set("p", id);
+  return url.toString();
+}
+
+/* Aviso curto e fixo, no pé da tela acima da barra de abas. Enquanto aparece,
+   a tela ganha espaço na base e sobe só o necessário para a ação tocada não
+   ficar debaixo dele. role="status" + aria-live: some sozinho em 3,5 s. */
+function avisoDeCompartilhamento(texto, botao) {
+  var aviso = document.getElementById("aviso-compartilhar");
+  if (!aviso) return;
+  if (avisoCompartilharTimer) clearTimeout(avisoCompartilharTimer);
+  aviso.textContent = texto;
+  aviso.hidden = false;
+  var tela = document.querySelector(".tela-comunidade");
+  document.body.classList.add("com-aviso-compartilhar");
+  if (tela) tela.classList.add("com-aviso-compartilhar");
+  /* A faixa não pode ficar sobre ação nenhuma. Primeiro sobe só o necessário
+     para a ação tocada continuar à vista; depois procura o primeiro espaço
+     livre na vertical. O «⋯» do canto não conta: fica fora da faixa. */
+  function descerAteLivre() {
+    var faixa = aviso.getBoundingClientRect();
+    var alvos = document.querySelectorAll("main button, main a");
+    var intervalos = [];
+    for (var i = 0; i < alvos.length; i++) {
+      var alvo = alvos[i];
+      if (!alvo.offsetHeight || alvo.hidden || alvo.closest("[hidden]")) continue;
+      var r = alvo.getBoundingClientRect();
+      if (r.right <= faixa.left - 8 || r.left >= faixa.right + 8) continue;
+      /* O alvo entra na faixa quando descemos «entra» e sai em «sai». */
+      var entra = r.top - faixa.bottom - 8;
+      var sai = r.bottom - faixa.top + 8;
+      if (sai > 0) intervalos.push({ entra: entra, sai: sai });
+    }
+    intervalos.sort(function (a, b) { return a.entra - b.entra; });
+    var livre = Math.max(0, document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+    var d = 0;
+    for (var j = 0; j < intervalos.length; j++) {
+      var iv = intervalos[j];
+      if (iv.sai <= d) continue;
+      if (iv.entra > d) break;
+      d = iv.sai;
+      if (d > livre) break;
+    }
+    var passo = Math.min(d, livre);
+    if (passo > 0) window.scrollBy(0, passo);
+  }
+  if (botao && botao.offsetHeight > 0) {
+    var acao = botao.getBoundingClientRect();
+    var area = aviso.getBoundingClientRect();
+    if (acao.bottom > area.top - 8) window.scrollBy(0, acao.bottom - area.top + 8);
+  }
+  descerAteLivre();
+  avisoCompartilharTimer = setTimeout(function () {
+    aviso.hidden = true;
+    aviso.textContent = "";
+    document.body.classList.remove("com-aviso-compartilhar");
+    if (tela) tela.classList.remove("com-aviso-compartilhar");
+    avisoCompartilharTimer = null;
+  }, 3500);
+}
+
+async function compartilharPost(post, botao) {
+  if (botao.getAttribute("aria-busy") === "true") return;
+  var url = linkDoPost(post);
+  botao.setAttribute("aria-busy", "true");
+  try {
+    if (navigator.share && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: T.compartilharTitulo, url: url });
+      } catch (erro) {
+        if (erro && erro.name === "AbortError") return;
+        throw erro;
+      }
+      return;
+    }
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(url);
+      avisoDeCompartilhamento(T.linkCopiado, botao);
+      return;
+    }
+    var campo = document.createElement("textarea");
+    campo.value = url;
+    campo.setAttribute("readonly", "");
+    campo.style.position = "fixed";
+    campo.style.opacity = "0";
+    document.body.appendChild(campo);
+    campo.select();
+    var copiado = false;
+    try { copiado = document.execCommand("copy") === true; } catch (erro) { copiado = false; }
+    campo.remove();
+    if (!copiado) throw new Error("cópia falhou");
+    avisoDeCompartilhamento(T.linkCopiado, botao);
+  } catch (erro) {
+    avisoDeCompartilhamento(T.compartilharErro, botao);
+  } finally {
+    botao.removeAttribute("aria-busy");
+  }
+}
+
+/* Mesma caixa de «Comentários» e «Apoiar»: contorno, ícone e palavra curta,
+   na cor neon que os Comentários já usavam. Sem luz própria. */
+function botaoDeCompartilhar(post) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-acao-post btn-compartilhar";
+  botao.appendChild(icone(DESENHOS.compartilhar));
+  var rotulo = document.createElement("span");
+  rotulo.textContent = T.compartilhar;
+  botao.appendChild(rotulo);
+  botao.setAttribute("aria-label", T.compartilharPost);
+  botao.addEventListener("click", function () {
+    compartilharPost(post, botao);
+  });
+  return botao;
+}
+
+/* Canto superior direito do post: três pontos, com nome acessível. A folha
+   esconde «Denunciar» no post da própria pessoa. */
+function botaoDeMais(post, acoes) {
+  var botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "btn btn-mais";
+  botao.appendChild(icone(DESENHOS.mais));
+  botao.setAttribute("aria-label", T.maisOpcoes);
+  botao.setAttribute("aria-haspopup", "dialog");
+  botao.addEventListener("click", function () {
+    abrirFolhaMais(post, acoes, botao);
+  });
+  return botao;
+}
+
+function abrirFolhaMais(post, acoes, botao) {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  acoesDaFolhaMais = { post: post, acoes: acoes, botao: botao };
+  var denunciar = folha.querySelector("#btn-mais-denunciar");
+  if (denunciar) denunciar.hidden = ehMeu(post);
+  folha.setAttribute("aria-label", T.maisOpcoes);
+  if (typeof folha.showModal === "function") folha.showModal();
+  else folha.setAttribute("open", "");
+  var primeiro = folha.querySelector('button:not([hidden])');
+  if (primeiro) primeiro.focus();
+}
+
+function fecharFolhaMais() {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  if (typeof folha.close === "function") folha.close();
+  else folha.removeAttribute("open");
+  if (acoesDaFolhaMais && acoesDaFolhaMais.botao) NexusAbas.focar(acoesDaFolhaMais.botao);
+  acoesDaFolhaMais = null;
+}
+
+function ligarFolhaMais() {
+  var folha = document.getElementById("folha-mais");
+  if (!folha) return;
+  var compartilhar = folha.querySelector("#btn-mais-compartilhar");
+  var denunciar = folha.querySelector("#btn-mais-denunciar");
+  var fechar = folha.querySelector("#btn-mais-fechar");
+  if (compartilhar) compartilhar.addEventListener("click", function () {
+    var atual = acoesDaFolhaMais;
+    fecharFolhaMais();
+    if (atual && atual.post) {
+      var botao = atual.acoes.querySelector(".btn-compartilhar");
+      if (botao) compartilharPost(atual.post, botao);
+    }
+  });
+  if (denunciar) denunciar.addEventListener("click", function () {
+    var atual = acoesDaFolhaMais;
+    fecharFolhaMais();
+    if (atual && atual.post && atual.botao) abrirFolha(atual.post, atual.botao);
+  });
+  if (fechar) fechar.addEventListener("click", fecharFolhaMais);
+  folha.addEventListener("cancel", function () {
+    acoesDaFolhaMais = null;
+  });
+}
+
+/* O link de um post abre a comunidade com o post à vista, sem apelido nem
+   ranking: só a posição na página. */
+function irParaPostCompartilhado() {
+  var id = String(parametro("p") || "").replace(/[^0-9]/g, "");
+  if (!id) return false;
+  var item = document.querySelector('.post[data-post="' + id + '"]');
+  if (!item) return false;
+  item.scrollIntoView({ block: "center" });
+  NexusAbas.focar(item);
+  return true;
+}
+
 function itemDoPost(post, destaque) {
   var item = document.createElement("li");
   item.className = "post";
   item.tabIndex = -1;
+  item.dataset.post = idDoPost(post);
   /* O próprio post aparece como «Você». Sem apelido do servidor, a linha some:
      nunca uma palavra genérica no lugar do nome. */
   var meu = ehMeu(post) || post.hidden === true;
   var nome = meu ? T.voce : (typeof post.username === "string" ? post.username.trim() : "");
   var idAutor = (destaque ? "autor-d-" : "autor-") + post.id;
-  if (nome) {
-    item.appendChild(cabecaDoPost(post, nome, idAutor));
-  } else {
-    idAutor = "";
-    item.appendChild(cabecaDoPost(post, "", ""));
-  }
+  var cabeca = nome ? cabecaDoPost(post, nome, idAutor) : cabecaDoPost(post, "", "");
+  if (!nome) idAutor = "";
+  item.appendChild(cabeca);
 
   if (post.hidden === true) {
     item.classList.add("post-escondido");
@@ -290,23 +498,18 @@ function itemDoPost(post, destaque) {
 
   var rodape = document.createElement("div");
   rodape.className = "post-rodape";
-  criarComentariosDoPost(post, item, rodape);
+
+  var principais = document.createElement("div");
+  principais.className = "acoes-principais";
+  criarComentariosDoPost(post, item, principais);
   var apoio = apoioDoPost(post, meu);
-  if (apoio) rodape.appendChild(apoio);
-  /* «Denunciar» não aparece no próprio post. */
-  if (!meu) {
-    var botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "btn btn-texto btn-denunciar";
-    botao.textContent = T.denunciar;
-    if (idAutor) botao.setAttribute("aria-describedby", idAutor);
-    botao.setAttribute("aria-haspopup", "dialog");
-    botao.addEventListener("click", function () {
-      abrirFolha(post, botao);
-    });
-    rodape.appendChild(botao);
-  }
+  if (apoio) principais.appendChild(apoio);
+  principais.appendChild(botaoDeCompartilhar(post));
+  rodape.appendChild(principais);
   item.appendChild(rodape);
+
+  /* «Denunciar» saiu do rodapé: fica só na folha do ⋯ do canto superior. */
+  cabeca.appendChild(botaoDeMais(post, rodape));
   return item;
 }
 
@@ -634,9 +837,13 @@ function criarComentariosDoPost(post, item, rodape) {
   var id = idComentario(post.id);
   var botao = document.createElement("button");
   botao.type = "button";
-  botao.className = "btn btn-texto btn-comentarios";
+  botao.className = "btn btn-acao-post btn-comentarios";
   botao.id = "btn-comentarios-" + id;
-  botao.textContent = T.comentarios;
+  botao.appendChild(icone(DESENHOS.comentarios));
+  var rotulo = document.createElement("span");
+  rotulo.className = "btn-rotulo";
+  rotulo.textContent = T.comentarios;
+  botao.appendChild(rotulo);
   botao.setAttribute("aria-expanded", "false");
   botao.setAttribute("aria-controls", "comentarios-" + id);
   rodape.insertBefore(botao, rodape.firstChild);
@@ -769,7 +976,7 @@ function criarComentariosDoPost(post, item, rodape) {
 function alternarComentarios(estado) {
   var aberto = estado.botao.getAttribute("aria-expanded") === "true";
   estado.botao.setAttribute("aria-expanded", aberto ? "false" : "true");
-  estado.botao.textContent = aberto ? T.comentarios : T.fecharComentarios;
+  estado.botao.querySelector(".btn-rotulo").textContent = aberto ? T.comentarios : T.fecharComentarios;
   estado.secao.hidden = aberto;
   if (aberto) {
     NexusAbas.focar(estado.botao);
@@ -788,14 +995,14 @@ async function carregarComentarios(estado) {
   esconderAviso(estado.alerta);
   estado.botao.disabled = true;
   estado.botao.setAttribute("aria-busy", "true");
-  estado.botao.textContent = T.comentariosAbrindo;
+  estado.botao.querySelector(".btn-rotulo").textContent = T.comentariosAbrindo;
   var resultado;
   try {
     resultado = await NexusApi.comentariosDoPost(slugAtual, estado.post.id);
   } finally {
     estado.botao.disabled = false;
     estado.botao.setAttribute("aria-busy", "false");
-    estado.botao.textContent = T.fecharComentarios;
+    estado.botao.querySelector(".btn-rotulo").textContent = T.fecharComentarios;
   }
   if (meu !== ciclo) return;
   if (!resultado.ok) {
@@ -1188,7 +1395,12 @@ function marcarDenunciado(botao) {
   var texto = document.createElement("span");
   texto.textContent = T.denunciaOk;
   aviso.appendChild(texto);
-  botao.parentNode.replaceChild(aviso, botao);
+  /* O ⋯ continua no canto: o aviso entra ao lado, sem tirar o menu do post. */
+  if (botao.classList && botao.classList.contains("btn-mais")) {
+    botao.parentNode.insertBefore(aviso, botao.nextSibling);
+  } else {
+    botao.parentNode.replaceChild(aviso, botao);
+  }
   NexusAbas.focar(aviso);
 }
 
@@ -1318,7 +1530,7 @@ function pintarComunidade(dados, destaques, pagina, missao, maratona) {
   NexusMaratonaLinha.pintar(maratona, acesso, slugAtual);
   mostrarVista("feed");
   ligarVerMaisDosDestaques();
-  focarTitulo();
+  if (!irParaPostCompartilhado()) focarTitulo();
 }
 
 async function carregar() {
@@ -1372,6 +1584,7 @@ function iniciar() {
   });
   document.getElementById("texto-post").setAttribute("placeholder", T.escrevaDica);
   ligarFolha();
+  ligarFolhaMais();
   ligarSaida();
   NexusMaratonaLinha.iniciar();
   NexusAbas.montar("comunidade");

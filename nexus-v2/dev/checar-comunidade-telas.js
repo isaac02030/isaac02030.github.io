@@ -196,7 +196,7 @@ if (/community_slug: "[^"]+", user_id:/.test(ler("dev/mock-api.js"))) falhas.pus
    denúncia na mesma folha e «Apoiar» sem lista de quem apoiou. */
 if (!/id="btn-comentarios-"|btn-comentarios-\d/.test(comJs) && !/btn-comentarios-/.test(comJs)) falhas.push("comentários: falta o botão que abre a lista");
 if (!/aria-expanded/.test(comJs) || !/aria-controls/.test(comJs)) falhas.push("comentários: o botão precisa dizer se a lista está aberta");
-if (!/btn btn-texto btn-comentarios/.test(comJs)) falhas.push("comentários: o botão é de texto, sem luz nova");
+if (!/btn btn-acao-post btn-comentarios/.test(comJs)) falhas.push("comentários: o botão é da mesma caixa dos outros, sem luz nova");
 if (!/campo\.maxLength = 280/.test(comJs) || !/window\.NexusNota\.ligar\(campo\.id, contador\.id, avisoContador\.id\)/.test(comJs)) falhas.push("comentários: contador de 280 do mesmo molde do chat");
 if (!/window\.NexusNota\.passou\(texto\)/.test(comJs)) falhas.push("comentários: limite de 280 antes de enviar");
 if (!/dados\.crisis === true[\s\S]*?B\.abrirAjuda\(\)/.test(comJs)) falhas.push("comentários: crise abre a ajuda e não finge enviar");
@@ -229,7 +229,7 @@ if (/var\(--(grad|glow-[a-z0-9]+|neon-[a-z]+)\)|#2DF2D0|#3DD8FF/i.test(css)) fal
 
 /* Cache. */
 var sw = ler("sw.js");
-if (sw.indexOf('CACHE = "nexus-v2-v55"') === -1) falhas.push("o cache não está em nexus-v2-v55");
+if (sw.indexOf('CACHE = "nexus-v2-v56"') === -1) falhas.push("o cache não está em nexus-v2-v56");
 NOVAS_JS.concat(NOVAS_HTML).forEach(function (n) {
   if (sw.indexOf('"./' + n + '"') === -1) falhas.push("sw.js sem " + n);
 });

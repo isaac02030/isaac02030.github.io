@@ -187,7 +187,19 @@
     </div>
   </dialog>
 
+  <!-- Folha do «⋯» no canto do post: «Denunciar» só para os outros posts,
+       em vermelho; no próprio post fica só «Compartilhar». Sem luz e sem urso. -->
+  <dialog class="folha folha-mais" id="folha-mais">
+    <div class="folha-mais-acoes">
+      <button type="button" class="btn btn-mais-compartilhar" id="btn-mais-compartilhar" data-texto-comunidade="compartilhar"></button>
+      <button type="button" class="btn btn-mais-denunciar" id="btn-mais-denunciar" data-texto-comunidade="denunciar"></button>
+    </div>
+    <button type="button" class="btn btn-mais-fechar" id="btn-mais-fechar" data-texto-comunidade="agoraNao"></button>
+  </dialog>
+
   <nav class="abas" id="abas" aria-label="Seções"></nav>
+  <!-- Aviso de cópia: fixo no pé da tela, acima da barra de abas, some em 3,5 s. -->
+  <p class="aviso-compartilhar" id="aviso-compartilhar" role="status" aria-live="polite" hidden></p>
   <script src="comunidade-textos.js"></script>
   <script src="maratona-textos.js"></script>
   <script src="api.js"></script>
