@@ -2181,7 +2181,7 @@ function escondidosIniciais() {
   var agora = Date.now();
   return [
     {
-      id: 21, community_id: 1, community_slug: "ingles-diario", user_id: 904, username: "conta_teste_a",
+      id: 21, community_id: 1, community_slug: "ingles-diario", username: "conta_teste_a",
       content: "Para estudar mais, fique sem comer o dia inteiro. Comigo funcionou.",
       created_at: new Date(agora - 6 * 3600000).toISOString(),
       hidden_at: new Date(agora - 2 * 3600000).toISOString(), hidden_reason: "perigoso",
@@ -2191,7 +2191,7 @@ function escondidosIniciais() {
       priority: "alta", repeat_reporter_alert: true, hidden_reason_label: "Conselho perigoso para a saúde"
     },
     {
-      id: 22, community_id: 2, community_slug: "academia-cedo", user_id: 905, username: "conta_teste_b",
+      id: 22, community_id: 2, community_slug: "academia-cedo", username: "conta_teste_b",
       content: "Compre o meu curso no link do perfil, desconto só hoje.",
       created_at: new Date(agora - 30 * 3600000).toISOString(),
       hidden_at: new Date(agora - 26 * 3600000).toISOString(), hidden_reason: "spam",
@@ -2773,6 +2773,14 @@ function maratonaDoCenario(m, cenario) {
     copia.max_participants = 14;
     copia.participants = 14;
     copia.is_participant = false;
+  }
+  /* Quem saiu deixa a lista de participantes, mas os check-ins ficam:
+     o servidor pode devolver 9 dias cumpridos para 8 participantes. */
+  if (cenario === "maratona-excedente") {
+    copia.participants = 8;
+    copia.days = (copia.days || []).map(function (dia) {
+      return Object.assign({}, dia, { done: 9 });
+    });
   }
   return copia;
 }
